@@ -1,0 +1,122 @@
+package com.example.demo.integration.test.api;
+
+import com.example.demo.integration.TestBase;
+import com.example.demo.integration.context.ItemContext;
+import com.example.demo.integration.data.ItemResponse;
+import io.restassured.response.Response;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.of;
+
+class UpdateItemTest extends TestBase {
+    private static Stream<Arguments> validPayload() {
+        return Stream.of(
+                of("name", 1, "description", "name2", 1, "description2"),
+                of("name", 1, "description", "name" , 1, "description" ),
+                of(""    , 1, " "          , "name" , 1, "description" ),
+                of("name", 1, "description", ""     , 1, " "           )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("validPayload")
+    void updateItem(String name, long amount, String description,
+                    String updatedName, long updatedAmount, String updatedDescription
+    ) {
+        // given
+        ItemContext context = ItemContext
+                .builder()
+                .name(name)
+                .amount(amount)
+                .description(description)
+                .build();
+
+        ItemContext updatedContext = ItemContext
+                .builder()
+                .name(updatedName)
+                .amount(updatedAmount)
+                .description(updatedDescription)
+                .build();
+
+        Response postResponse = requestSpec
+                .body(context.createItemRequest())
+                .post("/item");
+
+        updatedContext.setId(postResponse.jsonPath().get("id"));
+
+        // when
+        Response putResponse = requestSpec
+                .body(updatedContext.createItemRequest())
+                .put("/item/" + updatedContext.getId());
+
+        // and
+        Response getResponse = requestSpec.get("/item/" + updatedContext.getId());
+
+        // then
+        assertThat(putResponse.statusCode(), is(200));
+        assertThat(putResponse.getBody().asString(), is(emptyString()));
+        assertThat(getResponse.getBody().as(ItemResponse.class), is(updatedContext.createExpectedResponse()));
+    }
+
+    @Test
+    void updateNotExistingItem() {
+        // given
+        ItemContext context = ItemContext
+                .builder()
+                .id(randomNumeric(10))
+                .build();
+
+        // when
+        Response putResponse = requestSpec
+                .body(context.createItemRequest())
+                .put("/item/" + context.getId());
+
+        // then
+        assertThat(putResponse.statusCode(), is(500));
+        assertThat(putResponse.getBody().asString(), is("Item with id: " + context.getId() + " not found"));
+    }
+
+    @Test
+    @Tag("FailedTestExample")
+    void updateAmountFailedTestExampleBecauseAmountIsNotUpdated() {
+        // given
+        ItemContext context = ItemContext
+                .builder()
+                .amount(1)
+                .build();
+
+        ItemContext updatedContext = ItemContext
+                .builder()
+                .amount(2)
+                .build();
+
+        Response postResponse = requestSpec
+                .body(context.createItemRequest())
+                .post("/item");
+
+        updatedContext.setId(postResponse.jsonPath().get("id"));
+
+        // when
+        Response putResponse = requestSpec
+                .body(updatedContext.createItemRequest())
+                .put("/item/" + updatedContext.getId());
+
+        // and
+        Response getResponse = requestSpec.get("/item/" + updatedContext.getId());
+
+        // then
+        assertThat(putResponse.statusCode(), is(200));
+        assertThat(putResponse.getBody().asString(), is(emptyString()));
+        assertThat(getResponse.getBody().as(ItemResponse.class), is(updatedContext.createExpectedResponse()));
+    }
+}
