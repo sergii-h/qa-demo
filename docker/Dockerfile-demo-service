@@ -1,0 +1,6 @@
+FROM maven:3.8.6-openjdk-18
+COPY demo-service/src /demo-service/src
+COPY demo-service/pom.xml /demo-service
+COPY pom.xml /
+RUN mvn package
+CMD java -jar demo-service/target/demo-service.jar

@@ -1,0 +1,7 @@
+FROM node:18.12-alpine3.15
+COPY demo-interface/src /src
+COPY demo-interface/public /public
+COPY demo-interface/package.json /
+COPY demo-interface/tsconfig.json /
+RUN npm install
+CMD npm start
