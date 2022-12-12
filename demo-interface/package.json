@@ -1,0 +1,55 @@
+{
+  "name": "demo-interface",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.2.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.1",
+    "@types/node": "^16.11.36",
+    "@types/react": "^18.0.9",
+    "@types/react-dom": "^18.0.5",
+    "primeflex": "^3.2.0",
+    "primeicons": "^5.0.0",
+    "primereact": "^8.1.1",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
+    "react-scripts": "5.0.1",
+    "typescript": "^4.7.2",
+    "web-vitals": "^2.1.4",
+    "npm-run-all": "^4.1.5",
+    "start-server-and-test": "1.14.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:run:ci": "run-p \"cypress:run -- --spec {1}\" --",
+    "start:for:ui:tests": "REACT_APP_UI_TESTS=true npm run start",
+    "start:local:server": "npm run start:for:ui:tests",
+    "cypress:run:local": "CYPRESS_BASE_URL=http://localhost:3000 start-server-and-test start:local:server 3000 'cypress:run'"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "cypress": "^9.7.0",
+    "cypress-intercept-formdata": "^0.4.0"
+  }
+}
