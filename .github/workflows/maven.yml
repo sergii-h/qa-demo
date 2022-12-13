@@ -25,7 +25,7 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: '17'
-        distribution: Oracle OpenJDK
+        distribution: adopt
         cache: maven
     - name: Setup Node
       uses: actions/setup-node@v1
