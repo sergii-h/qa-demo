@@ -25,13 +25,14 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: '17'
+        distribution: Oracle OpenJDK
         cache: maven
-    - name: Build with Maven
-      run: mvn -B package --file demo-service/pom.xml
     - name: Setup Node
       uses: actions/setup-node@v1
       with:
         node-version: '18.x'
+    - name: Build with Maven
+      run: mvn -B package --file demo-service/pom.xml
     - name: Install Dependencies
       run: cd demo-interface && npm install
 
