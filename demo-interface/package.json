@@ -1,5 +1,5 @@
 {
-  "name": "demo-interface",
+  "name": "@sgoldys/demo-interface",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
