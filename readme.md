@@ -28,15 +28,17 @@ consists of 4 fields:
     run "npm install"
     run "npm start"
 
+    Note: if Frontend app will be used from docker - please set host connection to the BE API
+    run "REACT_APP_BE_API=http://host.docker.internal:8080/v1 npm start"
+
     Then try http://localhost:3000
 
 ## Run
-    docker-compose -f docker/docker-compose.yml up -d
 
 ## Tests
 ### e2e
-    - run application first
-    - TBD
+    - docker-compose -f docker/docker-compose.yml up -d
+    - mvn test -Dtest.tags=tmp -Dtest.env=docker
 
 ### integration
 #### demo-service/src/test/java/com/example/item/integration
