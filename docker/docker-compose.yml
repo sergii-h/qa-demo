@@ -2,16 +2,43 @@ version: '3.7'
 
 services:
   qa-demo-service:
+    container_name: qa-demo-service
     build:
       context: ../
       dockerfile: docker/Dockerfile-demo-service
-    container_name: qa-demo-service
     ports:
       - "8080:8080"
+
   qa-demo-interface:
+    platform: linux/amd64
+    container_name: qa-demo-interface
     build:
+      args:
+        BE_API_ARG: http://host.docker.internal:8080/v1
       context: ../
       dockerfile: docker/Dockerfile-demo-interface
-    container_name: qa-demo-interface
     ports:
       - "3000:3000"
+
+  qa-demo-selenide-selenoid-junit5-tests:
+    container_name: qa-demo-selenide-selenoid-junit5-tests
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile-selenide-selenoid-junit5-tests
+
+  qa-demo-selenoid:
+    container_name: qa-demo-selenoid
+    network_mode: bridge
+    image: aerokube/selenoid:1.11.0
+    volumes:
+      - "${PWD}/selenide-selenoid-junit5-example:/etc/selenoid"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "${PWD}/selenide-selenoid-junit5-example/selenoid/video:/opt/selenoid/video"
+      - "${PWD}/selenide-selenoid-junit5-example/selenoid/logs:/opt/selenoid/logs"
+    environment:
+      - OVERRIDE_VIDEO_OUTPUT_DIR=selenide-selenoid-junit5-example/video
+    command: [ "-conf", "/etc/selenoid/browsers.json",
+               "-video-output-dir", "/opt/selenoid/video",
+               "-log-output-dir", "/opt/selenoid/logs" ]
+    ports:
+      - "4444:4444"

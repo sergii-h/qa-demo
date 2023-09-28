@@ -1,6 +1,5 @@
-FROM maven:3.8.6-openjdk-18
-COPY demo-service/src /demo-service/src
-COPY demo-service/pom.xml /demo-service
-COPY pom.xml /
-RUN mvn package
-CMD java -jar demo-service/target/demo-service.jar
+FROM maven:3.8.3-openjdk-17
+COPY demo-service/src /src
+COPY demo-service/pom.xml /
+RUN mvn -Djdk.lang.Process.launchMechanism=vfork package
+CMD java -jar /target/demo-service.jar
