@@ -1,0 +1,16 @@
+{
+  "chrome": {
+    "default": "109.0",
+    "versions": {
+      "109.0": {
+        "image": "selenoid/chrome:109.0",
+        "port": "4444",
+        "path": "/",
+        "tmpfs": {"/tmp": "size=512m", "/var": "size=128m"},
+        "shmSize" : 536870912,
+        "cpu" : "1.0",
+        "mem" : "1g"
+      }
+    }
+  }
+}
