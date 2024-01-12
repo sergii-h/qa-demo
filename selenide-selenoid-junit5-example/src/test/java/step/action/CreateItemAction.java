@@ -24,16 +24,4 @@ public class CreateItemAction {
         createItemForm.createButton.click();
         createItemForm.createButton.shouldNotBe(visible);
     }
-
-    @Step("Close 'Create item' form")
-    public void closeForm() {
-        createItemForm.closeButton.click();
-        createItemForm.closeButton.shouldNotBe(visible);
-    }
-
-    @Step("Close 'Create item' form by X button")
-    public void closeFormByXButton() {
-        createItemForm.closeXButton.click();
-        createItemForm.closeXButton.shouldNotBe(visible);
-    }
 }
