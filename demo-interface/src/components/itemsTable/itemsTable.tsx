@@ -78,8 +78,16 @@ export const ItemsTable = () => {
                 </DataTable>
             </div>
             {isInfoModalOpen && <InfoModal itemId={activeItemId} onClose={() => setIsInfoModalOpen(false)} />}
-            {isEditModalOpen && <EditModal itemId={activeItemId} onClose={() => setIsEditModalOpen(false)} onSave={async () => await fetchItems()} />}
-            {isCreateModalOpen && <CreateModal onClose={() => setIsCreateModalOpen(false)} onSave={async () => await fetchItems()} />}
+            {isEditModalOpen && <EditModal
+                itemId={activeItemId}
+                onClose={() => setIsEditModalOpen(false)}
+                onSave={async () => await fetchItems()}
+            />}
+            {isCreateModalOpen && <CreateModal
+                onClose={() => setIsCreateModalOpen(false)}
+                onSave={async () => await fetchItems()}
+                isLoading={false}
+            />}
         </div>
     );
 }
