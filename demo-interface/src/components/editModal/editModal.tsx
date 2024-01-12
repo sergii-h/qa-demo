@@ -14,7 +14,7 @@ interface IProps {
 }
 
 export const EditModal = (props: IProps) => {
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [item, setItem] = useState<IItem | null>(null);
     const [name, setName] = useState<string>('');
     const [amount, setAmount] = useState<number>(0);
@@ -52,7 +52,13 @@ export const EditModal = (props: IProps) => {
     }
 
     return (
-        <Dialog id="edit-modal" header={item?.name ? `Edit ${item.name}` : "Edit"} visible={true} onHide={() => onHide()} footer={renderFooter()} style={{ minWidth: 480 }}>
+        <Dialog
+            id="edit-modal"
+            header={item?.name ? `Edit ${item.name}` : "Edit"}
+            visible={true}
+            onHide={() => onHide()}
+            footer={renderFooter()} style={{ minWidth: 480 }}
+        >
             {isLoading ? <ProgressSpinner /> : <>
                 <div className="field">
                     <label htmlFor="name" className="block">Name</label>
