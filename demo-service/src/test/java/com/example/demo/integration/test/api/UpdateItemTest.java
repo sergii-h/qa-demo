@@ -21,7 +21,7 @@ import static org.junit.jupiter.params.provider.Arguments.of;
 class UpdateItemTest extends TestBase {
     private static Stream<Arguments> validPayload() {
         return Stream.of(
-                of("name", 1, "description", "name2", 1, "description2"),
+                of("name", 1, "description", "name2", 2, "description2"),
                 of("name", 1, "description", "name" , 1, "description" ),
                 of(""    , 1, " "          , "name" , 1, "description" ),
                 of("name", 1, "description", ""     , 1, " "           )
@@ -84,39 +84,5 @@ class UpdateItemTest extends TestBase {
         // then
         assertThat(putResponse.statusCode(), is(500));
         assertThat(putResponse.getBody().asString(), is("Item with id: " + context.getId() + " not found"));
-    }
-
-    @Test
-    @Tag("FailedTestExample")
-    void updateAmountFailedTestExampleBecauseAmountIsNotUpdated() {
-        // given
-        ItemContext context = ItemContext
-                .builder()
-                .amount(1)
-                .build();
-
-        ItemContext updatedContext = ItemContext
-                .builder()
-                .amount(2)
-                .build();
-
-        Response postResponse = requestSpec
-                .body(context.createItemRequest())
-                .post("/item");
-
-        updatedContext.setId(postResponse.jsonPath().get("id"));
-
-        // when
-        Response putResponse = requestSpec
-                .body(updatedContext.createItemRequest())
-                .put("/item/" + updatedContext.getId());
-
-        // and
-        Response getResponse = requestSpec.get("/item/" + updatedContext.getId());
-
-        // then
-        assertThat(putResponse.statusCode(), is(200));
-        assertThat(putResponse.getBody().asString(), is(emptyString()));
-        assertThat(getResponse.getBody().as(ItemResponse.class), is(updatedContext.createExpectedResponse()));
     }
 }
