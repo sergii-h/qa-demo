@@ -43,6 +43,6 @@ class DemoRepository {
     }
 
     Set<DemoData> findAll() {
-        return items.stream().map(demoData -> demoData.toBuilder().description(null).build()).collect(Collectors.toSet());
+        return items.stream().map(demoData -> demoData.toBuilder().build()).collect(Collectors.toSet());
     }
 }
