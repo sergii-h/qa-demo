@@ -29,7 +29,13 @@ class DemoRepository {
         DemoData demoData = getById(itemId);
 
         items.remove(demoData);
-        items.add(demoData.toBuilder().name(demoRequest.getName()).description(demoRequest.getDescription()).build());
+        items.add(
+                demoData.toBuilder()
+                        .name(demoRequest.getName())
+                        .amount(demoRequest.getAmount())
+                        .description(demoRequest.getDescription())
+                        .build()
+        );
     }
 
     void delete(String itemId) {
@@ -43,6 +49,6 @@ class DemoRepository {
     }
 
     Set<DemoData> findAll() {
-        return items.stream().map(demoData -> demoData.toBuilder().description(null).build()).collect(Collectors.toSet());
+        return items.stream().map(demoData -> demoData.toBuilder().build()).collect(Collectors.toSet());
     }
 }
