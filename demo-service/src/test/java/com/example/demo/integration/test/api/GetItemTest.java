@@ -36,8 +36,7 @@ class GetItemTest extends TestBase {
     }
 
     @Test
-    @Tag("FailedTestExample")
-    void getUpdatedItemFailedTestExampleBecauseAmountIsNotUpdated() {
+    void getUpdatedItem() {
         // given
         ItemContext context = ItemContext
                 .builder()
@@ -58,6 +57,11 @@ class GetItemTest extends TestBase {
                 .post("/item");
 
         updatedContext.setId(postResponse.jsonPath().get("id"));
+
+        // and
+        requestSpec
+                .body(updatedContext.createItemRequest())
+                .put("/item/" + updatedContext.getId());
 
         // when
         Response getResponse = requestSpec.get("/item/" + updatedContext.getId());

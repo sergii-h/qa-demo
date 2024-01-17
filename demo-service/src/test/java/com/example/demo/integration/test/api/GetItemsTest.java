@@ -8,7 +8,6 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -51,8 +50,7 @@ class GetItemsTest {
     }
 
     @Test
-    @Tag("FailedTestExample")
-    void getItemsFailedTestExampleBecauseDescriptionIsNotReturned() {
+    void getItems() {
         // given
         ItemContext context1 = ItemContext
                 .builder()
@@ -80,8 +78,7 @@ class GetItemsTest {
     }
 
     @Test
-    @Tag("FailedTestExample")
-    void getItemsAfterUpdateFailedTestExampleBecauseDescriptionIsNotReturned() {
+    void getItemsAfterUpdate() {
         // given
         ItemContext context = ItemContext
                 .builder()
@@ -113,14 +110,17 @@ class GetItemsTest {
     }
 
     @Test
-    @Tag("FailedTestExample")
-    void getItemsAfterDeleteFailedTestExampleBecauseItemStillReturned() {
+    void getItemsAfterDelete() {
         // given
         ItemContext context = ItemContext
                 .builder()
                 .build();
 
-        requestSpec.body(context.createItemRequest()).post("/item");
+        Response postResponse = requestSpec
+                .body(context.createItemRequest())
+                .post("/item");
+
+        context.setId(postResponse.jsonPath().get("id"));
 
         // and
         requestSpec.delete("/item/" + context.getId());
