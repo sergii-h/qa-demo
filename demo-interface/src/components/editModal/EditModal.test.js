@@ -1,4 +1,4 @@
-import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {act, fireEvent, render, screen} from '@testing-library/react';
 import {EditModal} from './editModal';
 import {jest} from '@jest/globals';
 
@@ -17,38 +17,18 @@ beforeEach(() => {
     }
 
     fetchSpy = jest.spyOn(window, 'fetch').mockImplementation(mockGetItem)
-})
+});
 
 it('should render with mocked values', async () => {
     // when
     await act(() => render(<EditModal itemId={itemResponse.body.id} />))
 
     // then
-    await waitFor(() => {
-        expect(screen.getByLabelText('Name')).toHaveProperty('value', itemResponse.body.name)
-        expect(screen.getByLabelText('Amount')).toHaveProperty('value', itemResponse.body.amount)
-        expect(screen.getByLabelText('Description')).toHaveProperty('value', itemResponse.body.description)
-    })
+    expect(fetchSpy).toHaveBeenCalledTimes(1)
 
-});
-
-it('should get /item when rendered', () => {
-    // when
-    act(() => render(<EditModal itemId={itemResponse.body.id}/>))
-
-    // then
-    waitFor(() => {
-        expect(fetchSpy).toHaveBeenCalledWith(
-            `${BE_API}/item/1`,
-            expect.objectContaining({
-                "body": `{
-                "name":"${itemResponse.body.name}",
-                "amount":"${itemResponse.body.amount}",
-                "description":"${itemResponse.body.description}"}`,
-                "method": "GET"}
-            )
-        )
-    })
+    expect(screen.getByLabelText('Name')).toHaveProperty('value', itemResponse.body.name)
+    expect(screen.getByLabelText('Amount')).toHaveProperty('value', itemResponse.body.amount)
+    expect(screen.getByLabelText('Description')).toHaveProperty('value', itemResponse.body.description)
 });
 
 [
@@ -57,27 +37,25 @@ it('should get /item when rendered', () => {
     { name: "",             amount: -1,  description: ""             },
     { name: " ",            amount: 0,   description: " "            },
 ].forEach((data) => {
-    it(`should change values with valid data { '${data.name}', ${data.amount}, '${data.description}' }`, () => {
+    it(`should change values with valid data { '${data.name}', ${data.amount}, '${data.description}' }`, async () => {
         // given
-        act(() => render(<EditModal itemId={itemResponse.body.id}/>))
+        await act(() => render(<EditModal itemId={itemResponse.body.id}/>))
 
         const nameElement = screen.getByLabelText('Name')
         const amountElement = screen.getByLabelText('Amount')
         const descriptionElement = screen.getByLabelText('Description')
 
         // when
-        act(() => {
+        await act(() => {
             fireEvent.change(nameElement, {target: {value: data.name}})
             fireEvent.change(amountElement, {target: {value: data.amount}})
             fireEvent.change(descriptionElement, {target: {value: data.description}})
         });
 
         // then
-        waitFor(() => {
-            expect(nameElement).toHaveProperty('value', data.name)
-            expect(amountElement).toHaveProperty('value', `${data.amount}`)
-            expect(descriptionElement).toHaveProperty('value', data.description)
-        })
+        expect(nameElement).toHaveProperty('value', data.name)
+        expect(amountElement).toHaveProperty('value', `${data.amount}`)
+        expect(descriptionElement).toHaveProperty('value', data.description)
     })
 });
 
@@ -117,32 +95,23 @@ it('should get /item when rendered', () => {
         })
 
         // then
-        waitFor(() => {
-            expect(fetchSpy).toHaveBeenCalledTimes(2)
-            expect(fetchSpy).toHaveBeenLastCalledWith(
-                `${BE_API}/item/1`,
-                expect.objectContaining({
-                    "body": `{"name":"${data.name}","amount":"${data.amount}","description":"${data.description}"}`,
-                    "method": "PUT"}
-                )
+        expect(fetchSpy).toHaveBeenCalledTimes(2)
+        expect(fetchSpy).toHaveBeenLastCalledWith(
+            `${BE_API}/item/1`,
+            expect.objectContaining({
+                "body": `{"name":"${data.name}","amount":${data.amount},"description":"${data.description}"}`,
+                "method": "PUT"}
             )
-        })
+        )
     })
 });
 
 it("should not put /item when Close button is clicked", () => {
     // given
-    itemResponse.body = {
-        id: '1',
-        name: 'name1',
-        description: 'description1',
-        amount: '1',
-    }
-
     act(() => render(<EditModal itemId={itemResponse.body.id} onClose={() => true}/>))
 
     // when
-    waitFor(() => {
+    act(() => {
         screen
             .getAllByRole('button')
             .find(element => element.className.includes('close-button'))
@@ -151,7 +120,7 @@ it("should not put /item when Close button is clicked", () => {
 
     // then
     expect(fetchSpy).not.toHaveBeenCalledWith(
-        `${BE_API}/item/1`,
+        `${BE_API}/item/${itemResponse.body.id}`,
         expect.objectContaining({"method": "PUT"})
     )
 });
