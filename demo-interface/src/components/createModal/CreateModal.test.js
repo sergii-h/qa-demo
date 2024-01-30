@@ -9,7 +9,7 @@ let windowFetchSpy;
 
 beforeEach(() => {
     windowFetchSpy = jest.spyOn(window, 'fetch').mockImplementation(mockCreateItem);
-})
+});
 
 it('should render with default values', () => {
     // when
@@ -76,7 +76,7 @@ it('should change values', () => {
         })
 
         // then
-        await waitFor(() => {
+        await waitFor(() =>
             expect(windowFetchSpy).toHaveBeenCalledWith(
                 `${BE_API}/item`,
                 expect.objectContaining({
@@ -84,22 +84,22 @@ it('should change values', () => {
                     "method": "POST"}
                 )
             )
-        })
+        )
     })
-})
+});
 
 it("should not post /item when Close button is clicked", async () => {
     // given
     render(<CreateModal onClose={() => true} onSave={() => true}/>)
 
     // when
-    await waitFor(() => {
+    await waitFor(() =>
         screen
             .getAllByRole('button')
             .find(element => element.className.includes('close-button'))
             .click()
-    })
+    )
 
     // then
     expect(windowFetchSpy).not.toHaveBeenCalled()
-})
+});
