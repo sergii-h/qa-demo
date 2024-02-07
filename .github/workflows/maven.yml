@@ -35,3 +35,5 @@ jobs:
       run: mvn -B package --file demo-service/pom.xml
     - name: Install Dependencies
       run: cd demo-interface && npm install
+    - name: Run tests
+      run: cd demo-interface && npm test
