@@ -1,31 +1,31 @@
 import IItem from "../interfaces/IItem";
 
-const beApi = process.env.REACT_APP_BE_API || "http://localhost:8080/v1";
+const BE_API = process.env.REACT_APP_BE_API || "http://localhost:8080/v1";
 
 const getItems = async (): Promise<IItem[]> => {
-    const response = await fetch(beApi + `/item`, { method: 'GET', headers: { 'Content-Type': 'application/json'} });
+    const response = await fetch(BE_API + `/item`, { method: 'GET', headers: { 'Content-Type': 'application/json'} });
 
     return await response.json();
 }
 
 const getItem = async (itemId: string): Promise<IItem> => {
-    const response = await fetch(beApi + `/item/${itemId}`, { method: 'GET', headers: { 'Content-Type': 'application/json'} });
+    const response = await fetch(BE_API + `/item/${itemId}`, { method: 'GET', headers: { 'Content-Type': 'application/json'} });
 
     return await response.json();
 }
 
 const createItem = async (item: IItem): Promise<IItem> => {
-    const response = await fetch(beApi + `/item`, { method: 'POST', body: JSON.stringify({ ...item }), headers: { 'Content-Type': 'application/json'} });
+    const response = await fetch(BE_API + `/item`, { method: 'POST', body: JSON.stringify({ ...item }), headers: { 'Content-Type': 'application/json'} });
 
     return await response.json();
 }
 
 const updateItem = async (item: IItem): Promise<any> => {
-    return await fetch(beApi + `/item/${item.id}`, { method: 'PUT', body: JSON.stringify({ name: item.name, description: item.description }), headers: { 'Content-Type': 'application/json'} });
+    return await fetch(BE_API + `/item/${item.id}`, { method: 'PUT', body: JSON.stringify({ name: item.name, amount: item.amount, description: item.description }), headers: { 'Content-Type': 'application/json'} });
 }
 
 const deleteItem = async (itemId: string): Promise<any> => {
-    return await fetch(beApi + `/item/${itemId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json'} });
+    return await fetch(BE_API + `/item/${itemId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json'} });
 }
 
 export  {
@@ -33,5 +33,6 @@ export  {
     getItem,
     createItem,
     updateItem,
-    deleteItem
+    deleteItem,
+    BE_API
 }

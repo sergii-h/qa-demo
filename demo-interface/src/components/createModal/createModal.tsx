@@ -9,22 +9,23 @@ import {createItem} from '../../helpers';
 interface IProps {
     onClose: () => void;
     onSave: () => void;
+    isLoading?: boolean | false;
 }
 
 export const CreateModal = (props: IProps) => {
-    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [name, setName] = useState<string>('');
     const [amount, setAmount] = useState<number>(0);
     const [description, setDescription] = useState<string>('');
+    let isLoading = props.isLoading;
 
     const onHide = () => {
         props.onClose();
     }
 
     const onSave = async () => {
-        setIsLoading(true);
+        isLoading = true;
         await createItem({ name, amount: amount, description });
-        setIsLoading(false);
+        isLoading = false;
         props.onSave();
         props.onClose();
     }
@@ -39,7 +40,7 @@ export const CreateModal = (props: IProps) => {
     }
 
     return (
-        <Dialog id="create-modal" header="New item" visible={true} onHide={() => onHide()} footer={renderFooter()} style={{ minWidth: 480 }}>
+        <Dialog id="create-modal" header="New item" data-foo="bar" visible={true} onHide={() => onHide()} footer={renderFooter()} style={{ minWidth: 480 }}>
             {isLoading ? <ProgressSpinner /> : <>
                 <div className="field">
                     <label htmlFor="name" className="block">Name</label>
