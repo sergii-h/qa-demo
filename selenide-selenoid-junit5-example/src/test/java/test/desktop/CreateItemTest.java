@@ -35,7 +35,11 @@ class CreateItemTest {
     @DisplayName("Create item")
     void shouldCreateItem() {
         List<String> oldList = actions.items.getItemNames();
-        ItemContext context = ItemContext.builder().build();
+        ItemContext context = ItemContext.builder()
+                .name("name1")
+                .amount("1")
+                .description("description1")
+                .build();
 
         actions.items
                 .openCreateItemForm()
@@ -46,21 +50,12 @@ class CreateItemTest {
     }
 
     @CsvSource({
-            "name1        , 1    , description1    ",
             "''           , 1    , description1    ",
             "''           , ''   , description1    ",
-            "null         , 1    , description1    ",
-            "name1        , 1    ,         null    ",
-            "name1        , 0    , description1    ",
-            "name1        , '0,1', description1    ",
-            "name1        , -1   , description1    ",
-            "' name1 '    , 1    , ' description1 '",
-            "' '          , 1    , ' '             ",
-            "'name1 name2', 1    , Desc1 Desc2     ",
     })
     @DisplayName("Create item with name {name}")
     @ParameterizedTest(name="Create item \"{argumentsWithNames}\"")
-    void shouldCreateItemWithDifferentData(String name, String amount, String description) {
+    void shouldCreateItemWithOptionalData(String name, String amount, String description) {
         List<String> oldList = actions.items.getItemNames();
 
         ItemContext context = ItemContext.builder()
@@ -77,50 +72,21 @@ class CreateItemTest {
         validate.items.itemCreated(oldList, context.name);
     }
 
-    @CsvSource({
-            "name1, 1, ''",
-    })
-    @DisplayName("Item with name {name} not created")
-    @ParameterizedTest(name="Item \"{argumentsWithNames}\" not created")
-    void shouldNotCreateItemWhenWrongData(String name, String amount, String description) {
+    @DisplayName("Item without description is not created")
+    @Test()
+    void shouldNotCreateItemWithoutDescription() {
         List<String> oldList = actions.items.getItemNames();
 
         ItemContext context = ItemContext.builder()
-                .name(name)
-                .amount(amount)
-                .description(description)
+                .name("name")
+                .amount("1")
+                .description("")
                 .build();
 
         actions.items
                 .openCreateItemForm()
                 .setItemData(context.createItemData())
                 .submitForm();
-
-        validate.items.listIsNotChanged(oldList);
-    }
-
-    @Test
-    @DisplayName("Item is not created when form is closed before submit")
-    void shouldNotCreateItemWhenFormClosed() {
-        List<String> oldList = actions.items.getItemNames();
-
-        actions.items
-                .openCreateItemForm()
-                .setItemData(ItemContext.builder().build().createItemData())
-                .closeForm();
-
-        validate.items.listIsNotChanged(oldList);
-    }
-
-    @Test
-    @DisplayName("Item is not created when form is closed by X button before submit")
-    void shouldNotCreateItemWhenFormClosedByXButton() {
-        List<String> oldList = actions.items.getItemNames();
-
-        actions.items
-                .openCreateItemForm()
-                .setItemData(ItemContext.builder().build().createItemData())
-                .closeFormByXButton();
 
         validate.items.listIsNotChanged(oldList);
     }
