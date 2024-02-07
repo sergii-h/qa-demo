@@ -1,7 +1,7 @@
 import {act, render, screen} from '@testing-library/react';
 import * as React from 'react';
 import {jest} from '@jest/globals'
-import {itemResponse, mockGetItem} from '../../mocks/mockFetch';
+import {itemResponse, mockFetch} from '../../mocks/mockFetch';
 import {InfoModal} from "./infoModal";
 
 let fetchSpy;
@@ -14,7 +14,7 @@ beforeEach(() => {
         amount: '1',
     }
 
-    fetchSpy = jest.spyOn(window, 'fetch').mockImplementation(mockGetItem);
+    fetchSpy = jest.spyOn(window, 'fetch').mockImplementation(mockFetch);
 });
 
 it('should render with mocked values', async () => {
@@ -29,16 +29,16 @@ it('should render with mocked values', async () => {
     expect(screen.getByText(itemResponse.body.description)).toBeVisible()
 });
 
-it('should render default name if absent in response', () => {
+it('should render default name if absent in response', async () => {
     // given
-    itemResponse.changeBody = {
+    itemResponse.body = {
         id: '1',
         description: 'description1',
         amount: '1',
     }
 
     // when
-    act(() => render(<InfoModal itemId={itemResponse.body.id} />))
+    await act(() => render(<InfoModal itemId={itemResponse.body.id} />))
 
     // then
     expect(screen.getByText('Info')).toBeVisible()
