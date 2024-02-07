@@ -2,13 +2,13 @@ import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {CreateModal} from './createModal';
 import * as React from 'react';
 import {jest} from '@jest/globals'
-import {mockCreateItem} from '../../mocks/mockFetch';
+import {mockFetch} from '../../mocks/mockFetch';
 import {BE_API} from "../../helpers";
 
 let windowFetchSpy;
 
 beforeEach(() => {
-    windowFetchSpy = jest.spyOn(window, 'fetch').mockImplementation(mockCreateItem);
+    windowFetchSpy = jest.spyOn(window, 'fetch').mockImplementation(mockFetch);
 });
 
 it('should render with default values', () => {

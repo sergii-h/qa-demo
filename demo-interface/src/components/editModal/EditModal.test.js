@@ -2,7 +2,7 @@ import {act, fireEvent, render, screen} from '@testing-library/react';
 import {EditModal} from './editModal';
 import {jest} from '@jest/globals';
 
-import {itemResponse, mockGetItem} from '../../mocks/mockFetch';
+import {itemResponse, mockFetch} from '../../mocks/mockFetch';
 import * as React from "react";
 import {BE_API} from "../../helpers";
 
@@ -16,7 +16,7 @@ beforeEach(() => {
         amount: '1',
     }
 
-    fetchSpy = jest.spyOn(window, 'fetch').mockImplementation(mockGetItem)
+    fetchSpy = jest.spyOn(window, 'fetch').mockImplementation(mockFetch)
 });
 
 it('should render with mocked values', async () => {
@@ -26,6 +26,7 @@ it('should render with mocked values', async () => {
     // then
     expect(fetchSpy).toHaveBeenCalledTimes(1)
 
+    expect(screen.getByText('Edit ' + itemResponse.body.name)).toBeVisible()
     expect(screen.getByLabelText('Name')).toHaveProperty('value', itemResponse.body.name)
     expect(screen.getByLabelText('Amount')).toHaveProperty('value', itemResponse.body.amount)
     expect(screen.getByLabelText('Description')).toHaveProperty('value', itemResponse.body.description)
@@ -65,7 +66,7 @@ it('should render with mocked values', async () => {
     { name: "",             amount: -1,  description: ""             },
     { name: " ",            amount: 0,   description: " "            },
 ].forEach((data) => {
-    it(`should put /item with valid payload { '${data.name}', ${data.amount}, '${data.description}' }`, () => {
+    it(`should put /item with valid payload { '${data.name}', ${data.amount}, '${data.description}' }`, async () => {
         // given
         itemResponse.body = {
             id: '1',
@@ -74,20 +75,20 @@ it('should render with mocked values', async () => {
             amount: '1',
         }
 
-        act(() => render(<EditModal itemId={itemResponse.body.id} onClose={() => true} onSave={() => true}/>))
+        await act(() => render(<EditModal itemId={itemResponse.body.id} onClose={() => true} onSave={() => true}/>))
 
         const nameElement = screen.getByLabelText('Name')
         const amountElement = screen.getByLabelText('Amount')
         const descriptionElement = screen.getByLabelText('Description')
 
-        act(() => {
+        await act(() => {
             fireEvent.change(nameElement, {target: {value: data.name}})
             fireEvent.change(amountElement, {target: {value: data.amount}})
             fireEvent.change(descriptionElement, {target: {value: data.description}})
         });
 
         // when
-        act(() => {
+        await act(() => {
             screen
                 .getAllByRole('button')
                 .find(element => element.className.includes('save-button'))
@@ -106,12 +107,12 @@ it('should render with mocked values', async () => {
     })
 });
 
-it("should not put /item when Close button is clicked", () => {
+it("should not put /item when Close button is clicked", async () => {
     // given
-    act(() => render(<EditModal itemId={itemResponse.body.id} onClose={() => true}/>))
+    await act(() => render(<EditModal itemId={itemResponse.body.id} onClose={() => true}/>))
 
     // when
-    act(() => {
+    await act(() => {
         screen
             .getAllByRole('button')
             .find(element => element.className.includes('close-button'))
