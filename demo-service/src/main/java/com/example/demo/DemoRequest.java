@@ -17,6 +17,6 @@ class DemoRequest {
     private String name;
     @NotEmpty
     private String description;
-
+    @NotNull
     private Long amount;
 }

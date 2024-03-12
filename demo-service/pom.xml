@@ -95,7 +95,6 @@
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
-                    <excludedGroups>FailedTestExample</excludedGroups>
                 </configuration>
             </plugin>
         </plugins>
