@@ -31,9 +31,9 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: '18.x'
-    - name: Build with Maven
+    - name: Build BE (with tests)
       run: mvn -B package --file demo-service/pom.xml
-    - name: Install Dependencies
+    - name: Install npm dependencies
       run: cd demo-interface && npm install
-    - name: Run tests
+    - name: Run FE tests
       run: cd demo-interface && npm test
