@@ -6,6 +6,7 @@ import com.example.demo.integration.data.ItemResponse;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -20,18 +21,18 @@ import static org.junit.jupiter.params.provider.Arguments.of;
 class CreateItemTest extends TestBase {
     private static Stream<Arguments> validPayload() {
         return Stream.of(
-                of("name",          1, "description" ),
-                of("Name1",         1, "description" ),
-                of("first second",  1, "description" ),
-                of("null",          1, "description" ),
-                of(" ",             1, "description" ),
-                of("",              1, "description" ),
-                of("name",         -1, "description" ),
-                of("name",          0, "description" ),
-                of("name",          1, "Description1"),
-                of("name",          1, "first second"),
-                of("name",          1, "null"        ),
-                of("name",          1, " "           )
+                of("name",         1, "description" ),
+                of("Name1",        1, "description" ),
+                of("first second", 1, "description" ),
+                of("null",         1, "description" ),
+                of(" ",            1, "description" ),
+                of("",             1, "description" ),
+                of("name",        -1, "description" ),
+                of("name",         0, "description" ),
+                of("name",         1, "Description1"),
+                of("name",         1, "first second"),
+                of("name",         1, "null"        ),
+                of("name",         1, " "           )
         );
     }
 
@@ -63,11 +64,12 @@ class CreateItemTest extends TestBase {
 
     @ParameterizedTest
     @ValueSource( strings = {
-            "{\"name\": null,     \"amount\": 1, \"description\": \"description\"}",
-            "{\"name\": \"name\", \"amount\": 1, \"description\": \"\"}",
-            "{                    \"amount\": 1, \"description\": \"description\"}",
-            "{\"name\": \"name\", \"amount\": 1}",
-
+            "{\"name\": null,     \"amount\": 1,    \"description\": \"description\"}",
+            "{\"name\": \"name\", \"amount\": 1,    \"description\": \"\"           }",
+            "{                    \"amount\": 1,    \"description\": \"description\"}",
+            "{\"name\": \"name\", \"amount\": 1                                     }",
+            "{\"name\": \"name\", \"amount\": null, \"description\": \"description\"}",
+            "{\"name\": \"name\",                   \"description\": \"description\"}",
     })
     void badRequestWhenNotValidPayload(String notValidPayload) {
         // when
@@ -84,25 +86,15 @@ class CreateItemTest extends TestBase {
         assertThat(body.get("path"), is("/v1/item"));
     }
 
-    @ParameterizedTest
-    @Tag("FailedTestExample")
-    @ValueSource( strings = {
-            "{\"name\": \"name\", \"amount\": null, \"description\": \"description\"}",
-            "{\"name\": \"name\", \"description\": \"description\"}",
-            "{\"name\": \"name\", \"amount\": 0.5, \"description\": \"description\"}",
-    })
-    void badRequestFailedTestExampleBecauseUnexpectedResponseCode(String notValidPayload) {
+    @Test
+    void roundedAmountWhenDoubleValue() {
         // when
         Response response = requestSpec
-                .body(notValidPayload)
+                .body("{\"name\": \"name\", \"amount\": 0.5, \"description\": \"description\"}")
                 .post("/item");
 
-        JsonPath body = response.jsonPath();
-
         // then
-        assertThat(response.statusCode(), is(400));
-        assertThat(body.get("status"), is(400));
-        assertThat(body.get("error"), is("Bad Request"));
-        assertThat(body.get("path"), is("/v1/item"));
+        assertThat(response.statusCode(), is(200));
+        assertThat(response.jsonPath().get("amount"), is(0));
     }
 }
