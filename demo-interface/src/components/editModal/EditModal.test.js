@@ -2,34 +2,47 @@ import {act, fireEvent, render, screen} from '@testing-library/react';
 import {EditModal} from './editModal';
 import {jest} from '@jest/globals';
 
-import {itemResponse, mockFetch} from '../../mocks/mockFetch';
 import * as React from "react";
 import {BE_API} from "../../helpers";
 
-let fetchSpy;
+const MockFetch = require('../../mocks/mockFetch').default;
+const spyOnFetch = jest.spyOn(window, 'fetch')
+
+let mockFetch
+let fetchSpy
 
 beforeEach(() => {
-    itemResponse.body = {
-        id: '1',
-        name: 'name1',
-        description: 'description1',
-        amount: '1',
-    }
-
-    fetchSpy = jest.spyOn(window, 'fetch').mockImplementation(mockFetch)
+    mockFetch = new MockFetch()
+    fetchSpy = spyOnFetch.mockImplementation(mockFetch.execute)
 });
 
 it('should render with mocked values', async () => {
+    // given
+    mockFetch = new MockFetch({
+        itemResponse: {
+            status: 200,
+            body: {
+                id: '1',
+                name: 'name',
+                description: 'description',
+                amount: 1,
+            }
+        }
+    })
+
+    spyOnFetch.mockImplementation(mockFetch.execute)
+
     // when
-    await act(() => render(<EditModal itemId={itemResponse.body.id} />))
+    await act(() => render(<EditModal itemId={mockFetch.payload.itemResponse.body.id} />))
 
     // then
     expect(fetchSpy).toHaveBeenCalledTimes(1)
 
-    expect(screen.getByText('Edit ' + itemResponse.body.name)).toBeVisible()
-    expect(screen.getByLabelText('Name')).toHaveProperty('value', itemResponse.body.name)
-    expect(screen.getByLabelText('Amount')).toHaveProperty('value', itemResponse.body.amount)
-    expect(screen.getByLabelText('Description')).toHaveProperty('value', itemResponse.body.description)
+    expect(screen.getByText('Edit ' + mockFetch.payload.itemResponse.body.name)).toBeVisible()
+    expect(screen.getByLabelText('Name')).toHaveProperty('value', mockFetch.payload.itemResponse.body.name)
+    expect(screen.getByLabelText('Amount')).toHaveProperty('value', `${mockFetch.payload.itemResponse.body.amount}`)
+    expect(screen.getByLabelText('Description'))
+        .toHaveProperty('value', mockFetch.payload.itemResponse.body.description)
 });
 
 [
@@ -40,7 +53,21 @@ it('should render with mocked values', async () => {
 ].forEach((data) => {
     it(`should change values with valid data { '${data.name}', ${data.amount}, '${data.description}' }`, async () => {
         // given
-        await act(() => render(<EditModal itemId={itemResponse.body.id}/>))
+        mockFetch = new MockFetch({
+            itemResponse: {
+                status: 200,
+                body: {
+                    id: '1',
+                    name: 'name',
+                    description: 'description',
+                    amount: 1,
+                }
+            }
+        })
+
+        spyOnFetch.mockImplementation(mockFetch.execute)
+
+        await act(() => render(<EditModal itemId={mockFetch.payload.itemResponse.body.id}/>))
 
         const nameElement = screen.getByLabelText('Name')
         const amountElement = screen.getByLabelText('Amount')
@@ -68,14 +95,23 @@ it('should render with mocked values', async () => {
 ].forEach((data) => {
     it(`should put /item with valid payload { '${data.name}', ${data.amount}, '${data.description}' }`, async () => {
         // given
-        itemResponse.body = {
-            id: '1',
-            name: 'name1',
-            description: 'description1',
-            amount: '1',
-        }
+        mockFetch = new MockFetch({
+            itemResponse: {
+                status: 200,
+                body: {
+                    id: '1',
+                    name: 'name1',
+                    description: 'description1',
+                    amount: '1',
+                }
+            }
+        })
 
-        await act(() => render(<EditModal itemId={itemResponse.body.id} onClose={() => true} onSave={() => true}/>))
+        fetchSpy = spyOnFetch.mockImplementation(mockFetch.execute)
+
+        await act(() => render(
+            <EditModal itemId={mockFetch.payload.itemResponse.body.id} onClose={() => true} onSave={() => true}/>)
+        )
 
         const nameElement = screen.getByLabelText('Name')
         const amountElement = screen.getByLabelText('Amount')
@@ -98,7 +134,7 @@ it('should render with mocked values', async () => {
         // then
         expect(fetchSpy).toHaveBeenCalledTimes(2)
         expect(fetchSpy).toHaveBeenLastCalledWith(
-            `${BE_API}/item/1`,
+            `${BE_API}/item/${mockFetch.payload.itemResponse.body.id}`,
             expect.objectContaining({
                 "body": `{"name":"${data.name}","amount":${data.amount},"description":"${data.description}"}`,
                 "method": "PUT"}
@@ -109,7 +145,21 @@ it('should render with mocked values', async () => {
 
 it("should not put /item when Close button is clicked", async () => {
     // given
-    await act(() => render(<EditModal itemId={itemResponse.body.id} onClose={() => true}/>))
+    mockFetch = new MockFetch({
+        itemResponse: {
+            status: 200,
+            body: {
+                id: '1',
+                name: 'name1',
+                description: 'description1',
+                amount: '1',
+            }
+        }
+    })
+
+    fetchSpy = spyOnFetch.mockImplementation(mockFetch.execute)
+
+    await act(() => render(<EditModal itemId={mockFetch.payload.itemResponse.body.id} onClose={() => true}/>))
 
     // when
     await act(() => {
@@ -121,7 +171,7 @@ it("should not put /item when Close button is clicked", async () => {
 
     // then
     expect(fetchSpy).not.toHaveBeenCalledWith(
-        `${BE_API}/item/${itemResponse.body.id}`,
+        `${BE_API}/item/${mockFetch.payload.itemResponse.body.id}`,
         expect.objectContaining({"method": "PUT"})
     )
 });
