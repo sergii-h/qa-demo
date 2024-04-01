@@ -1,6 +1,6 @@
 import IItem from "../interfaces/IItem";
 
-const BE_API = process.env.REACT_APP_BE_API || "http://localhost:8080/v1";
+const BE_API = process.env.REACT_APP_BE_API || "http://127.0.0.1:8080/v1";
 
 const getItems = async (): Promise<IItem[]> => {
     const response = await fetch(BE_API + `/item`, { method: 'GET', headers: { 'Content-Type': 'application/json'} });
