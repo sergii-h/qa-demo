@@ -27,7 +27,7 @@
     "cypress:run:local": "CYPRESS_BASE_URL=http://localhost:3000 start-server-and-test start:local:server 3000 'cypress:run'",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test": "jest"
+    "test": "react-scripts test --watchAll=false"
   },
   "eslintConfig": {
     "extends": [
