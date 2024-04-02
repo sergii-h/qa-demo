@@ -9,7 +9,7 @@ consists of 4 fields:
 
 ## Prerequisites
 - jdk 17
-- node 18
+- node 20
 
 ## Modules
 
