@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI with Maven
+name: demo-service CI (maven)
 
 on:
   push:
@@ -16,24 +16,15 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up JDK 17
+    - name: Set up JDK
       uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: adopt
         cache: maven
-    - name: Setup Node
-      uses: actions/setup-node@v1
-      with:
-        node-version: '18.x'
-    - name: Build with Maven
+    - name: Build BE (with test-run)
       run: mvn -B package --file demo-service/pom.xml
-    - name: Install Dependencies
-      run: cd demo-interface && npm install
-    - name: Run tests
-      run: cd demo-interface && npm test

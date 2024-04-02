@@ -2,14 +2,10 @@ import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {CreateModal} from './createModal';
 import * as React from 'react';
 import {jest} from '@jest/globals'
-import {mockFetch} from '../../mocks/mockFetch';
 import {BE_API} from "../../helpers";
 
-let windowFetchSpy;
-
-beforeEach(() => {
-    windowFetchSpy = jest.spyOn(window, 'fetch').mockImplementation(mockFetch);
-});
+const MockFetch = require('../../mocks/mockFetch').default;
+const spyOnFetch = jest.spyOn(window, 'fetch')
 
 it('should render with default values', () => {
     // when
@@ -57,6 +53,8 @@ it('should change values', () => {
 ].forEach((data) => {
     it(`should post /item with parameters { '${data.name}', ${data.amount}, '${data.description}' }`, async () => {
         // given
+        const fetchSpy = spyOnFetch.mockImplementation(new MockFetch().execute)
+
         render(<CreateModal onClose={() => true} onSave={() => true}/>)
 
         const nameElement = screen.getByLabelText('Name')
@@ -77,7 +75,7 @@ it('should change values', () => {
 
         // then
         await waitFor(() =>
-            expect(windowFetchSpy).toHaveBeenCalledWith(
+            expect(fetchSpy).toHaveBeenCalledWith(
                 `${BE_API}/item`,
                 expect.objectContaining({
                     "body": `{"name":"${data.name}","amount":${data.amount},"description":"${data.description}"}`,
@@ -88,8 +86,49 @@ it('should change values', () => {
     })
 });
 
+[
+    { amount: "",   formattedAmount: "0" },
+    { amount: "01", formattedAmount: "1" },
+].forEach((data) => {
+    it(`should post /item parameter '${data.amount}' with formatted parameter '${data.formattedAmount}`, async () => {
+        // given
+        const fetchSpy = spyOnFetch.mockImplementation(new MockFetch().execute)
+
+        render(<CreateModal onClose={() => true} onSave={() => true}/>)
+
+        const nameElement = screen.getByLabelText('Name')
+        const amountElement = screen.getByLabelText('Amount')
+        const descriptionElement = screen.getByLabelText('Description')
+
+        fireEvent.change(nameElement, {target: {value: 'name'}})
+        fireEvent.change(amountElement, {target: {value: data.amount}})
+        fireEvent.change(descriptionElement, {target: {value: 'description'}})
+
+        // when
+        await waitFor(() => {
+            screen
+                .getAllByRole('button')
+                .find(element => element.className === 'p-button p-component create-button')
+                .click()
+        })
+
+        // then
+        await waitFor(() =>
+            expect(fetchSpy).toHaveBeenCalledWith(
+                `${BE_API}/item`,
+                expect.objectContaining({
+                    "body": `{"name":"name","amount":${data.formattedAmount},"description":"description"}`,
+                    "method": "POST"}
+                )
+            )
+        )
+    })
+});
+
 it("should not post /item when Close button is clicked", async () => {
     // given
+    const fetchSpy = spyOnFetch.mockImplementation(new MockFetch().execute)
+
     render(<CreateModal onClose={() => true} onSave={() => true}/>)
 
     // when
@@ -101,5 +140,5 @@ it("should not post /item when Close button is clicked", async () => {
     )
 
     // then
-    expect(windowFetchSpy).not.toHaveBeenCalled()
+    expect(fetchSpy).not.toHaveBeenCalled()
 });
