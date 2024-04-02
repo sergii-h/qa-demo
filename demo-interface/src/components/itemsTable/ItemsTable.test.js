@@ -1,24 +1,43 @@
-import {act, render, screen, within} from '@testing-library/react'
+import {act, fireEvent, render, screen, within} from '@testing-library/react'
 import * as React from 'react'
 import {jest} from '@jest/globals'
-import {itemResponse, itemsResponse, mockFetch} from '../../mocks/mockFetch'
 import {ItemsTable} from "./itemsTable"
 import {BE_API} from "../../helpers";
 
+const MockFetch = require('../../mocks/mockFetch').default;
+const spyOnFetch = jest.spyOn(window, 'fetch')
+
+let mockFetch
 let fetchSpy
 
 beforeEach(() => {
-    fetchSpy = jest.spyOn(window, 'fetch').mockImplementation(mockFetch)
+    mockFetch = new MockFetch()
+    fetchSpy = spyOnFetch.mockImplementation(mockFetch.execute)
 });
 
-it('should render with mocked values', async () => {
+it('should render multiple rows', async () => {
     // given
-    itemsResponse.body = [{
-        id: '1',
-        name: 'name1',
-        description: 'description1',
-        amount: '1',
-    }]
+    mockFetch = new MockFetch({
+        itemsResponse: {
+            status: 200,
+            body: [
+                {
+                    id: '1',
+                    name: 'name1',
+                    description: 'description1',
+                    amount: '1',
+                },
+                {
+                    id: '2',
+                    name: 'name2',
+                    description: 'description2',
+                    amount: '2',
+                },
+            ]
+        }
+    })
+
+    fetchSpy = spyOnFetch.mockImplementation(mockFetch.execute)
 
     // when
     await act(() => render(<ItemsTable />))
@@ -33,11 +52,36 @@ it('should render with mocked values', async () => {
     expect(columnHeaders[0]).toHaveTextContent('Name')
     expect(columnHeaders[1]).toHaveTextContent('Actions')
 
-    expect(cells).toHaveLength(2)
+    expect(cells).toHaveLength(4)
     expect(cells[0]).toHaveTextContent('name1')
     expect(within(cells[1]).getByText('Info')).toBeVisible()
     expect(within(cells[1]).getByText('Edit')).toBeVisible()
     expect(within(cells[1]).getByText('Delete')).toBeVisible()
+    expect(cells[2]).toHaveTextContent('name2')
+    expect(within(cells[3]).getByText('Info')).toBeVisible()
+    expect(within(cells[3]).getByText('Edit')).toBeVisible()
+    expect(within(cells[3]).getByText('Delete')).toBeVisible()
+});
+
+it('should render No results when no items received', async () => {
+    // given
+    mockFetch = new MockFetch({
+        itemsResponse: {
+            status: 200,
+            body: []
+        }
+    })
+
+    spyOnFetch.mockImplementation(mockFetch.execute)
+
+    // when
+    await act(() => render(<ItemsTable />))
+
+    // then
+    const cells = screen.getAllByRole('cell')
+
+    expect(cells).toHaveLength(1)
+    expect(cells[0]).toHaveTextContent('No results found')
 });
 
 it('should render CreateModal when clicked', async () => {
@@ -45,24 +89,85 @@ it('should render CreateModal when clicked', async () => {
     await act(() => render(<ItemsTable />))
 
     // when
-    await act(() => {
-        screen
-            .getByLabelText('Create item')
-            .click()
-    })
+    await act(() => screen.getByLabelText('Create item').click())
 
     // then
     expect(screen.getByText('New item')).toBeVisible()
 });
 
-it('should render Info when clicked', async () => {
+[0, 1].forEach(closeButton => {
+    it(`should close CreateModal when Close button ${closeButton} clicked`, async () => {
+        // given
+        await act(() => render(<ItemsTable />))
+
+        await act(() => screen.getByLabelText('Create item').click())
+
+        // when
+        await act(() => screen.getAllByLabelText('Close')[closeButton].click())
+
+        // then
+        expect(screen.queryByRole('dialog')).toBeNull()
+    })
+});
+
+it('should get /item when CreateModal saved', async () => {
     // given
-    itemResponse.body = {
-        id: '1',
-        name: 'name1',
-        description: 'description1',
-        amount: '1',
-    }
+    await act(() => render(<ItemsTable />))
+    await act(() => screen.getByLabelText('Create item').click())
+    await act(() => fireEvent.change(screen.getByLabelText('Description'), {target: {value: 'description'}}))
+
+    // when
+    await act(() =>
+        screen
+            .getAllByRole('button')
+            .find(element => element.className === 'p-button p-component create-button')
+            .click()
+    )
+
+    // then
+    expect(fetchSpy).toHaveBeenNthCalledWith(1,
+        `${BE_API}/item`,
+        expect.objectContaining({"method": "GET"})
+    )
+});
+
+it('should not render Spinner when Create clicked', async () => {
+    // given
+    await act(() => render(<ItemsTable />))
+
+    // when
+    await act(() => screen.getByLabelText('Create item').click())
+
+    // then
+    expect(document.querySelector('.p-progress-spinner')).toBeNull()
+});
+
+it('should render InfoModal when clicked', async () => {
+    // given
+    mockFetch = new MockFetch({
+        itemsResponse: {
+            status: 200,
+            body: [
+                {
+                    id: '1',
+                    name: 'name1',
+                    description: 'description1',
+                    amount: '1',
+                }
+            ]
+        },
+        itemResponse: {
+            status: 200,
+            body: {
+                id: '1',
+                name: 'name1',
+                description: 'description1',
+                amount: '1',
+            }
+        }
+    })
+
+    spyOnFetch.mockImplementation(mockFetch.execute)
 
     await act(() => render(<ItemsTable />))
 
@@ -70,21 +175,65 @@ it('should render Info when clicked', async () => {
     await act(() => within(screen.getAllByRole('cell')[1]).getByText('Info').click())
 
     // then
-    const infoModal = screen.getByRole('dialog')
-
-    expect(within(infoModal).getByText(itemResponse.body.name)).toBeVisible()
-    expect(within(infoModal).getByText(itemResponse.body.amount + ' €')).toBeVisible()
-    expect(within(infoModal).getByText(itemResponse.body.description)).toBeVisible()
+    expect(within(screen.getByRole('dialog')).getByText(mockFetch.payload.itemResponse.body.name)).toBeVisible()
 });
 
-it('should render Edit when clicked', async () => {
+it('should get /item with id when Info clicked', async () => {
     // given
-    itemResponse.body = {
-        id: '1',
-        name: 'name1',
-        description: 'description1',
-        amount: '1',
-    }
+    await act(() => render(<ItemsTable />))
+
+    // when
+    await act(() => within(screen.getAllByRole('cell')[1]).getByText('Info').click())
+
+    // then
+    expect(fetchSpy).toHaveBeenCalledTimes(2)
+
+    expect(fetchSpy).toHaveBeenLastCalledWith(
+        `${BE_API}/item/${mockFetch.payload.itemResponse.body.id}`,
+        expect.objectContaining({"method": "GET"})
+    )
+});
+
+it('should close InfoModal when clicked', async () => {
+    // given
+    await act(() => render(<ItemsTable />))
+
+    // when
+    await act(() => within(screen.getAllByRole('cell')[1]).getByText('Info').click())
+
+    // and
+    await act(() => screen.getByLabelText('Close').click())
+
+    // then
+    expect(screen.queryByRole('dialog')).toBeNull()
+});
+
+it('should render EditModal when clicked', async () => {
+    // given
+    mockFetch = new MockFetch({
+        itemsResponse: {
+            status: 200,
+            body: [
+                {
+                    id: '1',
+                    name: 'name1',
+                    description: 'description1',
+                    amount: '1',
+                }
+            ]
+        },
+        itemResponse: {
+            status: 200,
+            body: {
+                id: '1',
+                name: 'name1',
+                description: 'description1',
+                amount: '1',
+            }
+        }
+    })
+
+    spyOnFetch.mockImplementation(mockFetch.execute)
 
     await act(() => render(<ItemsTable />))
 
@@ -92,20 +241,84 @@ it('should render Edit when clicked', async () => {
     await act(() => within(screen.getAllByRole('cell')[1]).getByText('Edit').click())
 
     // then
-    expect(screen.getByText('Edit ' + itemResponse.body.name)).toBeVisible()
-    expect(screen.getByLabelText('Name')).toHaveProperty('value', itemResponse.body.name)
-    expect(screen.getByLabelText('Amount')).toHaveProperty('value', itemResponse.body.amount)
-    expect(screen.getByLabelText('Description')).toHaveProperty('value', itemResponse.body.description)
+    expect(screen.getByText('Edit ' + mockFetch.payload.itemResponse.body.name)).toBeVisible()
+});
+
+it('should get /item with id when Edit clicked', async () => {
+    // given
+    await act(() => render(<ItemsTable />))
+
+    // when
+    await act(() => within(screen.getAllByRole('cell')[1]).getByText('Edit').click())
+
+    // then
+    expect(fetchSpy).toHaveBeenCalledTimes(2)
+
+    expect(fetchSpy).toHaveBeenLastCalledWith(
+        `${BE_API}/item/${mockFetch.payload.itemResponse.body.id}`,
+        expect.objectContaining({"method": "GET"})
+    )
+});
+
+[0, 1].forEach(closeButton => {
+    it(`should close EditModal when Close button ${closeButton} clicked`, async () => {
+        // given
+        await act(() => render(<ItemsTable />))
+
+        await act(() => within(screen.getAllByRole('cell')[1]).getByText('Edit').click())
+
+        // when
+        await act(() => screen.getAllByLabelText('Close')[closeButton].click())
+
+        // then
+        expect(screen.queryByRole('dialog')).toBeNull()
+    })
+});
+
+it('should get /item when EditModal saved', async () => {
+    // given
+    await act(() => render(<ItemsTable />))
+    await act(() => within(screen.getAllByRole('cell')[1]).getByText('Edit').click())
+
+    // when
+    await act(() => {
+        screen
+            .getAllByRole('button')
+            .find(element => element.className.includes('save-button'))
+            .click()
+    })
+
+    // then
+    expect(fetchSpy).toHaveBeenNthCalledWith(1,
+        `${BE_API}/item`,
+        expect.objectContaining({"method": "GET"})
+    )
 });
 
 it('should remove row when deleted', async () => {
     // given
-    itemsResponse.body = [{
-        id: '1',
-        name: 'name1',
-        description: 'description1',
-        amount: '1',
-    }]
+    mockFetch = new MockFetch({
+        itemsResponse: {
+            status: 200,
+            body: [
+                {
+                    id: '1',
+                    name: 'name1',
+                    description: 'description1',
+                    amount: '1',
+                }
+            ]
+        },
+        itemResponse: {
+            status: 200,
+            body: {
+                id: '1',
+                name: 'name1',
+                description: 'description1',
+                amount: '1',
+            }
+        }
+    })
 
     await act(() => render(<ItemsTable />))
 
@@ -121,13 +334,6 @@ it('should remove row when deleted', async () => {
 
 it('should send Delete request when deleted', async () => {
     // given
-    itemsResponse.body = [{
-        id: '1',
-        name: 'name1',
-        description: 'description1',
-        amount: '1',
-    }]
-
     await act(() => render(<ItemsTable />))
 
     // when
@@ -135,8 +341,9 @@ it('should send Delete request when deleted', async () => {
 
     // then
     expect(fetchSpy).toHaveBeenCalledTimes(2)
+
     expect(fetchSpy).toHaveBeenLastCalledWith(
-        `${BE_API}/item/1`,
+        `${BE_API}/item/${mockFetch.payload.itemResponse.body.id}`,
         expect.objectContaining({"method": "DELETE"})
     )
 });

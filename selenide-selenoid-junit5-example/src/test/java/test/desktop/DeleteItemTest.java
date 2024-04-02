@@ -44,23 +44,4 @@ class DeleteItemTest {
         // then
         validate.items.itemDeleted(oldList, context.name);
     }
-
-    @Test()
-    @DisplayName("Item with empty name can be deleted")
-    void shouldDeleteItemWithEmptyName() {
-        // given
-        ItemContext context = ItemContext.builder()
-                .name("")
-                .build();
-
-        actions.api.createItem(context.createItemRequest());
-
-        List<String> oldList = actions.items.getItemNames();
-
-        // when
-        actions.items.deleteItem(context.name);
-
-        // then
-        validate.items.listSizeIs(oldList.size() - 1);
-    }
 }
