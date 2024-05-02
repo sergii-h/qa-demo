@@ -24,7 +24,7 @@ consists of 4 fields:
 ### demo-interface
     Frontend React application exposing a web interface to list, create, update and remove items 
     How to run:
-    go to "demo-interface" folder
+    open "demo-interface" folder
     run "npm install"
     run "npm start"
 
@@ -42,5 +42,5 @@ consists of 4 fields:
 
 ### integration
 #### demo-service/src/test/java/com/example/item/integration
-    - go to "demo-service" folder
+    - open "demo-service" folder
     - mvn clean test
