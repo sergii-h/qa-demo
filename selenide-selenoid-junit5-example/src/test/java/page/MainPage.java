@@ -9,6 +9,7 @@ import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 
 public class MainPage {
+    public SelenideElement formLocator = $("#root");
     public SelenideElement createItemButton = $(".add-item-button");
     public ElementsCollection itemNames = $$(".p-datatable-tbody > tr:not(.p-datatable-emptymessage) > td:first-child");
 
@@ -30,6 +31,7 @@ public class MainPage {
 
     private SelenideElement getItemElement(String itemName, String buttonLocator) {
         return $$(".p-datatable-tbody > tr:not(.p-datatable-emptymessage)")
+                .asFixedIterable()
                 .stream()
                 .filter(item -> item.$("td").getText().equals(itemName))
                 .map(item -> item.$("td " + buttonLocator))

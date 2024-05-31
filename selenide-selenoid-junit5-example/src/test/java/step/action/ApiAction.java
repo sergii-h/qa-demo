@@ -8,11 +8,15 @@ import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
+import page.MainPage;
 
+import static com.codeborne.selenide.Condition.visible;
 import static io.restassured.RestAssured.given;
 import static test.TestBase.ENV;
 
 public class ApiAction {
+    MainPage mainPage = new MainPage();
+
     RequestSpecification requestSpec = given()
             .baseUri(ENV.beUrl)
             .contentType(ContentType.JSON)
@@ -21,6 +25,8 @@ public class ApiAction {
     @Step("Create item by api")
     public void createItem(ItemRequest itemBody) {
        requestSpec.body(itemBody).post("/item");
+
        Selenide.refresh();
+       mainPage.formLocator.shouldBe(visible);
     }
 }

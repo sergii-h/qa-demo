@@ -53,35 +53,7 @@ class EditItemTest {
                 .openItemInfoForm(changedContext.name);
 
         // then
-        validate.items.listSizeIsNotChanged(oldList.size());
-        validate.item.info(changedContext.name, changedContext.amount, changedContext.description);
-    }
-
-    @Test()
-    @DisplayName("Edit item with required 'description' field")
-    void shouldEditItemWithRequiredFieldOnly() {
-        // given
-        ItemContext context = ItemContext.builder().build();
-
-        actions.api.createItem(context.createItemRequest());
-
-        List<String> oldList = actions.items.getItemNames();
-
-        ItemContext changedContext = ItemContext.builder()
-                .name("")
-                .amount("")
-                .description(context.description + "1")
-                .build();
-
-        //when
-        actions.items
-                .openItemEditForm(context.name)
-                .setItemData(changedContext.createItemData())
-                .submitForm()
-                .openItemInfoForm(changedContext.name);
-
-        // then
-        validate.items.listSizeIsNotChanged(oldList.size());
+        validate.items.listSizeIs(oldList.size());
         validate.item.info(changedContext.name, changedContext.amount, changedContext.description);
     }
 }

@@ -27,7 +27,7 @@
     "cypress:run:local": "CYPRESS_BASE_URL=http://localhost:3000 start-server-and-test start:local:server 3000 'cypress:run'",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test": "react-scripts test --watchAll=false"
+    "test": "react-scripts test --watchAll=false --detectOpenHandles"
   },
   "eslintConfig": {
     "extends": [
@@ -52,6 +52,7 @@
     "@babel/preset-env": "^7.22.20",
     "@babel/preset-react": "^7.22.15",
     "@babel/preset-typescript": "^7.23.0",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@storybook/addon-essentials": "^7.4.5",
     "@storybook/addon-interactions": "^7.4.5",
     "@storybook/addon-links": "^7.4.5",
