@@ -2,7 +2,6 @@ package step.action;
 
 
 import com.codeborne.selenide.Selenide;
-import data.Item;
 import io.qameta.allure.Step;
 import page.CreateItemForm;
 import page.EditItemForm;
@@ -29,22 +28,12 @@ public class ItemsAction {
         return new CreateItemAction();
     }
 
-    @Step("Create item '{item}'")
-    public ItemsAction createItem(Item item) {
-        openCreateItemForm()
-                .setItemData(item)
-                .submitForm();
-        return this;
-    }
-
     @Step("Open 'Item info' form for '{itemName}' item")
-    public ItemInfoAction openItemInfoForm(String itemName) {
+    public void openItemInfoForm(String itemName) {
         SelenideUtil.waitForEquals(mainPage.itemInfoButton(itemName)::getLocation);
 
         mainPage.itemInfoButton(itemName).click();
         itemInfoForm.title.shouldBe(visible);
-
-        return new ItemInfoAction();
     }
 
     @Step("Open 'Item edit' form for '{itemName}' item")
