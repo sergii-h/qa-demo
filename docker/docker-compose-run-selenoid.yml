@@ -1,31 +1,6 @@
 version: '3.7'
 
 services:
-  qa-demo-service:
-    container_name: qa-demo-service
-    build:
-      context: ../
-      dockerfile: docker/Dockerfile-demo-service
-    ports:
-      - "8080:8080"
-
-  qa-demo-interface:
-    platform: linux/amd64
-    container_name: qa-demo-interface
-    build:
-      args:
-        BE_API_ARG: http://host.docker.internal:8080/v1
-      context: ../
-      dockerfile: docker/Dockerfile-demo-interface
-    ports:
-      - "3000:3000"
-
-  qa-demo-selenide-selenoid-junit5-tests:
-    container_name: qa-demo-selenide-selenoid-junit5-tests
-    build:
-      context: ../
-      dockerfile: docker/Dockerfile-selenide-selenoid-junit5-tests
-
   qa-demo-selenoid:
     container_name: qa-demo-selenoid
     network_mode: bridge
