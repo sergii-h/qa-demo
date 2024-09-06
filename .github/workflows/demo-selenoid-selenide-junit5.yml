@@ -35,7 +35,7 @@ jobs:
       run: docker-compose -f docker/docker-compose-run-selenoid.yml up -d
 
     - name: Run e2e tests
-      run: mvn -Dtest.env=docker test
+      run: mvn -Dtest.env=local test
 
     - name: Load test report history
       uses: actions/checkout@v3
