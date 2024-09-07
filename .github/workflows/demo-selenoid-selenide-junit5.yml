@@ -29,10 +29,10 @@ jobs:
         cache: maven
 
     - name: Start application under test
-      run: docker-compose -f docker/docker-compose-run-application.yml up -d
+      run: docker compose -f docker/docker-compose-run-application.yml up -d
 
     - name: Start Selenoid
-      run: docker-compose -f docker/docker-compose-run-selenoid.yml up -d
+      run: docker compose -f docker/docker-compose-run-selenoid.yml up -d
 
     - name: Run e2e tests
       run: mvn -Dtest.env=local test
