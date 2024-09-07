@@ -11,3 +11,7 @@ selenide-selenoid-junit5-example/selenoid/
 selenide-selenoid-junit5-example/cm
 /demo-interface/src/stories/
 /allure-results/
+.nojekyll
+.vscode
+last-history
+1
