@@ -23,9 +23,12 @@ jobs:
     - name: Start application under test
       run: docker compose -f docker/docker-compose-run-application.yml up -d
 
-    - name: Start Selenoid
-      run: docker compose -f docker/docker-compose-run-selenoid.yml up -d
+    - name: Pull chrome image
+      run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
 
+    - name: Start Selenoid
+      run: docker compose -f docker/docker-compose-run-selenoid.yml up -d qa-demo-selenoid
+      
     - name: Run e2e tests
       run: docker ps -a && mvn -Dtest.env=local test
 
