@@ -1,6 +1,7 @@
 services:
   chrome:
     image: selenoid/chrome:109.0
+    
   qa-demo-selenoid:
     container_name: qa-demo-selenoid
     network_mode: bridge
