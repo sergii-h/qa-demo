@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   qa-demo-selenide-junit5-tests:
     network_mode: "host"

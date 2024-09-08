@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   qa-demo-service:
     container_name: qa-demo-service
