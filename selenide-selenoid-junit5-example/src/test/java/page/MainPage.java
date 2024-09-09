@@ -3,6 +3,8 @@ package page;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 
+import util.SelenideUtil;
+
 import java.util.List;
 
 import static com.codeborne.selenide.Selenide.$;
@@ -10,6 +12,7 @@ import static com.codeborne.selenide.Selenide.$$;
 
 public class MainPage {
     public SelenideElement formLocator = $("#root");
+    public SelenideElement itemsLocator = $(".p-datatable-table");
     public SelenideElement createItemButton = $(".add-item-button");
     public ElementsCollection itemNames = $$(".p-datatable-tbody > tr:not(.p-datatable-emptymessage) > td:first-child");
 
@@ -26,6 +29,7 @@ public class MainPage {
     }
 
     public List<String> getItemNames() {
+        SelenideUtil.waitForEquals(itemsLocator::getLocation);
         return itemNames.texts();
     }
 

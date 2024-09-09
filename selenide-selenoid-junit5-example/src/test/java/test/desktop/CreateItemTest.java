@@ -51,7 +51,7 @@ class CreateItemTest {
     @Test
     void shouldCreateItemWithRequiredFieldOnly() {
         List<String> oldList = actions.items.getItemNames();
-
+        
         ItemContext context = ItemContext.builder()
                 .name("")
                 .amount("")

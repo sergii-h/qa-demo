@@ -1,6 +1,6 @@
 services:
   chrome:
-    image: selenoid/chrome:109.0
+    image: selenoid/chrome:127.0
     
   qa-demo-selenoid:
     container_name: qa-demo-selenoid

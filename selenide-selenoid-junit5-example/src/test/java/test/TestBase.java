@@ -154,7 +154,7 @@ public abstract class TestBase implements TestWatcher, BeforeAllCallback, Before
         @Override
         public void beforeEach(ExtensionContext context) {
             if (ENV.isLocal) {
-                System.setProperty("chromeoptions.args", "--remote-allow-origins=*");
+                System.setProperty("chromeoptions.args", "--remote-allow-origins=*, --disable-search-engine-choice-screen");
             } else {
                 RemoteWebDriver webDriver = new ChromeRemoteProvider("window-size=1920,1080")
                         .createDriver(new DesiredCapabilities());
