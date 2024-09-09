@@ -28,7 +28,8 @@ public class ChromeRemoteProvider implements WebDriverProvider {
                 "--disable-dev-shm-usage",
                 "--disable-notifications",
                 "--allow-silent-push",
-                "--remote-allow-origins=*"
+                "--remote-allow-origins=*",
+                "--disable-search-engine-choice-screen"
         );
 
         options.addArguments(arguments);
