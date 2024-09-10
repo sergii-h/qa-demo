@@ -19,7 +19,7 @@ services:
       - qa-demo-network
     build:
       args:
-        BE_API_ARG: http://host.docker.internal:8080/v1
+        BE_API_ARG: http://qa-demo-interface:8080/v1
       context: ../
       dockerfile: docker/Dockerfile-demo-interface
     ports:
