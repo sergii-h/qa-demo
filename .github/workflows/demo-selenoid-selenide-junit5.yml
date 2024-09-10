@@ -20,6 +20,9 @@ jobs:
         distribution: adopt
         cache: maven
 
+    - name: Create network
+      run: docker network create qa-demo-network
+
     - name: Start application under test
       run: docker compose -f docker/docker-compose-run-application.yml up -d
 
