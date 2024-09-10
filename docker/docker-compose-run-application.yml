@@ -1,6 +1,12 @@
+networks:
+  qa-demo-network:
+    external: true
+
 services:
   qa-demo-service:
     container_name: qa-demo-service
+    networks:
+      - qa-demo-network
     build:
       context: ../
       dockerfile: docker/Dockerfile-demo-service
@@ -9,6 +15,8 @@ services:
 
   qa-demo-interface:
     container_name: qa-demo-interface
+    networks:
+      - qa-demo-network
     build:
       args:
         BE_API_ARG: http://host.docker.internal:8080/v1
