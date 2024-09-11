@@ -42,7 +42,7 @@ jobs:
       with:
         source-files: 'selenide-selenoid-junit5-example/target/allure-results'
         destination-username: 'sgoldys'
-        destination-repository: 'sgoldys.github.io/github-pages-allure-selenide'
+        destination-repository: 'github-pages-allure-selenide'
         destination-directory: 'allure-results'
         commit-email: '32680292+sgoldys@users.noreply.github.com'
     # - name: Load test report history
