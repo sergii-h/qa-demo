@@ -20,27 +20,30 @@ jobs:
         distribution: adopt
         cache: maven
 
-    - name: Create network
-      run: docker network create qa-demo-network
+    # - name: Create network
+    #   run: docker network create qa-demo-network
 
-    - name: Start application under test
-      run: docker compose -f docker/docker-compose-run-application.yml up -d
+    # - name: Start application under test
+    #   run: docker compose -f docker/docker-compose-run-application.yml up -d
 
-    - name: Pull chrome image
-      run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
+    # - name: Pull chrome image
+    #   run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
 
-    - name: Start Selenoid
-      run: docker compose -f docker/docker-compose-run-selenoid.yml up -d qa-demo-selenoid
+    # - name: Start Selenoid
+    #   run: docker compose -f docker/docker-compose-run-selenoid.yml up -d qa-demo-selenoid
       
-    - name: Run e2e tests
-      run: mvn -Dtest.env=remote test
+    # - name: Run e2e tests
+    #   run: mvn -Dtest.env=remote test
+
+    - name: Setup credentials to access private repositories
+      run: git config --global url.https://${{ secrets.API_TOKEN_GITHUB }}@github.com/.insteadOf https://github.com/
 
     - name: Push generated allure-results to another repository
       uses: nkoppel/push-files-to-another-repository@v1.1.3
       env:
         API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
       with:
-        source-files: 'selenide-selenoid-junit5-example/target/allure-results'
+        source-files: 'selenide-selenoid-junit5-example/browsers.json'
         destination-username: 'sgoldys'
         destination-repository: 'github-pages-allure-selenide'
         destination-directory: 'allure-results'
