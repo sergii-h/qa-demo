@@ -35,23 +35,18 @@ jobs:
     # - name: Run e2e tests
     #   run: mvn -Dtest.env=remote test
 
-    - name: set username
-      run: COMMIT_USERNAME=sgoldys
-
-    - name: set username
-      run: echo "COMMIT_USERNAME=sgoldys" >> "$GITHUB_ENV"
-
-    - name: Push generated allure-results to another repository
-      uses: nkoppel/push-files-to-another-repository@v1.1.3
+    - name: Pushes to another repository
+      uses: cpina/github-action-push-to-another-repository@main
       env:
+        # SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
         API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
       with:
-        source-files: 'selenide-selenoid-junit5-example/browsers.json'
-        destination-username: 'sgoldys'
-        destination-repository: 'github-pages-allure-selenide'
-        destination-directory: 'allure-results'
-        commit-email: '32680292+sgoldys@users.noreply.github.com'
-        commit-username: 'sgoldys'
+        source-directory: 'docker'
+        destination-github-username: 'sgoldys'
+        destination-repository-name: 'github-pages-allure-selenide'
+        user-email: 32680292+sgoldys@users.noreply.github.com
+        target-branch: master
+
     # - name: Load test report history
     #   uses: actions/checkout@v3
     #   if: always()
