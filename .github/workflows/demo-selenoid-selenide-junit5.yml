@@ -54,6 +54,7 @@ jobs:
         destination-repository: 'github-pages-allure-selenide'
         destination-directory: 'allure-results'
         commit-email: '32680292+sgoldys@users.noreply.github.com'
+        commit-username: 'sgoldys'
     # - name: Load test report history
     #   uses: actions/checkout@v3
     #   if: always()
