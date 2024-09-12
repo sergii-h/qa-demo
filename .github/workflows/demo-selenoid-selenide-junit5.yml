@@ -39,10 +39,7 @@ jobs:
       run: COMMIT_USERNAME=sgoldys
 
     - name: set username
-      run: echo "INPUT_COMMIT-USERNAME=sgoldys" >> "$GITHUB_ENV"
-
-    - name: echo
-      run: echo $INPUT_COMMIT-USERNAME
+      run: echo "COMMIT_USERNAME=sgoldys" >> "$GITHUB_ENV"
 
     - name: Push generated allure-results to another repository
       uses: nkoppel/push-files-to-another-repository@v1.1.3
