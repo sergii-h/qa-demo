@@ -35,11 +35,14 @@ jobs:
     # - name: Run e2e tests
     #   run: mvn -Dtest.env=remote test
 
-    - name: echo
-      run: echo $COMMIT_EMAIL $COMMIT_USERNAME $GITHUB_REPOSITORY $DESTINATION_USERNAME
-
     - name: set username
       run: COMMIT_USERNAME=sgoldys
+
+    - name: set username
+      run: echo "COMMIT_USERNAME=sgoldys" >> "$GITHUB_ENV"
+
+    - name: echo
+      run: echo $COMMIT_USERNAME
 
     - name: Push generated allure-results to another repository
       uses: nkoppel/push-files-to-another-repository@v1.1.3
