@@ -35,11 +35,8 @@ jobs:
     # - name: Run e2e tests
     #   run: mvn -Dtest.env=remote test
 
-    - name: git user.name
-      run: git config --global user.name
-
     - name: git clone
-      run: git clone "https://github.com/sgoldys/qa-demo.git" repo1
+      run: echo $COMMIT_EMAIL $COMMIT_USERNAME $GITHUB_REPOSITORY
 
     - name: Push generated allure-results to another repository
       uses: nkoppel/push-files-to-another-repository@v1.1.3
