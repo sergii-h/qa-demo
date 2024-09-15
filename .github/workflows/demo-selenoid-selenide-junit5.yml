@@ -41,32 +41,9 @@ jobs:
         # SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
         API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
       with:
-        source-directory: 'docker'
+        source-directory: 'selenide-selenoid-junit5-example/target/allure-results'
         destination-github-username: 'sgoldys'
         destination-repository-name: 'github-pages-allure-selenide'
         user-email: 32680292+sgoldys@users.noreply.github.com
         target-branch: master
-
-    # - name: Load test report history
-    #   uses: actions/checkout@v3
-    #   if: always()
-    #   continue-on-error: true
-    #   with:
-    #     ref: master
-    #     path: gh-pages
-
-    # - name: Build test report
-    #   uses: simple-elf/allure-report-action@v1.7
-    #   if: always()
-    #   with:
-    #     gh_pages: gh-pages
-    #     allure_history: allure-history
-    #     allure_results: build/allure-results
-
-    # - name: Publish test report
-    #   uses: peaceiris/actions-gh-pages@v3
-    #   if: always()
-    #   with:
-    #     github_token: ${{ secrets.GITHUB_TOKEN }}
-    #     publish_branch: master
-    #     publish_dir: allure-history
+        target-directory: allure-results
