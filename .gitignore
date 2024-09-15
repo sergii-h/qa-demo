@@ -5,7 +5,6 @@ builds
 target
 node_modules
 package-lock.json
-
 selenide-selenoid-junit5-example/build
 selenide-selenoid-junit5-example/selenoid/
 selenide-selenoid-junit5-example/cm
@@ -14,6 +13,4 @@ selenide-selenoid-junit5-example/allure-results/
 /allure-results/
 .nojekyll
 .vscode
-last-history
-1
-index.html
+
