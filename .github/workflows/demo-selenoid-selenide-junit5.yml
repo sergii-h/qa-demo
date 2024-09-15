@@ -20,20 +20,20 @@ jobs:
         distribution: adopt
         cache: maven
 
-    # - name: Create network
-    #   run: docker network create qa-demo-network
+    - name: Create network
+      run: docker network create qa-demo-network
 
-    # - name: Start application under test
-    #   run: docker compose -f docker/docker-compose-run-application.yml up -d
+    - name: Start application under test
+      run: docker compose -f docker/docker-compose-run-application.yml up -d
 
-    # - name: Pull chrome image
-    #   run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
+    - name: Pull chrome image
+      run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
 
-    # - name: Start Selenoid
-    #   run: docker compose -f docker/docker-compose-run-selenoid.yml up -d qa-demo-selenoid
+    - name: Start Selenoid
+      run: docker compose -f docker/docker-compose-run-selenoid.yml up -d qa-demo-selenoid
       
-    # - name: Run e2e tests
-    #   run: mvn -Dtest.env=remote test
+    - name: Run e2e tests
+      run: mvn -Dtest.env=remote test
 
     - name: Pushes to another repository
       uses: cpina/github-action-push-to-another-repository@main
