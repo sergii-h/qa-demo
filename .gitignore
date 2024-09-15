@@ -11,6 +11,4 @@ selenide-selenoid-junit5-example/cm
 selenide-selenoid-junit5-example/allure-results/
 /demo-interface/src/stories/
 /allure-results/
-.nojekyll
 .vscode
-
