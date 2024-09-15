@@ -1,4 +1,4 @@
-name: demo-interface CI (node.js)
+name: Run frontend tests
 
 on:
   push:

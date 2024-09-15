@@ -1,4 +1,4 @@
-name: demo-service CI (maven)
+name: Run backend tests
 
 on:
   push:

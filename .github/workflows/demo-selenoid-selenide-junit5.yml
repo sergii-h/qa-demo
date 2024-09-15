@@ -1,4 +1,4 @@
-name: demo-selenoid-junit5 CI (maven)
+name: Run e2e tests
 
 on:
   push:
@@ -35,7 +35,7 @@ jobs:
     - name: Run e2e tests
       run: mvn -Dtest.env=remote test
 
-    - name: Pushes to another repository
+    - name: Push allure report
       uses: cpina/github-action-push-to-another-repository@main
       env:
         API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
