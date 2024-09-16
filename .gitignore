@@ -12,3 +12,4 @@ selenide-selenoid-junit5-example/allure-results/
 /demo-interface/src/stories/
 /allure-results/
 .vscode
+/selenide-selenoid-junit5-example/src/test/resources/test.local.properties
