@@ -50,4 +50,4 @@ jobs:
     - name: Publish allure report
       run: gh workflow run allure-report.yml --ref master --repo sgoldys/github-pages-allure-selenide
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
