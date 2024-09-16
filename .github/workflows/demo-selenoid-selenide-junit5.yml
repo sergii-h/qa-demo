@@ -47,6 +47,6 @@ jobs:
         target-branch: gh-pages
         target-directory: allure-results
     
-  build-report:
-    uses: sgoldys/github-pages-allure-selenide/.github/workflows/allure-report.yml@master
-    secrets: inherit
+    - name: Publish allure report
+      run: gh workflow run allure-report.yml --ref master --repo sgoldys/github-pages-allure-selenide
+
