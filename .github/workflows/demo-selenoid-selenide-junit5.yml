@@ -49,3 +49,4 @@ jobs:
     
   build-report:
     uses: sgoldys/github-pages-allure-selenide/.github/workflows/allure-report.yml@master
+    secrets: inherit
