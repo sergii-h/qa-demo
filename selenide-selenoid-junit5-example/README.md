@@ -4,22 +4,25 @@
 - selenoid-ui start with port: `./cm selenoid-ui start --port 8081`
 
 ###### Tests
-- `mvn clean test`
+##### Configuration
+`.src/test/java/resources/test.properties`
 
-Options:
-- `test.env` env alias, 'local' by default (for more info see data.Environment class)
-- `test.parallel` run tests in parallel, true by default
-- `test.enableVNC` run tests with video recordings, false by default (works only with Selenoid)
-- `test.tags` include tests to run using junit5, no filter by default
-- `test.ignore.tags` exclude tests from run using junit5, no filter by default 
-- `test.include` include tests to run using file paths, no filter by default
-  `test.exclude` exclude tests from run using file paths, no filter by default
+Test configuration from test.properties can be overridden by sending properties from command line.
 
-Example:
-- `mvn -Dtest.parallel=false -Dtest.enableVNC=true -Dtest.include="**/d*/C*.java" clean test`
+It is recommended to use custom properties file, for example `-Dproperties.file.name=test.local.properties`
 
-###### Run/Debug tests with IDE
-Extend JUnit template configuration VM options with `-Dtest.env=local` tests will be started using local chrome browser without Selenoid
+test.env values:
+- local - tests will be started in local chrome browser without Selenoid
+- docker - tests will be started in docker containers managed by Selenoid
+- remote - to run tests with GitHub actions
+
+##### Run with maven
+- with custom properties file `mvn -Dproperties.file.name=test.local.properties clean test`
+- with command line properties `mvn -Dtest.env=remote -Dtest.parallel=false -Dtest.include="**/d*/P*.java" clean test`
+
+##### Run/Debug with IDE
+- Extend JUnit template configuration VM options with `-Dproperties.file.name=test.local.properties`
+- Set `test.env=local` in `test.local.properties` file
 
 ###### Run tests with selenoid in dockers
 - start application in background `docker-compose -f docker/docker-compose-run-application.yml up -d`

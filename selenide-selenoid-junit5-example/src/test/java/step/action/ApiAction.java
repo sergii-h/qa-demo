@@ -2,6 +2,7 @@ package step.action;
 
 
 import com.codeborne.selenide.Selenide;
+import config.PropertyReader;
 import data.ItemRequest;
 import io.qameta.allure.Step;
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -12,13 +13,15 @@ import page.MainPage;
 
 import static com.codeborne.selenide.Condition.visible;
 import static io.restassured.RestAssured.given;
-import static test.TestBase.ENV;
 
 public class ApiAction {
+    private static final PropertyReader PROPERTIES_READER = PropertyReader.getInstance();
+    private static final String TEST_ENV = PROPERTIES_READER.getProperty("test.env");
+
     MainPage mainPage = new MainPage();
 
     RequestSpecification requestSpec = given()
-            .baseUri(ENV.beUrl)
+            .baseUri(PROPERTIES_READER.getProperty(TEST_ENV + ".test.be.url"))
             .contentType(ContentType.JSON)
             .filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
 

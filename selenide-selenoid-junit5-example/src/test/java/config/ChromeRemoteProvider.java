@@ -1,4 +1,4 @@
-package browserprovider;
+package config;
 
 import com.codeborne.selenide.WebDriverProvider;
 import org.openqa.selenium.Capabilities;
@@ -9,8 +9,6 @@ import javax.annotation.Nonnull;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static test.TestBase.ENV;
-
 public class ChromeRemoteProvider implements WebDriverProvider {
     private final String[] arguments;
 
@@ -19,11 +17,10 @@ public class ChromeRemoteProvider implements WebDriverProvider {
     }
 
     @Nonnull
-    @Override
     public RemoteWebDriver createDriver(@Nonnull Capabilities capabilities) {
         ChromeOptions options = new ChromeOptions();
+
         options.addArguments(
-                "--headless",
                 "--no-sandbox",
                 "--disable-dev-shm-usage",
                 "--disable-notifications",
@@ -33,12 +30,14 @@ public class ChromeRemoteProvider implements WebDriverProvider {
         );
 
         options.addArguments(arguments);
-        options = options.merge(capabilities);
+        options.merge(capabilities);
+
+        String remoteWebdriverUrl = PropertyReader.getInstance().getProperty("test.remote.webdriver.url");
 
         try {
-            return new RemoteWebDriver(new URL(ENV.remoteWebDriverUrl), options);
+            return new RemoteWebDriver(new URL(remoteWebdriverUrl), options);
         } catch (final MalformedURLException e) {
-            throw new InternalError("Unable to create driver", e);
+            throw new InternalError("Unable to create driver. MalformedURLException", e);
         }
     }
 }
