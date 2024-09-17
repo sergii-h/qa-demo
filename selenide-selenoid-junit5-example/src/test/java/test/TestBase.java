@@ -102,10 +102,6 @@ public abstract class TestBase {
         } catch (IOException e) {
             throw new InternalError(e);
         }
-
-        if (WebDriverRunner.hasWebDriverStarted()) {
-            WebDriverRunner.closeWindow();
-        }
     }
 
     public abstract void setUpByPlatform();
