@@ -32,7 +32,7 @@ class CreateItemTest extends DesktopTest {
                 .setItemData(context.createItemData())
                 .submitForm();
 
-        validate.items.itemCreated(oldList, context.name);
+        validate.items.itemCreated(oldList, "wrong name");
     }
 
     @DisplayName("Create item with required 'description' field")
