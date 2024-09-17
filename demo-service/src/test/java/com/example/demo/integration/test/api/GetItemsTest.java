@@ -66,8 +66,8 @@ class GetItemsTest {
                 .description("description2")
                 .build();
 
-        context1.setId(requestSpec.body(context1.createItemRequest()).post("/item").jsonPath().get("id"));
-        context2.setId(requestSpec.body(context2.createItemRequest()).post("/item").jsonPath().get("id"));
+        context1.setResponse(requestSpec.body(context1.createItemRequest()).post("/item"));
+        context2.setResponse(requestSpec.body(context2.createItemRequest()).post("/item"));
 
         // when
         Response getResponse = requestSpec.get("/item");
@@ -94,7 +94,7 @@ class GetItemsTest {
                 .body(context.createItemRequest())
                 .post("/item");
 
-        updatedContext.setId(postResponse.jsonPath().get("id"));
+        updatedContext.setResponse(postResponse);
 
         // and
        requestSpec
@@ -120,7 +120,7 @@ class GetItemsTest {
                 .body(context.createItemRequest())
                 .post("/item");
 
-        context.setId(postResponse.jsonPath().get("id"));
+        context.setResponse(postResponse);
 
         // and
         requestSpec.delete("/item/" + context.getId());
