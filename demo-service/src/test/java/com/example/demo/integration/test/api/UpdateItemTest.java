@@ -52,7 +52,7 @@ class UpdateItemTest extends TestBase {
                 .body(context.createItemRequest())
                 .post("/item");
 
-        updatedContext.setId(postResponse.jsonPath().get("id"));
+        updatedContext.setResponse(postResponse);
 
         // when
         Response putResponse = requestSpec

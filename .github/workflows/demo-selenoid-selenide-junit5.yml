@@ -1,0 +1,53 @@
+name: Run e2e tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '18'
+        distribution: adopt
+        cache: maven
+
+    - name: Create network
+      run: docker network create qa-demo-network
+
+    - name: Start application under test
+      run: docker compose -f docker/docker-compose-run-application.yml up -d
+
+    - name: Pull chrome image
+      run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
+
+    - name: Start Selenoid
+      run: docker compose -f docker/docker-compose-run-selenoid.yml up -d qa-demo-selenoid
+      
+    - name: Run e2e tests
+      run: mvn -Dtest.env=remote test
+
+    - name: Push allure report
+      uses: cpina/github-action-push-to-another-repository@main
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+      with:
+        source-directory: 'selenide-selenoid-junit5-example/target/allure-results'
+        destination-github-username: 'sgoldys'
+        destination-repository-name: 'github-pages-allure-selenide'
+        user-email: 32680292+sgoldys@users.noreply.github.com
+        target-branch: gh-pages
+        target-directory: allure-results
+    
+    - name: Publish allure report
+      run: gh workflow run allure-report.yml --ref master --repo sgoldys/github-pages-allure-selenide
+      env:
+        GH_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}

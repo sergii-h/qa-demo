@@ -25,7 +25,8 @@ class GetItemTest extends TestBase {
         Response postResponse = requestSpec
                 .body(context.createItemRequest())
                 .post("/item");
-        context.setId(postResponse.jsonPath().get("id"));
+
+        context.setResponse(postResponse);
 
         // when
         Response getResponse = requestSpec.get("/item/" + context.getId());
@@ -56,7 +57,7 @@ class GetItemTest extends TestBase {
                 .body(context.createItemRequest())
                 .post("/item");
 
-        updatedContext.setId(postResponse.jsonPath().get("id"));
+        updatedContext.setResponse(postResponse);
 
         // and
         requestSpec
@@ -85,8 +86,8 @@ class GetItemTest extends TestBase {
                 .body(context.createItemRequest())
                 .post("/item");
 
-        context.setId(postResponse.jsonPath().get("id"));
-
+        context.setResponse(postResponse);
+        
         // and
         requestSpec.delete("/item/" + context.getId());
 
