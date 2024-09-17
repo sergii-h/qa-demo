@@ -91,14 +91,10 @@ public abstract class TestBase {
         }
 
         Properties prop = new Properties();
-
         prop.setProperty("browser", Optional.ofNullable(browserInfo).orElse(EMPTY));
-        prop.setProperty("env", TEST_ENV);
-
-        String envFilePath = System.getProperty("allure.results.directory") + "/environment.properties";
 
         try {
-            prop.store(new FileOutputStream(envFilePath), null);
+            prop.store(new FileOutputStream(System.getProperty("allure.results.directory") + "/environment.properties"), null);
         } catch (IOException e) {
             throw new InternalError(e);
         }

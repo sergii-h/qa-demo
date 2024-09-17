@@ -20,7 +20,7 @@ class DeleteItemTest extends TestBase {
                 .body(context.createItemRequest())
                 .post("/item");
 
-        context.setId(postResponse.jsonPath().get("id"));
+        context.setResponse(postResponse);
 
         // when
         Response deleteResponse = requestSpec.delete("/item/" + context.getId());
