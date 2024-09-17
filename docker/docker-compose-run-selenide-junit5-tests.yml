@@ -1,0 +1,8 @@
+services:
+  qa-demo-selenide-junit5-tests:
+    network_mode: "host"
+    container_name: qa-demo-selenide-junit5-tests
+    build:
+      context: ../
+      dockerfile: Dockerfile-selenide-junit5-tests
+    command: mvn -Dtest.env=docker test

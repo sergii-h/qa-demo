@@ -30,7 +30,7 @@ public class ItemsAction {
 
     @Step("Open 'Item info' form for '{itemName}' item")
     public void openItemInfoForm(String itemName) {
-        SelenideUtil.waitForEquals(mainPage.itemInfoButton(itemName)::getLocation);
+        waitForItem(itemName);
 
         mainPage.itemInfoButton(itemName).click();
         itemInfoForm.title.shouldBe(visible);
@@ -38,6 +38,8 @@ public class ItemsAction {
 
     @Step("Open 'Item edit' form for '{itemName}' item")
     public EditItemAction openItemEditForm(String itemName) {
+        waitForItem(itemName);
+
         mainPage.itemEditButton(itemName).click();
         itemEditForm.saveButton.shouldBe(visible);
 
@@ -54,8 +56,20 @@ public class ItemsAction {
         with().pollInSameThread().await().until(() -> mainPage.getItemNames().size() != oldList.size());
     }
 
-    @Step("Get item names")
+    @Step("Get item list")
     public List<String> getItemNames() {
         return mainPage.getItemNames();
+    }
+
+    private void waitForItem(String itemName) {
+        with().pollInSameThread()
+        .await()
+        .ignoreException(InternalError.class)
+        .until(() -> {
+            Selenide.refresh();
+            return mainPage.itemInfoButton(itemName).isDisplayed();
+        });
+        
+        SelenideUtil.waitForEquals(mainPage.itemInfoButton(itemName)::getLocation);
     }
 }

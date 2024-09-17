@@ -39,7 +39,7 @@ public class Environment {
             case "remote" -> hiddenBuilder()
                     .id(envName)
                     .isLocal(false)
-                    .url("http://host.docker.internal:3000")
+                    .url("http://qa-demo-interface:3000")
                     .beUrl("http://localhost:8080/v1")
                     .remoteWebDriverUrl("http://localhost:4444/wd/hub");
 

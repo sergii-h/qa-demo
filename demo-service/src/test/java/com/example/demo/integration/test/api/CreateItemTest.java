@@ -51,7 +51,8 @@ class CreateItemTest extends TestBase {
         Response postResponse = requestSpec
                 .body(context.createItemRequest())
                 .post("/item");
-        context.setId(postResponse.jsonPath().get("id"));
+                
+        context.setResponse(postResponse);
 
         // and
         Response getResponse = requestSpec.get("/item/" + context.getId());

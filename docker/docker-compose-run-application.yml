@@ -1,0 +1,26 @@
+networks:
+  qa-demo-network:
+    external: true
+
+services:
+  qa-demo-service:
+    container_name: qa-demo-service
+    networks:
+      - qa-demo-network
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile-demo-service
+    ports:
+      - "8080:8080"
+
+  qa-demo-interface:
+    container_name: qa-demo-interface
+    networks:
+      - qa-demo-network
+    build:
+      args:
+        BE_API_ARG: http://qa-demo-service:8080/v1
+      context: ../
+      dockerfile: docker/Dockerfile-demo-interface
+    ports:
+      - "3000:3000"

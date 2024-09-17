@@ -33,7 +33,7 @@ public final class SelenideUtil {
                     Object currentTry = toExecute.get();
                     return checkFor(() -> currentTry.equals(toExecute.get()), 1, 0.5);
                 },
-                5, 1
+                5, 0.5
         );
     }
 
