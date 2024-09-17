@@ -13,7 +13,7 @@ public abstract class MobileTest extends TestBase {
     }
 
     @Override
-    public void setUp() {
+    public void setUpByPlatform() {
         PropertyReader propertiesReader = PropertyReader.getInstance();
         Configuration.browserSize = format("%sx%s", propertiesReader.getProperty("test.mobile.browser-width"),
                 propertiesReader.getProperty("test.mobile.browser-height"));

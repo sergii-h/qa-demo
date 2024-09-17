@@ -21,15 +21,15 @@ test.env values:
 - with command line properties `mvn -Dtest.env=remote -Dtest.parallel=false -Dtest.include="**/d*/P*.java" clean test`
 
 ##### Run/Debug with IDE
-- Extend JUnit template configuration VM options with `-Dproperties.file.name=test.local.properties`
-- Set `test.env=local` in `test.local.properties` file
+- start application in background `docker-compose -f docker/docker-compose-run-application-local.yml up -d`
+- extend JUnit template configuration VM options with `-Dproperties.file.name=test.local.properties`
+- set `test.env=local` in `test.local.properties` file
 
 ###### Run tests with selenoid in dockers
 - start application in background `docker-compose -f docker/docker-compose-run-application.yml up -d`
 - start selenoid in background `docker-compose -f docker/docker-compose-run-selenoid.yml up -d`
 - run tests `docker-compose -f docker/docker-compose-run-selenide-junit5-tests.yml up`
 - open test-report (allure reporter should be installed first) `docker cp qa-demo-selenide-junit5-tests:target/allure-results allure-results && allure serve allure-results`
-- shutdown test-env `docker-compose -f docker/docker-compose-run-selenide-junit5-tests.yml down && docker-compose -f docker/docker-compose-run-selenoid.yml down -v && docker-compose -f docker/docker-compose-run-application.yml down`
 
 ###### Arm processors specific options
 - reset DOCKER_DEFAULT_PLATFORM variable before test-env run: `export DOCKER_DEFAULT_PLATFORM=`

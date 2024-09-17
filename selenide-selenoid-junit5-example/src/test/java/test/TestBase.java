@@ -53,10 +53,7 @@ public abstract class TestBase {
                         .savePageSource(false)
                         .enableLogs(LogType.BROWSER, Level.SEVERE)
         );
-    }
 
-    @BeforeAll
-    public static void beforeAll() {
         Awaitility.setDefaultTimeout(Duration.ofSeconds(
                 Long.parseLong(PROPERTIES_READER.getProperty("test.timeout.awaitility.default"))
         ));
@@ -70,9 +67,20 @@ public abstract class TestBase {
     }
 
     @BeforeEach
-    protected void setUpRemoteDriver() {
-        setUp();
-        initRemoteDriver();
+    protected void setUpBrowser() {
+        setUpByPlatform();
+
+        String disableSearchEngine = "--disable-search-engine-choice-screen";
+        String chromeOptions = System.getProperty("chromeoptions.args", disableSearchEngine);
+
+        if (!chromeOptions.contains(disableSearchEngine)) {
+            System.setProperty("chromeoptions.args", chromeOptions + ", " + disableSearchEngine);
+        }
+
+        if (!IS_LOCAL) {
+            initRemoteDriver();
+        }
+
         Selenide.open(TEST_URL);
     }
 
@@ -100,7 +108,7 @@ public abstract class TestBase {
         }
     }
 
-    public abstract void setUp();
+    public abstract void setUpByPlatform();
 
     private void initRemoteDriver() {
         String desktopBrowserSize = PROPERTIES_READER.getProperty("test.desktop.browser-size");
@@ -108,15 +116,7 @@ public abstract class TestBase {
         String mobileBrowserHeight = PROPERTIES_READER.getProperty("test.mobile.browser-height");
         String mobileUserAgent = PROPERTIES_READER.getProperty("test.mobile.user-agent");
 
-        String disableSearchEngine = "--disable-search-engine-choice-screen";
-        String chromeOptions = System.getProperty("chromeoptions.args", disableSearchEngine);
-
-        if (!chromeOptions.contains(disableSearchEngine)) {
-            System.setProperty("chromeoptions.args", chromeOptions + ", " + disableSearchEngine);
-        }
-
-        if (!IS_LOCAL) {
-            RemoteWebDriver remoteWebDriver = platform.equals(DESKTOP)
+        RemoteWebDriver remoteWebDriver = platform.equals(DESKTOP)
                     ? new ChromeRemoteProvider(format("window-size=%s", desktopBrowserSize))
                     .createDriver(new DesiredCapabilities())
                     : new ChromeRemoteProvider(
@@ -129,6 +129,5 @@ public abstract class TestBase {
 
             remoteWebDriver.setFileDetector(new LocalFileDetector());
             WebDriverRunner.setWebDriver(remoteWebDriver);
-        }
     }
 }
