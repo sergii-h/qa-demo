@@ -12,6 +12,9 @@ import java.net.URL;
 public class ChromeRemoteProvider implements WebDriverProvider {
     private final String[] arguments;
 
+    private static final PropertyReader PROPERTIES_READER = PropertyReader.getInstance();
+    private static final String TEST_ENV = PROPERTIES_READER.getProperty("test.env");
+
     public ChromeRemoteProvider(String... arguments) {
         this.arguments = arguments;
     }
@@ -32,7 +35,7 @@ public class ChromeRemoteProvider implements WebDriverProvider {
         options.addArguments(arguments);
         options.merge(capabilities);
 
-        String remoteWebdriverUrl = PropertyReader.getInstance().getProperty("test.remote.webdriver.url");
+        String remoteWebdriverUrl = PROPERTIES_READER.getProperty(TEST_ENV + ".test.remote.webdriver.url");
 
         try {
             return new RemoteWebDriver(new URL(remoteWebdriverUrl), options);
