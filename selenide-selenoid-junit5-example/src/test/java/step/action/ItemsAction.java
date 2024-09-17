@@ -56,6 +56,7 @@ public class ItemsAction {
         with().pollInSameThread().await().until(() -> mainPage.getItemNames().size() != oldList.size());
     }
 
+    @Step("Get item list")
     public List<String> getItemNames() {
         return mainPage.getItemNames();
     }

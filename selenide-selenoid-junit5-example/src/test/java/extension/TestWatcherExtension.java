@@ -40,6 +40,13 @@ public class TestWatcherExtension implements TestWatcher {
         }
     }
 
+    @Override
+    public void testAborted(ExtensionContext context, Throwable cause) {
+        if (WebDriverRunner.hasWebDriverStarted()) {
+            WebDriverRunner.closeWindow();
+        }
+    }
+
     private void takeFullPageScreenshot() {
         takeFullPageScreenshot(0);
     }

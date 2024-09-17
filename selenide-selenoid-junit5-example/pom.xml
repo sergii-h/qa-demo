@@ -163,7 +163,7 @@
                         </goals>
                         <configuration>
                             <files>
-                                <file>${project.basedir}/src/test/java/resources/${properties.file.name}</file>
+                                <file>${project.basedir}/src/test/resources/${properties.file.name}</file>
                             </files>
                         </configuration>
                     </execution>
@@ -172,7 +172,7 @@
         </plugins>
         <testResources>
             <testResource>
-                <directory>${project.basedir}/src/test/java/resources</directory>
+                <directory>${project.basedir}/src/test/resources</directory>
             </testResource>
         </testResources>
     </build>
