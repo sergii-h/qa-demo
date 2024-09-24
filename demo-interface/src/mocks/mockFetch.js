@@ -25,12 +25,12 @@ export default class MockFetch {
     execute = async (url, data) => {
         switch(data.method) {
             case 'GET':
-                if (url.includes('/item/')) {
+                if (url.includes('/items/')) {
                     return {
                         status: this.payload.itemResponse.status,
                         json: () => this.payload.itemResponse.body,
                     }
-                } else if (url.endsWith('/item')) {
+                } else if (url.endsWith('/items')) {
                     return {
                         status: this.payload.itemsResponse.status,
                         json: () => this.payload.itemsResponse.body,
@@ -58,7 +58,7 @@ export default class MockFetch {
                 break
 
             case 'DELETE':
-                if (url.includes('/item/')) {
+                if (url.includes('/items/')) {
                     return {
                         status: 200,
                     };

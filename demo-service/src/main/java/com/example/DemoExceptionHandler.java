@@ -1,13 +1,13 @@
 package com.example;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.NoSuchElementException;
 
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @ControllerAdvice
 class DemoExceptionHandler {
@@ -16,7 +16,7 @@ class DemoExceptionHandler {
     protected ResponseEntity<String> handleNotFundException(Exception e, HttpServletRequest request) {
 
         return ResponseEntity
-                .status(INTERNAL_SERVER_ERROR)
-                .body(e.getMessage());
+                .status(NOT_FOUND)
+                .body(e.getMessage() + " for request " + request.getRequestURI());
     }
 }

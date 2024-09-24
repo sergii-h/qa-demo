@@ -4,7 +4,6 @@ import com.example.demo.integration.TestBase;
 import com.example.demo.integration.context.ItemContext;
 import com.example.demo.integration.data.ItemResponse;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -16,6 +15,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.params.provider.Arguments.of;
 
 class UpdateItemTest extends TestBase {
@@ -48,24 +48,25 @@ class UpdateItemTest extends TestBase {
                 .description(updatedDescription)
                 .build();
 
-        Response postResponse = requestSpec
-                .body(context.createItemRequest())
-                .post("/item");
-
-        updatedContext.setResponse(postResponse);
+        updatedContext.setResponse(requestSpec.body(context.createItemRequest()).post("/items"));
 
         // when
         Response putResponse = requestSpec
                 .body(updatedContext.createItemRequest())
-                .put("/item/" + updatedContext.getId());
+                .put("/items/" + updatedContext.getId());
 
         // and
-        Response getResponse = requestSpec.get("/item/" + updatedContext.getId());
+        Response getResponse = requestSpec.get("/items/" + updatedContext.getId());
 
         // then
-        assertThat(putResponse.statusCode(), is(200));
-        assertThat(putResponse.getBody().asString(), is(emptyString()));
-        assertThat(getResponse.getBody().as(ItemResponse.class), is(updatedContext.createExpectedResponse()));
+        assertAll(
+                () -> assertThat(putResponse.statusCode(), is(200)),
+                () -> assertThat(putResponse.getBody().asString(), is(emptyString())),
+                () -> assertThat(
+                        getResponse.getBody().as(ItemResponse.class),
+                        is(updatedContext.createExpectedResponse())
+                )
+        );
     }
 
     @Test
@@ -79,10 +80,16 @@ class UpdateItemTest extends TestBase {
         // when
         Response putResponse = requestSpec
                 .body(context.createItemRequest())
-                .put("/item/" + context.getId());
+                .put("/items/" + context.getId());
 
         // then
-        assertThat(putResponse.statusCode(), is(500));
-        assertThat(putResponse.getBody().asString(), is("Item with id: " + context.getId() + " not found"));
+        assertAll(
+                () -> assertThat(putResponse.statusCode(), is(404)),
+                () -> assertThat(
+                        putResponse.getBody().asString(),
+                        is("No value present for request /v1/items/" + context.getId()
+                        )
+                )
+        );
     }
 }

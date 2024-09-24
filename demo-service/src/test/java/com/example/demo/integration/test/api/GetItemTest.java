@@ -4,12 +4,12 @@ import com.example.demo.integration.TestBase;
 import com.example.demo.integration.context.ItemContext;
 import com.example.demo.integration.data.ItemResponse;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class GetItemTest extends TestBase {
     @Test
@@ -22,18 +22,16 @@ class GetItemTest extends TestBase {
                 .description("description")
                 .build();
 
-        Response postResponse = requestSpec
-                .body(context.createItemRequest())
-                .post("/item");
-
-        context.setResponse(postResponse);
+        context.setResponse(requestSpec.body(context.createItemRequest()).post("/items"));
 
         // when
-        Response getResponse = requestSpec.get("/item/" + context.getId());
+        Response getResponse = requestSpec.get("/items/" + context.getId());
 
         // then
-        assertThat(getResponse.statusCode(), is(200));
-        assertThat(getResponse.getBody().as(ItemResponse.class), is(context.createExpectedResponse()));
+        assertAll(
+                () -> assertThat(getResponse.statusCode(), is(200)),
+                () -> assertThat(getResponse.getBody().as(ItemResponse.class), is(context.createExpectedResponse()))
+        );
     }
 
     @Test
@@ -53,50 +51,47 @@ class GetItemTest extends TestBase {
                 .description("updatedDescription")
                 .build();
 
-        Response postResponse = requestSpec
-                .body(context.createItemRequest())
-                .post("/item");
-
-        updatedContext.setResponse(postResponse);
+        updatedContext.setResponse(requestSpec.body(context.createItemRequest()).post("/items"));
 
         // and
         requestSpec
                 .body(updatedContext.createItemRequest())
-                .put("/item/" + updatedContext.getId());
+                .put("/items/" + updatedContext.getId());
 
         // when
-        Response getResponse = requestSpec.get("/item/" + updatedContext.getId());
+        Response getResponse = requestSpec.get("/items/" + updatedContext.getId());
 
         // then
-        assertThat(getResponse.statusCode(), is(200));
-        assertThat(getResponse.getBody().as(ItemResponse.class), is(updatedContext.createExpectedResponse()));
+        assertAll(
+                () -> assertThat(getResponse.statusCode(), is(200)),
+                () -> assertThat(
+                        getResponse.getBody().as(ItemResponse.class),
+                        is(updatedContext.createExpectedResponse())
+                )
+        );
     }
 
     @Test
     void getDeletedItem() {
         // given
-        ItemContext context = ItemContext
-                .builder()
-                .name("name")
-                .amount(1)
-                .description("description")
-                .build();
+        ItemContext context = ItemContext.builder().build();
 
-        Response postResponse = requestSpec
-                .body(context.createItemRequest())
-                .post("/item");
-
-        context.setResponse(postResponse);
+        context.setResponse(requestSpec.body(context.createItemRequest()).post("/items"));
         
         // and
-        requestSpec.delete("/item/" + context.getId());
+        requestSpec.delete("/items/" + context.getId());
 
         // when
-        Response getResponse = requestSpec.get("/item/" + context.getId());
+        Response getResponse = requestSpec.get("/items/" + context.getId());
 
         // then
-        assertThat(getResponse.statusCode(), is(500));
-        assertThat(getResponse.getBody().asString(), is("Item with id: " + context.getId() + " not found"));
+        assertAll(
+                () -> assertThat(getResponse.statusCode(), is(404)),
+                () -> assertThat(
+                        getResponse.getBody().asString(),
+                        is("No value present for request /v1/items/" + context.getId())
+                )
+        );
     }
 
     @Test
@@ -108,10 +103,15 @@ class GetItemTest extends TestBase {
                 .build();
 
         // when
-        Response response = requestSpec.get("/item/" + context.getId());
+        Response response = requestSpec.get("/items/" + context.getId());
 
         // then
-        assertThat(response.statusCode(), is(500));
-        assertThat(response.getBody().asString(), is("Item with id: " + context.getId() + " not found"));
+        assertAll(
+                () -> assertThat(response.statusCode(), is(404)),
+                () -> assertThat(
+                        response.getBody().asString(),
+                        is("No value present for request /v1/items/" + context.getId())
+                )
+        );
     }
 }

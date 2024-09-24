@@ -16,10 +16,14 @@ consists of 4 fields:
 ### demo-service
     Backend SpringBoot service exposing api
     How to run:
+
+    Run mongo-db container first on port 2018 or use this commmand from qa-demo directory
+    `docker compose -f docker/docker-compose-run-application-local.yml up -d qa-demo-mongo`
+    
     * IDE: Create a SpringBoot application and run it
     * Terminal: Package it with maven and run with "java -jar demo-service.jar"
 
-    Then try http://localhost:8080/v1/item
+    Then try http://localhost:8080/v1/items
 
 ### demo-interface
     Frontend React application exposing a web interface to list, create, update and remove items 

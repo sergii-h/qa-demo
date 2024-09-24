@@ -93,7 +93,7 @@ it('should render with mocked values', async () => {
     { name: "",             amount: -1,  description: ""             },
     { name: " ",            amount: 0,   description: " "            },
 ].forEach((data) => {
-    it(`should put /item with valid payload { '${data.name}', ${data.amount}, '${data.description}' }`, async () => {
+    it(`should put /items with valid payload { '${data.name}', ${data.amount}, '${data.description}' }`, async () => {
         // given
         mockFetch = new MockFetch({
             itemResponse: {
@@ -134,7 +134,7 @@ it('should render with mocked values', async () => {
         // then
         expect(fetchSpy).toHaveBeenCalledTimes(2)
         expect(fetchSpy).toHaveBeenLastCalledWith(
-            `${BE_API}/item/${mockFetch.payload.itemResponse.body.id}`,
+            `${BE_API}/items/${mockFetch.payload.itemResponse.body.id}`,
             expect.objectContaining({
                 "body": `{"name":"${data.name}","amount":${data.amount},"description":"${data.description}"}`,
                 "method": "PUT"}
@@ -143,7 +143,7 @@ it('should render with mocked values', async () => {
     })
 });
 
-it("should not put /item when Close button is clicked", async () => {
+it("should not put /items when Close button is clicked", async () => {
     // given
     mockFetch = new MockFetch({
         itemResponse: {
@@ -171,7 +171,7 @@ it("should not put /item when Close button is clicked", async () => {
 
     // then
     expect(fetchSpy).not.toHaveBeenCalledWith(
-        `${BE_API}/item/${mockFetch.payload.itemResponse.body.id}`,
+        `${BE_API}/items/${mockFetch.payload.itemResponse.body.id}`,
         expect.objectContaining({"method": "PUT"})
     )
 });

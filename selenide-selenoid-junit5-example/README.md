@@ -21,7 +21,7 @@ test.env values:
 - with command line properties `mvn -Dtest.env=remote -Dtest.parallel=false -Dtest.include="**/d*/P*.java" clean test`
 
 ##### Run/Debug with IDE
-- start application in background `docker-compose -f docker/docker-compose-run-application-local.yml up -d`
+- start application in background `docker compose -f docker/docker-compose-run-application-local.yml up -d`
 - extend JUnit template configuration VM options with `-Dproperties.file.name=test.local.properties`
 - set `test.env=local` in `test.local.properties` file
 

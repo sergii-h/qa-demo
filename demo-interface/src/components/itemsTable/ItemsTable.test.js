@@ -110,7 +110,7 @@ it('should render CreateModal when clicked', async () => {
     })
 });
 
-it('should get /item when CreateModal saved', async () => {
+it('should get /items when CreateModal saved', async () => {
     // given
     await act(() => render(<ItemsTable />))
     await act(() => screen.getByLabelText('Create item').click())
@@ -126,7 +126,7 @@ it('should get /item when CreateModal saved', async () => {
 
     // then
     expect(fetchSpy).toHaveBeenNthCalledWith(1,
-        `${BE_API}/item`,
+        `${BE_API}/items`,
         expect.objectContaining({"method": "GET"})
     )
 });
@@ -178,7 +178,7 @@ it('should render InfoModal when clicked', async () => {
     expect(within(screen.getByRole('dialog')).getByText(mockFetch.payload.itemResponse.body.name)).toBeVisible()
 });
 
-it('should get /item with id when Info clicked', async () => {
+it('should get /items with id when Info clicked', async () => {
     // given
     await act(() => render(<ItemsTable />))
 
@@ -189,7 +189,7 @@ it('should get /item with id when Info clicked', async () => {
     expect(fetchSpy).toHaveBeenCalledTimes(2)
 
     expect(fetchSpy).toHaveBeenLastCalledWith(
-        `${BE_API}/item/${mockFetch.payload.itemResponse.body.id}`,
+        `${BE_API}/items/${mockFetch.payload.itemResponse.body.id}`,
         expect.objectContaining({"method": "GET"})
     )
 });
@@ -244,7 +244,7 @@ it('should render EditModal when clicked', async () => {
     expect(screen.getByText('Edit ' + mockFetch.payload.itemResponse.body.name)).toBeVisible()
 });
 
-it('should get /item with id when Edit clicked', async () => {
+it('should get /items with id when Edit clicked', async () => {
     // given
     await act(() => render(<ItemsTable />))
 
@@ -255,7 +255,7 @@ it('should get /item with id when Edit clicked', async () => {
     expect(fetchSpy).toHaveBeenCalledTimes(2)
 
     expect(fetchSpy).toHaveBeenLastCalledWith(
-        `${BE_API}/item/${mockFetch.payload.itemResponse.body.id}`,
+        `${BE_API}/items/${mockFetch.payload.itemResponse.body.id}`,
         expect.objectContaining({"method": "GET"})
     )
 });
@@ -275,7 +275,7 @@ it('should get /item with id when Edit clicked', async () => {
     })
 });
 
-it('should get /item when EditModal saved', async () => {
+it('should get /items when EditModal saved', async () => {
     // given
     await act(() => render(<ItemsTable />))
     await act(() => within(screen.getAllByRole('cell')[1]).getByText('Edit').click())
@@ -290,7 +290,7 @@ it('should get /item when EditModal saved', async () => {
 
     // then
     expect(fetchSpy).toHaveBeenNthCalledWith(1,
-        `${BE_API}/item`,
+        `${BE_API}/items`,
         expect.objectContaining({"method": "GET"})
     )
 });
@@ -343,7 +343,7 @@ it('should send Delete request when deleted', async () => {
     expect(fetchSpy).toHaveBeenCalledTimes(2)
 
     expect(fetchSpy).toHaveBeenLastCalledWith(
-        `${BE_API}/item/${mockFetch.payload.itemResponse.body.id}`,
+        `${BE_API}/items/${mockFetch.payload.itemResponse.body.id}`,
         expect.objectContaining({"method": "DELETE"})
     )
 });
