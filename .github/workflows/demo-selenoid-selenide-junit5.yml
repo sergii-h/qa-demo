@@ -27,7 +27,7 @@ jobs:
       run: docker compose -f docker/docker-compose-run-application.yml up -d
 
     - name: debug1
-      run: curl http://localhost:8080/v1/items
+      run: sleep 30s
 
     - name: debug2
       run: docker logs qa-demo-service
