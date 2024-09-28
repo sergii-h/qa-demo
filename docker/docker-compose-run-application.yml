@@ -5,9 +5,13 @@ networks:
 services:
   qa-demo-service:
     container_name: qa-demo-service
+    depends_on:
+      - qa-demo-mongo
     networks:
       - qa-demo-network
     build:
+      args:
+        MONGODB_HOSTNAME_ARG: qa-demo-service
       context: ../
       dockerfile: docker/Dockerfile-demo-service
     ports:
@@ -24,3 +28,9 @@ services:
       dockerfile: docker/Dockerfile-demo-interface
     ports:
       - "3000:3000"
+  
+  qa-demo-mongo:
+    image: mongo:4.4
+    container_name: qa-demo-mongo
+    ports:
+      - "27018:27017"
