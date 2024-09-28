@@ -26,11 +26,11 @@ jobs:
     - name: Start application under test
       run: docker compose -f docker/docker-compose-run-application.yml up -d
 
-    - name: debug
-      run: docker logs qa-demo-service
-
-    - name: debug
+    - name: debug1
       run: curl http://localhost:8080/v1/items
+
+    - name: debug2
+      run: docker logs qa-demo-service
 
     # - name: Pull chrome image
     #   run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
