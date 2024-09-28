@@ -1,5 +1,7 @@
 FROM maven:3.8.3-openjdk-17
 COPY demo-service/src /src
 COPY demo-service/pom.xml /
-RUN mvn -Djdk.lang.Process.launchMechanism=vfork package
-CMD java -jar /target/demo-service.jar --spring.data.mongodb.uri=mongodb://host.docker.internal:27018/demo_db
+ARG MONGODB_HOSTNAME_ARG
+ENV MONGODB_HOSTNAME=$MONGODB_HOSTNAME_ARG
+RUN mvn -Djdk.lang.Process.launchMechanism=vfork -Dtests.skip=true package
+CMD java -jar /target/demo-service.jar --spring.data.mongodb.uri=mongodb://$MONGODB_HOSTNAME:27018/demo_db

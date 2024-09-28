@@ -32,7 +32,7 @@ consists of 4 fields:
     run "npm install"
     run "npm start"
 
-    Note: if Frontend app will be used from docker - please set host connection to the BE API
+    Note: if Frontend app will be used from docker - set host connection to the BE API
     run "REACT_APP_BE_API=http://host.docker.internal:8080/v1 npm start"
 
     Then try http://localhost:3000
@@ -41,10 +41,13 @@ consists of 4 fields:
 
 ## Tests
 ### e2e
-    - docker-compose -f docker/docker-compose.yml up -d
-    - mvn test -Dtest.tags=tmp -Dtest.env=docker
+[README.md](selenide-selenoid-junit5-example/README.md)
 
 ### integration
-#### demo-service/src/test/java/com/example/item/integration
+#### BE tests: demo-service/src/test/java/com/example/item/integration
     - open "demo-service" folder
     - mvn clean test
+
+#### FE tests: demo-interface/src/components/<component name>/*.test.js*
+    - open "demo-interface" folder
+    - npm test

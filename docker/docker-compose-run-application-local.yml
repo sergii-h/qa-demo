@@ -4,6 +4,8 @@ services:
     depends_on:
       - qa-demo-mongo
     build:
+      args:
+        MONGODB_HOSTNAME_ARG: host.docker.internal
       context: ../
       dockerfile: docker/Dockerfile-demo-service
     ports:
@@ -18,7 +20,7 @@ services:
       - "3000:3000"
 
   qa-demo-mongo:
-    image: docker.repo.dreamit.de/mongo:4.4
+    image: mongo:4.4
     container_name: qa-demo-mongo
     expose:
       - 27018

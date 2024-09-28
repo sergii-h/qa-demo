@@ -22,7 +22,7 @@ test.env values:
 
 ##### Run/Debug with IDE
 - start application in background `docker compose -f docker/docker-compose-run-application-local.yml up -d`
-- extend JUnit template configuration VM options with `-Dproperties.file.name=test.local.properties`
+- extend run configuration with `properties.file.name=test.local.properties` env variable (Intellij - extend Junit run configuration, Vscode - add vmArgs to java.test.config in settings.json)
 - set `test.env=local` in `test.local.properties` file
 
 ###### Run tests with selenoid in dockers
