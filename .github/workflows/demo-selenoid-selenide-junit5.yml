@@ -28,8 +28,11 @@ jobs:
 
     - name: debug1
       run: sleep 30s
-
+    
     - name: debug2
+      run: docker ps -a
+
+    - name: debug3
       run: docker logs qa-demo-service
 
     # - name: Pull chrome image
