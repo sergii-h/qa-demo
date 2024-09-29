@@ -27,10 +27,10 @@ jobs:
       run: docker compose -f docker/docker-compose-run-application.yml up -d
 
     - name: debug1
-      run: sleep 30s
+      run: docker inspect qa-demo-mongo
     
     - name: debug2
-      run: docker ps -a
+      run: docker inspect qa-demo-service
 
     - name: debug3
       run: docker logs qa-demo-service
