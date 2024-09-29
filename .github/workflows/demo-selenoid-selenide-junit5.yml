@@ -38,6 +38,9 @@ jobs:
     - name: debug4
       run: docker logs qa-demo-service
 
+    - name: debug5
+      run: docker ps -a
+
     # - name: Pull chrome image
     #   run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
 
