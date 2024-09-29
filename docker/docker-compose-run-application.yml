@@ -5,8 +5,8 @@ networks:
 services:
   qa-demo-service:
     container_name: qa-demo-service
-    depends_on:
-      - qa-demo-mongo
+    # depends_on:
+    #   - qa-demo-mongo
     networks:
       - qa-demo-network
     build:
