@@ -11,7 +11,7 @@ services:
       - qa-demo-network
     build:
       args:
-        MONGODB_URL_ARG: mongodb://host.docker.internal:27018/demo_db
+        MONGODB_URL_ARG: mongodb://qa-demo-mongo:27018/demo_db
       context: ../
       dockerfile: docker/Dockerfile-demo-service
     ports:
