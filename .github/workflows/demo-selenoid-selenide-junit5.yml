@@ -33,6 +33,9 @@ jobs:
       run: docker inspect qa-demo-service
 
     - name: debug3
+      run: sleep 60s
+    
+    - name: debug4
       run: docker logs qa-demo-service
 
     # - name: Pull chrome image
