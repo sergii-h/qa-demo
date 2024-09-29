@@ -26,29 +26,17 @@ jobs:
     - name: Start application under test
       run: docker compose -f docker/docker-compose-run-application.yml up -d
 
-    - name: debug1
-      run: docker inspect qa-demo-mongo
-    
-    - name: debug2
-      run: docker inspect qa-demo-service
-
     - name: debug3
       run: sleep 60s
     
-    - name: debug4
-      run: docker logs qa-demo-service
+    - name: Pull chrome image
+      run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
 
-    - name: debug5
-      run: docker ps -a
-
-    # - name: Pull chrome image
-    #   run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
-
-    # - name: Start Selenoid
-    #   run: docker compose -f docker/docker-compose-run-selenoid.yml up -d qa-demo-selenoid
+    - name: Start Selenoid
+      run: docker compose -f docker/docker-compose-run-selenoid.yml up -d qa-demo-selenoid
       
-    # - name: Run e2e tests
-    #   run: mvn -Dtest.env=remote test
+    - name: Run e2e tests
+      run: mvn -Dtest.env=remote test
 
     # - name: Push allure report
     #   uses: cpina/github-action-push-to-another-repository@main
