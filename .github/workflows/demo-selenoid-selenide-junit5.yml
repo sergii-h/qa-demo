@@ -39,6 +39,7 @@ jobs:
       run: mvn -Dtest.env=remote -Dtest.tags=tmp test
     
     - name: debug4
+      if: always()
       run: docker logs qa-demo-service
 
     # - name: Push allure report
