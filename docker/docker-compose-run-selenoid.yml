@@ -1,6 +1,6 @@
-networks:
-  qa-demo-network:
-    external: true
+# networks:
+#   qa-demo-network:
+#     external: true
 
 services:
   chrome:
@@ -9,8 +9,8 @@ services:
   qa-demo-selenoid:
     container_name: qa-demo-selenoid
     image: aerokube/selenoid:1.11.3
-    networks:
-      - qa-demo-network
+    # networks:
+    #   - qa-demo-network
     volumes:
       - "${PWD}/selenide-selenoid-junit5-example:/etc/selenoid"
       - "/var/run/docker.sock:/var/run/docker.sock"

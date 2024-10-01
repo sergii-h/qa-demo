@@ -25,30 +25,50 @@ jobs:
         distribution: adopt
         cache: maven
 
-    - name: Create network
-      run: docker network create qa-demo-network
+    - name: build BE
+      run: docker build -f docker/Dockerfile-demo-service --build-arg MONGODB_URL_ARG=mongodb://host.docker.internal:27018/demo_db -t docker-qa-demo-service .
 
-    - name: debug1
-      run: docker ps -a
+    - name: build FE
+      run: docker build -f docker/Dockerfile-demo-interface -t docker-qa-demo-interface .
+    
+    - name: run BE
+      run: docker run -p 8080:8080 -d --name qa-demo-service docker-qa-demo-service
 
-    - name: Start application under test
-      run: docker compose -f docker/docker-compose-run-application.yml up -d
-
-    - name: debug3
-      run: sleep 10s && docker inspect qa-demo-mongo
+    - name: run FE
+      run: docker run -p 3000:3000 -d --name qa-demo-interface docker-qa-demo-interface
     
     - name: Pull chrome image
       run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
 
     - name: Start Selenoid
       run: docker compose -f docker/docker-compose-run-selenoid.yml up -d qa-demo-selenoid
-      
+       
     - name: Run e2e tests
       run: mvn -Dtest.env=remote -Dtest.tags=tmp test
+    # - name: Create network
+    #   run: docker network create qa-demo-network
+
+    # - name: debug1
+    #   run: docker ps -a
+
+    # - name: Start application under test
+    #   run: docker compose -f docker/docker-compose-run-application.yml up -d
+
+    # - name: debug3
+    #   run: sleep 10s && docker inspect qa-demo-mongo
     
-    - name: debug4
-      if: always()
-      run: docker logs qa-demo-service
+    # - name: Pull chrome image
+    #   run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
+
+    # - name: Start Selenoid
+    #   run: docker compose -f docker/docker-compose-run-selenoid.yml up -d qa-demo-selenoid
+      
+    # - name: Run e2e tests
+    #   run: mvn -Dtest.env=remote -Dtest.tags=tmp test
+    
+    # - name: debug4
+    #   if: always()
+    #   run: docker logs qa-demo-service
 
     # - name: Push allure report
     #   uses: cpina/github-action-push-to-another-repository@main
