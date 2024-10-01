@@ -28,8 +28,8 @@ jobs:
     - name: Create network
       run: docker network create qa-demo-network
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
+    - name: debug1
+      uses: docker ps -a
 
     - name: Start application under test
       run: docker compose -f docker/docker-compose-run-application.yml up -d
