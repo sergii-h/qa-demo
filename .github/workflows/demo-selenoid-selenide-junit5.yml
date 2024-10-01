@@ -29,7 +29,7 @@ jobs:
       run: docker network create qa-demo-network
 
     - name: debug1
-      uses: docker ps -a
+      run: docker ps -a
 
     - name: Start application under test
       run: docker compose -f docker/docker-compose-run-application.yml up -d
