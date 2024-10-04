@@ -32,10 +32,10 @@ jobs:
       run: docker build -f docker/Dockerfile-demo-interface --build-arg BE_API_ARG=http://host.docker.internal:8080/v1 -t docker-qa-demo-interface .
     
     - name: run BE
-      run: docker run -p 8080:8080 -d --name qa-demo-service docker-qa-demo-service
+      run: docker run -p 8080:8080 -d --add-host host.docker.internal=host-gateway --name qa-demo-service docker-qa-demo-service
 
     - name: run FE
-      run: docker run -p 3000:3000 -d --name qa-demo-interface docker-qa-demo-interface
+      run: docker run -p 3000:3000 -d --add-host host.docker.internal=host-gateway --name qa-demo-interface docker-qa-demo-interface
     
     - name: Pull chrome image
       run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
