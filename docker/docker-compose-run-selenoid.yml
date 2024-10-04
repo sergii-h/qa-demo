@@ -7,10 +7,9 @@ services:
     image: selenoid/chrome:127.0
     
   qa-demo-selenoid:
+    network_mode: bridge
     container_name: qa-demo-selenoid
     image: aerokube/selenoid:1.11.3
-    # networks:
-    #   - qa-demo-network
     volumes:
       - "${PWD}/selenide-selenoid-junit5-example:/etc/selenoid"
       - "/var/run/docker.sock:/var/run/docker.sock"
@@ -21,6 +20,5 @@ services:
     command: [ "-conf", "/etc/selenoid/browsers.json",
                "-video-output-dir", "/opt/selenoid/video",
                "-log-output-dir", "/opt/selenoid/logs" ]
-              #  "-container-network", "qa-demo-network" ]
     ports:
       - "4444:4444"
