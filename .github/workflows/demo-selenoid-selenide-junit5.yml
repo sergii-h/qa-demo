@@ -9,11 +9,6 @@ on:
 jobs:
   run-tests:
     runs-on: ubuntu-20.04
-    services:
-      mongo:
-        image: mongo:4.4
-        ports:
-          - 27018:27017
 
     steps:
     - uses: actions/checkout@v4
@@ -25,18 +20,9 @@ jobs:
         distribution: adopt
         cache: maven
 
-    - name: build BE
-      run: docker build -f docker/Dockerfile-demo-service --build-arg MONGODB_URL_ARG=mongodb://172.17.0.1:27018/demo_db -t docker-qa-demo-service .
+    - name: start application under test
+      run: docker compose -f docker/docker-compose-run-application-remote.yml up -d
 
-    - name: build FE
-      run: docker build -f docker/Dockerfile-demo-interface --build-arg BE_API_ARG=http://172.17.0.1:8080/v1 -t docker-qa-demo-interface .
-    
-    - name: run BE
-      run: docker run -p 8080:8080 -d --name qa-demo-service docker-qa-demo-service
-
-    - name: run FE
-      run: docker run -p 3000:3000 -d --name qa-demo-interface docker-qa-demo-interface
-    
     - name: Pull chrome image
       run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
 
@@ -44,7 +30,7 @@ jobs:
       run: docker compose -f docker/docker-compose-run-selenoid.yml up -d qa-demo-selenoid
        
     - name: Run e2e tests
-      run: mvn -Dtest.env=remote -Dtest.tags=tmp test
+      run: mvn -Dtest.env=remote test
     # - name: Create network
     #   run: docker network create qa-demo-network
 

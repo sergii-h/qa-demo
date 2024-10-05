@@ -16,7 +16,7 @@ class CreateItemTest extends DesktopTest {
     ActionManager actions = new ActionManager();
     ValidationManager validate = new ValidationManager();
 
-    @Tag("tmp")
+    @Tag("smoke")
     @Test
     @DisplayName("Create item")
     void shouldCreateItem() {

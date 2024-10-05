@@ -1,29 +1,21 @@
-networks:
-  qa-demo-network:
-    external: true
-
 services:
   qa-demo-service:
     container_name: qa-demo-service
     depends_on:
       - qa-demo-mongo
-    networks:
-      - qa-demo-network
     build:
       args:
-        MONGODB_URL_ARG: mongodb://172.18.0.2:27018/demo_db
+        MONGODB_URL_ARG: mongodb://172.17.0.1:27018/demo_db
       context: ../
       dockerfile: docker/Dockerfile-demo-service
     ports:
       - "8080:8080"
-
+    
   qa-demo-interface:
     container_name: qa-demo-interface
-    networks:
-      - qa-demo-network
     build:
       args:
-        BE_API_ARG: http://qa-demo-service:8080/v1
+        BE_API_ARG: http://http://172.17.0.1:8080/v1
       context: ../
       dockerfile: docker/Dockerfile-demo-interface
     ports:
@@ -32,7 +24,5 @@ services:
   qa-demo-mongo:
     image: mongo:4.4
     container_name: qa-demo-mongo
-    networks:
-      - qa-demo-network
     ports:
       - "27018:27017"
