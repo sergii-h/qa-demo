@@ -25,9 +25,16 @@ jobs:
         distribution: adopt
         cache: maven
 
-    - name: start application under test
-      run: docker compose -f docker/docker-compose-run-application-remote.yml up -d
-      
+    - name: start BE
+      run: |
+        docker build -f docker/Dockerfile-demo-service --build-arg MONGODB_URL_ARG=mongodb://172.17.0.1:27018/demo_db -t docker-qa-demo-service . &&
+        docker run -p 8080:8080 -d --name qa-demo-service docker-qa-demo-service
+    
+    - name: start FE
+      run: |
+        docker build -f docker/Dockerfile-demo-interface --build-arg BE_API_ARG=http://172.17.0.1:8080/v1 -t docker-qa-demo-interface . &&
+        docker run -p 3000:3000 -d --name qa-demo-interface docker-qa-demo-interface
+
     - name: Pull chrome image
       run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
 

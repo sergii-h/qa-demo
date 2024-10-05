@@ -1,7 +1,3 @@
-# networks:
-#   qa-demo-network:
-#     external: true
-
 services:
   chrome:
     image: selenoid/chrome:127.0
