@@ -9,6 +9,11 @@ on:
 jobs:
   run-tests:
     runs-on: ubuntu-20.04
+    services:
+      mongo:
+        image: mongo:4.4
+        ports:
+          - 27018:27017
 
     steps:
     - uses: actions/checkout@v4
@@ -22,7 +27,7 @@ jobs:
 
     - name: start application under test
       run: docker compose -f docker/docker-compose-run-application-remote.yml up -d
-
+      
     - name: Pull chrome image
       run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
 

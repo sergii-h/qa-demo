@@ -1,8 +1,6 @@
 services:
   qa-demo-service:
     container_name: qa-demo-service
-    depends_on:
-      - qa-demo-mongo
     build:
       args:
         MONGODB_URL_ARG: mongodb://172.17.0.1:27018/demo_db
@@ -20,9 +18,3 @@ services:
       dockerfile: docker/Dockerfile-demo-interface
     ports:
       - "3000:3000"
-  
-  qa-demo-mongo:
-    image: mongo:4.4
-    container_name: qa-demo-mongo
-    ports:
-      - "27018:27017"
