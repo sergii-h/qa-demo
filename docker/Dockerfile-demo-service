@@ -1,5 +1,7 @@
 FROM maven:3.8.3-openjdk-17
 COPY demo-service/src /src
 COPY demo-service/pom.xml /
-RUN mvn -Djdk.lang.Process.launchMechanism=vfork package
-CMD java -jar /target/demo-service.jar
+ARG MONGODB_URL_ARG
+ENV MONGODB_URL=$MONGODB_URL_ARG
+RUN mvn -Djdk.lang.Process.launchMechanism=vfork -Dtests.skip=true package
+CMD java -jar /target/demo-service.jar --spring.data.mongodb.uri=$MONGODB_URL

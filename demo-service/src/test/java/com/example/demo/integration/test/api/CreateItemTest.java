@@ -5,7 +5,6 @@ import com.example.demo.integration.context.ItemContext;
 import com.example.demo.integration.data.ItemResponse;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -16,6 +15,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.params.provider.Arguments.of;
 
 class CreateItemTest extends TestBase {
@@ -50,17 +50,19 @@ class CreateItemTest extends TestBase {
         // when
         Response postResponse = requestSpec
                 .body(context.createItemRequest())
-                .post("/item");
+                .post("/items");
                 
         context.setResponse(postResponse);
 
         // and
-        Response getResponse = requestSpec.get("/item/" + context.getId());
+        Response getResponse = requestSpec.get("/items/" + context.getId());
 
         // then
-        assertThat(postResponse.statusCode(), is(200));
-        assertThat(postResponse.getBody().as(ItemResponse.class), is(context.createExpectedResponse()));
-        assertThat(getResponse.getBody().as(ItemResponse.class), is(context.createExpectedResponse()));
+        assertAll(
+                () -> assertThat(postResponse.statusCode(), is(200)),
+                () -> assertThat(postResponse.getBody().as(ItemResponse.class), is(context.createExpectedResponse())),
+                () -> assertThat(getResponse.getBody().as(ItemResponse.class), is(context.createExpectedResponse()))
+        );
     }
 
     @ParameterizedTest
@@ -76,15 +78,17 @@ class CreateItemTest extends TestBase {
         // when
         Response response = requestSpec
                 .body(notValidPayload)
-                .post("/item");
+                .post("/items");
 
         JsonPath body = response.jsonPath();
 
         // then
-        assertThat(response.statusCode(), is(400));
-        assertThat(body.get("status"), is(400));
-        assertThat(body.get("error"), is("Bad Request"));
-        assertThat(body.get("path"), is("/v1/item"));
+        assertAll(
+                () -> assertThat(response.statusCode(), is(400)),
+                () -> assertThat(body.get("status"), is(400)),
+                () -> assertThat(body.get("error"), is("Bad Request")),
+                () -> assertThat(body.get("path"), is("/v1/items"))
+        );
     }
 
     @Test
@@ -92,10 +96,12 @@ class CreateItemTest extends TestBase {
         // when
         Response response = requestSpec
                 .body("{\"name\": \"name\", \"amount\": 0.5, \"description\": \"description\"}")
-                .post("/item");
+                .post("/items");
 
         // then
-        assertThat(response.statusCode(), is(200));
-        assertThat(response.jsonPath().get("amount"), is(0));
+        assertAll(
+                () -> assertThat(response.statusCode(), is(200)),
+                () -> assertThat(response.jsonPath().get("amount"), is(0))
+        );
     }
 }

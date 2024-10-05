@@ -1,6 +1,8 @@
 package com.example.demo;
 
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
+import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,38 +12,57 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-import java.util.Set;
+import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
-@RequestMapping("/v1/item")
+@RequestMapping("/v1/items")
 class DemoController {
+    private final ItemRepository repository;
 
-    private final DemoRepository demoRepository;
+    @Autowired
+    public DemoController(ItemRepository repository) {
+        this.repository = repository;
+    }
 
     @PostMapping
     DemoData createItem(@RequestBody @Valid DemoRequest demoRequest) {
-        return demoRepository.create(demoRequest);
+        DemoData item = DemoData.builder()
+                .id(String.valueOf(new ObjectId()))
+                .name(demoRequest.getName())
+                .description(demoRequest.getDescription())
+                .amount(demoRequest.getAmount())
+                .build();
+
+        return repository.insert(item);
     }
 
     @PutMapping("/{itemId}")
     void updateItem(@PathVariable("itemId") String itemId, @RequestBody DemoRequest demoRequest) {
-        demoRepository.update(itemId, demoRequest);
+        DemoData item = repository.findById(itemId).orElseThrow();
+
+        DemoData changedItem = DemoData.builder()
+                .id(item.getId())
+                .name(demoRequest.getName())
+                .description(demoRequest.getDescription())
+                .amount(demoRequest.getAmount())
+                .build();
+
+        repository.save(changedItem);
     }
 
     @DeleteMapping("/{itemId}")
     void deleteItem(@PathVariable("itemId") String itemId) {
-        demoRepository.delete(itemId);
+        DemoData item = repository.findById(itemId).orElseThrow();
+        repository.delete(item);
     }
 
     @GetMapping("/{itemId}")
     DemoData getItem(@PathVariable("itemId") String itemId) {
-        return demoRepository.getById(itemId);
+        return repository.findById(itemId).orElseThrow();
     }
 
     @GetMapping
-    Set<DemoData> getItems() {
-        return demoRepository.findAll();
+    List<DemoData> getItems() {
+        return repository.findAll();
     }
 }

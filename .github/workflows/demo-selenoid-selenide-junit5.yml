@@ -9,33 +9,40 @@ on:
 jobs:
   run-tests:
     runs-on: ubuntu-20.04
+    services:
+      mongo:
+        image: mongo:4.4
+        ports:
+          - 27018:27017
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up JDK
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '18'
         distribution: adopt
         cache: maven
 
-    - name: Create network
-      run: docker network create qa-demo-network
-
-    - name: Start application under test
-      run: docker compose -f docker/docker-compose-run-application.yml up -d
-
+    - name: start application under test
+      run: |
+        docker build -f docker/Dockerfile-demo-service --build-arg MONGODB_URL_ARG=mongodb://172.17.0.1:27018/demo_db -t docker-qa-demo-service . &&
+        docker build -f docker/Dockerfile-demo-interface --build-arg BE_API_ARG=http://172.17.0.1:8080/v1 -t docker-qa-demo-interface . &&
+        docker run -p 8080:8080 -d --name qa-demo-service docker-qa-demo-service &&
+        docker run -p 3000:3000 -d --name qa-demo-interface docker-qa-demo-interface
+  
     - name: Pull chrome image
-      run: docker compose -f docker/docker-compose-run-selenoid.yml pull chrome
+      run: docker pull selenoid/chrome:127.0
 
     - name: Start Selenoid
-      run: docker compose -f docker/docker-compose-run-selenoid.yml up -d qa-demo-selenoid
-      
+      run: docker compose -f docker/docker-compose-run-selenoid.yml up -d
+       
     - name: Run e2e tests
       run: mvn -Dtest.env=remote test
 
     - name: Push allure report
+      if: always()
       uses: cpina/github-action-push-to-another-repository@main
       env:
         API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
@@ -48,6 +55,7 @@ jobs:
         target-directory: allure-results
     
     - name: Publish allure report
+      if: always()
       run: gh workflow run allure-report.yml --ref master --repo sgoldys/github-pages-allure-selenide
       env:
         GH_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}

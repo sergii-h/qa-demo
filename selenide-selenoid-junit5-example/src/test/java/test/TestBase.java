@@ -1,25 +1,8 @@
 package test;
 
-import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.Selenide;
-import com.codeborne.selenide.WebDriverRunner;
-import com.codeborne.selenide.junit5.ScreenShooterExtension;
-import com.codeborne.selenide.logevents.SelenideLogger;
-import config.ChromeRemoteProvider;
-import config.PropertyReader;
-import data.Platform;
-import extension.TestWatcherExtension;
-import io.qameta.allure.selenide.AllureSelenide;
-import io.qameta.allure.selenide.LogType;
-import lombok.extern.slf4j.Slf4j;
-import org.awaitility.Awaitility;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.LocalFileDetector;
-import org.openqa.selenium.remote.RemoteWebDriver;
+import static data.Platform.DESKTOP;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,9 +11,27 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import static data.Platform.DESKTOP;
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
+import org.awaitility.Awaitility;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.LocalFileDetector;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import com.codeborne.selenide.Configuration;
+import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.WebDriverRunner;
+import com.codeborne.selenide.junit5.ScreenShooterExtension;
+import com.codeborne.selenide.logevents.SelenideLogger;
+
+import config.ChromeRemoteProvider;
+import config.PropertyReader;
+import data.Platform;
+import extension.TestWatcherExtension;
+import io.qameta.allure.selenide.AllureSelenide;
+import io.qameta.allure.selenide.LogType;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ExtendWith({ScreenShooterExtension.class, TestWatcherExtension.class})

@@ -27,7 +27,7 @@ public class ApiAction {
 
     @Step("Create item by api")
     public void createItem(ItemRequest itemBody) {
-       requestSpec.body(itemBody).post("/item");
+       requestSpec.body(itemBody).post("/items");
 
        Selenide.refresh();
        mainPage.formLocator.shouldBe(visible);

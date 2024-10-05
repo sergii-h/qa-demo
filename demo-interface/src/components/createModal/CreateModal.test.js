@@ -51,7 +51,7 @@ it('should change values', () => {
     { name: " ",            amount: 0,   description: " "            },
     { name: "",             amount: 0.5, description: ""             },
 ].forEach((data) => {
-    it(`should post /item with parameters { '${data.name}', ${data.amount}, '${data.description}' }`, async () => {
+    it(`should post /items with parameters { '${data.name}', ${data.amount}, '${data.description}' }`, async () => {
         // given
         const fetchSpy = spyOnFetch.mockImplementation(new MockFetch().execute)
 
@@ -76,7 +76,7 @@ it('should change values', () => {
         // then
         await waitFor(() =>
             expect(fetchSpy).toHaveBeenCalledWith(
-                `${BE_API}/item`,
+                `${BE_API}/items`,
                 expect.objectContaining({
                     "body": `{"name":"${data.name}","amount":${data.amount},"description":"${data.description}"}`,
                     "method": "POST"}
@@ -90,7 +90,7 @@ it('should change values', () => {
     { amount: "",   formattedAmount: "0" },
     { amount: "01", formattedAmount: "1" },
 ].forEach((data) => {
-    it(`should post /item parameter '${data.amount}' with formatted parameter '${data.formattedAmount}`, async () => {
+    it(`should post /items parameter '${data.amount}' with formatted parameter '${data.formattedAmount}`, async () => {
         // given
         const fetchSpy = spyOnFetch.mockImplementation(new MockFetch().execute)
 
@@ -115,7 +115,7 @@ it('should change values', () => {
         // then
         await waitFor(() =>
             expect(fetchSpy).toHaveBeenCalledWith(
-                `${BE_API}/item`,
+                `${BE_API}/items`,
                 expect.objectContaining({
                     "body": `{"name":"name","amount":${data.formattedAmount},"description":"description"}`,
                     "method": "POST"}
@@ -125,7 +125,7 @@ it('should change values', () => {
     })
 });
 
-it("should not post /item when Close button is clicked", async () => {
+it("should not post /items when Close button is clicked", async () => {
     // given
     const fetchSpy = spyOnFetch.mockImplementation(new MockFetch().execute)
 
