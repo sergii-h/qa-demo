@@ -41,19 +41,19 @@ jobs:
     - name: Run e2e tests
       run: mvn -Dtest.env=remote test
 
-    # - name: Push allure report
-    #   uses: cpina/github-action-push-to-another-repository@main
-    #   env:
-    #     API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-    #   with:
-    #     source-directory: 'selenide-selenoid-junit5-example/target/allure-results'
-    #     destination-github-username: 'sgoldys'
-    #     destination-repository-name: 'github-pages-allure-selenide'
-    #     user-email: 32680292+sgoldys@users.noreply.github.com
-    #     target-branch: gh-pages
-    #     target-directory: allure-results
+    - name: Push allure report
+      uses: cpina/github-action-push-to-another-repository@main
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+      with:
+        source-directory: 'selenide-selenoid-junit5-example/target/allure-results'
+        destination-github-username: 'sgoldys'
+        destination-repository-name: 'github-pages-allure-selenide'
+        user-email: 32680292+sgoldys@users.noreply.github.com
+        target-branch: gh-pages
+        target-directory: allure-results
     
-    # - name: Publish allure report
-    #   run: gh workflow run allure-report.yml --ref master --repo sgoldys/github-pages-allure-selenide
-    #   env:
-    #     GH_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
+    - name: Publish allure report
+      run: gh workflow run allure-report.yml --ref master --repo sgoldys/github-pages-allure-selenide
+      env:
+        GH_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
