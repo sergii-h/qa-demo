@@ -40,6 +40,10 @@ consists of 4 fields:
 ## Run
 
 ## Tests
+
+### Doc
+[check-list.md](doc/check-list.md)
+
 ### e2e
 [README.md](selenide-selenoid-junit5-example/README.md)
 

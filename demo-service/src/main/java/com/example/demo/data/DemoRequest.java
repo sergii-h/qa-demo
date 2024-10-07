@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.data;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-class DemoRequest {
+public class DemoRequest {
     @NotNull
     private String name;
     @NotEmpty

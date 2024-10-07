@@ -18,6 +18,7 @@ import java.util.List;
 @RequestMapping("/v1/items")
 class DemoController {
     private final ItemRepository repository;
+    private final DemoEventProducer demoEventProducer;
 
     @Autowired
     public DemoController(ItemRepository repository) {
@@ -25,13 +26,15 @@ class DemoController {
     }
 
     @PostMapping
-    DemoData createItem(@RequestBody @Valid DemoRequest demoRequest) {
+    DemoResponse createItem(@RequestBody @Valid DemoRequest demoRequest) {
         DemoData item = DemoData.builder()
                 .id(String.valueOf(new ObjectId()))
                 .name(demoRequest.getName())
                 .description(demoRequest.getDescription())
                 .amount(demoRequest.getAmount())
                 .build();
+
+        demoEventProducer.produce(item);
 
         return repository.insert(item);
     }
