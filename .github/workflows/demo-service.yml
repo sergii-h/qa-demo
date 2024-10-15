@@ -2,7 +2,8 @@ name: Run backend tests
 
 on:
   push:
-    branches: [ "master" ]
+    branches:
+    - '**'
   pull_request:
     branches: [ "master" ]
 
@@ -14,6 +15,11 @@ jobs:
         image: mongo:4.4
         ports:
           - 27018:27017
+      kafka:
+        image: docker.io/dougdonohoe/kafka-zookeeper:2.6.0
+        ports:
+          - "2181:2181"
+          - "9092:9092"
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK
