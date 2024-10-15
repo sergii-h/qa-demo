@@ -1,4 +1,4 @@
-package com.example.demo.integration.data;
+package com.example.demo.data;
 
 import lombok.Builder;
 import lombok.Data;

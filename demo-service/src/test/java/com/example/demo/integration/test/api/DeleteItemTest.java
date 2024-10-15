@@ -1,7 +1,7 @@
 package com.example.demo.integration.test.api;
 
 import com.example.demo.integration.TestBase;
-import com.example.demo.integration.context.ItemContext;
+import com.example.demo.context.ItemTestContext;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 
@@ -13,9 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class DeleteItemTest extends TestBase {
     @Test
-    void deleteItem() {
+    void shouldDeleteItem() {
         // given
-        ItemContext context = ItemContext.builder().build();
+        ItemTestContext context = ItemTestContext.builder().build();
 
         Response postResponse = requestSpec
                 .body(context.createItemRequest())
@@ -42,9 +42,9 @@ class DeleteItemTest extends TestBase {
     }
 
     @Test
-    void deleteNotExistingItem() {
+    void shouldDeleteNotExistingItem() {
         // given
-        ItemContext context = ItemContext
+        ItemTestContext context = ItemTestContext
                 .builder()
                 .id(randomNumeric(10))
                 .build();

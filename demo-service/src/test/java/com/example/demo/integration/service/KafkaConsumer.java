@@ -1,4 +1,4 @@
-package org.lotto.ui.tests.services;
+package com.example.demo.integration.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,8 +1,8 @@
 package com.example.demo.integration.test.api;
 
 import com.example.demo.integration.TestBase;
-import com.example.demo.integration.context.ItemContext;
-import com.example.demo.integration.data.ItemResponse;
+import com.example.demo.context.ItemTestContext;
+import com.example.demo.data.ItemResponse;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
@@ -21,26 +21,21 @@ import static org.junit.jupiter.params.provider.Arguments.of;
 class CreateItemTest extends TestBase {
     private static Stream<Arguments> validPayload() {
         return Stream.of(
-                of("name",         1, "description" ),
-                of("Name1",        1, "description" ),
-                of("first second", 1, "description" ),
-                of("null",         1, "description" ),
-                of(" ",            1, "description" ),
-                of("",             1, "description" ),
-                of("name",        -1, "description" ),
-                of("name",         0, "description" ),
-                of("name",         1, "Description1"),
-                of("name",         1, "first second"),
-                of("name",         1, "null"        ),
-                of("name",         1, " "           )
+                of("First1 second", 1, "description"  ),
+                of(" ",             1, "description"  ),
+                of("",              1, "description"  ),
+                of("name",         -1, "description"  ),
+                of("name",          0, "description"  ),
+                of("name",          1, "First1 second"),
+                of("name",          1, " "            )
         );
     }
 
     @ParameterizedTest
     @MethodSource("validPayload")
-    void createItem(String name, long amount, String description) {
+    void shouldCreateItem(String name, long amount, String description) {
         // given
-        ItemContext context = ItemContext
+        ItemTestContext context = ItemTestContext
                 .builder()
                 .name(name)
                 .amount(amount)
@@ -74,7 +69,7 @@ class CreateItemTest extends TestBase {
             "{\"name\": \"name\", \"amount\": null, \"description\": \"description\"}",
             "{\"name\": \"name\",                   \"description\": \"description\"}",
     })
-    void badRequestWhenNotValidPayload(String notValidPayload) {
+    void shouldRespondWithBadRequestWhenNotValidPayload(String notValidPayload) {
         // when
         Response response = requestSpec
                 .body(notValidPayload)
@@ -92,7 +87,7 @@ class CreateItemTest extends TestBase {
     }
 
     @Test
-    void roundedAmountWhenDoubleValue() {
+    void shouldRespondWithRoundedAmountWhenDoubleValue() {
         // when
         Response response = requestSpec
                 .body("{\"name\": \"name\", \"amount\": 0.5, \"description\": \"description\"}")

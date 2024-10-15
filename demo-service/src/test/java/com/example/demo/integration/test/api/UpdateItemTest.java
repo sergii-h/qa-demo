@@ -1,8 +1,8 @@
 package com.example.demo.integration.test.api;
 
 import com.example.demo.integration.TestBase;
-import com.example.demo.integration.context.ItemContext;
-import com.example.demo.integration.data.ItemResponse;
+import com.example.demo.context.ItemTestContext;
+import com.example.demo.data.ItemResponse;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,18 +30,18 @@ class UpdateItemTest extends TestBase {
 
     @ParameterizedTest
     @MethodSource("validPayload")
-    void updateItem(String name, long amount, String description,
+    void shouldUpdateItem(String name, long amount, String description,
                     String updatedName, long updatedAmount, String updatedDescription
     ) {
         // given
-        ItemContext context = ItemContext
+        ItemTestContext context = ItemTestContext
                 .builder()
                 .name(name)
                 .amount(amount)
                 .description(description)
                 .build();
 
-        ItemContext updatedContext = ItemContext
+        ItemTestContext updatedContext = ItemTestContext
                 .builder()
                 .name(updatedName)
                 .amount(updatedAmount)
@@ -70,9 +70,9 @@ class UpdateItemTest extends TestBase {
     }
 
     @Test
-    void updateNotExistingItem() {
+    void shouldUpdateNotExistingItem() {
         // given
-        ItemContext context = ItemContext
+        ItemTestContext context = ItemTestContext
                 .builder()
                 .id(randomNumeric(10))
                 .build();

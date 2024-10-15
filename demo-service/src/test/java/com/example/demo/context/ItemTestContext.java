@@ -1,7 +1,9 @@
-package com.example.demo.integration.context;
+package com.example.demo.context;
 
-import com.example.demo.integration.data.ItemRequest;
-import com.example.demo.integration.data.ItemResponse;
+import com.example.demo.data.DemoEvent;
+import com.example.demo.data.DemoRequest;
+import com.example.demo.data.ItemRequest;
+import com.example.demo.data.ItemResponse;
 
 import io.restassured.response.Response;
 import lombok.Builder;
@@ -9,7 +11,7 @@ import lombok.Data;
 
 @Builder
 @Data
-public class ItemContext {
+public class ItemTestContext {
     private String id;
     private Response response;
 
@@ -30,8 +32,25 @@ public class ItemContext {
                 .build();
     }
 
+    public DemoRequest createDemoRequest() {
+        return DemoRequest.builder()
+                .name(name)
+                .description(description)
+                .amount(amount)
+                .build();
+    }
+
     public ItemResponse createExpectedResponse() {
         return ItemResponse.builder()
+                .id(id)
+                .name(name)
+                .description(description)
+                .amount(amount)
+                .build();
+    }
+
+    public DemoEvent createExpectedEvent() {
+        return DemoEvent.builder()
                 .id(id)
                 .name(name)
                 .description(description)
