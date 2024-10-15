@@ -7,7 +7,8 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.annotation.Nonnull;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class ChromeRemoteProvider implements WebDriverProvider {
     private final String[] arguments;
@@ -38,9 +39,9 @@ public class ChromeRemoteProvider implements WebDriverProvider {
         String remoteWebdriverUrl = PROPERTIES_READER.getProperty(TEST_ENV + ".test.remote.webdriver.url");
 
         try {
-            return new RemoteWebDriver(new URL(remoteWebdriverUrl), options);
-        } catch (final MalformedURLException e) {
-            throw new InternalError("Unable to create driver. MalformedURLException", e);
+            return new RemoteWebDriver(new URI(remoteWebdriverUrl).toURL(), options);
+        } catch (MalformedURLException | URISyntaxException e) {
+            throw new InternalError(e);
         }
     }
 }

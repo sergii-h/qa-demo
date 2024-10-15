@@ -18,7 +18,10 @@ consists of 4 fields:
     How to run:
 
     Run mongo-db container first on port 2018 or use this commmand from qa-demo directory
-    `docker compose -f docker/docker-compose-run-application-local.yml up -d qa-demo-mongo`
+    `docker compose -f docker/docker-compose-run-application.yml up -d qa-demo-mongo`
+
+    Run kafka container first on port 9092/2181 or use this commmand from qa-demo directory
+    `docker compose -f docker/docker-compose-run-application.yml up -d qa-demo-kafka`
     
     * IDE: Create a SpringBoot application and run it
     * Terminal: Package it with maven and run with "java -jar demo-service.jar"

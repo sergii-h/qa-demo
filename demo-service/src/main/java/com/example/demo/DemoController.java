@@ -1,8 +1,8 @@
 package com.example.demo;
 
-import jakarta.validation.Valid;
+import java.util.List;
+
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,7 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.example.demo.data.DemoData;
+import com.example.demo.data.DemoRequest;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/v1/items")
@@ -20,13 +23,13 @@ class DemoController {
     private final ItemRepository repository;
     private final DemoEventProducer demoEventProducer;
 
-    @Autowired
-    public DemoController(ItemRepository repository) {
+    public DemoController(ItemRepository repository, DemoEventProducer demoEventProducer) {
         this.repository = repository;
+        this.demoEventProducer = demoEventProducer;
     }
 
     @PostMapping
-    DemoResponse createItem(@RequestBody @Valid DemoRequest demoRequest) {
+    DemoData createItem(@RequestBody @Valid DemoRequest demoRequest) {
         DemoData item = DemoData.builder()
                 .id(String.valueOf(new ObjectId()))
                 .name(demoRequest.getName())
@@ -34,9 +37,10 @@ class DemoController {
                 .amount(demoRequest.getAmount())
                 .build();
 
+        DemoData response = repository.insert(item);
         demoEventProducer.produce(item);
 
-        return repository.insert(item);
+        return response;
     }
 
     @PutMapping("/{itemId}")
