@@ -3,7 +3,7 @@ name: Run frontend tests
 on:
   push:
     branches:
-      - master
+      - '**'
 
 jobs:
   run-tests:
