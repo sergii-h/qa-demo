@@ -4,8 +4,6 @@ on:
   push:
     branches:
     - '**'
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
   run-tests:
@@ -16,7 +14,7 @@ jobs:
         ports:
           - 27018:27017
       kafka:
-        image: docker.io/dougdonohoe/kafka-zookeeper:2.6.0
+        image: johnnypark/kafka-zookeeper:2.8.2
         ports:
           - "2181:2181"
           - "9092:9092"

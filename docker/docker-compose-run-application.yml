@@ -37,7 +37,7 @@ services:
       - ./scripts:/docker-entrypoint-initdb.d/
 
   qa-demo-kafka:
-    image: docker.io/dougdonohoe/kafka-zookeeper:2.6.0
+    image: johnnypark/kafka-zookeeper:2.8.2
     container_name: qa-demo-kafka
     ports:
       - "2181:2181"
