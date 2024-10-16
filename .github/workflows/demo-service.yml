@@ -29,9 +29,5 @@ jobs:
         java-version: '17'
         distribution: adopt
         cache: maven
-#    - name: debug
-#      run: |
-#        docker ps -a
-#        docker logs ${{ job.services.kafka.id }}
     - name: Build BE (with test-run)
       run: mvn -B package --file demo-service/pom.xml
