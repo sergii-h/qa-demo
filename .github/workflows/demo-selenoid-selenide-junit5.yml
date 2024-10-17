@@ -17,7 +17,7 @@ jobs:
       kafka:
         image: johnnypark/kafka-zookeeper:2.6.0
         env:
-          ADVERTISED_HOST: 127.0.0.1
+          ADVERTISED_HOST: 172.17.0.1
           NUM_PARTITIONS: 10
         ports:
           - "2181:2181"
