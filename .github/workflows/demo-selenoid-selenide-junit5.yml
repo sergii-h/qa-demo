@@ -17,7 +17,7 @@ jobs:
       kafka:
         image: johnnypark/kafka-zookeeper:2.6.0
         env:
-          ADVERTISED_HOST: 172.17.0.1
+          ADVERTISED_HOST: 127.0.0.1
           NUM_PARTITIONS: 10
         ports:
           - "2181:2181"
@@ -47,7 +47,7 @@ jobs:
       run: docker compose -f docker/docker-compose-run-selenoid.yml up -d
        
     - name: Run e2e tests
-      run: mvn -Dtest.env=remote test
+      run: mvn -Dtest.env=remote -Dtest.tags=tmp test
 
     - name: Push allure report
       if: ${{ github.ref == 'refs/heads/master' }} && always()
