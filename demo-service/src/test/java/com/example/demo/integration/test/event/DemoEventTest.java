@@ -81,9 +81,9 @@ class DemoEventTest extends TestBase {
         demoEventConsumer.setFilter(context.getId());
         demoEventConsumer.start();
 
-        await().until(() -> !demoEventConsumer.getRecords().isEmpty());
-
         // then
-        assertThat(demoEventConsumer.getRecords(), equalTo(List.of(context.createExpectedEvent())));
+        await().untilAsserted(
+                () -> assertThat(demoEventConsumer.getRecords(), equalTo(List.of(context.createExpectedEvent())))
+        );
     }
 }

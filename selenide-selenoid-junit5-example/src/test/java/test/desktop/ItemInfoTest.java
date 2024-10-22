@@ -1,6 +1,6 @@
 package test.desktop;
 
-import context.ItemContext;
+import context.ItemTestContext;
 import io.qameta.allure.Epic;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -18,11 +18,11 @@ class ItemInfoTest extends DesktopTest {
     @Test()
     @DisplayName("Get Item info")
     void shouldGetItemInfo() {
-        ItemContext context = ItemContext.builder().build();
+        ItemTestContext context = ItemTestContext.builder().build();
 
         actions.api.createItem(context.createItemRequest());
-        actions.items.openItemInfoForm(context.name);
+        actions.items.openItemInfoForm(context.getName());
 
-        validate.item.info(context.name, context.amount, context.description);
+        validate.item.info(context.getName(), context.getAmount(), context.getDescription());
     }
 }
