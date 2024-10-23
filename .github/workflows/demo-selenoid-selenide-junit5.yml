@@ -51,7 +51,7 @@ jobs:
       run: docker compose -f docker/docker-compose-run-selenoid.yml up -d
        
     - name: Run e2e tests
-      run: mvn -Dtest.env=remote -Dtest.tags=tmp test
+      run: sleep 60 && mvn -Dtest.env=remote -Dtest.tags=tmp test
 
     - name: Push allure report
       if: ${{ github.ref == 'refs/heads/master' }} && always()
