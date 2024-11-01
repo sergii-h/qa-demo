@@ -3,7 +3,7 @@ name: Run backend tests
 on:
   push:
     branches:
-    - '*master'
+    - '**'
 
 jobs:
   run-tests:
