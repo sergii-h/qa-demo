@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.data;
 
 import lombok.Builder;
 import lombok.Value;
@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document("items")
 @Value
 @Builder(toBuilder = true)
-class DemoData {
+public class DemoData {
     @Id
     String id;
     String name;

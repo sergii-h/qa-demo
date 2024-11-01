@@ -12,9 +12,9 @@ public class CreateItemAction {
 
     @Step("Set item data")
     public CreateItemAction setItemData(Item itemData) {
-        createItemForm.nameField.setValue(itemData.name);
-        createItemForm.amountField.setValue(itemData.amount);
-        createItemForm.descriptionField.setValue(itemData.description);
+        createItemForm.nameField.setValue(itemData.getName());
+        createItemForm.amountField.setValue(itemData.getAmount());
+        createItemForm.descriptionField.setValue(itemData.getDescription());
 
         return this;
     }

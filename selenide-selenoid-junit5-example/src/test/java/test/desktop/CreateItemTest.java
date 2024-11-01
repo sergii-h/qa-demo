@@ -1,6 +1,6 @@
 package test.desktop;
 
-import context.ItemContext;
+import context.ItemTestContext;
 import io.qameta.allure.Epic;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -21,7 +21,7 @@ class CreateItemTest extends DesktopTest {
     @DisplayName("Create item")
     void shouldCreateItem() {
         List<String> oldList = actions.items.getItemNames();
-        ItemContext context = ItemContext.builder()
+        ItemTestContext context = ItemTestContext.builder()
                 .name("name1")
                 .amount("1")
                 .description("description1")
@@ -32,7 +32,7 @@ class CreateItemTest extends DesktopTest {
                 .setItemData(context.createItemData())
                 .submitForm();
 
-        validate.items.itemCreated(oldList, context.name);
+        validate.items.itemCreated(oldList, context.getName());
     }
 
     @DisplayName("Create item with required 'description' field")
@@ -40,7 +40,7 @@ class CreateItemTest extends DesktopTest {
     void shouldCreateItemWithRequiredFieldOnly() {
         List<String> oldList = actions.items.getItemNames();
         
-        ItemContext context = ItemContext.builder()
+        ItemTestContext context = ItemTestContext.builder()
                 .name("")
                 .amount("")
                 .description("description")
@@ -51,6 +51,6 @@ class CreateItemTest extends DesktopTest {
                 .setItemData(context.createItemData())
                 .submitForm();
 
-        validate.items.itemCreated(oldList, context.name);
+        validate.items.itemCreated(oldList, context.getName());
     }
 }

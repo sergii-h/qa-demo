@@ -1,4 +1,4 @@
-package com.example.demo.integration.data;
+package data;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 
 @Builder
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class ItemResponse {
+@AllArgsConstructor
+public class DemoEventMessage {
     private String id;
     private String name;
     private String description;

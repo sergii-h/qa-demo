@@ -3,9 +3,11 @@ services:
     container_name: qa-demo-service
     depends_on:
       - qa-demo-mongo
+      - qa-demo-kafka
+    environment:
+      MONGODB_URL: mongodb://qa-demo-mongo:27017/demo_db
+      KAFKA_SERVER: qa-demo-kafka:9092
     build:
-      args:
-        MONGODB_URL_ARG: mongodb://host.docker.internal:27018/demo_db
       context: ../
       dockerfile: docker/Dockerfile-demo-service
     ports:
@@ -34,6 +36,20 @@ services:
     volumes:
       - mongo-volume:/data/db
       - ./scripts:/docker-entrypoint-initdb.d/
+
+  qa-demo-kafka:
+    image: bitnami/kafka:3.3.2
+    container_name: qa-demo-kafka
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://qa-demo-kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@qa-demo-kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    ports:
+      - '9094:9094'
 
 volumes:
   mongo-volume:

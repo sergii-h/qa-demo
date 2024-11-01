@@ -2,9 +2,8 @@ name: Run frontend tests
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    branches:
+      - '**'
 
 jobs:
   run-tests:

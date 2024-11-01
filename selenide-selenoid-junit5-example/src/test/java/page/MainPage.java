@@ -1,12 +1,13 @@
 package page;
 
 import com.codeborne.selenide.ElementsCollection;
+import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
-
 import util.SelenideUtil;
 
 import java.util.List;
 
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 
@@ -29,6 +30,9 @@ public class MainPage {
     }
 
     public List<String> getItemNames() {
+        Selenide.refresh();
+        formLocator.shouldBe(visible);
+
         SelenideUtil.waitForEquals(itemsLocator::getLocation);
         return itemNames.texts();
     }

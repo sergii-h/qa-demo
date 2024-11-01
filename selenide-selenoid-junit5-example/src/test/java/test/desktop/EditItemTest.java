@@ -1,6 +1,6 @@
 package test.desktop;
 
-import context.ItemContext;
+import context.ItemTestContext;
 import io.qameta.allure.Epic;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -21,27 +21,27 @@ class EditItemTest extends DesktopTest {
     @DisplayName("Edit item")
     void shouldEditItem() {
         // given
-        ItemContext context = ItemContext.builder().build();
+        ItemTestContext context = ItemTestContext.builder().build();
 
         actions.api.createItem(context.createItemRequest());
 
         List<String> oldList = actions.items.getItemNames();
 
-        ItemContext changedContext = ItemContext.builder()
-                .name(context.name + "1")
-                .amount(context.amount + "1")
-                .description(context.description + "1")
+        ItemTestContext changedContext = ItemTestContext.builder()
+                .name(context.getName() + "1")
+                .amount(context.getAmount() + "1")
+                .description(context.getDescription() + "1")
                 .build();
 
         //when
         actions.items
-                .openItemEditForm(context.name)
+                .openItemEditForm(context.getName())
                 .setItemData(changedContext.createItemData())
                 .submitForm()
-                .openItemInfoForm(changedContext.name);
+                .openItemInfoForm(changedContext.getName());
 
         // then
         validate.items.listSizeIs(oldList.size());
-        validate.item.info(changedContext.name, changedContext.amount, changedContext.description);
+        validate.item.info(changedContext.getName(), changedContext.getAmount(), changedContext.getDescription());
     }
 }

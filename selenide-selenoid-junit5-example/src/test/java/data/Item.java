@@ -3,17 +3,17 @@ package data;
 import lombok.Builder;
 import lombok.Data;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 
 @Builder
 @Data
 public class Item {
     @Builder.Default
-    public String name = randomAlphabetic(12);
+    private String name = secure().nextAlphabetic(12);
 
     @Builder.Default
-    public String amount = "1";
+    private String amount = "1";
 
     @Builder.Default
-    public String description = randomAlphabetic(12);
+    private String description = secure().nextAlphabetic(12);
 }

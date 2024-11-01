@@ -2,9 +2,8 @@ name: Run backend tests
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    branches:
+    - '**'
 
 jobs:
   run-tests:
@@ -14,6 +13,18 @@ jobs:
         image: mongo:4.4
         ports:
           - 27018:27017
+      kafka:
+        image: bitnami/kafka:3.3.2
+        env:
+          KAFKA_CFG_NODE_ID: 0
+          KAFKA_CFG_PROCESS_ROLES: controller,broker
+          KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+          KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+          KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+          KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+          KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+        ports:
+          - "9094:9094"
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK
@@ -22,5 +33,8 @@ jobs:
         java-version: '17'
         distribution: adopt
         cache: maven
+      env:
+        MONGODB_URL: mongodb://localhost:27018/demo_db
+        KAFKA_SERVER: localhost:9094
     - name: Build BE (with test-run)
       run: mvn -B package --file demo-service/pom.xml

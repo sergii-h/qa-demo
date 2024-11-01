@@ -1,8 +1,8 @@
 package com.example.demo.integration.test.api;
 
 import com.example.demo.integration.TestBase;
-import com.example.demo.integration.context.ItemContext;
-import com.example.demo.integration.data.ItemResponse;
+import com.example.demo.context.ItemTestContext;
+import com.example.demo.data.ItemResponse;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 
@@ -13,9 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class GetItemTest extends TestBase {
     @Test
-    void getCreatedItem() {
+    void shouldGetCreatedItem() {
         // given
-        ItemContext context = ItemContext
+        ItemTestContext context = ItemTestContext
                 .builder()
                 .name("name")
                 .amount(1)
@@ -35,16 +35,16 @@ class GetItemTest extends TestBase {
     }
 
     @Test
-    void getUpdatedItem() {
+    void shouldGetUpdatedItem() {
         // given
-        ItemContext context = ItemContext
+        ItemTestContext context = ItemTestContext
                 .builder()
                 .name("name")
                 .amount(1)
                 .description("description")
                 .build();
 
-        ItemContext updatedContext = ItemContext
+        ItemTestContext updatedContext = ItemTestContext
                 .builder()
                 .name("updatedName")
                 .amount(2)
@@ -72,9 +72,9 @@ class GetItemTest extends TestBase {
     }
 
     @Test
-    void getDeletedItem() {
+    void shouldGetDeletedItem() {
         // given
-        ItemContext context = ItemContext.builder().build();
+        ItemTestContext context = ItemTestContext.builder().build();
 
         context.setResponse(requestSpec.body(context.createItemRequest()).post("/items"));
         
@@ -95,9 +95,9 @@ class GetItemTest extends TestBase {
     }
 
     @Test
-    void getNotExistingItem() {
+    void shouldGetNotExistingItem() {
         // given
-        ItemContext context = ItemContext
+        ItemTestContext context = ItemTestContext
                 .builder()
                 .id(randomNumeric(10))
                 .build();

@@ -1,8 +1,8 @@
 package com.example.demo.integration.test.api;
 
 import com.example.demo.integration.TestBase;
-import com.example.demo.integration.context.ItemContext;
-import com.example.demo.integration.data.ItemResponse;
+import com.example.demo.context.ItemTestContext;
+import com.example.demo.data.ItemResponse;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 
@@ -17,16 +17,16 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class GetItemsTest extends TestBase {
     @Test
-    void getItems() {
+    void shouldGetItems() {
         // given
-        ItemContext context1 = ItemContext
+        ItemTestContext context1 = ItemTestContext
                 .builder()
                 .name("name")
                 .amount(1)
                 .description("description")
                 .build();
 
-        ItemContext context2 = ItemContext
+        ItemTestContext context2 = ItemTestContext
                 .builder()
                 .name("name2")
                 .amount(2)
@@ -50,14 +50,14 @@ class GetItemsTest extends TestBase {
     }
 
     @Test
-    void getItemsAfterUpdate() {
+    void shouldGetItemsAfterUpdate() {
         // given
-        ItemContext context = ItemContext
+        ItemTestContext context = ItemTestContext
                 .builder()
                 .name("name")
                 .build();
 
-        ItemContext updatedContext = ItemContext
+        ItemTestContext updatedContext = ItemTestContext
                 .builder()
                 .name("updatedName")
                 .build();
@@ -83,9 +83,9 @@ class GetItemsTest extends TestBase {
     }
 
     @Test
-    void getItemsAfterDelete() {
+    void shouldGetItemsAfterDelete() {
         // given
-        ItemContext context = ItemContext
+        ItemTestContext context = ItemTestContext
                 .builder()
                 .build();
 
