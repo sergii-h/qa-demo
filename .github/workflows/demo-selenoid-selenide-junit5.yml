@@ -50,11 +50,12 @@ jobs:
     - name: Start Selenoid
       run: docker compose -f docker/docker-compose-run-selenoid.yml up -d
 
-    - name: logs
-      run: sleep 60 && docker logs qa-demo-interface
-
     - name: Run e2e tests
       run: mvn -Dtest.env=remote test
+
+    - name: logs
+      if: ${{!cancelled() }}
+      run: docker logs qa-demo-service
 
     - name: Push allure report
       if: ${{ github.ref == 'refs/heads/master' && !cancelled() }}

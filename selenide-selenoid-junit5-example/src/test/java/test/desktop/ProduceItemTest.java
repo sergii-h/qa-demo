@@ -35,7 +35,7 @@ class ProduceItemTest extends DesktopTest {
         demoEventConsumer.shutdown();
     }
 
-    @Tag("smoke")
+    @Tag("tmp")
     @Test
     @DisplayName("Produce item message")
     void shouldProduceItem() {
