@@ -1,5 +1,6 @@
 package test.desktop;
 
+import config.PropertyReader;
 import context.ItemTestContext;
 import data.DemoEventMessage;
 import io.qameta.allure.Epic;
@@ -17,13 +18,20 @@ import java.util.Map;
 class ProduceItemTest extends DesktopTest {
     ActionManager actions = new ActionManager();
     ValidationManager validate = new ValidationManager();
-    private KafkaConsumer<DemoEventMessage> demoEventConsumer;
+
+    KafkaConsumer<DemoEventMessage> demoEventConsumer;
+    static final PropertyReader PROPERTIES_READER = PropertyReader.getInstance();
 
     @BeforeEach
     void beforeEach () {
         demoEventConsumer = KafkaConsumer.<DemoEventMessage>builder()
-                .config(Map.of(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9094"))
-                .topic("demo-event")
+                .config(
+                        Map.of(
+                                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                                PROPERTIES_READER.getProperty("test.kafka.bootstrap.servers")
+                        )
+                )
+                .topic(PROPERTIES_READER.getProperty("test.kafka.topic"))
                 .messageClass(DemoEventMessage.class)
                 .build();
 
