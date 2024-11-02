@@ -101,6 +101,12 @@
             <version>4.2.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.14.17</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <finalName>demo-service</finalName>
@@ -130,6 +136,13 @@
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
+                    <properties>
+                        <configurationParameters>
+                            junit.jupiter.execution.parallel.enabled = true
+                            junit.jupiter.execution.parallel.mode.default = concurrent
+                            junit.jupiter.execution.parallel.mode.classes.default = concurrent
+                        </configurationParameters>
+                    </properties>
                 </configuration>
             </plugin>
             <plugin>
