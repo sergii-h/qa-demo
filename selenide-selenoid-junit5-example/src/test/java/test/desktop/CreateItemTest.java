@@ -9,8 +9,6 @@ import step.ActionManager;
 import step.ValidationManager;
 import test.DesktopTest;
 
-import java.util.List;
-
 @Epic("Create item")
 class CreateItemTest extends DesktopTest {
     ActionManager actions = new ActionManager();
@@ -20,37 +18,40 @@ class CreateItemTest extends DesktopTest {
     @Test
     @DisplayName("Create item")
     void shouldCreateItem() {
-        List<String> oldList = actions.items.getItemNames();
+        // given
         ItemTestContext context = ItemTestContext.builder()
                 .name("name1")
                 .amount("1")
                 .description("description1")
                 .build();
 
+        // when
         actions.items
                 .openCreateItemForm()
                 .setItemData(context.createItemData())
                 .submitForm();
 
-        validate.items.itemCreated(oldList, context.getName());
+        // then
+        validate.items.hasItem(context.getName());
     }
 
     @DisplayName("Create item with required 'description' field")
     @Test
     void shouldCreateItemWithRequiredFieldOnly() {
-        List<String> oldList = actions.items.getItemNames();
-        
+        // given
         ItemTestContext context = ItemTestContext.builder()
                 .name("")
                 .amount("")
                 .description("description")
                 .build();
 
+        // when
         actions.items
                 .openCreateItemForm()
                 .setItemData(context.createItemData())
                 .submitForm();
 
-        validate.items.itemCreated(oldList, context.getName());
+        // then
+        validate.items.hasItem(context.getName());
     }
 }
