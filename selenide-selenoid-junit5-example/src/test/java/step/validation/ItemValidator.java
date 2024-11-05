@@ -1,6 +1,5 @@
 package step.validation;
 
-import context.ItemTestContext;
 import data.DemoEventMessage;
 import io.qameta.allure.Step;
 import page.ItemInfoForm;
@@ -19,10 +18,10 @@ public class ItemValidator {
         itemInfoForm.locator.shouldHave(text(name + " Amount: " + amount + " € Description: " + description));
     }
 
-    @Step("Validate item message is produced")
-    public void produced(KafkaConsumer<DemoEventMessage> demoEventConsumer, ItemTestContext context) {
+    @Step("Validate event is produced with message: {expectedMessage}")
+    public void produced(KafkaConsumer<DemoEventMessage> demoEventConsumer, DemoEventMessage expectedMessage) {
         await().untilAsserted(
-                () -> assertThat(demoEventConsumer.getRecords(), hasItem(context.createExpectedEvent()))
+                () -> assertThat(demoEventConsumer.getRecords(), hasItem(expectedMessage))
         );
     }
 }

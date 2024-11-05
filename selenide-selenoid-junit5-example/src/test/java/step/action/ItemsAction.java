@@ -51,14 +51,8 @@ public class ItemsAction {
         List<String> oldList = mainPage.getItemNames();
 
         mainPage.itemDeleteButton(itemName).click();
-        Selenide.refresh();
 
-        with().pollInSameThread().await().until(() -> mainPage.getItemNames().size() != oldList.size());
-    }
-
-    @Step("Get item list")
-    public List<String> getItemNames() {
-        return mainPage.getItemNames();
+        with().pollInSameThread().await().until(() -> mainPage.itemNames.texts().size() == oldList.size() - 1);
     }
 
     private void waitForItem(String itemName) {

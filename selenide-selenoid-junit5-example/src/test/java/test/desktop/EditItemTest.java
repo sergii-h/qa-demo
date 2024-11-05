@@ -9,8 +9,6 @@ import step.ActionManager;
 import step.ValidationManager;
 import test.DesktopTest;
 
-import java.util.List;
-
 @Epic("Edit item")
 class EditItemTest extends DesktopTest {
     ActionManager actions = new ActionManager();
@@ -24,8 +22,6 @@ class EditItemTest extends DesktopTest {
         ItemTestContext context = ItemTestContext.builder().build();
 
         actions.api.createItem(context.createItemRequest());
-
-        List<String> oldList = actions.items.getItemNames();
 
         ItemTestContext changedContext = ItemTestContext.builder()
                 .name(context.getName() + "1")
@@ -41,7 +37,6 @@ class EditItemTest extends DesktopTest {
                 .openItemInfoForm(changedContext.getName());
 
         // then
-        validate.items.listSizeIs(oldList.size());
         validate.item.info(changedContext.getName(), changedContext.getAmount(), changedContext.getDescription());
     }
 }

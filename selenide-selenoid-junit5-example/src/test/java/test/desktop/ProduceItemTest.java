@@ -43,7 +43,7 @@ class ProduceItemTest extends DesktopTest {
         demoEventConsumer.shutdown();
     }
 
-    @Tag("tmp")
+    @Tag("smoke")
     @Test
     @DisplayName("Produce item message")
     void shouldProduceItem() {
@@ -55,6 +55,6 @@ class ProduceItemTest extends DesktopTest {
         context.setResponse(response);
 
         // then
-        validate.item.produced(demoEventConsumer, context);
+        validate.item.produced(demoEventConsumer, context.createExpectedEvent());
     }
 }
