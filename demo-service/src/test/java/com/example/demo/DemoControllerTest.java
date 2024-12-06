@@ -2,12 +2,10 @@ package com.example.demo;
 
 import com.example.demo.context.ItemTestContext;
 import com.example.demo.data.DemoData;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
@@ -26,9 +24,12 @@ class DemoControllerTest {
     @Mock
     private DemoEventProducer demoEventProducer;
 
+    @Mock
+    private DemoService demoService;
+
     @BeforeEach
     void beforeEach() {
-        demoController = new DemoController(itemRepository, demoEventProducer);
+        demoController = new DemoController(itemRepository, demoEventProducer, demoService);
     }
 
     @Test
