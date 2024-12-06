@@ -7,6 +7,7 @@ services:
     environment:
       MONGODB_URL: mongodb://qa-demo-mongo:27017/demo_db
       KAFKA_SERVER: qa-demo-kafka:9092
+      EXTERNAL_SERVICE: http://qa-demo-wiremock:8080
     build:
       context: ../
       dockerfile: docker/Dockerfile-demo-service
@@ -50,6 +51,12 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
     ports:
       - '9094:9094'
+
+  qa-demo-wiremock:
+    image: wiremock/wiremock:3.9.2
+    container_name: qa-demo-wiremock
+    ports:
+      - '8084:8080'
 
 volumes:
   mongo-volume:
