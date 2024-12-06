@@ -5,8 +5,9 @@ import {InfoModal} from "./infoModal";
 import {BE_API} from "../../helpers";
 
 const title = () => within(document.querySelector('.p-dialog-title'))
-const amount = () => within(document.querySelector('#info-modal_content > p:nth-child(2)'))
-const description = () => within(document.querySelector('#info-modal_content > p:last-child'))
+const amount = () => within(document.querySelector('#amount'))
+const description = () => within(document.querySelector('#description'))
+const isValid = () => within(document.querySelector('#valid'))
 
 const MockFetch = require('../../mocks/mockFetch').default;
 const spyOnFetch = jest.spyOn(window, 'fetch')
@@ -20,13 +21,13 @@ beforeEach(() => {
 });
 
 [
-    { name: "name",         amount: 1,     description: "description"         },
-    { name: "name",         amount: 0.5,   description: "description"         },
-    { name: "name",         amount: "0,5", description: "description"         },
-    { name: "another name", amount: -1,    description: "another description" },
-    { name: " ",            amount: 0,     description: " "                   },
-    { name: "name",         amount: "",    description: ""                    },
-    { name: "name",         amount: "01",  description: ""                    },
+    { name: "name",         amount: 1,     description: "description",         isValid: true  },
+    { name: "name",         amount: 0.5,   description: "description",         isValid: true  },
+    { name: "name",         amount: "0,5", description: "description",         isValid: true  },
+    { name: "another name", amount: -1,    description: "another description", isValid: true  },
+    { name: " ",            amount: 0,     description: " ",                   isValid: true  },
+    { name: "name",         amount: "",    description: "",                    isValid: true  },
+    { name: "name",         amount: "01",  description: "",                    isValid: false },
 ].forEach((data) => {
     it(`should render with values { '${data.name}', ${data.amount}, '${data.description}' }`, async () => {
         // given
@@ -39,6 +40,10 @@ beforeEach(() => {
                     description: data.description,
                     amount: data.amount,
                 }
+            },
+            isValidResponse: {
+                status: 200,
+                body: data.isValid
             }
         })
 
@@ -51,34 +56,33 @@ beforeEach(() => {
         expect(title().getByText(mockFetch.payload.itemResponse.body.name.trim())).toBeVisible()
         expect(amount().getByText((mockFetch.payload.itemResponse.body.amount + ' €').trim())).toBeVisible()
         expect(description().getByText(mockFetch.payload.itemResponse.body.description.trim())).toBeVisible()
+        expect(isValid().getByTestId(data.isValid ? 'valid' : 'notValid')).toBeVisible()
     })
 });
 
-[
-    { id: '1',               amount: 1,    description: "description" },
-    { id: '1', name: 'name',               description: "description" },
-    { id: '1', name: 'name', amount: 1                                },
-].forEach((body) => {
-    it('should render default values when absent in response', async () => {
-        // given
-        mockFetch = new MockFetch({
-            itemResponse: {
-                status: 200,
-                body: body
-            }
-        })
-
-        spyOnFetch.mockImplementation(mockFetch.execute)
-
-        // when
-        await act(() => render(<InfoModal itemId={mockFetch.payload.itemResponse.body.id} />))
-
-        // then
-        expect(title().getByText(mockFetch.payload.itemResponse.body.name || 'Info')).toBeVisible()
-        expect(amount().getByText(`${mockFetch.payload.itemResponse.body.amount || ''} €`.trim())).toBeVisible()
-        expect(description().getByText(mockFetch.payload.itemResponse.body.description || '')).toBeVisible()
+it('should render default values when absent in response', async () => {
+    // given
+    mockFetch = new MockFetch({
+        itemResponse: {
+            status: 200,
+            body: { id: '1'}
+        },
+        isValidResponse: {
+            status: 200
+        }
     })
-});
+
+    spyOnFetch.mockImplementation(mockFetch.execute)
+
+    // when
+    await act(() => render(<InfoModal itemId={mockFetch.payload.itemResponse.body.id} />))
+
+    // then
+    expect(title().getByText(mockFetch.payload.itemResponse.body.name || 'Info')).toBeVisible()
+    expect(amount().getByText(`${mockFetch.payload.itemResponse.body.amount || ''} €`.trim())).toBeVisible()
+    expect(description().getByText(mockFetch.payload.itemResponse.body.description || '')).toBeVisible()
+    expect(isValid().getByTestId("notValid")).toBeVisible()
+})
 
 it(`should get /items with parameter`, async () => {
     // when
@@ -99,6 +103,9 @@ it('should render default values when error', async () => {
         itemResponse: {
             status: 400,
             body: {}
+        },
+        isValidResponse: {
+            status: 400
         }
     })
 

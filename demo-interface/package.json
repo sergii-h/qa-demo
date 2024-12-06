@@ -71,7 +71,7 @@
     "jest-extended": "^4.0.2",
     "@jest/globals": "^29.7.0",
     "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.2.0",
+    "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.1",
     "prop-types": "^15.8.1",
