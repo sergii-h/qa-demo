@@ -14,6 +14,12 @@ const getItem = async (itemId: string): Promise<IItem> => {
     return await response.json();
 }
 
+const getIsValid = async (itemId: string): Promise<IItem> => {
+    const response = await fetch(BE_API + `/items/isValid/${itemId}`, { method: 'GET', headers: { 'Content-Type': 'application/json'} });
+
+    return await response.json();
+}
+
 const createItem = async (item: IItem): Promise<IItem> => {
     const response = await fetch(BE_API + `/items`, { method: 'POST', body: JSON.stringify({ ...item }), headers: { 'Content-Type': 'application/json'} });
 
@@ -31,6 +37,7 @@ const deleteItem = async (itemId: string): Promise<any> => {
 export  {
     getItems,
     getItem,
+    getIsValid,
     createItem,
     updateItem,
     deleteItem,
