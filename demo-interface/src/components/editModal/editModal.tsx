@@ -80,7 +80,7 @@ export const EditModal = (props: IProps) => {
                             aria-describedby="amount-help"
                             className="block"
                             style={{ width: '100%' }}
-                            value={amount}
+                            value={amount.toString()}
                             type="number"
                             onChange={(e) => setAmount(Number(e.target.value))}
                         />

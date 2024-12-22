@@ -49,7 +49,7 @@ export default class MockFetch {
                 break
 
             case 'POST':
-                if (url.includes('/item/')) {
+                if (url.includes('/items')) {
                     return {
                         status: this.payload.itemResponse.status,
                         json: () => this.payload.itemResponse.body,
@@ -58,7 +58,7 @@ export default class MockFetch {
                 break
 
             case 'PUT':
-                if (url.includes('/item/')) {
+                if (url.includes('/items/')) {
                     return {
                         ok: true,
                         status: this.payload.itemResponse.status,
