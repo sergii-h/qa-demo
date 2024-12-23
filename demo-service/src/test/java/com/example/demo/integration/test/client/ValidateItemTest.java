@@ -26,7 +26,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @EnableWireMock(
-        @ConfigureWireMock(port = 8084)
+        @ConfigureWireMock(port = 8085)
 )
 class ValidateItemTest extends TestBase {
     @BeforeEach
