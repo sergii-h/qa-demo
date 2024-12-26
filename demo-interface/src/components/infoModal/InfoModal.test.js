@@ -89,10 +89,15 @@ it(`should get /items with parameter`, async () => {
     await act(() => render(<InfoModal itemId={mockFetch.payload.itemResponse.body.id} />))
 
     // then
-    expect(fetchSpy).toHaveBeenCalledTimes(1)
+    expect(fetchSpy).toHaveBeenCalledTimes(2)
 
     expect(fetchSpy).toHaveBeenCalledWith(
         `${BE_API}/items/${mockFetch.payload.itemResponse.body.id}`,
+        expect.objectContaining({"method": "GET"})
+    )
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+        `${BE_API}/items/isValid/${mockFetch.payload.itemResponse.body.id}`,
         expect.objectContaining({"method": "GET"})
     )
 });

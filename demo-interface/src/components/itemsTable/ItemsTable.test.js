@@ -186,10 +186,20 @@ it('should get /items with id when Info clicked', async () => {
     await act(() => within(screen.getAllByRole('cell')[1]).getByText('Info').click())
 
     // then
-    expect(fetchSpy).toHaveBeenCalledTimes(2)
+    expect(fetchSpy).toHaveBeenCalledTimes(3)
 
-    expect(fetchSpy).toHaveBeenLastCalledWith(
+    expect(fetchSpy).toHaveBeenCalledWith(
+        `${BE_API}/items`,
+        expect.objectContaining({"method": "GET"})
+    )
+
+    expect(fetchSpy).toHaveBeenCalledWith(
         `${BE_API}/items/${mockFetch.payload.itemResponse.body.id}`,
+        expect.objectContaining({"method": "GET"})
+    )
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+        `${BE_API}/items/isValid/${mockFetch.payload.itemResponse.body.id}`,
         expect.objectContaining({"method": "GET"})
     )
 });
