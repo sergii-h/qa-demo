@@ -57,6 +57,8 @@ services:
     container_name: qa-demo-wiremock
     ports:
       - '8084:8080'
+    volumes:
+      - ./mappings:/home/wiremock/mappings
 
 volumes:
   mongo-volume:
