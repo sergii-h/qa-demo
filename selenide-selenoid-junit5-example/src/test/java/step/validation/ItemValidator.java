@@ -17,7 +17,7 @@ public class ItemValidator {
     @Step("Validate item info")
     public void info(String name, String amount, String description) {
         itemInfoForm.locator.shouldHave(text(name + " Amount: " + amount + " € Description: " + description));
-        itemInfoForm.validLabel.shouldBe(visible);
+        itemInfoForm.itemValidLabel.shouldBe(visible);
     }
 
     @Step("Validate event is produced with message: {expectedMessage}")
