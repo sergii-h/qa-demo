@@ -3,14 +3,19 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+import {beforeEach, jest} from "@jest/globals";
 
-let consoleSpy: jest.SpyInstance;
-beforeAll(() => {
-    consoleSpy = jest.spyOn(global.console, 'error').mockImplementation((message) => {
-        if (!message?.message?.includes('Could not parse CSS stylesheet')) {
-            global.console.warn(message);
+function ignoreLogs(logType: 'log' | 'info' | 'warn' | 'error', match: RegExp) {
+    const logFn = console[logType];
+    jest.spyOn(console, logType).mockImplementation((...args) => {
+        if (typeof args[0] === 'string' && args[0].match(match)) {
+            return;
         }
-    })
-});
 
-afterAll(() => consoleSpy.mockRestore());
+        logFn(...args);
+    });
+}
+
+beforeEach(() => {
+    ignoreLogs('error', /Support for defaultProps will be removed/);
+});
