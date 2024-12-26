@@ -14,9 +14,14 @@ import static org.hamcrest.Matchers.hasItem;
 public class ItemValidator {
     ItemInfoForm itemInfoForm = new ItemInfoForm();
 
-    @Step("Validate item info")
-    public void info(String name, String amount, String description) {
+    @Step("Validate item data")
+    public ItemValidator data(String name, String amount, String description) {
         itemInfoForm.locator.shouldHave(text(name + " Amount: " + amount + " € Description: " + description));
+        return this;
+    }
+
+    @Step("Validate item is valid")
+    public void isValid() {
         itemInfoForm.itemValidLabel.shouldBe(visible);
     }
 

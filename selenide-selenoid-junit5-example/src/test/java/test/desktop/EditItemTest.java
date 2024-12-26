@@ -37,6 +37,6 @@ class EditItemTest extends DesktopTest {
                 .openItemInfoForm(changedContext.getName());
 
         // then
-        validate.item.info(changedContext.getName(), changedContext.getAmount(), changedContext.getDescription());
+        validate.item.data(changedContext.getName(), changedContext.getAmount(), changedContext.getDescription());
     }
 }

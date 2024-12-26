@@ -31,6 +31,8 @@ class ItemInfoTest extends DesktopTest {
         actions.api.createItem(context.createItemRequest());
         actions.items.openItemInfoForm(context.getName());
 
-        validate.item.info(context.getName(), context.getAmount(), context.getDescription());
+        validate.item
+                .data(context.getName(), context.getAmount(), context.getDescription())
+                .isValid();
     }
 }
