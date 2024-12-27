@@ -56,7 +56,7 @@ services:
     image: wiremock/wiremock:3.9.2
     container_name: qa-demo-wiremock
     ports:
-      - '8084:8080'
+      - '8085:8080'
     volumes:
       - ./mappings:/home/wiremock/mappings
 
