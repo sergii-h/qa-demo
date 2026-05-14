@@ -415,7 +415,7 @@ qa-demo/
 - ✅ **Validation Testing** - Frontend & backend validation (mandatory fields, unique constraints)
 - ✅ **Integration with External Services** - WireMock for 3rd party mocking
 - ✅ **Event-Driven Testing** - Kafka message validation
-- ✅ **AI-Assisted Testing** - Structured testing rules for AI code generation
+- ✅ **AI-Assisted Testing** - Proprietary Cursor AI rules for structured test generation (available on request)
 
 ## 🛠️ Development
 
@@ -423,7 +423,7 @@ qa-demo/
 
 This project follows strict testing standards to ensure maintainability and quality:
 - All tests follow patterns defined in [doc/testing-standards.md](doc/testing-standards.md)
-- Cursor AI rules configured in `.cursorrules` for consistent test generation
+- Cursor AI rules maintained in a **private submodule** at `.cursor/rules/` — available for review upon request
 - Tests are self-documenting with clear test case naming
 - Minimal mocking strategy - prefer real integrations when possible
 
