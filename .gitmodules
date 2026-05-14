@@ -1,0 +1,3 @@
+[submodule ".cursor/rules"]
+	path = .cursor/rules
+	url = git@github.com:sgoldys/qa-demo-cursor-rules.git
