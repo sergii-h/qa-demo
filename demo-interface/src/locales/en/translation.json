@@ -1,0 +1,59 @@
+{
+  "common": {
+    "close": "Close",
+    "title": "Title *",
+    "description": "Description",
+    "status": "Status *",
+    "priority": "Priority *",
+    "selectStatus": "Select status",
+    "selectPriority": "Select priority",
+    "titleTooLong": "Title must not exceed 100 characters",
+    "titleAlreadyExists": "Task with this title already exists",
+    "taskStatus": {
+      "TODO": "To Do",
+      "IN_PROGRESS": "In Progress",
+      "DONE": "Done"
+    },
+    "taskPriority": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High"
+    }
+  },
+  "tasksTable": {
+    "createTask": "Create task",
+    "columns": {
+      "title": "Title",
+      "status": "Status",
+      "priority": "Priority",
+      "actions": "Actions"
+    },
+    "actions": {
+      "info": "Info",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
+  },
+  "createTaskModal": {
+    "title": "New task",
+    "create": "Create",
+    "failedToCreate": "Failed to create task. Please try again."
+  },
+  "editTaskModal": {
+    "title": "Edit",
+    "titleWithTask": "Edit {{taskTitle}}",
+    "save": "Save",
+    "failedToUpdate": "Failed to update task. Please try again."
+  },
+  "infoTaskModal": {
+    "title": "Info",
+    "noDescription": "No description",
+    "na": "N/A",
+    "description": "Description:",
+    "status": "Status:",
+    "priority": "Priority:",
+    "created": "Created:",
+    "lastUpdated": "Last Updated:",
+    "validated": "Validated:"
+  }
+}

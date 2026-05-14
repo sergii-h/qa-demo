@@ -1,0 +1,30 @@
+---
+description: Backend testing rules for Java/SpringBoot tests in demo-service
+globs: demo-service/**
+alwaysApply: false
+---
+
+# Backend Testing Rules (Java/SpringBoot)
+
+## Both Unit & Integration
+
+- **Test Context Pattern** for objects with 3+ fields — setup in `@BeforeEach`, mutate only dynamic fields (ID/timestamps), assert the full object: `context.setId(captured.getId()); assertThat(captured, is(context.createTask()));` — see `TaskTestContext.java`, [ADR-002](../../doc/adr/002-test-context-pattern-with-object-comparison.md)
+
+## Unit Tests
+
+- `@ExtendWith(MockitoExtension.class)` + `@Mock` / `@InjectMocks` for all external dependencies (repositories, REST clients, Kafka producers) — **never** `@SpringBootTest`
+- `ArgumentCaptor` to validate args passed to mocks — don't assert on mock return values
+- `assertThrows()` for exceptions; `verify()` for side effects
+- 90%+ coverage; cover edge cases (null, empty, boundary values)
+
+## Integration Tests
+
+- Test through the public HTTP API only — see [ADR-004](../../doc/adr/004-api-level-integration-tests-as-sole-integration-layer.md)
+- `@SpringBootTest(RANDOM_PORT)` + Testcontainers (MongoDB, Kafka) + REST Assured
+- Validate HTTP status codes (200, 201, 400, 404, 409, 500); `@AfterEach` cleanup
+- Use a rich (all fields) dataset as the primary scenario; add a minimal (required fields only) dataset only when the behaviour meaningfully differs
+
+## Kafka Events
+
+- `await().untilAsserted()` for async assertions — never `pollDelay` as a substitute for a real condition
+- "Should not publish" scenarios belong in unit tests with `verify(producer, never())`

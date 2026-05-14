@@ -1,0 +1,17 @@
+---
+description: Pact testing rules for React/TypeScript tests in demo-interface
+globs: demo-interface/pact/**
+alwaysApply: false
+---
+
+# Frontend Testing Rules
+
+## Consumer Tests
+ - Always type contract definitions using the production request/response types — never define inline types in tests. This binds the contract structurally to the implementation and ensures TypeScript compilation fails if a type changes without updating the contract, which is the only reliable way to prevent stale contracts from reaching `can-i-deploy`
+ - Cover the primary success scenario where the API returns 200 with expected response structure
+ - Cover error scenarios (4xx, 5xx) only if the consumer implements specific error handling logic based on status codes or error response structures
+ - Avoid testing consumer application logic (data transformations, calculations, business rules) in Pact; focus only on HTTP request/response contracts and API client behaviour
+ - Prefer like, eachLike, term, and min/max types to avoid over‑specifying volatile data
+ - In Pact, the contract is defined by withRequest/willRespondWith; executeTest callback should contain only minimal assertions to verify the request was made (not to validate response data processing)
+ 
+## Provider States

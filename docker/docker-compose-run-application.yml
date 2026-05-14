@@ -1,0 +1,64 @@
+services:
+  qa-demo-service:
+    container_name: qa-demo-service
+    depends_on:
+      - qa-demo-mongo
+      - qa-demo-kafka
+    environment:
+      MONGODB_URL: mongodb://qa-demo-mongo:27017/demo_db
+      KAFKA_SERVER: qa-demo-kafka:9092
+      EXTERNAL_SERVICE: http://qa-demo-wiremock:8080
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile-demo-service
+    ports:
+      - "8080:8080"
+
+  qa-demo-interface:
+    container_name: qa-demo-interface
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile-demo-interface
+    ports:
+      - "5173:5173"
+
+  qa-demo-mongo:
+    image: mongo:4.4
+    container_name: qa-demo-mongo
+    expose:
+      - 27018
+    ports:
+      - "27018:27017"
+    command: [ "--replSet", "rs0", "--bind_ip_all", "--setParameter", "enableTestCommands=1" ]
+    healthcheck:
+      test: test $$(echo "rs.initiate().ok || rs.status().ok" | mongo --quiet) -eq 1
+      interval: 60s
+      start_period: 60s
+    volumes:
+      - mongo-volume:/data/db
+      - ./scripts/mongo:/docker-entrypoint-initdb.d/
+
+  qa-demo-kafka:
+    image: bitnami/kafka:3.3.2
+    container_name: qa-demo-kafka
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://qa-demo-kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@qa-demo-kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    ports:
+      - '9094:9094'
+
+  qa-demo-wiremock:
+    image: wiremock/wiremock:3.9.2
+    container_name: qa-demo-wiremock
+    ports:
+      - '8085:8080'
+    volumes:
+      - ./mappings:/home/wiremock/mappings
+
+volumes:
+  mongo-volume:

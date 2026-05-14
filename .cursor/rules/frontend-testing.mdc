@@ -1,0 +1,43 @@
+---
+description: Frontend testing rules for React/TypeScript tests in demo-interface
+globs: demo-interface/**
+alwaysApply: false
+---
+
+# Frontend Testing Rules
+
+## Both Unit & Integration
+
+- Use `data-testid` for expectations instead of text locators; add them to components when needed
+- `beforeEach`/`afterEach` for setup and cleanup to prevent test pollution
+- Don't import `describe`, `it`, `expect`, `vi`, `beforeEach`, `afterEach` from `vitest` — they are available globally
+
+## Unit Tests
+
+- 100% coverage; cover all business logic and requirements from the ticket
+- Minimal mocks — return only what the test requires, no logic inside mocks
+- Use spies to verify function calls and prop passing to inner components without rendering the component
+- Avoid validating `data-testid` prop passing, translation keys, and constants
+
+## Integration Tests
+
+- Test complete user workflows and component combinations
+- Test through the public interface — any path is reachable through the rendered component tree; see [ADR-004](../../doc/adr/004-api-level-integration-tests-as-sole-integration-layer.md)
+- Keep all project dependencies real — mock only 3rd party libs with browser-only behaviour, inline in the test file, not globally
+- If a project dependency cannot be kept real, create a minimal mock that returns only what the 
+test requires
+- Avoid duplicating logic already covered in unit tests; focus on component interactions
+
+## Form Testing Patterns
+
+### Standalone Forms
+- Render with all data (rich scenario)
+- Render with minimal data (only if different from above)
+- Handle API error (if applicable)
+
+### Multistep Forms
+- Happy path with all data
+- Happy path with minimal data (only if different from above)
+- Preserve data when navigating between steps
+- Handle API error (if applicable)
+- Handle form validations and proceed

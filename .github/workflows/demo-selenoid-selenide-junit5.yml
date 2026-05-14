@@ -1,0 +1,77 @@
+name: Run e2e tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-20.04
+    services:
+      mongo:
+        image: mongo:4.4
+        ports:
+          - 27018:27017
+      kafka:
+        image: bitnami/kafka:3.3.2
+        env:
+          KAFKA_CFG_NODE_ID: 0
+          KAFKA_CFG_PROCESS_ROLES: controller,broker
+          KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+          KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://172.17.0.1:9094
+          KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+          KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+          KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+        ports:
+          - "9094:9094"
+      wiremock:
+        image: wiremock/wiremock:3.9.2
+        ports:
+          - "8085:8080"
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '18'
+        distribution: adopt
+        cache: maven
+
+    - name: start application under test
+      run: |
+        docker build -f docker/Dockerfile-demo-service -t docker-qa-demo-service . &&
+        docker build -f docker/Dockerfile-demo-interface --build-arg BE_API_ARG=http://172.17.0.1:8080/v1 -t docker-qa-demo-interface . &&
+        docker run -p 8080:8080 -d --name qa-demo-service -e MONGODB_URL='mongodb://172.17.0.1:27018/demo_db' -e KAFKA_SERVER='172.17.0.1:9094' -e EXTERNAL_SERVICE='http://172.17.0.1:8085' docker-qa-demo-service &&
+        docker run -p 3000:3000 -d --name qa-demo-interface docker-qa-demo-interface
+  
+    - name: Pull chrome image
+      run: docker pull selenoid/chrome:127.0
+
+    - name: Start Selenoid
+      run: docker compose -f docker/docker-compose-run-selenoid.yml up -d
+
+    - name: Run e2e tests
+      run: mvn -Dtest.env=remote test
+
+    - name: Push allure report
+      if: ${{ github.ref == 'refs/heads/master' && !cancelled() }}
+      uses: cpina/github-action-push-to-another-repository@main
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+      with:
+        source-directory: 'selenide-selenoid-junit5-example/target/allure-results'
+        destination-github-username: 'sgoldys'
+        destination-repository-name: 'github-pages-allure-selenide'
+        user-email: 32680292+sgoldys@users.noreply.github.com
+        target-branch: gh-pages
+        target-directory: allure-results
+    
+    - name: Publish allure report
+      if: ${{ github.ref == 'refs/heads/master' && !cancelled() }}
+      run: gh workflow run allure-report.yml --ref master --repo sgoldys/github-pages-allure-selenide
+      env:
+        GH_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
