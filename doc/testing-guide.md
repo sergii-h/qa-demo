@@ -24,7 +24,7 @@ Before starting any testing work:
 - [ ] **Coverage Check** - Run `npm test -- --coverage` and verify >90% coverage
 
 **Standards:** Follow [testing-standards.md](testing-standards.md) unit testing rules  
-**Detailed Rules:** See [doc/rules/frontend-unit-testing.md](rules/frontend-unit-testing.md) for comprehensive patterns
+**Detailed Rules:** Available in the private rules repository (see project README)
 
 ### Backend (JUnit5)
 - [ ] **Service Logic** - Test all business logic methods in isolation
@@ -35,7 +35,7 @@ Before starting any testing work:
 - [ ] **Mock External Dependencies** - Mock repositories, external clients, Kafka producers
 
 **Standards:** Mock external dependencies; test business logic in isolation  
-**Detailed Rules:** See [doc/rules/backend-unit-testing.md](rules/backend-unit-testing.md) for comprehensive patterns
+**Detailed Rules:** Available in the private rules repository (see project README)
 
 ---
 
@@ -49,7 +49,7 @@ Before starting any testing work:
 - [ ] **Error Handling** - Test API error responses and user feedback
 
 **Standards:** Keep project dependencies real; mock only 3rd party libs  
-**Detailed Rules:** See [doc/rules/frontend-integration-testing.md](rules/frontend-integration-testing.md) for comprehensive patterns
+**Detailed Rules:** Available in the private rules repository (see project README)
 
 ### Backend Integration (@SpringBootTest)
 - [ ] **REST Endpoints** - Test all CRUD operations end-to-end
@@ -59,7 +59,7 @@ Before starting any testing work:
 - [ ] **Kafka Events** - Verify TaskEvent messages are produced correctly
 
 **Standards:** Use `@SpringBootTest` for full application context; test containers for DB/Kafka  
-**Detailed Rules:** See [doc/rules/backend-integration-testing.md](rules/backend-integration-testing.md) for comprehensive patterns
+**Detailed Rules:** Available in the private rules repository (see project README)
 
 ---
 
@@ -189,6 +189,6 @@ A ticket is **DONE** when:
 
 - **[Testing Standards](testing-standards.md)** - Detailed testing rules and principles
 - **[Quick Checklist](check-list.md)** - Simple testing pyramid reminder for daily work
-- **[AI Testing Rules](rules/README.md)** - 🤖 Comprehensive AI-ready testing rules (FE + BE)
+- **AI Testing Rules** - 🤖 Comprehensive AI-ready testing rules (FE + BE) — available in the private rules repository (see project README)
 - **[ADR-001: Vitest over Jest](adr/001-vitest-over-jest.md)** - Why we chose Vitest for unit/integration testing
 
