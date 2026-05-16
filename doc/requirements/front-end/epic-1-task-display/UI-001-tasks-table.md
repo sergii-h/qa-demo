@@ -53,7 +53,7 @@ As a user, I want to view all my tasks in a table with visual status and priorit
 3. **Pact**
    - Should have GET `/v1/tasks` consumer test
 4. **E2E**
-   - Should render tasks table with fetched data on component mount
+   - N/A (covered during task management)
 5. **Accessibility**
    - Should have proper ARIA labels for table and buttons
    - Should be keyboard navigable

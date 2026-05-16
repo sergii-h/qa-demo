@@ -43,10 +43,7 @@ As a user, I want to switch the application language so that I can use the task 
    - Should render language switcher dropdown with `EN` and `ES` options
    - Should change current language when user selects another language option
 3. **E2E**
-   - Should display the application in English by default
-   - Should switch all UI text to Spanish when ES is selected
-   - Should switch all UI text back to English when EN is selected
-   - Should display translated status and priority values in the tasks table after language switch
+   - Should switch all UI text and status/priority tag values to Spanish when ES is selected
 4. **Accessibility**
    - Language selector should be keyboard navigable
 5. **UAT** - N/A

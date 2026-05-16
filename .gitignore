@@ -16,3 +16,4 @@ selenide-selenoid-junit5-example/allure-results/
 /demo-interface/coverage/
 /demo-interface/pacts/
 /cv/
+/e2e/selenide-selenoid-junit5/build/

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
-        <module>selenide-selenoid-junit5-example</module>
+        <module>e2e/selenide-selenoid-junit5</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
