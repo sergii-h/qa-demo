@@ -5,11 +5,12 @@ import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
+import './app.css';
 
 function App() {
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '1rem' }}>
+    <div className="app-container">
+      <div className="app-header">
         <LanguageSwitcher />
       </div>
       <TasksTable />

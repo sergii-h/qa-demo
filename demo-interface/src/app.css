@@ -1,0 +1,27 @@
+.app-container {
+    padding: 0 1rem;
+}
+
+.app-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem 0;
+}
+
+.tasks-table-container {
+    padding: 0 0 1rem 0;
+}
+
+.add-task-button {
+    margin-bottom: 1rem;
+}
+
+@media screen and (max-width: 768px) {
+    .task-action-button .p-button-label {
+        display: none;
+    }
+
+    .task-action-button {
+        padding: 0.5rem;
+    }
+}

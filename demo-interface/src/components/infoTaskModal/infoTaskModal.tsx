@@ -60,7 +60,7 @@ export const InfoTaskModal = (props: IProps) => {
     );
 
     return (
-        <Dialog id="info-task-modal" header={<span data-testid="modal-title">{task?.title || t('infoTaskModal.title')}</span>} visible={true} onHide={onHide} footer={renderFooter()} style={{ minWidth: 480 }}>
+        <Dialog id="info-task-modal" header={<span data-testid="modal-title">{task?.title || t('infoTaskModal.title')}</span>} visible={true} onHide={onHide} footer={renderFooter()} style={{ width: '95vw', maxWidth: '560px' }}>
             {isLoading ? <ProgressSpinner data-testid="loading-spinner" /> : <>
                 <label className="block">{t('infoTaskModal.description')}</label>
                 <p data-testid="description">{task?.description || t('infoTaskModal.noDescription')}</p>

@@ -103,7 +103,7 @@ export const CreateTaskModal = (props: IProps) => {
     }
 
     return (
-        <Dialog id="create-task-modal" header={<span data-testid="modal-title">{t('createTaskModal.title')}</span>} visible={true} onHide={onHide} footer={renderFooter()} style={{ minWidth: 480 }}>
+        <Dialog id="create-task-modal" header={<span data-testid="modal-title">{t('createTaskModal.title')}</span>} visible={true} onHide={onHide} footer={renderFooter()} style={{ width: '95vw', maxWidth: '560px' }}>
             {isLoading ? <ProgressSpinner data-testid="loading-spinner" /> : <>
                 <div className="field">
                     <label htmlFor="title" className="block">{t('common.title')}</label>
