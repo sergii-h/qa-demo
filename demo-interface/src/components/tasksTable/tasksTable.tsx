@@ -82,7 +82,7 @@ export const TasksTable = () => {
                         setActiveTaskId(rowData.id);
                         setIsInfoModalOpen(true);
                     }}
-                    className="p-button-outlined task-info-button"
+                    className="p-button-outlined task-info-button task-action-button"
                     style={{ marginRight: 8 }}
                 />
                 <Button
@@ -93,7 +93,7 @@ export const TasksTable = () => {
                         setActiveTaskId(rowData.id);
                         setIsEditModalOpen(true);
                     }}
-                    className="p-button-outlined edit-task-button"
+                    className="p-button-outlined edit-task-button task-action-button"
                     style={{ marginRight: 8 }}
                 />
                 <Button
@@ -103,14 +103,14 @@ export const TasksTable = () => {
                     onClick={() => {
                         deleteTaskById(rowData.id);
                     }}
-                    className="p-button-outlined p-button-danger delete-task-button"
+                    className="p-button-outlined p-button-danger delete-task-button task-action-button"
                 />
             </>
         );
     }
 
     return (
-        <div>
+        <div className="tasks-table-container">
             <Button
                 icon="pi pi-plus"
                 label={t('tasksTable.createTask')}

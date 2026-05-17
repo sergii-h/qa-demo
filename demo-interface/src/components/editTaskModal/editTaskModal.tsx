@@ -131,7 +131,7 @@ export const EditTaskModal = (props: IProps) => {
             header={<span data-testid="modal-title">{task?.title ? t('editTaskModal.titleWithTask', { taskTitle: task.title }) : t('editTaskModal.title')}</span>}
             visible={true}
             onHide={onHide}
-            footer={renderFooter()} style={{ minWidth: 480 }}
+            footer={renderFooter()} style={{ width: '95vw', maxWidth: '560px' }}
         >
             {isLoading ? <ProgressSpinner data-testid="loading-spinner" /> : <>
                 <div className="field">
