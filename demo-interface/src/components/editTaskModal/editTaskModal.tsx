@@ -9,6 +9,14 @@ import {useTranslation} from 'react-i18next';
 import ITask, {TaskStatus, TaskPriority} from '../../interfaces/ITask';
 import {getTask, updateTask} from '../../services';
 
+const statusDropdownItemTemplate = (option: { label: string; value: TaskStatus }) => (
+    <span data-testid={`status-dropdown-option-${option.value}`}>{option.label}</span>
+);
+
+const priorityDropdownItemTemplate = (option: { label: string; value: TaskPriority }) => (
+    <span data-testid={`priority-dropdown-option-${option.value}`}>{option.label}</span>
+);
+
 interface IProps {
     onClose: () => void;
     onSave: () => void;
@@ -162,6 +170,7 @@ export const EditTaskModal = (props: IProps) => {
                         data-testid="status-dropdown"
                         value={status}
                         options={statusOptions}
+                        itemTemplate={statusDropdownItemTemplate}
                         onChange={(e) => setStatus(e.value)}
                         placeholder={t('common.selectStatus')}
                         style={{ width: '100%' }}
@@ -174,6 +183,7 @@ export const EditTaskModal = (props: IProps) => {
                         data-testid="priority-dropdown"
                         value={priority}
                         options={priorityOptions}
+                        itemTemplate={priorityDropdownItemTemplate}
                         onChange={(e) => setPriority(e.value)}
                         placeholder={t('common.selectPriority')}
                         style={{ width: '100%' }}
