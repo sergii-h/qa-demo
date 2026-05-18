@@ -14,6 +14,7 @@ import io.qameta.allure.selenide.LogType;
 import lombok.extern.slf4j.Slf4j;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -80,6 +81,11 @@ public abstract class TestBase {
         }
 
         Selenide.open(TEST_URL);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        Selenide.closeWebDriver();
     }
 
     @AfterAll

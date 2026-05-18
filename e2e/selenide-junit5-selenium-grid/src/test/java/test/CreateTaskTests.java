@@ -1,21 +1,19 @@
-package test.desktop;
+package test;
 
 import context.TaskTestContext;
-import io.qameta.allure.Epic;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import step.ActionManager;
 import step.ValidationManager;
-import test.DesktopTest;
 
-@Epic("Create task")
-class CreateTaskTest extends DesktopTest {
-    ActionManager actions = new ActionManager();
-    ValidationManager validate = new ValidationManager();
+public interface CreateTaskTests {
 
     @Test
     @DisplayName("Create task with all fields")
-    void shouldCreateTask() {
+    default void shouldCreateTask() {
+        ActionManager actions = new ActionManager();
+        ValidationManager validate = new ValidationManager();
+
         // given
         TaskTestContext context = TaskTestContext.builder().build();
 

@@ -1,30 +1,28 @@
-package test.desktop;
+package test;
 
 import context.TaskTestContext;
-import io.qameta.allure.Epic;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import step.ActionManager;
 import step.ValidationManager;
-import test.DesktopTest;
 
-@Epic("Task info")
-class TaskInfoTest extends DesktopTest {
-    ActionManager actions = new ActionManager();
-    ValidationManager validate = new ValidationManager();
+public interface TaskInfoTests {
 
     @BeforeEach
-    void beforeEach() {
-        actions.wiremock
+    default void setUpTaskInfoMocks() {
+        new ActionManager().wiremock
                 .clearMocks()
                 .setIsValidMock(true);
     }
 
     @Test
     @DisplayName("View task info")
-    void shouldViewTaskInfo() {
+    default void shouldViewTaskInfo() {
+        ActionManager actions = new ActionManager();
+        ValidationManager validate = new ValidationManager();
+
         // given
         TaskTestContext context = TaskTestContext.builder().build();
         Response response = actions.api.createTask(context.createTaskRequest());
