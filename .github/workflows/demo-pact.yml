@@ -7,13 +7,13 @@ on:
 
 jobs:
   pact:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Start Pact Broker
-        run: docker compose -f docker/docker-compose-run-pact-broker.yml up -d
+        run: docker compose -f docker/docker-compose/run-pact-broker.yml up -d
 
       - name: Wait for Pact Broker to be ready
         run: |

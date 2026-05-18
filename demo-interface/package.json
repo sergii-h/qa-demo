@@ -20,8 +20,8 @@
     "test:ui": "vitest --ui",
     "test": "vitest run --coverage",
     "test:pact": "rm -rf pacts && vitest run pact",
-    "pact:broker:up": "docker compose -f ../docker/docker-compose-run-pact-broker.yml up -d",
-    "pact:broker:down": "docker compose -f ../docker/docker-compose-run-pact-broker.yml down -v",
+    "pact:broker:up": "docker compose -f ../docker/docker-compose/run-pact-broker.yml up -d",
+    "pact:broker:down": "docker compose -f ../docker/docker-compose/run-pact-broker.yml down -v",
     "pact:publish": "docker run --rm --network=host -v \"$PWD/pacts:/pacts\" -e PACT_BROKER_BASE_URL=${PACT_BROKER_BASE_URL:-http://localhost:9292} pactfoundation/pact-cli:latest pact-broker publish /pacts --consumer-app-version ${PACT_CONSUMER_VERSION:-local-dev} --branch ${PACT_BRANCH:-local}",
     "pact:can-i-deploy": "docker run --rm --network=host -e PACT_BROKER_BASE_URL=${PACT_BROKER_BASE_URL:-http://localhost:9292} pactfoundation/pact-cli:latest pact-broker can-i-deploy --pacticipant demo-interface --version ${PACT_CONSUMER_VERSION:-local-dev} --to-environment ${PACT_ENVIRONMENT:-test}"
   },

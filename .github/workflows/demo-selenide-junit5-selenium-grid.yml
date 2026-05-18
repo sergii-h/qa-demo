@@ -63,7 +63,7 @@ jobs:
       env:
         API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
       with:
-        source-directory: 'selenide-selenoid-junit5-example/target/allure-results'
+        source-directory: 'e2e/selenide-junit5-selenium-grid/target/allure-results'
         destination-github-username: 'sgoldys'
         destination-repository-name: 'github-pages-allure-selenide'
         user-email: 32680292+sgoldys@users.noreply.github.com
