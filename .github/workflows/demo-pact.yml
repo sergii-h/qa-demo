@@ -12,6 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
       - name: Start Pact Broker
         run: docker compose -f docker/docker-compose/run-pact-broker.yml up -d
 
