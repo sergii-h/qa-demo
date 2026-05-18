@@ -9,18 +9,25 @@ services:
       KAFKA_SERVER: qa-demo-kafka:9092
       EXTERNAL_SERVICE: http://qa-demo-wiremock:8080
     build:
-      context: ../
-      dockerfile: docker/Dockerfile-demo-service
+      context: ../../
+      dockerfile: docker/Dockerfile/demo-service
     ports:
       - "8080:8080"
+    networks:
+      - qa-demo-app
+      - qa-demo-e2e
 
   qa-demo-interface:
     container_name: qa-demo-interface
     build:
-      context: ../
-      dockerfile: docker/Dockerfile-demo-interface
+      context: ../../
+      dockerfile: docker/Dockerfile/demo-interface
     ports:
       - "5173:5173"
+    environment:
+      - VITE_BE_PROXY_TARGET=http://qa-demo-service:8080
+    networks:
+      - qa-demo-e2e
 
   qa-demo-mongo:
     image: mongo:4.4
@@ -37,6 +44,8 @@ services:
     volumes:
       - mongo-volume:/data/db
       - ./scripts/mongo:/docker-entrypoint-initdb.d/
+    networks:
+      - qa-demo-app
 
   qa-demo-kafka:
     image: bitnami/kafka:3.3.2
@@ -51,6 +60,8 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
     ports:
       - '9094:9094'
+    networks:
+      - qa-demo-app
 
   qa-demo-wiremock:
     image: wiremock/wiremock:3.9.2
@@ -59,6 +70,14 @@ services:
       - '8085:8080'
     volumes:
       - ./mappings:/home/wiremock/mappings
+    networks:
+      - qa-demo-app
+      - qa-demo-e2e
 
 volumes:
   mongo-volume:
+
+networks:
+  qa-demo-app:
+  qa-demo-e2e:
+    external: true

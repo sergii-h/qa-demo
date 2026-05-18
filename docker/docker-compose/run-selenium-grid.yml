@@ -1,0 +1,28 @@
+services:
+  qa-demo-selenium-hub:
+    image: selenium/hub:4.43.0-20260404
+    container_name: qa-demo-selenium-hub
+    networks:
+      - qa-demo-e2e
+    ports:
+      - "4444:4444"
+      - "4442:4442"
+      - "4443:4443"
+
+  qa-demo-selenium-chrome:
+    image: selenium/node-chrome:4.43.0-20260404
+    container_name: qa-demo-selenium-chrome
+    shm_size: 2gb
+    networks:
+      - qa-demo-e2e
+    depends_on:
+      - qa-demo-selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=qa-demo-selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=4
+
+networks:
+  qa-demo-e2e:
+    external: true
