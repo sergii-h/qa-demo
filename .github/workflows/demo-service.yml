@@ -36,4 +36,6 @@ jobs:
 
       - name: Run integration tests
         working-directory: demo-service
+        env:
+          DOCKER_HOST: unix:///var/run/docker.sock
         run: mvn verify -Pintegration-tests -Dfailsafe.excludes='**/*PactProviderTest.java' -Djacoco.skip=true
