@@ -1,6 +1,6 @@
 import ITask from "../interfaces/ITask";
 
-const BE_API = import.meta.env.VITE_BE_API || "http://localhost:8080/v1";
+const BE_API = import.meta.env.VITE_BE_API || "/v1";
 
 const getTasks = async (baseUrl: string = BE_API): Promise<ITask[]> => {
     const response = await fetch(baseUrl + `/tasks`, { method: 'GET', headers: { 'Content-Type': 'application/json'} });
