@@ -17,9 +17,7 @@ public class DeleteTaskTest extends ApiIntegrationTestBase {
     @Test
     void shouldSuccessfullyDeleteTaskViaDeleteAndReturnHttp204() {
         // given
-        TaskTestContext context = TaskTestContext.builder()
-                .title("Task to Delete")
-                .build();
+        TaskTestContext context = TaskTestContext.builder().build();
 
         Response createResponse = requestSpec
                 .body(context.createTaskRequest())
