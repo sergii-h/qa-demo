@@ -1,6 +1,0 @@
-FROM maven:3.8.6-openjdk-18
-COPY selenide-selenoid-junit5-example/src /src
-COPY selenide-selenoid-junit5-example/browsers.json /
-COPY selenide-selenoid-junit5-example/pom.xml /
-RUN mvn compile
-CMD mvn test

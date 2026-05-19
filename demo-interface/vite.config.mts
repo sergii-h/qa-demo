@@ -9,4 +9,13 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
+  server: {
+    allowedHosts: ['qa-demo-interface'],
+    proxy: {
+      '/v1': {
+        target: process.env.VITE_BE_PROXY_TARGET || 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
+  },
 });

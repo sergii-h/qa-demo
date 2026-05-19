@@ -47,7 +47,6 @@ public class TaskDeletedEventTest extends ApiIntegrationTestBase {
     void shouldPublishEventToKafkaTopicTaskEventWhenTaskDeleted() {
         // given
         TaskTestContext context = TaskTestContext.builder()
-                .title("Task to Delete")
                 .description("Details before deletion")
                 .status(TaskStatus.TODO)
                 .priority(TaskPriority.MEDIUM)

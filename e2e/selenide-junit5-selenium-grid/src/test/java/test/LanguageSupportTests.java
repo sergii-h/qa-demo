@@ -1,32 +1,31 @@
-package test.desktop;
+package test;
 
 import context.TaskTestContext;
 import data.TaskPriority;
 import data.TaskStatus;
-import io.qameta.allure.Epic;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import step.ActionManager;
 import step.ValidationManager;
-import test.DesktopTest;
 
-@Epic("Language support")
-class LanguageSupportTest extends DesktopTest {
-    ActionManager actions = new ActionManager();
-    ValidationManager validate = new ValidationManager();
+public interface LanguageSupportTests {
 
     @Test
     @DisplayName("Switch all UI text and status/priority tag values to Spanish when ES is selected")
-    void shouldSwitchUIToSpanishWhenESSelected() {
+    default void shouldSwitchUIToSpanishWhenESSelected() {
+        ActionManager actions = new ActionManager();
+        ValidationManager validate = new ValidationManager();
+
         // given
         TaskTestContext context = TaskTestContext.builder()
                 .status(TaskStatus.TODO)
                 .priority(TaskPriority.LOW)
                 .build();
+
         Response response = actions.api.createTask(context.createTaskRequest());
         context.setResponse(response);
-        
+
         actions.navigation.refresh();
 
         // when

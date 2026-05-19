@@ -7,7 +7,7 @@ on:
 
 jobs:
   unit:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -22,7 +22,7 @@ jobs:
         run: mvn verify -DskipITs
 
   integration:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: unit
 
     steps:
@@ -34,6 +34,14 @@ jobs:
           distribution: temurin
           cache: maven
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
       - name: Run integration tests
         working-directory: demo-service
+        env:
+          DOCKER_HOST: unix:///var/run/docker.sock
         run: mvn verify -Pintegration-tests -Dfailsafe.excludes='**/*PactProviderTest.java' -Djacoco.skip=true

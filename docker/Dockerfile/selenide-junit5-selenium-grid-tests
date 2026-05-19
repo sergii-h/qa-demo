@@ -1,0 +1,5 @@
+FROM maven:3.9-eclipse-temurin-21
+COPY e2e/selenide-junit5-selenium-grid/src /src
+COPY e2e/selenide-junit5-selenium-grid/pom.xml /
+RUN mvn compile
+CMD mvn test

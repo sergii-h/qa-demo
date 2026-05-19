@@ -1,0 +1,13 @@
+services:
+  qa-demo-selenide-junit5-selenium-grid-tests:
+    container_name: qa-demo-selenide-junit5-selenium-grid-tests
+    networks:
+      - qa-demo-e2e
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile/selenide-junit5-selenium-grid-tests
+    command: mvn -Dtest.env=docker test
+
+networks:
+  qa-demo-e2e:
+    external: true
