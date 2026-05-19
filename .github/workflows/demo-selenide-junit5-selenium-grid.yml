@@ -1,8 +1,6 @@
 name: Run e2e tests
 
 on:
-  push:
-    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
@@ -55,7 +53,7 @@ jobs:
         path: e2e/selenide-junit5-selenium-grid/target/allure-results
 
     - name: Push allure report
-      if: ${{ github.ref == 'refs/heads/master' && !cancelled() }}
+      if: ${{ !cancelled() }}
       uses: cpina/github-action-push-to-another-repository@main
       env:
         API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
@@ -68,7 +66,7 @@ jobs:
         target-directory: allure-results
 
     - name: Publish allure report
-      if: ${{ github.ref == 'refs/heads/master' && !cancelled() }}
+      if: ${{ !cancelled() }}
       run: gh workflow run allure-report.yml --ref master --repo sgoldys/github-pages-allure-selenide
       env:
         GH_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
