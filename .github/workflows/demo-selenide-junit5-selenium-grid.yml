@@ -47,6 +47,13 @@ jobs:
       working-directory: e2e/selenide-junit5-selenium-grid
       run: mvn -Dtest.env=remote test
 
+    - name: Upload allure results
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-results
+        path: e2e/selenide-junit5-selenium-grid/target/allure-results
+
     - name: Push allure report
       if: ${{ github.ref == 'refs/heads/master' && !cancelled() }}
       uses: cpina/github-action-push-to-another-repository@main
