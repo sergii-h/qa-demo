@@ -1,15 +1,15 @@
-package step.action;
+package interaction.step;
 
+import interaction.page.CreateTaskForm;
+import interaction.page.EditTaskForm;
+import interaction.page.InfoTaskModal;
+import interaction.page.MainPage;
 import io.qameta.allure.Step;
-import page.CreateTaskForm;
-import page.EditTaskForm;
-import page.InfoTaskModal;
-import page.MainPage;
 
 import static com.codeborne.selenide.Condition.disappear;
 import static com.codeborne.selenide.Condition.visible;
 
-public class TaskTableAction {
+public class TaskTableStep {
     MainPage mainPage = new MainPage();
     CreateTaskForm createTaskForm = new CreateTaskForm();
     InfoTaskModal infoTaskModal = new InfoTaskModal();
@@ -21,10 +21,10 @@ public class TaskTableAction {
     }
 
     @Step("Open 'Create task' form")
-    public CreateTaskAction openCreateTaskForm() {
+    public CreateTaskStep openCreateTaskForm() {
         mainPage.createTaskButton.click();
         createTaskForm.createButton.shouldBe(visible);
-        return new CreateTaskAction();
+        return new CreateTaskStep();
     }
 
     @Step("Open 'Task info' modal for task '{taskId}'")
@@ -34,10 +34,10 @@ public class TaskTableAction {
     }
 
     @Step("Open 'Task edit' form for task '{taskId}'")
-    public EditTaskAction openTaskEditForm(String taskId) {
+    public EditTaskStep openTaskEditForm(String taskId) {
         mainPage.editButton(taskId).shouldBe(visible).click();
         editTaskForm.saveButton.shouldBe(visible);
-        return new EditTaskAction();
+        return new EditTaskStep();
     }
 
     @Step("Delete task '{taskId}'")

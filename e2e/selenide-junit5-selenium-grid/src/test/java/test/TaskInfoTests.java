@@ -5,14 +5,19 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import step.ActionManager;
-import step.ValidationManager;
+import provider.StepProvider;
+import provider.SupportProvider;
+import provider.ValidationProvider;
 
 public interface TaskInfoTests {
+    StepProvider steps = new StepProvider();
+    ValidationProvider validate = new ValidationProvider();
+
+    SupportProvider support();
 
     @BeforeEach
     default void setUpTaskInfoMocks() {
-        new ActionManager().wiremock
+        support().wiremock
                 .clearMocks()
                 .setIsValidMock(true);
     }
@@ -20,17 +25,14 @@ public interface TaskInfoTests {
     @Test
     @DisplayName("View task info")
     default void shouldViewTaskInfo() {
-        ActionManager actions = new ActionManager();
-        ValidationManager validate = new ValidationManager();
-
         // given
         TaskTestContext context = TaskTestContext.builder().build();
-        Response response = actions.api.createTask(context.createTaskRequest());
+        Response response = support().api.createTask(context.createTaskRequest());
         context.setResponse(response);
 
         // when
-        actions.navigation.refresh();
-        actions.tasks.openTaskInfoForm(context.getId());
+        steps.navigation.refresh();
+        steps.tasks.openTaskInfoForm(context.getId());
 
         // then
         validate.task

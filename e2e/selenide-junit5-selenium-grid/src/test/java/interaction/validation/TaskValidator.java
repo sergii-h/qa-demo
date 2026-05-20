@@ -1,8 +1,8 @@
-package step.validation;
+package interaction.validation;
 
 import data.TaskData;
+import interaction.page.InfoTaskModal;
 import io.qameta.allure.Step;
-import page.InfoTaskModal;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;

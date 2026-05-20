@@ -1,8 +1,8 @@
-package step.validation;
+package interaction.validation;
 
+import interaction.page.MainPage;
 import io.qameta.allure.Step;
 import org.hamcrest.CoreMatchers;
-import page.MainPage;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;

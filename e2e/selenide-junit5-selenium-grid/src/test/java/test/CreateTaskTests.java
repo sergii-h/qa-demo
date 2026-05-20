@@ -3,22 +3,21 @@ package test;
 import context.TaskTestContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import step.ActionManager;
-import step.ValidationManager;
+import provider.StepProvider;
+import provider.ValidationProvider;
 
 public interface CreateTaskTests {
+    StepProvider steps = new StepProvider();
+    ValidationProvider validate = new ValidationProvider();
 
     @Test
     @DisplayName("Create task with all fields")
     default void shouldCreateTask() {
-        ActionManager actions = new ActionManager();
-        ValidationManager validate = new ValidationManager();
-
         // given
         TaskTestContext context = TaskTestContext.builder().build();
 
         // when
-        actions.tasks
+        steps.tasks
                 .openCreateTaskForm()
                 .setTaskData(context.createTaskData())
                 .submitForm();
@@ -27,8 +26,8 @@ public interface CreateTaskTests {
         validate.tasks.hasTask(context.getTitle());
 
         // when
-        String taskId = actions.tasks.getTaskIdByTitle(context.getTitle());
-        actions.tasks.openTaskInfoForm(taskId);
+        String taskId = steps.tasks.getTaskIdByTitle(context.getTitle());
+        steps.tasks.openTaskInfoForm(taskId);
 
         // then
         validate.task.data(context.createTaskData());

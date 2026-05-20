@@ -120,22 +120,27 @@ open http://localhost:5173
 This project follows the **Testing Pyramid** approach with **Shift-Left** methodology:
 
 ```
-      /\
-     /  \    E2E (multiple frameworks)
-    /____\   Critical user flows — web & mobile
-   /      \
-  /________\ Integration (Vitest, JUnit5)
- /          \ High-level component & API integration
-/____________\
-              Unit (Vitest, JUnit5)
-              Business logic & component behavior
-              Target: >90% coverage
+           /\
+          /  \    E2E — Full Stack
+         /____\   Smoke tests on real env (P1 happy paths only)
+        /      \
+       /________\ E2E — FE + Mocked BE (Playwright)
+      /          \ User flows — no real BE needed
+     /____________\
+    /              \ Integration + Contract (Pact)
+   /________________\ API integration, consumer-driven contracts
+  /                  \
+ /____________________\
+                        Unit (Vitest, JUnit5)
+                        Business logic & component behavior
+                        Target: >90% coverage
 ```
 
 ### Test Distribution
-- **Unit Tests:** 90%+ (business logic, component behavior)
-- **Integration Tests:** 7-8% (component interactions, API integration)
-- **E2E Tests:** <2% (critical happy paths) — desktop & mobile
+- **Unit Tests:** ~90% (business logic, component behavior)
+- **Integration + Contract (Pact):** ~7-8% (API integration; Error states; Pact consumer/provider tests decouple FE↔BE verification — no need to run both together)
+- **E2E — FE + Mocked BE:** ~1-2% (browser-level user flows via Playwright `page.route()` — fast, no real BE required; confidence backed by Pact contracts)
+- **E2E — Full Stack:** <1% (smoke tests on staging only — P1 happy paths to confirm deployment wiring, not to test business logic)
 
 📚 **Detailed Testing Standards:** See [doc/testing-guide.md](doc/testing-guide.md)
 

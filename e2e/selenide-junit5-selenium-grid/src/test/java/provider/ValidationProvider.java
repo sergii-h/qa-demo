@@ -1,12 +1,12 @@
-package step;
+package provider;
 
+import interaction.validation.LanguageValidator;
+import interaction.validation.TaskValidator;
+import interaction.validation.TasksValidator;
 import lombok.Getter;
-import step.validation.LanguageValidator;
-import step.validation.TaskValidator;
-import step.validation.TasksValidator;
 
 @Getter
-public class ValidationManager {
+public class ValidationProvider {
     public TasksValidator tasks = new TasksValidator();
     public TaskValidator task = new TaskValidator();
     public LanguageValidator language = new LanguageValidator();

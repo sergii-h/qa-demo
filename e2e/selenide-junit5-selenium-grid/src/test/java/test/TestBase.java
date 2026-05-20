@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import provider.SupportProvider;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,6 +42,10 @@ public abstract class TestBase {
     private static final PropertyReader PROPERTIES_READER = PropertyReader.getInstance();
     private static final boolean IS_LOCAL = PROPERTIES_READER.getProperty("test.env").equals("local");
     private static final String TEST_URL = PROPERTIES_READER.getEnvProperty("test.url");
+
+    protected final SupportProvider support = new SupportProvider();
+
+    public SupportProvider support() { return support; }
 
     public TestBase(Platform platform) {
         this.platform = platform;

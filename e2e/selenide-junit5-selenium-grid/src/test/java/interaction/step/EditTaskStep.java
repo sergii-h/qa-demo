@@ -1,18 +1,18 @@
-package step.action;
+package interaction.step;
 
 import com.codeborne.selenide.SelenideElement;
 import data.TaskData;
+import interaction.page.EditTaskForm;
 import io.qameta.allure.Step;
-import page.EditTaskForm;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 
-public class EditTaskAction {
+public class EditTaskStep {
     EditTaskForm editTaskForm = new EditTaskForm();
 
     @Step("Set task data")
-    public EditTaskAction setTaskData(TaskData taskData) {
+    public EditTaskStep setTaskData(TaskData taskData) {
         editTaskForm.titleField.clear();
         editTaskForm.titleField.setValue(taskData.getTitle());
         editTaskForm.descriptionField.clear();
@@ -32,11 +32,11 @@ public class EditTaskAction {
     }
 
     @Step("Submit 'Edit task' form")
-    public TaskTableAction submitForm() {
+    public TaskTableStep submitForm() {
         editTaskForm.saveButton.click();
         editTaskForm.saveButton.shouldNotBe(visible);
         
-        return new TaskTableAction();
+        return new TaskTableStep();
     }
 
     private void selectOption(SelenideElement dropdown, SelenideElement option, SelenideElement label) {

@@ -1,18 +1,18 @@
-package step.action;
+package interaction.step;
 
 import com.codeborne.selenide.SelenideElement;
 import data.TaskData;
+import interaction.page.CreateTaskForm;
 import io.qameta.allure.Step;
-import page.CreateTaskForm;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 
-public class CreateTaskAction {
+public class CreateTaskStep {
     CreateTaskForm createTaskForm = new CreateTaskForm();
 
     @Step("Set task data")
-    public CreateTaskAction setTaskData(TaskData taskData) {
+    public CreateTaskStep setTaskData(TaskData taskData) {
         createTaskForm.titleField.setValue(taskData.getTitle());
         createTaskForm.descriptionField.setValue(taskData.getDescription());
         selectOption(

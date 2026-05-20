@@ -1,4 +1,4 @@
-package page;
+package interaction.page;
 
 import com.codeborne.selenide.SelenideElement;
 import data.TaskPriority;
@@ -6,9 +6,9 @@ import data.TaskStatus;
 
 import static com.codeborne.selenide.Selenide.$;
 
-public class EditTaskForm {
-    public SelenideElement saveButton = $("[data-testid='save-button']");
-    public SelenideElement titleField = $("[data-testid='edit-task-title-input']");
+public class CreateTaskForm {
+    public SelenideElement createButton = $("[data-testid='create-button']");
+    public SelenideElement titleField = $("[data-testid='create-task-title-input']");
     public SelenideElement descriptionField = $("#description");
     public SelenideElement statusDropdown = $("[data-testid='status-dropdown']");
     public SelenideElement statusDropdownLabel = statusDropdown.$(".p-dropdown-label");

@@ -1,7 +1,7 @@
-package step.validation;
+package interaction.validation;
 
+import interaction.page.MainPage;
 import io.qameta.allure.Step;
-import page.MainPage;
 
 import static com.codeborne.selenide.Condition.text;
 

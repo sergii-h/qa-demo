@@ -1,9 +1,8 @@
-package step.action;
+package support.mock;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import config.PropertyReader;
-import io.qameta.allure.Step;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
@@ -13,7 +12,7 @@ import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 
-public class WireMockAction {
+public class WireMockClient {
     private static final PropertyReader PROPERTIES_READER = PropertyReader.getInstance();
 
     RequestSpecification requestSpec = given()
@@ -21,7 +20,6 @@ public class WireMockAction {
             .contentType(ContentType.JSON)
             .filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
 
-    @Step("Set isValid mock to {isValid}")
     public void setIsValidMock(boolean isValid) {
         setMapping(
                 Map.of(
@@ -37,7 +35,7 @@ public class WireMockAction {
         );
     }
 
-    public WireMockAction clearMocks() {
+    public WireMockClient clearMocks() {
         requestSpec
                 .delete("/__admin/mappings")
                 .then()
