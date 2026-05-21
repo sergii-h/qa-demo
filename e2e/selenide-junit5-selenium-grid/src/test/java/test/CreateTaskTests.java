@@ -26,8 +26,7 @@ public interface CreateTaskTests {
         validate.tasks.hasTask(context.getTitle());
 
         // when
-        String taskId = steps.tasks.getTaskIdByTitle(context.getTitle());
-        steps.tasks.openTaskInfoForm(taskId);
+        steps.tasks.openTaskInfoForm(context.getTitle());
 
         // then
         validate.task.data(context.createTaskData());

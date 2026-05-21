@@ -1,7 +1,6 @@
 package test;
 
 import context.TaskTestContext;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import provider.StepProvider;
@@ -19,12 +18,11 @@ public interface DeleteTaskTests {
     default void shouldDeleteTask() {
         // given
         TaskTestContext context = TaskTestContext.builder().build();
-        Response response = support().api.createTask(context.createTaskRequest());
-        context.setResponse(response);
+        support().api.createTask(context.createTaskRequest());
 
         // when
         steps.navigation.refresh();
-        steps.tasks.deleteTask(context.getId());
+        steps.tasks.deleteTask(context.getTitle());
 
         // then
         validate.tasks.hasNoTask(context.getTitle());

@@ -6,6 +6,8 @@ import interaction.page.InfoTaskModal;
 import interaction.page.MainPage;
 import io.qameta.allure.Step;
 
+import java.util.Objects;
+
 import static com.codeborne.selenide.Condition.disappear;
 import static com.codeborne.selenide.Condition.visible;
 
@@ -15,11 +17,6 @@ public class TaskTableStep {
     InfoTaskModal infoTaskModal = new InfoTaskModal();
     EditTaskForm editTaskForm = new EditTaskForm();
 
-    @Step("Get task id by title '{title}'")
-    public String getTaskIdByTitle(String title) {
-        return mainPage.getTaskIdByTitle(title);
-    }
-
     @Step("Open 'Create task' form")
     public CreateTaskStep openCreateTaskForm() {
         mainPage.createTaskButton.click();
@@ -27,22 +24,28 @@ public class TaskTableStep {
         return new CreateTaskStep();
     }
 
-    @Step("Open 'Task info' modal for task '{taskId}'")
-    public void openTaskInfoForm(String taskId) {
-        mainPage.infoButton(taskId).shouldBe(visible).click();
+    @Step("Open 'Task info' modal for task '{title}'")
+    public void openTaskInfoForm(String title) {
+        mainPage.infoButton(resolveTaskId(title)).shouldBe(visible).click();
         infoTaskModal.title.shouldBe(visible);
     }
 
-    @Step("Open 'Task edit' form for task '{taskId}'")
-    public EditTaskStep openTaskEditForm(String taskId) {
-        mainPage.editButton(taskId).shouldBe(visible).click();
+    @Step("Open 'Task edit' form for task '{title}'")
+    public EditTaskStep openTaskEditForm(String title) {
+        mainPage.editButton(resolveTaskId(title)).shouldBe(visible).click();
         editTaskForm.saveButton.shouldBe(visible);
         return new EditTaskStep();
     }
 
-    @Step("Delete task '{taskId}'")
-    public void deleteTask(String taskId) {
-        mainPage.deleteButton(taskId).shouldBe(visible).click();
-        mainPage.deleteButton(taskId).should(disappear);
+    @Step("Delete task '{title}'")
+    public void deleteTask(String title) {
+        String id = resolveTaskId(title);
+        mainPage.deleteButton(id).shouldBe(visible).click();
+        mainPage.deleteButton(id).should(disappear);
+    }
+
+    private String resolveTaskId(String title) {
+        String dataTestId = mainPage.taskTitleByTitle(title).getAttribute("data-testid");
+        return Objects.requireNonNull(dataTestId).replace("task-title-", "");
     }
 }

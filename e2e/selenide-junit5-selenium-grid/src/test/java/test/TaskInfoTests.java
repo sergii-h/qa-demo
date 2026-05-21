@@ -1,7 +1,6 @@
 package test;
 
 import context.TaskTestContext;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,12 +26,11 @@ public interface TaskInfoTests {
     default void shouldViewTaskInfo() {
         // given
         TaskTestContext context = TaskTestContext.builder().build();
-        Response response = support().api.createTask(context.createTaskRequest());
-        context.setResponse(response);
+        support().api.createTask(context.createTaskRequest());
 
         // when
         steps.navigation.refresh();
-        steps.tasks.openTaskInfoForm(context.getId());
+        steps.tasks.openTaskInfoForm(context.getTitle());
 
         // then
         validate.task

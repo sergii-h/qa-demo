@@ -5,7 +5,6 @@ import com.codeborne.selenide.SelenideElement;
 import util.SelenideUtil;
 
 import java.util.List;
-import java.util.Objects;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
@@ -38,9 +37,8 @@ public class MainPage {
         return $("[data-testid='delete-button-" + taskId + "']");
     }
 
-    public String getTaskIdByTitle(String title) {
-        String dataTestId = taskTitles.findBy(text(title)).getAttribute("data-testid");
-        return Objects.requireNonNull(dataTestId).replace("task-title-", "");
+    public SelenideElement taskTitleByTitle(String title) {
+        return taskTitles.findBy(text(title));
     }
 
     public List<String> getTaskTitles() {

@@ -3,7 +3,6 @@ package test;
 import context.TaskTestContext;
 import data.TaskPriority;
 import data.TaskStatus;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import provider.StepProvider;
@@ -25,8 +24,7 @@ public interface EditTaskTests {
                 .priority(TaskPriority.MEDIUM)
                 .build();
 
-        Response response = support().api.createTask(context.createTaskRequest());
-        context.setResponse(response);
+        support().api.createTask(context.createTaskRequest());
 
         TaskTestContext updatedContext = TaskTestContext.builder()
                 .title(context.getTitle() + "-Updated")
@@ -38,10 +36,10 @@ public interface EditTaskTests {
         // when
         steps.navigation.refresh();
         steps.tasks
-                .openTaskEditForm(context.getId())
+                .openTaskEditForm(context.getTitle())
                 .setTaskData(updatedContext.createTaskData())
                 .submitForm()
-                .openTaskInfoForm(context.getId());
+                .openTaskInfoForm(updatedContext.getTitle());
 
         // then
         validate.task.data(updatedContext.createTaskData());
