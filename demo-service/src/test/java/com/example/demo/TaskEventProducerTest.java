@@ -14,10 +14,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import org.springframework.kafka.support.SendResult;
+
+import java.util.concurrent.CompletableFuture;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TaskEventProducerTest {
@@ -33,6 +42,8 @@ class TaskEventProducerTest {
     @BeforeEach
     void beforeEach() {
         ReflectionTestUtils.setField(taskEventProducer, "topic", "task-events");
+        lenient().when(kafkaTemplate.send(anyString(), anyString(), any(TaskEvent.class)))
+                .thenReturn(CompletableFuture.completedFuture(null));
 
         context = TaskTestContext.builder()
                 .title("Test Task")
@@ -96,5 +107,17 @@ class TaskEventProducerTest {
         verify(kafkaTemplate).send(eq("task-events"), eq(deleteContext.getId()), eventCaptor.capture());
         deleteContext.setEventTimestamp(eventCaptor.getValue().getTimestamp());
         assertThat(eventCaptor.getValue(), is(deleteContext.createExpectedEvent()));
+    }
+
+    @Test
+    void shouldNotThrowWhenKafkaSendFails() {
+        // given
+        CompletableFuture<SendResult<String, TaskEvent>> failedFuture = new CompletableFuture<>();
+        failedFuture.completeExceptionally(new RuntimeException("Kafka unavailable"));
+        when(kafkaTemplate.send(anyString(), anyString(), any(TaskEvent.class)))
+                .thenReturn(failedFuture);
+
+        // when / then
+        assertDoesNotThrow(() -> taskEventProducer.produceTaskCreated(context.createTask()));
     }
 }

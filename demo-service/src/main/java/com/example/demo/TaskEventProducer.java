@@ -43,7 +43,14 @@ public class TaskEventProducer {
                 .build();
 
         log.info("Sending task event to {}: {}", topic, event);
-        kafkaTemplate.send(topic, event.getTaskId(), event);
+        kafkaTemplate.send(topic, event.getTaskId(), event)
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        log.error("Failed to send {} event for task {}: {}", event.getEventType(), event.getTaskId(), ex.getMessage());
+                    } else {
+                        log.info("Sent {} event for task {}", event.getEventType(), event.getTaskId());
+                    }
+                });
     }
 }
 
