@@ -137,7 +137,8 @@ export const CreateTaskModal = (props: IProps) => {
                 <div className="field">
                     <label htmlFor="status" className="block">{t('common.status')}</label>
                     <Dropdown
-                        id="status"
+                        inputId="status"
+                        ariaLabel={t('common.status')}
                         data-testid="status-dropdown"
                         value={status}
                         options={statusOptions}
@@ -145,12 +146,16 @@ export const CreateTaskModal = (props: IProps) => {
                         onChange={(e) => setStatus(e.value)}
                         placeholder={t('common.selectStatus')}
                         style={{ width: '100%' }}
+                        pt={{
+                            select: { 'aria-label': t('common.status') },
+                        }}
                     />
                 </div>
                 <div className="field">
                     <label htmlFor="priority" className="block">{t('common.priority')}</label>
                     <Dropdown
-                        id="priority"
+                        inputId="priority"
+                        ariaLabel={t('common.priority')}
                         data-testid="priority-dropdown"
                         value={priority}
                         options={priorityOptions}
@@ -158,6 +163,9 @@ export const CreateTaskModal = (props: IProps) => {
                         onChange={(e) => setPriority(e.value)}
                         placeholder={t('common.selectPriority')}
                         style={{ width: '100%' }}
+                        pt={{
+                            select: { 'aria-label': t('common.priority') },
+                        }}
                     />
                 </div>
             </>}

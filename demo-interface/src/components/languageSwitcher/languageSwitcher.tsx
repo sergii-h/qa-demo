@@ -8,15 +8,24 @@ const LANGUAGE_OPTIONS = [
 ];
 
 export const LanguageSwitcher = () => {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const languageSwitcherId = 'language-switcher-input';
 
     return (
-        <Dropdown
-            data-testid="language-switcher"
-            value={i18n.resolvedLanguage}
-            options={LANGUAGE_OPTIONS}
-            onChange={(e) => i18n.changeLanguage(e.value)}
-        />
+        <>
+            <label htmlFor={languageSwitcherId} className="sr-only">{t('languageSwitcher.label')}</label>
+            <Dropdown
+                inputId={languageSwitcherId}
+                ariaLabel={t('languageSwitcher.label')}
+                data-testid="language-switcher"
+                value={i18n.resolvedLanguage}
+                options={LANGUAGE_OPTIONS}
+                onChange={(e) => i18n.changeLanguage(e.value)}
+                pt={{
+                    select: { 'aria-label': t('languageSwitcher.label') },
+                }}
+            />
+        </>
     );
 };
 

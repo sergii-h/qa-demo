@@ -8,12 +8,60 @@
     padding: 1rem 0;
 }
 
+.app-main {
+    padding: 0;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .tasks-table-container {
     padding: 0 0 1rem 0;
 }
 
+.page-title {
+    margin: 0 0 1rem 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
 .add-task-button {
     margin-bottom: 1rem;
+}
+
+.add-task-button.p-button-info,
+.add-task-button.p-button-info:enabled:hover,
+.add-task-button.p-button-info:enabled:active {
+    background: #0277bd;
+    border-color: #0277bd;
+}
+
+.p-tag.p-tag-info {
+    background-color: #0277bd;
+}
+
+.p-button-outlined:not(.p-button-danger),
+.p-button-outlined:not(.p-button-danger):enabled:hover,
+.p-button-outlined:not(.p-button-danger):enabled:active {
+    color: #1565c0;
+    border-color: #1565c0;
+}
+
+.p-dialog-footer .close-button.p-button-text,
+.p-dialog-footer .close-button.p-button-text:enabled:hover,
+.p-dialog-footer .close-button.p-button-outlined,
+.p-dialog-footer .close-button.p-button-outlined:enabled:hover {
+    color: #1565c0;
+    border-color: #1565c0;
 }
 
 @media screen and (max-width: 768px) {
