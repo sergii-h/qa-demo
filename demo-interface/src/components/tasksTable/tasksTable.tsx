@@ -111,6 +111,7 @@ export const TasksTable = () => {
 
     return (
         <div className="tasks-table-container">
+            <h1 className="page-title" data-testid="page-title">{t('tasksTable.title')}</h1>
             <Button
                 icon="pi pi-plus"
                 label={t('tasksTable.createTask')}
