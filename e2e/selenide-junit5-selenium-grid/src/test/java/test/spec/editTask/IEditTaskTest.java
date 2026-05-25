@@ -25,7 +25,11 @@ public interface IEditTaskTest {
         context.setStatus(TaskStatus.TODO);
         context.setPriority(TaskPriority.MEDIUM);
 
-        support().mock.api().getTasks(List.of(context.createTaskResponse()));
+        var response = context.createTaskResponse();
+
+        support().mock.api().getTasks(List.of(response));
+        support().mock.api().getTask(response.getId(), response);
+        support().mock.api().getIsValid(response.getId(), true);
     }
 
     @Test
@@ -52,7 +56,6 @@ public interface IEditTaskTest {
         support().mock.api().updateTask(updatedContext.getId(), updatedResponse);
         support().mock.api().getTasks(List.of(updatedResponse));
         support().mock.api().getTask(updatedContext.getId(), updatedResponse);
-        support().mock.api().getIsValid(updatedContext.getId(), true);
 
         editTaskStep.submitForm();
         steps.tasks.openTaskInfoForm(updatedContext.getTitle());

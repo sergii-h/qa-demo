@@ -15,7 +15,10 @@ test.describe('Edit task', () => {
 
   test.beforeEach(async ({ support }) => {
     context = new TaskContext({ status: TaskStatus.TODO, priority: TaskPriority.MEDIUM });
-    await support.mock.api.getTasks([context.createTaskResponse()]);
+    const response = context.createTaskResponse();
+    await support.mock.api.getTasks([response]);
+    await support.mock.api.getTask(response.id, response);
+    await support.mock.api.getIsValid(response.id, true);
   });
 
   test('should edit task', async ({ step, validate, support }) => {

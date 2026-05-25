@@ -41,7 +41,8 @@ export class TaskTableStep {
   async openEditTaskForm(title: string): Promise<void> {
     const id = await this.resolveTaskId(title);
     await this.mainPage.taskEditButtonById(id).click();
-    await expect(this.editTaskForm.submitButton).toBeVisible();
+
+    await expect(this.editTaskForm.titleInput).toHaveValue(title);
   }
 
   @step("Delete task '{title}'")

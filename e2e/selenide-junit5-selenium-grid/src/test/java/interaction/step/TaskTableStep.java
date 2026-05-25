@@ -8,8 +8,7 @@ import io.qameta.allure.Step;
 
 import java.util.Objects;
 
-import static com.codeborne.selenide.Condition.disappear;
-import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Condition.*;
 
 public class TaskTableStep {
     MainPage mainPage = new MainPage();
@@ -33,7 +32,8 @@ public class TaskTableStep {
     @Step("Open 'Task edit' form for task '{title}'")
     public EditTaskStep openTaskEditForm(String title) {
         mainPage.editButton(resolveTaskId(title)).shouldBe(visible).click();
-        editTaskForm.saveButton.shouldBe(visible);
+        editTaskForm.titleField.shouldHave(value(title));
+        
         return new EditTaskStep();
     }
 
