@@ -1,0 +1,33 @@
+name: Run accessibility tests (Playwright — mocked BE)
+
+on:
+  pull_request:
+    branches: [ "master" ]
+  push:
+    branches: [ "master" ]
+
+permissions:
+  contents: write
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: frontend
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Run Playwright accessibility tests
+        uses: ./.github/actions/playwright-test
+        with:
+          npm-script: accessibility
+          app-mode: frontend
+          test-label: Run accessibility tests (mocked BE)
+          artifact-name: allure-results-playwright-accessibility
+          destination-dir: playwright-accessibility

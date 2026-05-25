@@ -1,0 +1,34 @@
+name: Run UAT tests (Playwright — full app)
+
+on:
+  pull_request:
+    branches: [ "master" ]
+  push:
+    branches: [ "master" ]
+
+permissions:
+  contents: write
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: full
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Run Playwright UAT tests
+        uses: ./.github/actions/playwright-test
+        with:
+          npm-script: uat
+          app-mode: full
+          browsers: chromium
+          test-label: Run UAT tests (full app)
+          artifact-name: allure-results-playwright-uat
+          destination-dir: playwright-uat

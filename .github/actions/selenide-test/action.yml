@@ -1,0 +1,52 @@
+name: Run Selenide tests
+description: Run Selenide Maven profile, upload Allure results, and publish to GitHub Pages
+
+inputs:
+  maven-profile:
+    description: Maven profile (e2e, accessibility, uat)
+    required: true
+  test-label:
+    description: Label for the Maven test step
+    required: true
+  artifact-name:
+    description: Artifact name for raw Allure results
+    required: true
+  destination-dir:
+    description: GitHub Pages subdirectory for the generated report
+    required: true
+  publish-landing-page:
+    description: Publish the reports landing page to the site root
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: temurin
+        cache: maven
+
+    - name: ${{ inputs.test-label }}
+      if: ${{ !cancelled() }}
+      shell: bash
+      working-directory: e2e/selenide-junit5-selenium-grid
+      run: mvn -Dtest.env=remote -P${{ inputs.maven-profile }} test
+
+    - name: Upload allure results
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: e2e/selenide-junit5-selenium-grid/target/allure-results
+        retention-days: 7
+
+    - name: Publish Allure report to GitHub Pages
+      if: ${{ !cancelled() }}
+      uses: ./.github/actions/publish-selenide-allure
+      with:
+        working-directory: e2e/selenide-junit5-selenium-grid
+        destination-dir: ${{ inputs.destination-dir }}
+        publish-landing-page: ${{ inputs.publish-landing-page }}
