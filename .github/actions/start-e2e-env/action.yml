@@ -1,0 +1,65 @@
+name: Start E2E environment
+description: Docker login, network, application stack, and optional Selenium Grid
+
+inputs:
+  app-mode:
+    description: frontend (FE only) or full (full stack)
+    required: true
+  start-selenium-grid:
+    description: Start Selenium Grid after the application is ready
+    required: false
+    default: 'false'
+  docker-hub-username:
+    description: Docker Hub username
+    required: true
+  docker-hub-token:
+    description: Docker Hub token
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ inputs.docker-hub-username }}
+        password: ${{ inputs.docker-hub-token }}
+
+    - name: Create shared Docker network
+      shell: bash
+      run: docker network create qa-demo-e2e
+
+    - name: Start frontend
+      if: inputs.app-mode == 'frontend'
+      shell: bash
+      run: docker compose -f docker/docker-compose/run-application.yml up -d --build qa-demo-interface
+
+    - name: Start application
+      if: inputs.app-mode == 'full'
+      shell: bash
+      run: docker compose -f docker/docker-compose/run-application.yml up -d --build
+
+    - name: Wait for frontend to be ready
+      if: inputs.app-mode == 'frontend'
+      shell: bash
+      run: |
+        for i in {1..30}; do
+          curl -sf http://localhost:5173 && break
+          echo "Waiting for frontend... ($i)"
+          sleep 3
+        done
+
+    - name: Wait for application to be ready
+      if: inputs.app-mode == 'full'
+      shell: bash
+      run: |
+        for i in {1..30}; do
+          curl -sf http://localhost:8080/actuator/health && break
+          echo "Waiting for application... ($i)"
+          sleep 3
+        done
+
+    - name: Start Selenium Grid
+      if: inputs.start-selenium-grid == 'true'
+      shell: bash
+      run: docker compose -f docker/docker-compose/run-selenium-grid.yml up -d

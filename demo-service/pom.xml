@@ -10,6 +10,9 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <skipUnitTests>false</skipUnitTests>
+        <pact.verifier.publishResults>false</pact.verifier.publishResults>
+        <pact.provider.version></pact.provider.version>
+        <pact.provider.branch></pact.provider.branch>
     </properties>
     <dependencies>
         <dependency>
@@ -234,6 +237,11 @@
                         </goals>
                         <configuration>
                             <argLine>@{jacocoArgLine} -XX:+EnableDynamicAgentLoading</argLine>
+                            <systemPropertyVariables>
+                                <pact.verifier.publishResults>${pact.verifier.publishResults}</pact.verifier.publishResults>
+                                <pact.provider.version>${pact.provider.version}</pact.provider.version>
+                                <pact.provider.branch>${pact.provider.branch}</pact.provider.branch>
+                            </systemPropertyVariables>
                             <includes>
                                 <include>**/integration/**/*Test.java</include>
                             </includes>

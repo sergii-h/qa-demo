@@ -1,6 +1,6 @@
 services:
   qa-demo-selenium-hub:
-    image: selenium/hub:4.43.0-20260404
+    image: selenium/hub:4.44.0
     container_name: qa-demo-selenium-hub
     networks:
       - qa-demo-e2e
@@ -10,7 +10,7 @@ services:
       - "4443:4443"
 
   qa-demo-selenium-chrome:
-    image: selenium/node-chrome:4.43.0-20260404
+    image: selenium/node-chrome:4.44.0
     container_name: qa-demo-selenium-chrome
     shm_size: 2gb
     networks:
@@ -22,6 +22,8 @@ services:
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
       - SE_NODE_MAX_SESSIONS=4
+      - SE_NODE_GRID_URL=${SE_NODE_GRID_URL:-http://localhost:4444}
+      - SE_NODE_CONNECTION_LIMIT_PER_SESSION=100
 
 networks:
   qa-demo-e2e:

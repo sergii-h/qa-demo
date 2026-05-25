@@ -16,3 +16,5 @@ selenide-selenoid-junit5-example/allure-results/
 /demo-interface/pacts/
 /cv/
 /e2e/selenide-junit5-selenium-grid/build/
+/e2e/playwright-typescript/allure-results/
+/e2e/playwright-typescript/playwright-report/

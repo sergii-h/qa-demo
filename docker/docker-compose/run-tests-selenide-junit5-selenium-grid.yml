@@ -6,7 +6,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/Dockerfile/selenide-junit5-selenium-grid-tests
-    command: mvn -Dtest.env=docker test
+    command: mvn -Pe2e -Dtest.env=docker test
 
 networks:
   qa-demo-e2e:

@@ -1,0 +1,33 @@
+name: Run e2e tests (Playwright — mocked BE)
+
+on:
+  pull_request:
+    branches: [ "master" ]
+  push:
+    branches: [ "master" ]
+
+permissions:
+  contents: write
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: frontend
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Run Playwright e2e tests
+        uses: ./.github/actions/playwright-test
+        with:
+          npm-script: e2e
+          app-mode: frontend
+          test-label: Run e2e tests (mocked BE)
+          artifact-name: allure-results-playwright-e2e
+          destination-dir: playwright-e2e

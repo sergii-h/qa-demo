@@ -10,10 +10,12 @@ import './app.css';
 function App() {
   return (
     <div className="app-container">
-      <div className="app-header">
+      <header className="app-header">
         <LanguageSwitcher />
-      </div>
-      <TasksTable />
+      </header>
+      <main className="app-main">
+        <TasksTable />
+      </main>
     </div>
   );
 }

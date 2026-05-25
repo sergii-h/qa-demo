@@ -5,34 +5,33 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import javax.annotation.Nonnull;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
 public class ChromeRemoteProvider implements WebDriverProvider {
-    private final String[] arguments;
+    private final String[] platformArguments;
 
     private static final PropertyReader PROPERTIES_READER = PropertyReader.getInstance();
 
-    public ChromeRemoteProvider(String... arguments) {
-        this.arguments = arguments;
+    public ChromeRemoteProvider(String... platformArguments) {
+        this.platformArguments = platformArguments;
     }
 
-    @Nonnull
-    public RemoteWebDriver createDriver(@Nonnull Capabilities capabilities) {
+    @Override
+    public RemoteWebDriver createDriver(Capabilities capabilities) {
         ChromeOptions options = new ChromeOptions();
 
-        options.addArguments(
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-notifications",
-                "--allow-silent-push",
-                "--remote-allow-origins=*",
-                "--disable-search-engine-choice-screen"
-        );
+        String chromeOptions = System.getProperty("chromeoptions.args", "");
+        if (!chromeOptions.isBlank()) {
+            options.addArguments(Arrays.stream(chromeOptions.split(", "))
+                    .map(String::trim)
+                    .filter(arg -> !arg.isEmpty())
+                    .toList());
+        }
 
-        options.addArguments(arguments);
+        options.addArguments(platformArguments);
         options.merge(capabilities);
 
         String remoteWebdriverUrl = PROPERTIES_READER.getEnvProperty("test.remote.webdriver.url");

@@ -11,6 +11,7 @@
 [![Vitest](https://img.shields.io/badge/Unit-Vitest-yellow?logo=vitest)](https://vitest.dev/)
 [![JUnit5](https://img.shields.io/badge/Unit-JUnit5-green?logo=junit5)](https://junit.org/junit5/)
 [![Selenide](https://img.shields.io/badge/E2E-Selenide-blue)](https://selenide.org/)
+[![Playwright](https://img.shields.io/badge/E2E-Playwright-green?logo=playwright)](https://playwright.dev/)
 [![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen)](doc/testing-guide.md)
 <!-- When adding a new E2E framework: add a badge here, a sub-bullet in Tech Stack > Testing Frameworks,
      a new #### section under Running Tests > E2E Tests, and replace the matching placeholder in Project Structure -->
@@ -113,6 +114,7 @@ open http://localhost:5173
 - **Integration:** Vitest 4 (FE), JUnit5 + TestContainers (BE)
 - **E2E:**
   - Selenide + JUnit5 + Selenium Grid — Java, desktop & mobile
+  - Playwright + TypeScript — mocked BE, accessibility (`@accessibility`), and UAT (`@uat`)
 - **Coverage:** JaCoCo (BE), Istanbul via Vitest (FE)
 
 ## 🧪 Testing Strategy
@@ -120,22 +122,39 @@ open http://localhost:5173
 This project follows the **Testing Pyramid** approach with **Shift-Left** methodology:
 
 ```
-      /\
-     /  \    E2E (multiple frameworks)
-    /____\   Critical user flows — web & mobile
-   /      \
-  /________\ Integration (Vitest, JUnit5)
- /          \ High-level component & API integration
-/____________\
-              Unit (Vitest, JUnit5)
-              Business logic & component behavior
-              Target: >90% coverage
+           /\
+          /  \    E2E — Full Stack
+         /____\   Smoke tests on real env (P1 happy paths only)
+        /      \
+       /________\ E2E — FE + Mocked BE (Playwright)
+      /          \ User flows — no real BE needed
+     /____________\
+    /              \ Integration + Contract (Pact)
+   /________________\ API integration, consumer-driven contracts
+  /                  \
+ /____________________\
+                        Unit (Vitest, JUnit5)
+                        Business logic & component behavior
+                        Target: >90% coverage
 ```
 
 ### Test Distribution
-- **Unit Tests:** 90%+ (business logic, component behavior)
-- **Integration Tests:** 7-8% (component interactions, API integration)
-- **E2E Tests:** <2% (critical happy paths) — desktop & mobile
+- **Unit Tests:** ~90% (business logic, component behavior)
+- **Integration + Contract (Pact):** ~7-8% (API integration; Error states; Pact consumer/provider tests decouple FE↔BE verification — no need to run both together)
+- **E2E — FE + Mocked BE:** ~1-2% (browser-level user flows via Playwright `page.route()` — fast, no real BE required; confidence backed by Pact contracts)
+- **E2E — Full Stack:** <1% (smoke tests on staging only — P1 happy paths to confirm deployment wiring, not to test business logic)
+
+### Playwright Test Suites
+
+The Playwright suite (`e2e/playwright-typescript`) is split into three distinct groups that map directly to the pyramid above:
+
+| Suite | Tag | Purpose | When to run |
+|---|---|---|---|
+| Mocked BE | *(no tag)* | Browser-level user flows with `page.route()` mocks — no real BE needed | Every CI run |
+| Accessibility | `@accessibility` | axe-core scans for WCAG violations on key UI states | Every CI run |
+| UAT | `@uat` | Single smoke test against the real running app — verifies the critical create-task happy path end-to-end | Staging / post-deploy only |
+
+The UAT suite is intentionally minimal (one test — the most critical happy path). Unit, integration, Pact, and mocked-BE E2E tests already cover business logic thoroughly; the UAT test exists purely to confirm that all services are correctly wired together in a real environment.
 
 📚 **Detailed Testing Standards:** See [doc/testing-guide.md](doc/testing-guide.md)
 
@@ -227,6 +246,18 @@ npm run test:ui
 
 **Status:** ✅ **100% coverage** | Report: `coverage/index.html`
 
+### Pact Broker & CI
+
+This demo uses an **ephemeral Pact Broker** — started fresh in Docker on each CI run and for local development. The Pact pipeline runs on **pull requests and pushes to `master`** (same as E2E), and includes a **`can-i-merge`** gate to check that a branch is safe to merge.
+
+Because the broker has no history between runs, CI **bootstraps `master` contracts first** (via `.github/scripts/pact-bootstrap-master.sh`) so `can-i-merge` has a baseline to compare against. Run the full pipeline locally with:
+
+```bash
+bash .github/scripts/pact-run-local.sh
+```
+
+We chose this approach to keep the demo self-contained with no hosted broker or cloud cost. In production, a **persistent broker** (PactFlow or self-hosted) would hold `master` history and remove the bootstrap step.
+
 ### Pact Consumer Contracts (Frontend)
 
 Run Pact consumer tests for the frontend API client and publish to a standalone local Pact Broker:
@@ -317,6 +348,36 @@ PACT_BROKER_BASE_URL=http://localhost:9292 mvn verify -Pintegration-tests -Dit.t
 
 Each E2E framework lives in its own sub-folder under `e2e/` and has its own section below.
 
+#### Playwright + TypeScript
+
+Tests run across Desktop Chrome and Mobile Safari (iPhone 12 Pro). Three suites can be run independently:
+
+```bash
+cd e2e/playwright-typescript
+npm install
+
+# Suite 1 — mocked BE + accessibility (no real backend needed)
+npm run test:mock
+
+# Suite 2 — accessibility only
+npm test -- --grep @accessibility
+
+# Suite 3 — UAT smoke test (requires the full app to be running)
+npm run test:uat
+
+# All suites
+npm test
+```
+
+Copy `.env.e2e` to `.env.e2e.local` and set `E2E_TEST_ENV_URL` to point at the running frontend before executing UAT tests.
+
+```bash
+# View Allure report
+npm run allure:generate && npm run allure:serve
+```
+
+See [Playwright E2E README](e2e/playwright-typescript/README.md) for full configuration options.
+
 #### Selenide + JUnit5 + Selenium Grid (Java)
 
 Tests cover both desktop and mobile viewports across five test suites: Create Task, Delete Task, Edit Task, Task Info, and Language Support.
@@ -388,11 +449,23 @@ qa-demo/
 │   └── public/                # Static assets
 │
 ├── e2e/                       # End-to-End Tests (one sub-folder per framework)
+│   ├── playwright-typescript/ # Playwright + TypeScript
+│   │   ├── tests/             # Test specs organised by feature
+│   │   │   ├── create-task/   # *.spec.ts (mocked) · *.axe.spec.ts (a11y) · *.uat.spec.ts (UAT)
+│   │   │   ├── edit-task/
+│   │   │   ├── delete-task/
+│   │   │   ├── task-info/
+│   │   │   ├── task-table/
+│   │   │   └── translation/
+│   │   ├── interactions/      # Page objects, step orchestrators, validators
+│   │   ├── fixtures/          # Playwright fixtures (step & validate providers)
+│   │   ├── support/           # API client & mock helpers (WireMock, page.route)
+│   │   ├── data/              # Shared enums & request/response types
+│   │   └── playwright.config.ts
 │   └── selenide-junit5-selenium-grid/  # Selenide + JUnit5 + Selenium Grid (Java)
 │       └── src/test/java/test/
 │           ├── desktop/       # Desktop browser tests (1920×1080)
 │           └── mobile/        # Mobile emulation tests (iPhone viewport)
-│   # playwright-typescript/   # (planned) Playwright + TypeScript
 │   # appium-*/                # (planned) Appium mobile testing
 │
 ├── docker/                    # Docker configurations

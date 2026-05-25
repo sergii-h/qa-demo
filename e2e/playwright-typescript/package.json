@@ -1,0 +1,24 @@
+{
+  "name": "playwright-typescript-e2e",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "playwright test",
+    "test:e2e": "playwright test --grep-invert \"@uat|@accessibility\"",
+    "test:mock": "npm run test:e2e",
+    "test:accessibility": "playwright test --grep @accessibility",
+    "test:uat": "playwright test --grep @uat --project='Desktop Chrome (chromium)'",
+    "test:desktop": "playwright test --project='Desktop Chrome (chromium)'",
+    "test:mobile": "playwright test --project='Mobile Safari (webkit)'",
+    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:serve": "allure serve allure-results"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
+    "@playwright/test": "^1.44.0",
+    "@types/node": "^25.9.1",
+    "allure-playwright": "^3.0.0",
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "typescript": "^5.4.5"
+  }
+}

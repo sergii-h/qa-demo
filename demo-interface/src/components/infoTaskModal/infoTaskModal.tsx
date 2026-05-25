@@ -56,7 +56,7 @@ export const InfoTaskModal = (props: IProps) => {
     };
 
     const renderFooter = () => (
-        <Button label={t('common.close')} data-testid="close-button" onClick={onHide} className="p-button-outlined" />
+        <Button label={t('common.close')} data-testid="close-button" onClick={onHide} className="p-button-outlined close-button" />
     );
 
     return (
