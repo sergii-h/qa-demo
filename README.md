@@ -248,7 +248,7 @@ npm run test:ui
 
 ### Pact Broker & CI
 
-This demo uses an **ephemeral Pact Broker** — started fresh in Docker on each CI run and for local development. GitHub Actions runs consumer tests, provider verification, and a **`can-i-merge`** gate to check that a branch is safe to merge into `master`.
+This demo uses an **ephemeral Pact Broker** — started fresh in Docker on each CI run and for local development. The Pact pipeline runs on **pull requests and pushes to `master`** (same as E2E), and includes a **`can-i-merge`** gate to check that a branch is safe to merge.
 
 Because the broker has no history between runs, CI **bootstraps `master` contracts first** (via `.github/scripts/pact-bootstrap-master.sh`) so `can-i-merge` has a baseline to compare against. Run the full pipeline locally with:
 
