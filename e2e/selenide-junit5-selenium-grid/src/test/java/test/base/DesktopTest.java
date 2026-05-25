@@ -10,6 +10,5 @@ public abstract class DesktopTest extends TestBase {
 
     @Override
     public void setUpByPlatform() {
-        System.setProperty("chromeoptions.args", "--remote-allow-origins=*");
     }
 }

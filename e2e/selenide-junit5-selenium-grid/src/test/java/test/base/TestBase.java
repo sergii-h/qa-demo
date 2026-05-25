@@ -76,16 +76,35 @@ public abstract class TestBase {
     protected void setUpBrowser() {
         setUpByPlatform();
 
-        String disableSearchEngine = "--disable-search-engine-choice-screen";
-        String chromeOptions = System.getProperty("chromeoptions.args", disableSearchEngine);
+        String chromeOptions = System.getProperty("chromeoptions.args", "--disable-search-engine-choice-screen");
+        chromeOptions = ensureChromeArg(chromeOptions, "--disable-search-engine-choice-screen");
+        chromeOptions = ensureChromeArg(chromeOptions, "--remote-allow-origins=*");
+        chromeOptions = ensureChromeArg(
+                chromeOptions,
+                "--disable-features=BlockInsecurePrivateNetworkRequests,PrivateNetworkAccessSendPreflights,PrivateNetworkAccessRespectPreflightResults,LocalNetworkAccessChecks"
+        );
+        chromeOptions = ensureChromeArg(chromeOptions, "--unsafely-treat-insecure-origin-as-secure=" + TEST_URL);
 
-        if (!chromeOptions.contains(disableSearchEngine)) {
-            System.setProperty("chromeoptions.args", chromeOptions + ", " + disableSearchEngine);
+        if (!IS_LOCAL) {
+            chromeOptions = ensureChromeArg(chromeOptions, "--no-sandbox");
+            chromeOptions = ensureChromeArg(chromeOptions, "--disable-dev-shm-usage");
+            chromeOptions = ensureChromeArg(chromeOptions, "--disable-notifications");
+            chromeOptions = ensureChromeArg(chromeOptions, "--allow-silent-push");
         }
+
+        System.setProperty("chromeoptions.args", chromeOptions);
 
         if (!IS_LOCAL) {
             initRemoteDriver();
         }
+    }
+
+    private String ensureChromeArg(String chromeOptions, String argument) {
+        if (chromeOptions.contains(argument)) {
+            return chromeOptions;
+        }
+
+        return chromeOptions + ", " + argument;
     }
 
     @AfterEach
@@ -116,14 +135,12 @@ public abstract class TestBase {
         String desktopBrowserSize = PROPERTIES_READER.getProperty("test.desktop.browser-size");
         String mobileBrowserWidth = PROPERTIES_READER.getProperty("test.mobile.browser-width");
         String mobileBrowserHeight = PROPERTIES_READER.getProperty("test.mobile.browser-height");
-        String mobileUserAgent = PROPERTIES_READER.getProperty("test.mobile.user-agent");
 
         RemoteWebDriver remoteWebDriver = platform.equals(DESKTOP)
                     ? new ChromeRemoteProvider(format("window-size=%s", desktopBrowserSize))
                     .createDriver(new DesiredCapabilities())
                     : new ChromeRemoteProvider(
-                    format("window-size=%s,%s", mobileBrowserWidth, mobileBrowserHeight),
-                    format("user-agent=%s", mobileUserAgent)
+                    format("window-size=%s,%s", mobileBrowserWidth, mobileBrowserHeight)
             ).createDriver(new DesiredCapabilities());
 
             browserInfo = remoteWebDriver.getCapabilities().getBrowserName() + " " +

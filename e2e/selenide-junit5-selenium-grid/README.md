@@ -39,6 +39,7 @@ test.env values:
 ###### Run tests with Selenium Grid in Docker
 - create shared Docker network (one-time setup): `docker network create qa-demo-e2e`
 - start application in background: `docker compose -f docker/docker-compose/run-application.yml up -d`
-- start Selenium Grid in background: `docker compose -f docker/docker-compose/run-selenium-grid.yml up -d`
+- start Selenium Grid in background (tests run inside Docker):
+  `SE_NODE_GRID_URL=http://qa-demo-selenium-hub:4444 docker compose -f docker/docker-compose/run-selenium-grid.yml up -d`
 - run tests: `docker compose -f docker/docker-compose/run-tests-selenide-junit5-selenium-grid.yml up`
 - open test-report (allure reporter should be installed first): `rm -rf allure-results && docker cp qa-demo-selenide-junit5-selenium-grid-tests:target/allure-results allure-results && allure serve allure-results`

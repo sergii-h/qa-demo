@@ -20,10 +20,7 @@ public abstract class MobileTest extends TestBase {
 
         System.setProperty(
                 "chromeoptions.args",
-                format(
-                        "--remote-allow-origins=*, --user-agent=\"%s\"",
-                        propertiesReader.getProperty("test.mobile.user-agent")
-                )
+                format("--user-agent=\"%s\"", propertiesReader.getProperty("test.mobile.user-agent"))
         );
     }
 }
