@@ -246,6 +246,18 @@ npm run test:ui
 
 **Status:** ✅ **100% coverage** | Report: `coverage/index.html`
 
+### Pact Broker & CI
+
+This demo uses an **ephemeral Pact Broker** — started fresh in Docker on each CI run and for local development. GitHub Actions runs consumer tests, provider verification, and a **`can-i-merge`** gate to check that a branch is safe to merge into `master`.
+
+Because the broker has no history between runs, CI **bootstraps `master` contracts first** (via `.github/scripts/pact-bootstrap-master.sh`) so `can-i-merge` has a baseline to compare against. Run the full pipeline locally with:
+
+```bash
+bash .github/scripts/pact-run-local.sh
+```
+
+We chose this approach to keep the demo self-contained with no hosted broker or cloud cost. In production, a **persistent broker** (PactFlow or self-hosted) would hold `master` history and remove the bootstrap step.
+
 ### Pact Consumer Contracts (Frontend)
 
 Run Pact consumer tests for the frontend API client and publish to a standalone local Pact Broker:
