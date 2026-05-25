@@ -1,4 +1,4 @@
-package test;
+package test.base;
 
 import static data.Platform.DESKTOP;
 

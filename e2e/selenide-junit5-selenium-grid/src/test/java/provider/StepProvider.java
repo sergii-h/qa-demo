@@ -10,4 +10,5 @@ public class StepProvider {
     public EditTaskStep editTask = new EditTaskStep();
     public LanguageSwitcherStep language = new LanguageSwitcherStep();
     public NavigationStep navigation = new NavigationStep();
+    public AccessibilityStep accessibility = new AccessibilityStep();
 }

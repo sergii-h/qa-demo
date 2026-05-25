@@ -1,4 +1,4 @@
-package test;
+package test.spec.taskInfo;
 
 import context.TaskTestContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,28 +8,31 @@ import provider.StepProvider;
 import provider.SupportProvider;
 import provider.ValidationProvider;
 
-public interface TaskInfoTests {
+import java.util.List;
+
+public interface ITaskInfoTest {
     StepProvider steps = new StepProvider();
     ValidationProvider validate = new ValidationProvider();
+    TaskTestContext context = TaskTestContext.builder().build();
 
     SupportProvider support();
 
     @BeforeEach
-    default void setUpTaskInfoMocks() {
-        support().wiremock
-                .clearMocks()
-                .setIsValidMock(true);
+    default void init() {
+        var response = context.createTaskResponse();
+
+        support().mock.api().getTasks(List.of(response));
+        support().mock.api().getTask(response.getId(), response);
+        support().mock.api().getIsValid(response.getId(), true);
     }
 
     @Test
-    @DisplayName("View task info")
+    @DisplayName("Should view task info")
     default void shouldViewTaskInfo() {
         // given
-        TaskTestContext context = TaskTestContext.builder().build();
-        support().api.createTask(context.createTaskRequest());
+        steps.navigation.openMainPage();
 
         // when
-        steps.navigation.refresh();
         steps.tasks.openTaskInfoForm(context.getTitle());
 
         // then

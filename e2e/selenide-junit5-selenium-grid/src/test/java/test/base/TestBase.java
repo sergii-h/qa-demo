@@ -1,4 +1,4 @@
-package test;
+package test.base;
 
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
@@ -84,12 +84,11 @@ public abstract class TestBase {
         if (!IS_LOCAL) {
             initRemoteDriver();
         }
-
-        Selenide.open(TEST_URL);
     }
 
     @AfterEach
     public void tearDown() {
+        support.clearMocks();
         Selenide.closeWebDriver();
     }
 

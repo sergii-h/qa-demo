@@ -1,4 +1,4 @@
-package test;
+package test.base;
 
 import com.codeborne.selenide.Configuration;
 import config.PropertyReader;

@@ -14,19 +14,29 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <aspectj.version>1.9.24</aspectj.version>
         <jupiter.version>5.11.0</jupiter.version>
+        <selenium.version>4.44.0</selenium.version>
+        <selenide.version>7.16.1</selenide.version>
         <properties.file.name>test.properties</properties.file.name>
+        <test.tags></test.tags>
+        <test.ignore.tags>uat</test.ignore.tags>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>4.24.0</version>
+            <version>${selenium.version}</version>
         </dependency>
         <dependency>
             <groupId>com.codeborne</groupId>
             <artifactId>selenide</artifactId>
-            <version>7.5.0</version>
+            <version>${selenide.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.seleniumhq.selenium</groupId>
+                    <artifactId>selenium-java</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.qameta.allure</groupId>
@@ -59,7 +69,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.30</version>
+            <version>2.0.17</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -96,6 +106,12 @@
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>4.2.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.deque.html.axe-core</groupId>
+            <artifactId>selenium</artifactId>
+            <version>4.10.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -176,5 +192,27 @@
             </testResource>
         </testResources>
     </build>
+
+    <profiles>
+        <profile>
+            <id>e2e</id>
+            <properties>
+                <test.ignore.tags>uat,accessibility</test.ignore.tags>
+            </properties>
+        </profile>
+        <profile>
+            <id>uat</id>
+            <properties>
+                <test.tags>uat</test.tags>
+                <test.ignore.tags></test.ignore.tags>
+            </properties>
+        </profile>
+        <profile>
+            <id>accessibility</id>
+            <properties>
+                <test.tags>accessibility</test.tags>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

@@ -1,20 +1,23 @@
-package test;
+package test.spec.createTask;
 
 import context.TaskTestContext;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import provider.StepProvider;
 import provider.ValidationProvider;
 
-public interface CreateTaskTests {
+public interface ICreateTaskUatTest {
     StepProvider steps = new StepProvider();
     ValidationProvider validate = new ValidationProvider();
+    TaskTestContext context = TaskTestContext.builder().build();
 
     @Test
-    @DisplayName("Create task with all fields")
+    @Tag("uat")
+    @DisplayName("Should create task")
     default void shouldCreateTask() {
         // given
-        TaskTestContext context = TaskTestContext.builder().build();
+        steps.navigation.openMainPage();
 
         // when
         steps.tasks

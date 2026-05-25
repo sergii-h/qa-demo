@@ -5,7 +5,6 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import javax.annotation.Nonnull;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,8 +18,8 @@ public class ChromeRemoteProvider implements WebDriverProvider {
         this.arguments = arguments;
     }
 
-    @Nonnull
-    public RemoteWebDriver createDriver(@Nonnull Capabilities capabilities) {
+    @Override
+    public RemoteWebDriver createDriver(Capabilities capabilities) {
         ChromeOptions options = new ChromeOptions();
 
         options.addArguments(
