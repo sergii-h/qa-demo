@@ -94,7 +94,9 @@ public abstract class TestBase {
 
         System.setProperty("chromeoptions.args", chromeOptions);
 
-        if (!IS_LOCAL) {
+        if (IS_LOCAL) {
+            WebDriverRunner.getAndCheckWebDriver();
+        } else {
             initRemoteDriver();
         }
     }
