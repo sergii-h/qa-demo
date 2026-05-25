@@ -17,6 +17,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -128,6 +130,7 @@ public abstract class TestBase {
                     remoteWebDriver.getCapabilities().getBrowserVersion();
 
             remoteWebDriver.setFileDetector(new LocalFileDetector());
-            WebDriverRunner.setWebDriver(remoteWebDriver);
+            WebDriver driver = new Augmenter().augment(remoteWebDriver);
+            WebDriverRunner.setWebDriver(driver);
     }
 }
