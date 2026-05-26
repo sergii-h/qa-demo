@@ -3,6 +3,7 @@ package com.example.demo.data;
 import lombok.Builder;
 import lombok.Value;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
@@ -13,6 +14,8 @@ import java.time.Instant;
 public class Task {
     @Id
     String id;
+
+    @Indexed(unique = true)
     String title;
     String description;
     TaskStatus status;

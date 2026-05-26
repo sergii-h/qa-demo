@@ -1,0 +1,13 @@
+{
+  "name": "qa-demo-performance",
+  "private": true,
+  "scripts": {
+    "test:baseline": "k6 run baseline-load.js",
+    "test:create": "k6 run create-under-load.js",
+    "test:uniqueness": "k6 run concurrent-uniqueness.js",
+    "test:spike": "k6 run spike-test.js"
+  },
+  "devDependencies": {
+    "@types/k6": "^1.6.0"
+  }
+}
