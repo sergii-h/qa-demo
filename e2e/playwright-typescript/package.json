@@ -18,7 +18,7 @@
     "@types/node": "^25.9.1",
     "allure-playwright": "^3.0.0",
     "axios": "^1.7.2",
-    "dotenv": "^16.4.5",
+    "dotenv": "^17.4.2",
     "typescript": "^5.4.5"
   }
 }
