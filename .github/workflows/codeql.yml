@@ -60,11 +60,10 @@ jobs:
             demo-interface/package-lock.json
             e2e/playwright-typescript/package-lock.json
 
-      - name: Build TypeScript projects
+      - name: Install TypeScript dependencies
         if: matrix.language == 'javascript-typescript'
         run: |
           npm ci --prefix demo-interface
-          npm run build --prefix demo-interface
           npm ci --prefix e2e/playwright-typescript
 
       - name: Perform CodeQL Analysis
