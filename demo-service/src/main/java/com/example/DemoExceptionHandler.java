@@ -2,6 +2,7 @@ package com.example;
 
 import com.example.demo.DuplicateTitleException;
 import com.example.demo.TaskNotFoundException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,6 +31,13 @@ class DemoExceptionHandler {
         return ResponseEntity
                 .status(CONFLICT)
                 .body(Map.of("message", e.getMessage()));
+    }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    protected ResponseEntity<Map<String, String>> handleDuplicateKeyException(DuplicateKeyException e) {
+        return ResponseEntity
+                .status(CONFLICT)
+                .body(Map.of("message", "Task with this title already exists"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

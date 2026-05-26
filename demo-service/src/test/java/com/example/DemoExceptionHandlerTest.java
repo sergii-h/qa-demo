@@ -4,6 +4,7 @@ import com.example.demo.DuplicateTitleException;
 import com.example.demo.TaskNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -53,6 +54,19 @@ class DemoExceptionHandlerTest {
         // then
         assertThat(response.getStatusCode(), is(CONFLICT));
         assertThat(response.getBody().get("message"), is("Task with title 'My Task' already exists"));
+    }
+
+    @Test
+    void shouldHandleDuplicateKeyExceptionWithConflictStatus() {
+        // given
+        DuplicateKeyException exception = new DuplicateKeyException("E11000 duplicate key error");
+
+        // when
+        ResponseEntity<Map<String, String>> response = exceptionHandler.handleDuplicateKeyException(exception);
+
+        // then
+        assertThat(response.getStatusCode(), is(CONFLICT));
+        assertThat(response.getBody().get("message"), is("Task with this title already exists"));
     }
 
     @Test
