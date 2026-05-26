@@ -507,6 +507,7 @@ qa-demo/
 
 ### Testing Documentation
 - **[Testing Guide](doc/testing-guide.md)** - Comprehensive testing rules and principles
+- **[Security Scanning](doc/security.md)** - Dependabot (SCA), secret scanning, CodeQL (SAST)
 
 ### Architecture Decision Records (ADRs)
 - **[ADR Index](doc/adr/README.md)** - All architectural decisions with context and rationale
@@ -538,6 +539,14 @@ qa-demo/
 - ✅ **AI-Assisted Testing** - Proprietary Cursor AI rules for structured test generation (available on request)
 
 ## 🛠️ Development
+
+### Security
+
+GitHub-native scanning is configured in-repo; enable alerts in **Settings → Code security and analysis** (see [doc/security.md](doc/security.md)):
+
+- **Dependabot** — Maven (`demo-service`, `notification-service`, E2E) and npm (`demo-interface`, Playwright E2E)
+- **Secret scanning** — push protection recommended (no repo config)
+- **CodeQL** — Java + TypeScript on push/PR to `master` (`.github/workflows/codeql.yml`)
 
 ### Code Quality
 

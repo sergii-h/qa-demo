@@ -1,3 +1,5 @@
+import enMessages from '../locales/en/translation.json';
+
 const translationMatchers = {
   toHaveTranslations(received: Array<string>, source?: Record<string, unknown>) {
     const getValueByPath = (obj: Record<string, unknown>, path: string) => {

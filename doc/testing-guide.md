@@ -160,6 +160,11 @@ Before starting any testing work:
 - [ ] **E2E Tests** - Run on staging/pre-production
 - [ ] **Build Success** - All tests pass before merge
 
+### Security (GitHub-native)
+- [ ] **SCA (Dependabot)** - No open high/critical dependency alerts; review Dependabot PRs — see [security.md](security.md)
+- [ ] **Secret scanning** - Push protection enabled; no leaked credentials in PRs
+- [ ] **SAST (CodeQL)** - Code scanning workflow green on PR; triage new alerts — `.github/workflows/codeql.yml`
+
 ---
 
 ## 📚 Documentation

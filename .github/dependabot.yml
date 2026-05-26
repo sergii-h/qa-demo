@@ -1,0 +1,71 @@
+# Software composition analysis (SCA): dependency vulnerability alerts and update PRs.
+# https://docs.github.com/en/code-security/dependabot
+
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /demo-service
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    groups:
+      spring-boot:
+        patterns:
+          - org.springframework.boot*
+          - org.springframework*
+
+  - package-ecosystem: maven
+    directory: /notification-service
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    groups:
+      spring-boot:
+        patterns:
+          - org.springframework.boot*
+          - org.springframework*
+
+  - package-ecosystem: maven
+    directory: /e2e/selenide-junit5-selenium-grid
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: /demo-interface
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    groups:
+      react:
+        patterns:
+          - react*
+          - "@types/react*"
+      vite-vitest:
+        patterns:
+          - vite*
+          - vitest*
+          - "@vitest/*"
+
+  - package-ecosystem: npm
+    directory: /e2e/playwright-typescript
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      playwright:
+        patterns:
+          - "@playwright/*"
+          - playwright*

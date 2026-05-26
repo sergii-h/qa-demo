@@ -1,0 +1,84 @@
+name: CodeQL Security Analysis
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  schedule:
+    - cron: '30 5 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java
+            build-mode: manual
+          - language: javascript-typescript
+            build-mode: none
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - uses: actions/setup-java@v4
+        if: matrix.language == 'java'
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
+      - name: Build Java modules
+        if: matrix.language == 'java'
+        run: |
+          mvn -B -DskipTests compile -f demo-service/pom.xml
+          mvn -B -DskipTests compile -f notification-service/pom.xml
+          mvn -B -DskipTests compile -f e2e/selenide-junit5-selenium-grid/pom.xml
+          mvn -B -DskipTests compile -f pom.xml
+
+      - uses: actions/setup-node@v4
+        if: matrix.language == 'javascript-typescript'
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            demo-interface/package-lock.json
+            e2e/playwright-typescript/package-lock.json
+
+      - name: Build TypeScript projects
+        if: matrix.language == 'javascript-typescript'
+        run: |
+          npm ci --prefix demo-interface
+          npm run build --prefix demo-interface
+          npm ci --prefix e2e/playwright-typescript
+
+      - name: Perform CodeQL Analysis
+        id: analyze
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}
+          upload: never
+          output: ${{ github.workspace }}/codeql-results
+
+      - name: Upload SARIF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-${{ matrix.language }}-sarif
+          path: ${{ steps.analyze.outputs.sarif-output }}
+          retention-days: 30
+          if-no-files-found: error
