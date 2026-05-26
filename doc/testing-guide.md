@@ -33,6 +33,7 @@ Before starting any testing work:
 - [ ] **Exception Handling** - Test custom exceptions (e.g., `TaskNotFoundException`, `DuplicateTitleException`)
 - [ ] **Edge Cases** - Test null handling, empty collections, boundary values
 - [ ] **Mock External Dependencies** - Mock repositories, external clients, Kafka producers
+- [ ] **Mutation Testing** - Run `mvn verify -Pmutation-tests -DskipITs` and review surviving mutants in `target/pit-reports/index.html`
 
 **Standards:** Mock external dependencies; test business logic in isolation  
 **Detailed Rules:** Available in the private rules repository (see project README)

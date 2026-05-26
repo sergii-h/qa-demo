@@ -4,6 +4,10 @@ import com.example.demo.context.TaskTestContext;
 import com.example.demo.data.TaskEvent;
 import com.example.demo.data.TaskPriority;
 import com.example.demo.data.TaskStatus;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -18,9 +23,9 @@ import org.springframework.kafka.support.SendResult;
 
 import java.util.concurrent.CompletableFuture;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -110,14 +115,29 @@ class TaskEventProducerTest {
     }
 
     @Test
-    void shouldNotThrowWhenKafkaSendFails() {
+    void shouldLogErrorWhenKafkaSendFails() {
         // given
+        Logger logger = (Logger) LoggerFactory.getLogger(TaskEventProducer.class);
+        ListAppender<ILoggingEvent> logAppender = new ListAppender<>();
+        logAppender.start();
+        logger.addAppender(logAppender);
+
         CompletableFuture<SendResult<String, TaskEvent>> failedFuture = new CompletableFuture<>();
         failedFuture.completeExceptionally(new RuntimeException("Kafka unavailable"));
         when(kafkaTemplate.send(anyString(), anyString(), any(TaskEvent.class)))
                 .thenReturn(failedFuture);
 
-        // when / then
-        assertDoesNotThrow(() -> taskEventProducer.produceTaskCreated(context.createTask()));
+        // when
+        taskEventProducer.produceTaskCreated(context.createTask());
+
+        // then
+        await().untilAsserted(() -> assertThat(
+                logAppender.list.stream().anyMatch(event ->
+                        Level.ERROR.equals(event.getLevel())
+                                && event.getFormattedMessage().contains("Failed to send CREATED event for task " + context.getId())
+                                && event.getFormattedMessage().contains("Kafka unavailable")),
+                is(true)));
+
+        logger.detachAppender(logAppender);
     }
 }
