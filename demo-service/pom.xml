@@ -10,6 +10,9 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <skipUnitTests>false</skipUnitTests>
+        <jacoco.skip>false</jacoco.skip>
+        <pitest.version>1.19.1</pitest.version>
+        <pitest-junit5-plugin.version>1.2.2</pitest-junit5-plugin.version>
         <pact.verifier.publishResults>false</pact.verifier.publishResults>
         <pact.provider.version></pact.provider.version>
         <pact.provider.branch></pact.provider.branch>
@@ -276,6 +279,7 @@
                             <goal>prepare-agent</goal>
                         </goals>
                         <configuration>
+                            <skip>${jacoco.skip}</skip>
                             <propertyName>jacocoArgLine</propertyName>
                         </configuration>
                     </execution>
@@ -285,6 +289,9 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <skip>${jacoco.skip}</skip>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>jacoco-check</id>
@@ -292,6 +299,7 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
+                            <skip>${jacoco.skip}</skip>
                             <rules>
                                 <rule>
                                     <element>PACKAGE</element>
@@ -308,6 +316,38 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>${pitest.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-junit5-plugin</artifactId>
+                        <version>${pitest-junit5-plugin.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <targetClasses>
+                        <param>com.example.*</param>
+                    </targetClasses>
+                    <excludedClasses>
+                        <param>com.example.DemoServiceApplication</param>
+                        <param>com.example.demo.data.*</param>
+                        <param>com.example.demo.TaskRepository</param>
+                    </excludedClasses>
+                    <excludedTestClasses>
+                        <param>com.example.demo.integration.*</param>
+                    </excludedTestClasses>
+                    <mutators>DEFAULTS</mutators>
+                    <threads>4</threads>
+                    <timestampedReports>false</timestampedReports>
+                    <exportLineCoverage>true</exportLineCoverage>
+                    <jvmArgs>
+                        <jvmArg>-Djunit.jupiter.execution.parallel.enabled=false</jvmArg>
+                    </jvmArgs>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -316,6 +356,33 @@
             <properties>
                 <skipUnitTests>true</skipUnitTests>
             </properties>
+        </profile>
+        <profile>
+            <id>mutation-tests</id>
+            <properties>
+                <jacoco.skip>true</jacoco.skip>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <executions>
+                            <execution>
+                                <id>mutation-coverage</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>mutationCoverage</goal>
+                                </goals>
+                                <configuration>
+                                    <mutationThreshold>80</mutationThreshold>
+                                    <coverageThreshold>90</coverageThreshold>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

@@ -233,6 +233,19 @@ open target/site/jacoco/index.html
 
 **Status:** ✅ **100% coverage** | Report: `target/site/jacoco/index.html` (min 90%)
 
+**Mutation testing (PiTest):**
+```bash
+cd demo-service
+
+# Run unit tests + mutation analysis (JaCoCo disabled — agents conflict)
+mvn verify -Pmutation-tests -DskipITs
+
+# Open mutation report
+open target/pit-reports/index.html
+```
+
+Targets business logic and config classes (`com.example.*`), excluding DTOs, the Spring Boot entrypoint, and the repository interface. Only unit tests are used — integration tests are excluded because they are slow and depend on Testcontainers. Enforces ≥90% line coverage and ≥80% mutation score. CI runs mutation tests in a separate job after unit tests pass (see `.github/workflows/demo-service.yml`).
+
 **Frontend (Vitest 4 + Istanbul):**
 ```bash
 cd demo-interface

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -38,39 +39,18 @@ class KafkaConfigTest {
     }
 
     @Test
-    void shouldConfigureProducerFactoryWithBootstrapServersWhenKafkaTemplateCreated() {
-        kafkaConfig.taskEventKafkaTemplate();
+    void shouldConfigureProducerFactoryWhenKafkaTemplateCreated() {
+        KafkaTemplate<String, TaskEvent> template = kafkaConfig.taskEventKafkaTemplate();
 
-        Map<String, Object> configProps = (Map<String, Object>) ReflectionTestUtils.getField(kafkaConfig, "configProps");
-        
-        assertThat(configProps.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG), is("localhost:9092"));
-    }
+        @SuppressWarnings("unchecked")
+        DefaultKafkaProducerFactory<String, TaskEvent> producerFactory =
+                (DefaultKafkaProducerFactory<String, TaskEvent>) ReflectionTestUtils.getField(template, "producerFactory");
+        Map<String, Object> config = producerFactory.getConfigurationProperties();
 
-    @Test
-    void shouldConfigureJsonSerializerWithoutTypeHeadersWhenKafkaTemplateCreated() {
-        kafkaConfig.taskEventKafkaTemplate();
-
-        Map<String, Object> configProps = (Map<String, Object>) ReflectionTestUtils.getField(kafkaConfig, "configProps");
-        
-        assertThat(configProps.get(JsonSerializer.ADD_TYPE_INFO_HEADERS), is(false));
-    }
-
-    @Test
-    void shouldConfigureStringKeySerializerWhenKafkaTemplateCreated() {
-        kafkaConfig.taskEventKafkaTemplate();
-
-        Map<String, Object> configProps = (Map<String, Object>) ReflectionTestUtils.getField(kafkaConfig, "configProps");
-        
-        assertThat(configProps.get(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG), is(StringSerializer.class));
-    }
-
-    @Test
-    void shouldConfigureJsonValueSerializerWhenKafkaTemplateCreated() {
-        kafkaConfig.taskEventKafkaTemplate();
-
-        Map<String, Object> configProps = (Map<String, Object>) ReflectionTestUtils.getField(kafkaConfig, "configProps");
-        
-        assertThat(configProps.get(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG), is(JsonSerializer.class));
+        assertThat(config.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG), is("localhost:9092"));
+        assertThat(config.get(JsonSerializer.ADD_TYPE_INFO_HEADERS), is(false));
+        assertThat(config.get(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG), is(StringSerializer.class));
+        assertThat(config.get(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG), is(JsonSerializer.class));
     }
 }
 
