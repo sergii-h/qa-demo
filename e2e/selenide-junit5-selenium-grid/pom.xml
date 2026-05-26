@@ -13,7 +13,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <aspectj.version>1.9.24</aspectj.version>
-        <jupiter.version>5.11.0</jupiter.version>
+        <jupiter.version>6.1.0</jupiter.version>
         <selenium.version>4.44.0</selenium.version>
         <selenide.version>7.16.1</selenide.version>
         <properties.file.name>test.properties</properties.file.name>
