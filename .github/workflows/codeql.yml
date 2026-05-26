@@ -25,7 +25,7 @@ jobs:
           - language: java
             build-mode: manual
           - language: javascript-typescript
-            build-mode: manual
+            build-mode: none
 
     steps:
       - uses: actions/checkout@v4
@@ -71,3 +71,12 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: /language:${{ matrix.language }}
+          upload: never
+          output: codeql-results
+
+      - name: Upload SARIF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-${{ matrix.language }}-sarif
+          path: codeql-results/
+          retention-days: 30
