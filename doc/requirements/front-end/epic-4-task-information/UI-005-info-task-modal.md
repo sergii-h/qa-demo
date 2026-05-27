@@ -20,6 +20,7 @@ As a user, I want a read-only modal with full task details and validation status
    - Should close info modal on close action
    - Should keep info flow available when task details request fails (HTTP 500 or network rejection)
    - Should keep info flow available when validation request fails (HTTP 500 or network rejection)
+   - Should have translations for info task modal
 3. **Pact**
    - Should have GET `/v1/tasks/{id}` consumer test (HTTP 200)
    - Should have GET `/v1/tasks/isValid/{id}` consumer test (HTTP 200 with boolean)

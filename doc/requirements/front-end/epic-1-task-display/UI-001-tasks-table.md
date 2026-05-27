@@ -25,6 +25,7 @@ As a user, I want a task table with status/priority tags and row actions so I ca
    - Should keep task row when delete fails (HTTP 500 or network error)
    - Should allow delete retry after failure and remove row when retry succeeds
    - Should keep create flow available when initial tasks request fails
+   - Should have translations for tasks table
 3. **Pact**
    - Should have GET `/v1/tasks` consumer test
 4. **E2E**

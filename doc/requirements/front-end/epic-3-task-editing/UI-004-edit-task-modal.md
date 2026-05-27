@@ -23,6 +23,7 @@ As a user, I want to edit a task in a pre-populated modal with the same validati
    - Should display generic error for PUT API failures (HTTP 400/500)
    - Should allow retry and save after initial PUT failure
    - Should display generic error when PUT request is rejected (network failure)
+   - Should have translations for edit task modal
 3. **Pact**
    - Should have GET `/v1/tasks/{id}` consumer test (HTTP 200)
    - Should have PUT `/v1/tasks/{id}` consumer test (HTTP 200 with updated task)

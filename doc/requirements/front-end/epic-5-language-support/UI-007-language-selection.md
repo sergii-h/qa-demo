@@ -18,6 +18,7 @@ As a user, I want EN/ES with browser detection and a manual switcher so I can us
 2. **IT**
    - Should render language switcher dropdown with `EN` and `ES` options
    - Should change current language when user selects another language option
+   - Per-component translation keys: [UI-001](../epic-1-task-display/UI-001-tasks-table.md), [UI-003](../epic-2-task-creation/UI-003-create-task-modal.md), [UI-004](../epic-3-task-editing/UI-004-edit-task-modal.md), [UI-005](../epic-4-task-information/UI-005-info-task-modal.md) IT
 3. **Pact** - N/A
 4. **E2E**
    - Should switch all UI text and status/priority tag values to Spanish when ES is selected

@@ -25,6 +25,7 @@ As a user, I want to create a task in a modal with validation and clear errors.
    - Should keep create flow available when initial GET fails (HTTP 500 or network rejection)
    - Should close modal when refresh GET fails after successful POST (HTTP 500 or network rejection)
    - Should display generic error when POST request is rejected (network failure)
+   - Should have translations for create task modal
 3. **Pact**
    - Should have POST `/v1/tasks` consumer test (HTTP 201 with task response)
    - Should have POST `/v1/tasks` consumer test (HTTP 409 duplicate title)

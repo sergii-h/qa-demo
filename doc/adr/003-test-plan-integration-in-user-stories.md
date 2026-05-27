@@ -18,7 +18,7 @@ Separate test documents also go stale quickly.
 | # | Level | Backend | Frontend |
 |---|-------|---------|----------|
 | 1 | **UT** | JUnit + Mockito | Vitest |
-| 2 | **IT** | RestAssured + `@SpringBootTest` (real MongoDB/Kafka) | Vitest + RTL — full component tree, mocked fetch |
+| 2 | **IT** | RestAssured + `@SpringBootTest` (real MongoDB/Kafka) | Vitest + RTL — full component tree, mocked fetch; translation tests |
 | 3 | **Pact** | Provider verification when FE consumes the API | Consumer contracts when calling BE APIs |
 | 4 | **E2E** | Cross-reference only (see below) | Playwright / Selenide — critical UI workflows |
 | 5 | **Accessibility** | N/A | axe-core in E2E suites (**automated**) |
@@ -36,7 +36,7 @@ Separate test documents also go stale quickly.
 
 | Level | Automated? | Notes |
 |-------|------------|--------|
-| **UT**, **IT**, **Pact**, **E2E** | Yes (CI) | See [testing guide](../testing-guide.md) pipeline table |
+| **UT**, **IT**, **Pact**, **E2E** | Yes (CI) | IT includes `*.translation.test.tsx` for localized FE components |
 | **Accessibility** | Yes | axe-core only, via E2E suites |
 | **UAT** | Yes | Full-stack smoke on `master` (`@uat`); most stories `N/A` |
 | **Manual** | No | FE only — visual check; keyboard/screen-reader when listed |
@@ -73,7 +73,7 @@ Separate test documents also go stale quickly.
 ```markdown
 ## Test Plan
 1. **UT** - All ACs covered at unit level
-2. **IT** - Modal render/validation; create flow with mocked API; error/retry paths
+2. **IT** - Modal render/validation; create flow with mocked API; error/retry paths; translations
 3. **Pact** - Consumer: POST `/v1/tasks` → 201 and 409
 4. **E2E** - Complete create workflow (open modal → fill → save → verify table)
 5. **Accessibility** - axe-core checks on create modal in E2E
