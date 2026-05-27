@@ -1,43 +1,28 @@
 # CONFIG-002: Error Handling
 
-**Epic:** System Configuration  
-**Priority:** High  
-**Story Points:** 3
+**Points:** 3 · **Epic:** System Configuration
 
-## Description
-As an API consumer, I want consistent error responses so that I can handle errors appropriately in my application.
+As an API consumer, I want consistent error responses so I can handle failures predictably.
 
 ## Acceptance Criteria
 
-1. Should return HTTP 400 with map of field names to error messages when validation error occurs
-
-2. Should return HTTP 400 with all validation errors when multiple fields are invalid
-
-3. Should return HTTP 404 with error message including request URI when resource not found (NoSuchElementException)
-
-4. Should return error in format `{"fieldName": "error message"}` for validation errors
-
-5. Should handle NoSuchElementException consistently across all endpoints returning HTTP 404
-
-6. Should handle MethodArgumentNotValidException consistently across all endpoints returning HTTP 400
+1. Should return HTTP 400 with `{fieldName: message}` map for validation errors (all invalid fields in one response)
+2. Should return HTTP 404 with `{message: "..."}` for `TaskNotFoundException`
+3. Should return HTTP 409 with `{message: "..."}` for duplicate title / duplicate key
+4. Should apply handlers globally via `@ControllerAdvice` (`MethodArgumentNotValidException`, `TaskNotFoundException`, etc.)
 
 ## Test Plan
 
 1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
 2. **IT**
    - Should return HTTP 400 with field errors for validation failures
-   - Should return HTTP 404 with message for NoSuchElementException
+   - Should return HTTP 404 with message for `TaskNotFoundException`
+   - Should return HTTP 409 with message for duplicate title
    - Should handle multiple validation errors in single response
    - Should format error responses consistently
-3. **Pact**
-   - Consumer: Covered by consumer tests with error scenarios
-   - Provider: Should verify provider contract for error responses across all endpoints
+3. **Pact** - N/A for 400/404 (IT only). Duplicate-title 409 contracts covered in [TASK-001](../epic-1-task-management/TASK-001-create-task.md) / [TASK-003](../epic-1-task-management/TASK-003-update-task.md) and FE consumer tests
 4. **E2E** - Error messages displayed in UI (create/edit modals)
-5. **UAT** - N/A
-
-## Technical Notes
-- Global exception handler using `@ControllerAdvice`
-- Handles `MethodArgumentNotValidException` for validation errors
-- Handles `NoSuchElementException` for not found errors
-- Returns structured error responses with appropriate HTTP status codes
+5. **Accessibility** - N/A
+6. **UAT** - N/A
+7. **Manual** - N/A
 

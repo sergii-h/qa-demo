@@ -1,23 +1,14 @@
 # UI-002: Delete Task
 
-**Epic:** Task Display  
-**Priority:** High  
-**Story Points:** 2
+**Points:** 2 · **Epic:** Task Display
 
-## Description
-As a user, I want to delete a task from the table so that I can remove tasks I no longer need.
+As a user, I want to delete a task from the table without a confirmation dialog.
 
 ## Acceptance Criteria
 
-1. Should remove task from the table without page refresh after successful delete operation from a task row
-
-2. Should send DELETE request to backend API `/v1/tasks/{taskId}`
-
-3. Should remove task from local state after successful deletion
-
-4. Should update table display to reflect removal
-
-5. Should not require confirmation dialog (immediate deletion)
+1. Should call `DELETE /v1/tasks/{taskId}` on Delete click
+2. Should remove row from local state only after successful response (no page refresh)
+3. Should keep row on failure (HTTP 500 / network) and allow retry
 
 ## Test Plan
 
@@ -32,13 +23,9 @@ As a user, I want to delete a task from the table so that I can remove tasks I n
    - Should have DELETE `/v1/tasks/{id}` consumer test (HTTP 204)
 4. **E2E**
    - Should delete task through UI and verify removal from table
-5. **Accessibility**
-   - Should announce task deletion to screen readers
+5. **Accessibility** - N/A
 6. **UAT** - N/A
-
-## Technical Notes
-- Calls `deleteTask(taskId)` service function
-- Filters local state to remove deleted task only after successful delete response
-- Keeps current rows unchanged on delete failure so user can retry
-- Delete button styled with `p-button-outlined p-button-danger` classes
+7. **Manual**
+   - Visual check — row removal feedback
+   - Screen reader announcement on task deletion
 

@@ -1,23 +1,14 @@
 # EVENT-001: Task Created Event
 
-**Epic:** Event Streaming  
-**Priority:** High  
-**Story Points:** 3
+**Points:** 3 · **Epic:** Event Streaming
 
-## Description
-As a system, I want to publish task created events to Kafka so that downstream systems can react to new tasks.
+As a system, I want to publish task-created events to Kafka so downstream systems can react.
 
 ## Acceptance Criteria
 
-1. Should publish event to Kafka topic with eventType "CREATED" when task is successfully created and saved to database
-
-2. Should include taskId, title, status, priority, timestamp, and eventType in published event
-
-3. Should set Kafka message key to task ID for partition ordering
-
-4. Should not publish event when task creation fails validation (HTTP 400)
-
-5. Should not publish event when task creation fails due to duplicate title (HTTP 409)
+1. Should publish to `task-event` with `eventType: CREATED` after successful DB save
+2. Payload: `taskId`, `title`, `status`, `priority`, `timestamp`, `eventType`; key = task ID; no description
+3. Should not publish on HTTP 400 or 409
 
 ## Test Plan
 
@@ -26,11 +17,7 @@ As a system, I want to publish task created events to Kafka so that downstream s
    - Should publish event to Kafka topic `task-event` when task created
 3. **Pact** - N/A
 4. **E2E** - N/A (event streaming not visible in UI)
-5. **UAT** - N/A
-
-## Technical Notes
-- Kafka topic configured via `kafka.topic.task-event` property
-- Event timestamp is current time when event is created
-- Uses JSON serialization for event payload
-- Task description is not included in event
+5. **Accessibility** - N/A
+6. **UAT** - N/A
+7. **Manual** - N/A
 

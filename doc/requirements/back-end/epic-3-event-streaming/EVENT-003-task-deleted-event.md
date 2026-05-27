@@ -1,23 +1,14 @@
 # EVENT-003: Task Deleted Event
 
-**Epic:** Event Streaming  
-**Priority:** Medium  
-**Story Points:** 3
+**Points:** 3 · **Epic:** Event Streaming
 
-## Description
-As a system, I want to publish task deleted events to Kafka so that downstream systems can react to task removal.
+As a system, I want to publish task-deleted events to Kafka so downstream systems can react.
 
 ## Acceptance Criteria
 
-1. Should publish event to Kafka topic with eventType "DELETED" when task is successfully deleted and removed from database
-
-2. Should include taskId, title, status, priority, timestamp, and eventType in published event
-
-3. Should set Kafka message key to task ID for partition ordering
-
-4. Should not publish event when deletion fails due to task not found (HTTP 404)
-
-5. Should contain task values from before deletion in event payload
+1. Should publish to `task-event` with `eventType: DELETED` after successful DB delete (pre-delete values)
+2. Payload: `taskId`, `title`, `status`, `priority`, `timestamp`, `eventType`; key = task ID
+3. Should not publish on HTTP 404
 
 ## Test Plan
 
@@ -26,11 +17,7 @@ As a system, I want to publish task deleted events to Kafka so that downstream s
    - Should publish event to Kafka topic `task-event` when task deleted
 3. **Pact** - N/A
 4. **E2E** - N/A (event streaming not visible in UI)
-5. **UAT** - N/A
-
-## Technical Notes
-- Kafka topic configured via `kafka.topic.task-event` property
-- Event timestamp is current time when event is created
-- Uses JSON serialization for event payload
-- Event must be published before task data is lost
+5. **Accessibility** - N/A
+6. **UAT** - N/A
+7. **Manual** - N/A
 

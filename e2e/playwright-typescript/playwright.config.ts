@@ -34,11 +34,11 @@ export default defineConfig({
         links: {
           issue: {
             nameTemplate: "Issue #%s",
-            urlTemplate: "https://github.com/sgoldys/qa-demo/issues/%s",
+            urlTemplate: "https://github.com/sergii-h/qa-demo/issues/%s",
           },
           tms: {
             nameTemplate: "TMS #%s",
-            urlTemplate: "https://github.com/sgoldys/qa-demo/issues/%s",
+            urlTemplate: "https://github.com/sergii-h/qa-demo/issues/%s",
           },
         },
       },

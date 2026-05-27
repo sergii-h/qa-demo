@@ -1,49 +1,15 @@
 # UI-004: Edit Task Modal
 
-**Epic:** Task Editing  
-**Priority:** High  
-**Story Points:** 5
+**Points:** 5 · **Epic:** Task Editing
 
-## Description
-As a user, I want to edit an existing task through a modal dialog so that I can update task information as my work progresses.
+As a user, I want to edit a task in a pre-populated modal with the same validation as create.
 
 ## Acceptance Criteria
 
-1. Should open modal dialog with title "Edit {task title}" when user clicks Edit button on a task row
-
-2. Should display loading spinner while task data is loading after edit modal opens
-
-3. Should pre-populate all form fields with current task data after task data is loaded
-
-4. Should display form with following fields:
-   - Title (text input, required, pre-filled)
-   - Description (textarea, optional, pre-filled)
-   - Status (dropdown, required, pre-selected)
-   - Priority (dropdown, required, pre-selected)
-
-5. Should provide same dropdown options as create modal
-
-6. Should close modal and refresh tasks table with updated task after successful save
-
-7. Should validate title is not empty before allowing submission
-
-8. Should disable Save button when title is empty
-
-9. Should display error message "Title is required" when title is blank
-
-10. Should display error message "Title must not exceed 100 characters" when title exceeds limit
-
-11. Should display error "Task with this title already exists" when backend returns duplicate title error
-
-12. Should display error message "Failed to update task. Please try again." for general errors
-
-13. Should clear title error when user starts typing after error
-
-14. Should show loading spinner during task update
-
-15. Should have Close and Save buttons in footer
-
-16. Should close modal when Close button clicked without saving
+1. Should open "Edit {title}" modal with spinner, then pre-filled title, description, status, priority (same options as [UI-003](../epic-2-task-creation/UI-003-create-task-modal.md))
+2. Should disable Save when title empty; same client validation and error messages as create (with `"Failed to update task..."` for generic errors)
+3. Should fetch via `GET /v1/tasks/{id}`, save via `PUT /v1/tasks/{id}`; spinner during load/update
+4. Should close and refresh table on success; Close discards without save
 
 ## Test Plan
 
@@ -64,16 +30,13 @@ As a user, I want to edit an existing task through a modal dialog so that I can 
 4. **E2E**
    - Should edit task through complete UI workflow
 5. **Accessibility**
-   - Should have proper labels and ARIA attributes for form fields
-   - Should announce validation errors to screen readers
-   - Should trap focus within modal
+   - axe-core checks on edit modal in E2E
 6. **UAT** - N/A
+7. **Manual**
+   - Visual check
+   - Focus trap within modal
+   - Screen reader announcements for validation errors
 
-## Technical Notes
-- Uses PrimeReact Dialog component (minimum width: 480px)
-- Fetches task data on modal open via `getTask(taskId)`
-- Calls `updateTask()` service function
-- Sends PUT request to `/v1/tasks/{taskId}`
-- Modal ID: `edit-task-modal`
-- Button classes: `close-button`, `save-button`
+## Notes
 
+- Modal ID `edit-task-modal`; test IDs: `save-button`, `close-button`

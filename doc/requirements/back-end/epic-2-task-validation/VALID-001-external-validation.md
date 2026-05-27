@@ -1,23 +1,15 @@
 # VALID-001: External Task Validation
 
-**Epic:** Task Validation  
-**Priority:** Medium  
-**Story Points:** 3
+**Points:** 3 · **Epic:** Task Validation
 
-## Description
-As a user, I want to validate a task against external business rules so that I can ensure task data meets external system requirements.
+As a user, I want to validate a task against external rules so that I can check data quality.
 
 ## Acceptance Criteria
 
-1. Should return HTTP 200 with boolean validation result from external service when valid task ID exists
-
-2. Should return HTTP 200 with `false` when task ID does not exist
-
-3. Should call external validation service with task title, description, status, and priority when task exists in database
-
-4. Should return `true` when external service validates task successfully
-
-5. Should return `false` when external service validation fails
+1. Should return HTTP 200 with boolean from `GET /v1/tasks/isValid/{id}`
+2. Should return `false` (200) when task ID does not exist — not 404
+3. Should call external `POST /external/validate/task` with title, description, status, priority (no id/timestamps)
+4. Should return `true` / `false` per external service response
 
 ## Test Plan
 
@@ -31,11 +23,7 @@ As a user, I want to validate a task against external business rules so that I c
    - Should verify provider contract for GET `/v1/tasks/isValid/{id}` (HTTP 200 with validation result)
 4. **E2E**
    - Should display validation status in task info modal
-5. **UAT** - N/A
-
-## Technical Notes
-- External validation endpoint: POST `/external/validate/task`
-- Uses reactive WebClient for external service communication
-- Task ID and timestamps are not included in validation request
-- External service URL configured via `external.service.url` property
+5. **Accessibility** - N/A
+6. **UAT** - N/A
+7. **Manual** - N/A
 

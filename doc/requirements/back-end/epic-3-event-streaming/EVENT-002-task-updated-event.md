@@ -1,27 +1,14 @@
 # EVENT-002: Task Updated Event
 
-**Epic:** Event Streaming  
-**Priority:** High  
-**Story Points:** 3
+**Points:** 3 · **Epic:** Event Streaming
 
-## Description
-As a system, I want to publish task updated events to Kafka so that downstream systems can react to task changes.
+As a system, I want to publish task-updated events to Kafka so downstream systems can react.
 
 ## Acceptance Criteria
 
-1. Should publish event to Kafka topic with eventType "UPDATED" when task is successfully updated and saved to database
-
-2. Should include taskId, title, status, priority, timestamp, and eventType in published event
-
-3. Should set Kafka message key to task ID for partition ordering
-
-4. Should contain updated task values in event payload
-
-5. Should not publish event when update fails validation (HTTP 400)
-
-6. Should not publish event when task not found (HTTP 404)
-
-7. Should not publish event when update fails due to duplicate title (HTTP 409)
+1. Should publish to `task-event` with `eventType: UPDATED` after successful DB save (updated field values)
+2. Payload: `taskId`, `title`, `status`, `priority`, `timestamp`, `eventType`; key = task ID
+3. Should not publish on HTTP 400, 404, or 409
 
 ## Test Plan
 
@@ -30,11 +17,7 @@ As a system, I want to publish task updated events to Kafka so that downstream s
    - Should publish event to Kafka topic `task-event` when task updated
 3. **Pact** - N/A
 4. **E2E** - N/A (event streaming not visible in UI)
-5. **UAT** - N/A
-
-## Technical Notes
-- Kafka topic configured via `kafka.topic.task-event` property
-- Event timestamp is current time when event is created
-- Uses JSON serialization for event payload
-- Event contains updated task values
+5. **Accessibility** - N/A
+6. **UAT** - N/A
+7. **Manual** - N/A
 
