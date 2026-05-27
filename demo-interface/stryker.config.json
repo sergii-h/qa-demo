@@ -1,0 +1,40 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "packageManager": "npm",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "testRunner": "vitest",
+  "reporters": ["html", "clear-text", "progress"],
+  "ignorePatterns": ["coverage/**", "reports/**", "pacts/**", ".stryker-tmp/**", "dist/**"],
+  "disableTypeChecks": false,
+  "timeoutMS": 5000,
+  "vitest": {
+    "configFile": "vitest.stryker.config.mts",
+    "related": true
+  },
+  "mutate": [
+    "src/services/index.ts",
+    "src/App.tsx",
+    "src/components/**/*.tsx",
+    "!src/**/*.unit.test.{ts,tsx}",
+    "!src/**/*.integration.test.{ts,tsx}",
+    "!src/**/*.translation.test.{ts,tsx}",
+    "!src/**/*.test.{ts,tsx}",
+    "!src/test/**",
+    "!src/test-utils/**",
+    "!src/**/*.d.ts",
+    "!src/components/**/index.ts",
+    "!src/index.tsx",
+    "!src/reportWebVitals.ts",
+    "!src/setupTests.ts",
+    "!src/i18n.ts",
+    "!src/interfaces/**"
+  ],
+  "mutator": {
+    "excludedMutations": ["StringLiteral"]
+  },
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": null
+  }
+}
