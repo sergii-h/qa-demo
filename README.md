@@ -20,7 +20,11 @@
 [![Shift-Left](https://img.shields.io/badge/Methodology-Shift--Left-blue)](doc/testing-guide.md)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Demo project by **Sergii Holdys** — a full-stack QA engineering demo applying the **Testing Pyramid** and **shift-left** methodology.
+A full-stack QA engineering demo project applying the **Testing Pyramid** and **shift-left** methodology.
+
+<p align="center">
+  <img src="doc/assets/qa-demo-app.gif" alt="QA Demo App" width="800"/>
+</p>
 
 ---
 
