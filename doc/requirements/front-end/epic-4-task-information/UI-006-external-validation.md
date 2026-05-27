@@ -1,25 +1,14 @@
 # UI-006: External Validation Display
 
-**Epic:** Task Information  
-**Priority:** Low  
-**Story Points:** 2
+**Points:** 2 · **Epic:** Task Information
 
-## Description
-As a user, I want to see if my task passes external validation rules so that I know if my task data meets system requirements.
+As a user, I want a validation indicator in the info modal so I know if external rules pass.
 
 ## Acceptance Criteria
 
-1. Should display validation status with visual indicator after task and validation data are loaded in info modal
-
-2. Should call external validation endpoint `/v1/tasks/isValid/{taskId}`
-
-3. Should display green check icon with label "Validated:" when validation response is `true`
-
-4. Should display red X icon with label "Validated:" when validation response is `false`
-
-5. Should fetch validation status independently from task data
-
-6. Should display validation indicator at the bottom of task info
+1. Should call `GET /v1/tasks/isValid/{taskId}` independently of task fetch
+2. Should show green check / red X with label `"Validated:"` at bottom of info modal for `true` / `false`
+3. Should remain usable when validation endpoint fails (HTTP 500 / network)
 
 ## Test Plan
 
@@ -34,14 +23,11 @@ As a user, I want to see if my task passes external validation rules so that I k
    - Should have GET `/v1/tasks/isValid/{id}` consumer test (HTTP 200 with boolean)
 4. **E2E**
    - Covered by UI-005 (info modal E2E test)
-5. **Accessibility**
-   - Should use ARIA labels for validation icons
+5. **Accessibility** - N/A
 6. **UAT** - N/A
+7. **Manual**
+   - Visual check
 
-## Technical Notes
-- Calls `getIsValid(taskId)` service function
-- Returns boolean value from backend
-- Uses PrimeIcons: `pi-check` (green) and `pi-times` (red)
-- Validation happens asynchronously with task data fetch
-- Located in InfoTaskModal component
+## Notes
 
+- Implemented inside InfoTaskModal via `getIsValid()`

@@ -1,53 +1,16 @@
 # UI-003: Create Task Modal
 
-**Epic:** Task Creation  
-**Priority:** High  
-**Story Points:** 5
+**Points:** 5 · **Epic:** Task Creation
 
-## Description
-As a user, I want to create a new task through a modal dialog so that I can add tasks to my task list with all required information.
+As a user, I want to create a task in a modal with validation and clear errors.
 
 ## Acceptance Criteria
 
-1. Should open modal dialog with title "New task" when user clicks "Create task" button
-
-2. Should display form with following fields:
-   - Title (text input, required, with asterisk)
-   - Description (textarea, optional, 5 rows)
-   - Status (dropdown, required, default: TODO)
-   - Priority (dropdown, required, default: MEDIUM)
-
-3. Should provide status dropdown options:
-   - To Do (TODO)
-   - In Progress (IN_PROGRESS)
-   - Done (DONE)
-
-4. Should provide priority dropdown options:
-   - Low (LOW)
-   - Medium (MEDIUM)
-   - High (HIGH)
-
-5. Should close modal and refresh tasks table with new task after successful creation with valid data
-
-6. Should validate title is not empty before allowing submission
-
-7. Should disable Create button when title is empty
-
-8. Should display error message "Title is required" when title is blank and user attempts to create
-
-9. Should display error message "Title must not exceed 100 characters" when title exceeds limit
-
-10. Should display error "Task with this title already exists" when backend returns duplicate title error
-
-11. Should display error message "Failed to create task. Please try again." for general errors
-
-12. Should clear title error when user starts typing after error
-
-13. Should show loading spinner during task creation
-
-14. Should have Close and Create buttons in footer
-
-15. Should close modal when Close button clicked without saving
+1. Should open "New task" modal from Create button with fields: title (required), description (optional), status (default TODO), priority (default MEDIUM)
+2. Should offer status TODO / IN_PROGRESS / DONE and priority LOW / MEDIUM / HIGH
+3. Should disable Create when title empty; validate before submit
+4. Should show errors: `"Title is required"`, `"Title must not exceed 100 characters"`, `"Task with this title already exists"`, `"Failed to create task. Please try again."` (generic); clear title error on typing
+5. Should show loading spinner during POST; close and refresh table on success; Close discards without save
 
 ## Test Plan
 
@@ -62,22 +25,21 @@ As a user, I want to create a new task through a modal dialog so that I can add 
    - Should keep create flow available when initial GET fails (HTTP 500 or network rejection)
    - Should close modal when refresh GET fails after successful POST (HTTP 500 or network rejection)
    - Should display generic error when POST request is rejected (network failure)
+   - Should have translations for create task modal
 3. **Pact**
    - Should have POST `/v1/tasks` consumer test (HTTP 201 with task response)
    - Should have POST `/v1/tasks` consumer test (HTTP 409 duplicate title)
 4. **E2E**
    - Should create task through complete UI workflow
 5. **Accessibility**
-   - Should have proper labels and ARIA attributes for form fields
-   - Should announce validation errors to screen readers
-   - Should trap focus within modal
-6. **UAT** - N/A
+   - axe-core checks on create modal in E2E
+6. **UAT**
+   - Should create task
+7. **Manual**
+   - Visual check
+   - Focus trap within modal
+   - Screen reader announcements for validation errors
 
-## Technical Notes
-- Uses PrimeReact Dialog component (minimum width: 480px)
-- Form fields: InputText, InputTextarea, Dropdown components
-- Calls `createTask()` service function
-- Sends POST request to `/v1/tasks`
-- Error styling with `p-invalid` class for invalid fields
-- Test IDs: `create-task-title-input`, `create-button`, `close-button`, `title-error`, `loading-spinner`
+## Notes
 
+- Modal ID `create-task-modal`; test IDs: `create-task-title-input`, `create-button`, `close-button`, `title-error`, `loading-spinner`

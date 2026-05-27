@@ -1,23 +1,13 @@
 # CONFIG-001: CORS Configuration
 
-**Epic:** System Configuration  
-**Priority:** High  
-**Story Points:** 2
+**Points:** 2 · **Epic:** System Configuration
 
-## Description
-As a frontend application, I want the API to support CORS so that I can make requests from different origins.
+As a frontend app, I want CORS enabled so I can call the API from another origin.
 
 ## Acceptance Criteria
 
-1. Should return appropriate CORS headers when preflight request is made from any origin
-
-2. Should allow all HTTP methods for CORS requests
-
-3. Should allow all origin patterns for CORS requests
-
-4. Should allow credentials for CORS requests
-
-5. Should apply CORS configuration to all paths (`/**`)
+1. Should return CORS headers on preflight from any origin
+2. Should allow all methods, all origin patterns, credentials, on all paths (`/**`)
 
 ## Test Plan
 
@@ -29,10 +19,10 @@ As a frontend application, I want the API to support CORS so that I can make req
    - Should allow credentials
 3. **Pact** - N/A
 4. **E2E** - Implicitly tested (frontend can make requests)
-5. **UAT** - N/A
+5. **Accessibility** - N/A
+6. **UAT** - N/A
+7. **Manual** - N/A
 
-## Technical Notes
-- Configured via `WebMvcConfigurer` implementation
-- Allows credentials for authenticated requests
-- Production deployment should restrict allowed origins
+## Notes
 
+- Restrict allowed origins in production

@@ -1,5 +1,5 @@
 {
-  "name": "@sgoldys/demo-interface",
+  "name": "@sergii-h/demo-interface",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -19,6 +19,7 @@
     "clean": "rm -rf node_modules package-lock.json && npm install",
     "test:ui": "vitest --ui",
     "test": "vitest run --coverage",
+    "test:stryker": "stryker run",
     "test:pact": "rm -rf pacts && vitest run pact",
     "pact:broker:up": "docker compose -f ../docker/docker-compose/run-pact-broker.yml up -d",
     "pact:broker:down": "docker compose -f ../docker/docker-compose/run-pact-broker.yml down -v",
@@ -44,6 +45,8 @@
     ]
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^9.6.0",
+    "@stryker-mutator/vitest-runner": "^9.6.0",
     "@pact-foundation/pact": "^16.3.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^15.0.7",

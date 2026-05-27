@@ -1,40 +1,15 @@
 # UI-001: Tasks Table Display
 
-**Epic:** Task Display  
-**Priority:** High  
-**Story Points:** 3
+**Points:** 3 · **Epic:** Task Display
 
-## Description
-As a user, I want to view all my tasks in a table with visual status and priority indicators so that I can quickly scan and manage my task list.
+As a user, I want a task table with status/priority tags and row actions so I can scan and manage my list.
 
 ## Acceptance Criteria
 
-1. Should display tasks table with all existing tasks fetched from backend on initial page render
-
-2. Should display tasks in a data table with striped rows for better readability
-
-3. Should show task title column (30% width)
-
-4. Should display status column (15% width) with colored tags:
-   - TODO → Blue/Info tag
-   - IN_PROGRESS → Orange/Warning tag
-   - DONE → Green/Success tag
-
-5. Should display priority column (15% width) with colored tags:
-   - LOW → Green/Success tag
-   - MEDIUM → Orange/Warning tag
-   - HIGH → Red/Danger tag
-
-6. Should show actions column with three buttons for each task:
-   - Info button (outlined, with info icon)
-   - Edit button (outlined, with pencil icon)
-   - Delete button (outlined danger, with trash icon)
-
-7. Should display "Create task" button at the top with plus icon
-
-8. Should fetch tasks automatically on component mount
-
-9. Should be responsive and adapt to different screen sizes
+1. Should load all tasks from `GET /v1/tasks` on mount (striped DataTable)
+2. Should show columns: title, status tags (TODO/info, IN_PROGRESS/warning, DONE/success), priority tags (LOW/success, MEDIUM/warning, HIGH/danger), actions
+3. Should show Info, Edit, Delete (outlined danger), and top "Create task" buttons
+4. Should render empty table when response is empty; remain usable when initial GET fails
 
 ## Test Plan
 
@@ -50,19 +25,18 @@ As a user, I want to view all my tasks in a table with visual status and priorit
    - Should keep task row when delete fails (HTTP 500 or network error)
    - Should allow delete retry after failure and remove row when retry succeeds
    - Should keep create flow available when initial tasks request fails
+   - Should have translations for tasks table
 3. **Pact**
    - Should have GET `/v1/tasks` consumer test
 4. **E2E**
    - N/A (covered during task management)
 5. **Accessibility**
-   - Should have proper ARIA labels for table and buttons
-   - Should be keyboard navigable
-6. **UAT** - N/A
+   - axe-core checks when table is exercised in E2E suite
+6. **UAT** - Covered by create-task UAT smoke (table load, task visible after create)
+7. **Manual**
+   - Visual check — status/priority tag colours, table layout, empty state
+   - Keyboard navigation for table and row actions
 
-## Technical Notes
-- Uses PrimeReact DataTable component
-- React functional component with hooks (useState, useEffect)
-- Status and priority displayed using PrimeReact Tag component
-- Fetches data from `GET /v1/tasks` endpoint
-- CSS classes: `tasks-table`, `task-info-button`, `edit-task-button`, `delete-task-button`, `add-task-button`
+## Notes
 
+- Test IDs: `task-title-{id}`, `delete-button-{id}`; classes: `tasks-table`, `add-task-button`

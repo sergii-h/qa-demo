@@ -1,27 +1,18 @@
 # TASK-003: Update Task
 
-**Epic:** Task Management  
-**Priority:** High  
-**Story Points:** 5
+**Points:** 5 · **Epic:** Task Management
 
-## Description
-As a user, I want to update an existing task's title, description, status, and priority so that I can keep task information current.
+As a user, I want to update a task's fields so that I can keep task information current.
 
 ## Acceptance Criteria
 
-1. Should return HTTP 200 with updated task details when valid task ID and valid update data provided
-
-2. Should return HTTP 404 with error message "Task not found with id: {taskId}" when task ID does not exist
-
-3. Should return HTTP 409 with error message "Task with title '{title}' already exists" when update contains new title that already exists on different task
-
-4. Should allow update without duplicate title validation when update contains same title as current task
-
-5. Should return HTTP 400 with validation errors when title is blank or fields exceed length limits
-
-6. Should set `updatedDate` to current timestamp and preserve `createdDate` when task successfully updated
-
-7. Should publish task updated event to Kafka topic when task successfully updated
+1. Should return HTTP 200 with updated task when `PUT /v1/tasks/{id}` with valid data
+2. Should return HTTP 404 with `"Task not found with id: {taskId}"` when ID does not exist
+3. Should return HTTP 409 with `"Task with title '{title}' already exists"` when new title belongs to another task
+4. Should allow same title as current task without 409
+5. Should return HTTP 400 when title blank or fields exceed length limits ([TASK-001](TASK-001-create-task.md) rules)
+6. Should set `updatedDate` to now and preserve `createdDate` on success
+7. Should publish task-updated event to Kafka on success
 
 ## Test Plan
 
@@ -38,9 +29,10 @@ As a user, I want to update an existing task's title, description, status, and p
    - Should verify provider contract for PUT `/v1/tasks/{id}` (HTTP 409 duplicate title)
 4. **E2E**
    - Should update task through complete UI workflow (edit modal)
-5. **UAT** - N/A
+5. **Accessibility** - N/A
+6. **UAT** - N/A
+7. **Manual** - N/A
 
-## Technical Notes
-- All validations from TASK-001 apply
-- Task ID and createdDate are immutable
+## Notes
 
+- `id` and `createdDate` are immutable

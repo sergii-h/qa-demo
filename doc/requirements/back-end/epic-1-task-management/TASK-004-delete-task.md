@@ -1,21 +1,14 @@
 # TASK-004: Delete Task
 
-**Epic:** Task Management  
-**Priority:** Medium  
-**Story Points:** 3
+**Points:** 3 · **Epic:** Task Management
 
-## Description
-As a user, I want to delete a task so that I can remove tasks that are no longer needed.
+As a user, I want to delete a task so that I can remove work items I no longer need.
 
 ## Acceptance Criteria
 
-1. Should return HTTP 204 with no content when valid task ID deleted successfully
-
-2. Should return HTTP 404 with error message "Task not found with id: {taskId}" when task ID does not exist
-
-3. Should remove task from database when deletion successful
-
-4. Should publish task deleted event to Kafka topic when task successfully deleted
+1. Should return HTTP 204 when `DELETE /v1/tasks/{id}` and task exists (hard delete from DB)
+2. Should return HTTP 404 with `"Task not found with id: {taskId}"` when ID does not exist
+3. Should publish task-deleted event to Kafka on successful delete (payload from pre-delete state)
 
 ## Test Plan
 
@@ -28,9 +21,7 @@ As a user, I want to delete a task so that I can remove tasks that are no longer
    - Should verify provider contract for DELETE `/v1/tasks/{id}` (HTTP 204 success)
 4. **E2E**
    - Should delete task through UI (table delete button)
-5. **UAT** - N/A
-
-## Technical Notes
-- Deletion is permanent (hard delete)
-- Event includes task details before deletion
+5. **Accessibility** - N/A
+6. **UAT** - N/A
+7. **Manual** - N/A
 

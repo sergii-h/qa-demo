@@ -14,6 +14,8 @@ selenide-selenoid-junit5-example/allure-results/
 /selenide-selenoid-junit5-example/src/test/resources/test.local.properties
 /demo-interface/coverage/
 /demo-interface/pacts/
+/demo-interface/reports/
+/demo-interface/.stryker-tmp/
 /cv/
 /e2e/selenide-junit5-selenium-grid/build/
 /e2e/playwright-typescript/allure-results/

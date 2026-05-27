@@ -1,0 +1,14 @@
+import { defineConfig, mergeConfig } from 'vitest/config';
+import baseConfig from './vitest.config.mts';
+
+export default mergeConfig(
+  baseConfig,
+  defineConfig({
+    test: {
+      include: ['src/**/*.unit.test.{ts,tsx}'],
+      coverage: {
+        enabled: false,
+      },
+    },
+  }),
+);

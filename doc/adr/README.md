@@ -28,8 +28,9 @@ Each ADR follows this structure:
 | ID | Title | Status | Date | Summary |
 |----|-------|--------|------|---------|
 | [001](001-vitest-over-jest.md) | Use Vitest Instead of Jest | Accepted | 2025-12-24 | Choose Vitest for frontend unit/integration tests due to performance, modern stack compatibility, and shift-left enablement |
-| [002](002-test-context-pattern-with-object-comparison.md) | Test Context Pattern with Object Comparison | Accepted | 2026-01-03 (Updated 2026-01-26) | Adopt Test Context Pattern for unit tests with object comparison. Supports two approaches: immutable (simple DTOs) and mutation (complex DTOs 10+ fields) |
+| [002](002-test-context-pattern-with-object-comparison.md) | Test Context Pattern with Object Comparison | Accepted | 2026-01-03 | Builder-based test contexts; sync dynamic fields; assert full objects instead of field-by-field checks |
 | [003](003-test-plan-integration-in-user-stories.md) | Test Plan Integration in User Stories | Accepted | 2026-02-17 | Integrate explicit test plans into user stories specifying UT/IT/Pact/E2E/Accessibility/UAT levels. Follows testing pyramid and shift-left principles with clear test ownership per story |
+| [004](004-api-level-integration-tests-as-sole-integration-layer.md) | Public-Facing Integration Tests as Sole Integration Layer | Accepted | 2026-03-17 | Integration tests only through public HTTP API (BE) and full component tree (FE); no intermediate integration layers unless explicitly justified |
 
 ---
 
@@ -62,4 +63,3 @@ When making a significant technical decision:
 ---
 
 **Note:** ADRs are living documents. They can be updated with new information, but decisions should not be changed without creating a new ADR.
-
