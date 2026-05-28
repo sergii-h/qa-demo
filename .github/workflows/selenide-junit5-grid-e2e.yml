@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     concurrency:
-      group: allure-pages
+      group: ${{ github.workflow }}-publish
       cancel-in-progress: false
 
     steps:
