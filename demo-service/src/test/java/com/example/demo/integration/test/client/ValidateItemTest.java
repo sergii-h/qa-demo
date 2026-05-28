@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @EnableWireMock(
         @ConfigureWireMock(port = 8085)
 )
+@ResourceLock("wiremock-8085")
 public class ValidateItemTest extends ApiIntegrationTestBase {
     @BeforeEach
     void setupWiremock() {

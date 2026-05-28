@@ -13,14 +13,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.wiremock.spring.ConfigureWireMock;
-import org.wiremock.spring.EnableWireMock;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @PactBroker(url = "${PACT_BROKER_BASE_URL:http://localhost:9292}")
-@EnableWireMock(@ConfigureWireMock(port = 8085))
 public abstract class PactProviderTestBase extends ApiIntegrationTestBase {
 
     @Autowired
