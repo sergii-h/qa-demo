@@ -10,10 +10,6 @@ permissions:
   contents: write
   pull-requests: write
 
-concurrency:
-  group: allure-pages
-  cancel-in-progress: false
-
 jobs:
   run-tests:
     runs-on: ubuntu-22.04
@@ -33,6 +29,30 @@ jobs:
         with:
           npm-script: accessibility
           app-mode: frontend
-          test-label: Run accessibility tests (mocked BE)
+          test-label: Run Playwright accessibility tests (mocked BE)
           artifact-name: allure-results-playwright-accessibility
+
+  publish-allure:
+    needs: run-tests
+    if: always() && needs.run-tests.result != 'cancelled' && needs.run-tests.result != 'skipped'
+    runs-on: ubuntu-22.04
+
+    concurrency:
+      group: allure-pages
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download allure results
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results-playwright-accessibility
+          path: e2e/playwright-typescript/allure-results
+
+      - name: Publish Allure report to GitHub Pages
+        uses: ./.github/actions/publish-playwright-allure
+        with:
+          working-directory: e2e/playwright-typescript
           destination-dir: playwright-accessibility
+          report-title: Run Playwright accessibility tests (mocked BE)

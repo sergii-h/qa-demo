@@ -10,29 +10,49 @@ permissions:
   contents: write
   pull-requests: write
 
-concurrency:
-  group: allure-pages
-  cancel-in-progress: false
-
 jobs:
   run-tests:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Start E2E environment
-      uses: ./.github/actions/start-e2e-env
-      with:
-        app-mode: frontend
-        start-selenium-grid: 'true'
-        docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
-        docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: frontend
+          start-selenium-grid: 'true'
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-    - name: Run Selenide accessibility tests
-      uses: ./.github/actions/selenide-test
-      with:
-        maven-profile: accessibility
-        test-label: Run accessibility tests (mocked BE)
-        artifact-name: allure-results-selenide-accessibility
-        destination-dir: selenide-accessibility
+      - name: Run Selenide accessibility tests
+        uses: ./.github/actions/selenide-test
+        with:
+          maven-profile: accessibility
+          test-label: Run Selenide accessibility tests (mocked BE)
+          artifact-name: allure-results-selenide-accessibility
+
+  publish-allure:
+    needs: run-tests
+    if: always() && needs.run-tests.result != 'cancelled' && needs.run-tests.result != 'skipped'
+    runs-on: ubuntu-22.04
+
+    concurrency:
+      group: allure-pages
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download allure results
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results-selenide-accessibility
+          path: e2e/selenide-junit5-selenium-grid/target/allure-results
+
+      - name: Publish Allure report to GitHub Pages
+        uses: ./.github/actions/publish-selenide-allure
+        with:
+          working-directory: e2e/selenide-junit5-selenium-grid
+          destination-dir: selenide-accessibility
+          report-title: Run Selenide accessibility tests (mocked BE)
