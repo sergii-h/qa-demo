@@ -1,7 +1,7 @@
 # QA Demo Project - Task Management Application
 
 [![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk)](https://openjdk.org/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.9-brightgreen?logo=spring)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.12-brightgreen?logo=spring)](https://spring.io/projects/spring-boot)
 [![Node](https://img.shields.io/badge/Node-22-green?logo=node.js)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18-blue?logo=react)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
@@ -56,7 +56,7 @@ A full-stack Task Management app used as a testing pyramid demo. The domain is i
 
 | Layer | Stack |
 |---|---|
-| Backend | Java 21 · SpringBoot 3.2.9 · MongoDB 4.4 · Kafka 3.3.2 · WireMock 3.9.2 |
+| Backend | Java 21 · SpringBoot 3.5.12 · MongoDB 4.4 · Kafka 3.3.2 · WireMock 3.9.2 |
 | Frontend | TypeScript 5 · React 18 · PrimeReact 10 · Vite 8 · Node 22 |
 | Unit | JUnit5 + Mockito (BE) · Vitest 4 (FE) |
 | Integration | JUnit5 + TestContainers (BE) · Vitest 4 (FE) |
@@ -120,14 +120,21 @@ GitHub Actions validates every change — see [Actions](https://github.com/sergi
 | `demo-service` | Backend unit, PiTest mutation, integration (all branches) |
 | `demo-interface` | Frontend unit + integration (all branches) |
 | `pact` | Consumer contracts, provider verification, can-i-deploy (`master`) |
-| `playwright-typescript-*` | Playwright E2E mocked BE, accessibility, UAT (`master`) |
-| `selenide-junit5-grid-*` | Selenide E2E mocked BE, accessibility, UAT (`master`) |
+| `e2e-allure-reports` | All 6 E2E suites in parallel + single Allure publish to GitHub Pages (`master`) |
 | `allure-pages` | Allure reports landing page (`master`) |
+| `allure-pages-cleanup` | Remove PR report folder (Allure + Playwright HTML) from GitHub Pages when a PR closes |
 | `codeql` | SAST — CodeQL analysis for Java and TypeScript (`master`); SARIF artifacts in workflow runs |
 
 **GitHub platform security** (no repo config): Dependabot alerts (SCA), secret scanning, push protection.
 
-Allure reports from E2E runs are published to GitHub Pages on push to `master`.
+Allure and Playwright HTML reports from E2E runs are published to [GitHub Pages](https://sergii-h.github.io/qa-demo/):
+
+| Trigger | Location | How to find |
+|---|---|---|
+| Push to `master` | `https://sergii-h.github.io/qa-demo/` | Landing page links to Allure (`{suite}/`) and Playwright HTML (`playwright-html-{suite}/`) |
+| Pull request to `master` | `https://sergii-h.github.io/qa-demo/pr/{number}/` | Single PR comment with link after all E2E workflows finish; removed when the PR closes |
+
+Raw Allure results and Playwright HTML reports are also kept as workflow artifacts for 7 days.
 
 ---
 

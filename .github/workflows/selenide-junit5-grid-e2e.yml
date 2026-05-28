@@ -1,37 +1,26 @@
 name: Run e2e tests (Selenide — mocked BE)
 
 on:
-  pull_request:
-    branches: [ "master" ]
-  push:
-    branches: [ "master" ]
-
-permissions:
-  contents: write
-
-concurrency:
-  group: allure-pages
-  cancel-in-progress: false
+  workflow_call:
 
 jobs:
   run-tests:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Start E2E environment
-      uses: ./.github/actions/start-e2e-env
-      with:
-        app-mode: frontend
-        start-selenium-grid: 'true'
-        docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
-        docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: frontend
+          start-selenium-grid: 'true'
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-    - name: Run Selenide e2e tests
-      uses: ./.github/actions/selenide-test
-      with:
-        maven-profile: e2e
-        test-label: Run e2e tests (mocked BE)
-        artifact-name: allure-results-selenide-e2e
-        destination-dir: selenide-e2e
+      - name: Run Selenide e2e tests
+        uses: ./.github/actions/selenide-test
+        with:
+          maven-profile: e2e
+          test-label: Run Selenide e2e tests (mocked BE)
+          artifact-name: allure-results-selenide-e2e

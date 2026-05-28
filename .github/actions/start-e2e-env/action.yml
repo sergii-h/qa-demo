@@ -43,23 +43,54 @@ runs:
       if: inputs.app-mode == 'frontend'
       shell: bash
       run: |
-        for i in {1..30}; do
-          curl -sf http://localhost:5173 && break
-          echo "Waiting for frontend... ($i)"
+        for i in {1..40}; do
+          curl -sf http://localhost:5173 && exit 0
+          echo "Waiting for frontend... ($i/40)"
           sleep 3
         done
+        echo "Frontend did not become ready in time"
+        exit 1
 
     - name: Wait for application to be ready
       if: inputs.app-mode == 'full'
       shell: bash
       run: |
-        for i in {1..30}; do
-          curl -sf http://localhost:8080/actuator/health && break
-          echo "Waiting for application... ($i)"
-          sleep 3
-        done
+        wait_for() {
+          local url=$1
+          local name=$2
+          for i in {1..40}; do
+            if curl -sf "$url" > /dev/null; then
+              echo "$name is ready"
+              return 0
+            fi
+            echo "Waiting for $name... ($i/40)"
+            sleep 3
+          done
+          echo "$name did not become ready in time"
+          return 1
+        }
+
+        wait_for "http://localhost:8080/actuator/health" "Backend health"
+        wait_for "http://localhost:8080/v1/tasks" "Backend API"
+        wait_for "http://localhost:5173" "Frontend"
+        wait_for "http://localhost:5173/v1/tasks" "Frontend API proxy"
 
     - name: Start Selenium Grid
       if: inputs.start-selenium-grid == 'true'
       shell: bash
       run: docker compose -f docker/docker-compose/run-selenium-grid.yml up -d
+
+    - name: Wait for Selenium Grid to be ready
+      if: inputs.start-selenium-grid == 'true'
+      shell: bash
+      run: |
+        for i in {1..30}; do
+          if curl -sf http://localhost:4444/status > /dev/null; then
+            echo "Selenium Grid is ready"
+            exit 0
+          fi
+          echo "Waiting for Selenium Grid... ($i/30)"
+          sleep 3
+        done
+        echo "Selenium Grid did not become ready in time"
+        exit 1

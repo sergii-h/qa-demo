@@ -1,37 +1,26 @@
 name: Run UAT tests (Selenide - full app)
 
 on:
-  pull_request:
-    branches: [ "master" ]
-  push:
-    branches: [ "master" ]
-
-permissions:
-  contents: write
-
-concurrency:
-  group: allure-pages
-  cancel-in-progress: false
+  workflow_call:
 
 jobs:
   run-tests:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Start E2E environment
-      uses: ./.github/actions/start-e2e-env
-      with:
-        app-mode: full
-        start-selenium-grid: 'true'
-        docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
-        docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: full
+          start-selenium-grid: 'true'
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-    - name: Run Selenide UAT tests
-      uses: ./.github/actions/selenide-test
-      with:
-        maven-profile: uat
-        test-label: Run UAT tests (full app)
-        artifact-name: allure-results-selenide-uat
-        destination-dir: selenide-uat
+      - name: Run Selenide UAT tests
+        uses: ./.github/actions/selenide-test
+        with:
+          maven-profile: uat
+          test-label: Run Selenide UAT tests (full app)
+          artifact-name: allure-results-selenide-uat

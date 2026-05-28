@@ -6,6 +6,7 @@ import { AllureEpic } from '@/data/AllureEpic';
 test.beforeAll(async () => {
   await allure.epic(AllureEpic.TASK_MANAGEMENT);
   await allure.feature('Delete task');
+  await allure.tms('99');
 });
 
 test.describe('Delete task', () => {

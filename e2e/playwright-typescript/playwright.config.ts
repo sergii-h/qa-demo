@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -8,7 +9,7 @@ const envPath = fs.existsSync(path.resolve(__dirname, '.env.e2e.local'))
   ? path.resolve(__dirname, '.env.e2e.local')
   : path.resolve(__dirname, '.env.e2e');
 
-import('dotenv').then(dotenv => dotenv.config({ path: envPath }));
+dotenv.config({ path: envPath });
 
 export default defineConfig({
   testDir: './',
@@ -26,6 +27,7 @@ export default defineConfig({
         detail: true,
         suiteTitle: true,
         environmentInfo: {
+          Framework: 'Playwright',
           os_release: os.release(),
           os_version: os.version(),
           node_version: process.version,

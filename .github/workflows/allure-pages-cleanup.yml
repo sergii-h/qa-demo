@@ -1,0 +1,47 @@
+name: Clean up PR test reports
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [ master ]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: allure-pages
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+
+      - name: Remove PR report folder
+        shell: bash
+        run: |
+          target="pr/${{ github.event.pull_request.number }}"
+          if [ ! -d "$target" ]; then
+            echo "No reports published for ${target}; nothing to remove."
+            exit 0
+          fi
+          rm -rf "$target"
+          rmdir pr 2>/dev/null || true
+
+      - name: Push cleanup to GitHub Pages
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to push."
+            exit 0
+          fi
+          git commit -m "Remove test reports for PR #${{ github.event.pull_request.number }}"
+          git push origin gh-pages

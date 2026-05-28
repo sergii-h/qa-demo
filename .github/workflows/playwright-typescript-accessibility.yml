@@ -1,17 +1,7 @@
 name: Run accessibility tests (Playwright — mocked BE)
 
 on:
-  pull_request:
-    branches: [ "master" ]
-  push:
-    branches: [ "master" ]
-
-permissions:
-  contents: write
-
-concurrency:
-  group: allure-pages
-  cancel-in-progress: false
+  workflow_call:
 
 jobs:
   run-tests:
@@ -32,6 +22,5 @@ jobs:
         with:
           npm-script: accessibility
           app-mode: frontend
-          test-label: Run accessibility tests (mocked BE)
+          test-label: Run Playwright accessibility tests (mocked BE)
           artifact-name: allure-results-playwright-accessibility
-          destination-dir: playwright-accessibility

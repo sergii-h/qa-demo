@@ -1,5 +1,5 @@
 name: Run Selenide tests
-description: Run Selenide Maven profile, upload Allure results, and publish to GitHub Pages
+description: Run Selenide Maven profile and upload Allure results
 
 inputs:
   maven-profile:
@@ -10,9 +10,6 @@ inputs:
     required: true
   artifact-name:
     description: Artifact name for raw Allure results
-    required: true
-  destination-dir:
-    description: GitHub Pages subdirectory for the generated report
     required: true
 
 runs:
@@ -27,6 +24,8 @@ runs:
 
     - name: ${{ inputs.test-label }}
       if: ${{ !cancelled() }}
+      continue-on-error: true
+      id: test
       shell: bash
       working-directory: e2e/selenide-junit5-selenium-grid
       run: mvn -Dtest.env=remote -P${{ inputs.maven-profile }} test
@@ -39,9 +38,7 @@ runs:
         path: e2e/selenide-junit5-selenium-grid/target/allure-results
         retention-days: 7
 
-    - name: Publish Allure report to GitHub Pages
-      if: ${{ !cancelled() }}
-      uses: ./.github/actions/publish-selenide-allure
-      with:
-        working-directory: e2e/selenide-junit5-selenium-grid
-        destination-dir: ${{ inputs.destination-dir }}
+    - name: Fail job when tests failed
+      if: steps.test.outcome == 'failure'
+      shell: bash
+      run: exit 1

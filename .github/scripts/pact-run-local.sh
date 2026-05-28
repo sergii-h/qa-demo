@@ -62,7 +62,7 @@ echo "Running demo-service provider verification..."
     -Dpact.verifier.publishResults=true \
     -Dpact.provider.version="${PACT_VERSION}" \
     -Dpact.provider.branch="${PACT_BRANCH}" \
-    -Djunit.jupiter.execution.parallel.enabled=false
+    -Djunit.parallel.enabled=false
 )
 
 if [[ "${CURRENT_BRANCH}" != "${PACT_MAIN_BRANCH}" ]]; then

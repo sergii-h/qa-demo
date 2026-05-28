@@ -93,7 +93,7 @@ jobs:
         env:
           DOCKER_HOST: unix:///var/run/docker.sock
           PACT_BROKER_BASE_URL: http://localhost:9292
-        run: mvn verify -Pintegration-tests -Dit.test="*PactProviderTest" -Djacoco.skip=true -Dpact.verifier.publishResults=true -Dpact.provider.version=${{ github.sha }} -Dpact.provider.branch=${{ github.ref_name }} -Djunit.jupiter.execution.parallel.enabled=false
+        run: mvn verify -Pintegration-tests -Dit.test="*PactProviderTest" -Djacoco.skip=true -Dpact.verifier.publishResults=true -Dpact.provider.version=${{ github.sha }} -Dpact.provider.branch=${{ github.ref_name }} -Djunit.parallel.enabled=false
 
       - name: Can I merge to master
         if: github.ref_name != 'master'

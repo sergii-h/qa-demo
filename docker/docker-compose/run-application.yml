@@ -2,8 +2,10 @@ services:
   qa-demo-service:
     container_name: qa-demo-service
     depends_on:
-      - qa-demo-mongo
-      - qa-demo-kafka
+      qa-demo-mongo:
+        condition: service_healthy
+      qa-demo-kafka:
+        condition: service_started
     environment:
       MONGODB_URL: mongodb://qa-demo-mongo:27017/demo_db
       KAFKA_SERVER: qa-demo-kafka:9092

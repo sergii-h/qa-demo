@@ -117,12 +117,12 @@ public abstract class TestBase {
 
     @AfterAll
     public static void afterAll() {
-        if (IS_LOCAL) {
-            return;
-        }
-
         Properties prop = new Properties();
-        prop.setProperty("browser", Optional.ofNullable(browserInfo).orElse(EMPTY));
+        prop.setProperty("Framework", "Selenide");
+
+        if (!IS_LOCAL) {
+            prop.setProperty("browser", Optional.ofNullable(browserInfo).orElse(EMPTY));
+        }
 
         try {
             prop.store(new FileOutputStream(System.getProperty("allure.results.directory") + "/environment.properties"), null);

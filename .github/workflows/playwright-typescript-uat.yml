@@ -1,17 +1,7 @@
 name: Run UAT tests (Playwright — full app)
 
 on:
-  pull_request:
-    branches: [ "master" ]
-  push:
-    branches: [ "master" ]
-
-permissions:
-  contents: write
-
-concurrency:
-  group: allure-pages
-  cancel-in-progress: false
+  workflow_call:
 
 jobs:
   run-tests:
@@ -33,6 +23,5 @@ jobs:
           npm-script: uat
           app-mode: full
           browsers: chromium
-          test-label: Run UAT tests (full app)
+          test-label: Run Playwright UAT tests (full app)
           artifact-name: allure-results-playwright-uat
-          destination-dir: playwright-uat

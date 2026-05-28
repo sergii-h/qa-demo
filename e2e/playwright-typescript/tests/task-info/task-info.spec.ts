@@ -6,6 +6,7 @@ import { AllureEpic } from '@/data/AllureEpic';
 test.beforeAll(async () => {
   await allure.epic(AllureEpic.TASK_MANAGEMENT);
   await allure.feature('View task info');
+  await allure.tms('102');
 });
 
 test.describe('View task info', () => {
