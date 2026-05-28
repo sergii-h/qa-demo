@@ -23,3 +23,4 @@ selenide-selenoid-junit5-example/allure-results/
 /e2e/playwright-typescript/playwright-report/
 /demo-interface/dist/
 /demo-interface/tsconfig.tsbuildinfo
+/e2e/playwright-typescript/test-results/

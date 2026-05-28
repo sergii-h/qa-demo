@@ -17,7 +17,6 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,
-  globalTeardown: './global-teardown.ts',
 
   reporter: [
     ['html'],
