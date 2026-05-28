@@ -1,14 +1,7 @@
 name: Run e2e tests (Playwright — mocked BE)
 
 on:
-  pull_request:
-    branches: [ "master" ]
-  push:
-    branches: [ "master" ]
-
-permissions:
-  contents: write
-  pull-requests: write
+  workflow_call:
 
 jobs:
   run-tests:
@@ -31,28 +24,3 @@ jobs:
           app-mode: frontend
           test-label: Run Playwright e2e tests (mocked BE)
           artifact-name: allure-results-playwright-e2e
-
-  publish-allure:
-    needs: run-tests
-    if: always() && needs.run-tests.result != 'cancelled' && needs.run-tests.result != 'skipped'
-    runs-on: ubuntu-22.04
-
-    concurrency:
-      group: ${{ github.workflow }}-publish
-      cancel-in-progress: false
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download allure results
-        uses: actions/download-artifact@v4
-        with:
-          name: allure-results-playwright-e2e
-          path: e2e/playwright-typescript/allure-results
-
-      - name: Publish Allure report to GitHub Pages
-        uses: ./.github/actions/publish-playwright-allure
-        with:
-          working-directory: e2e/playwright-typescript
-          destination-dir: playwright-e2e
-          report-title: Run Playwright e2e tests (mocked BE)

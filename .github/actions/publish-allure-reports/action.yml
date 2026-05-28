@@ -1,0 +1,105 @@
+name: Publish all E2E Allure reports
+description: Generate Allure HTML for every suite and deploy to GitHub Pages in a single push
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve publish destination
+      id: publish
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/master" ]; then
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+          echo "destination=" >> "$GITHUB_OUTPUT"
+          echo "pages-base=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}" >> "$GITHUB_OUTPUT"
+        elif [ "${{ github.event_name }}" = "pull_request" ]; then
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+          echo "destination=pr/${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          echo "pages-base=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr/${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "enabled=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Install Allure
+      if: steps.publish.outputs.enabled == 'true'
+      shell: bash
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y default-jre-headless
+        curl -L -o allure.deb https://github.com/allure-framework/allure2/releases/download/2.34.0/allure_2.34.0-1_all.deb
+        sudo dpkg -i allure.deb
+
+    - name: Generate Allure reports
+      id: generate
+      if: steps.publish.outputs.enabled == 'true'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        PAGES_BASE: ${{ steps.publish.outputs.pages-base }}
+      run: |
+        set -euo pipefail
+        staging="allure-pages-staging"
+        rm -rf "$staging"
+        mkdir -p "$staging"
+        comment_file="${RUNNER_TEMP}/allure-comment.md"
+        : > "$comment_file"
+        published=0
+
+        reports=(
+          "allure-results-playwright-e2e|playwright-e2e|Run Playwright e2e tests (mocked BE)"
+          "allure-results-playwright-uat|playwright-uat|Run Playwright UAT tests (full app)"
+          "allure-results-playwright-accessibility|playwright-accessibility|Run Playwright accessibility tests (mocked BE)"
+          "allure-results-selenide-e2e|selenide-e2e|Run Selenide e2e tests (mocked BE)"
+          "allure-results-selenide-uat|selenide-uat|Run Selenide UAT tests (full app)"
+          "allure-results-selenide-accessibility|selenide-accessibility|Run Selenide accessibility tests (mocked BE)"
+        )
+
+        for report in "${reports[@]}"; do
+          IFS='|' read -r artifact destination title <<< "$report"
+          workdir="${RUNNER_TEMP}/allure-${destination}"
+          rm -rf "$workdir"
+          mkdir -p "$workdir/results"
+
+          if ! gh run download "${{ github.run_id }}" -n "$artifact" -D "$workdir/results"; then
+            echo "No results for ${destination} (${artifact}); skipping."
+            continue
+          fi
+
+          allure generate "$workdir/results" --clean -o "$staging/$destination"
+          echo "**${title}** — [View Allure report](${PAGES_BASE}/${destination}/)" >> "$comment_file"
+          published=$((published + 1))
+        done
+
+        if [ "$published" -eq 0 ]; then
+          echo "No Allure artifacts were available to publish."
+          echo "published=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        echo "published=true" >> "$GITHUB_OUTPUT"
+        {
+          echo "comment<<EOF"
+          cat "$comment_file"
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Deploy Allure reports to GitHub Pages
+      if: steps.publish.outputs.enabled == 'true' && steps.generate.outputs.published == 'true'
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ github.token }}
+        publish_dir: allure-pages-staging
+        destination_dir: ${{ steps.publish.outputs.destination }}
+        keep_files: true
+
+    - name: Comment Allure report links on PR
+      if: github.event_name == 'pull_request' && steps.publish.outputs.enabled == 'true' && steps.generate.outputs.published == 'true'
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body-includes: '<!-- allure-reports -->'
+        body: |
+          <!-- allure-reports -->
+          ### Allure reports
+
+          ${{ steps.generate.outputs.comment }}

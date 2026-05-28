@@ -1,14 +1,7 @@
 name: Run accessibility tests (Selenide — mocked BE)
 
 on:
-  pull_request:
-    branches: [ "master" ]
-  push:
-    branches: [ "master" ]
-
-permissions:
-  contents: write
-  pull-requests: write
+  workflow_call:
 
 jobs:
   run-tests:
@@ -31,28 +24,3 @@ jobs:
           maven-profile: accessibility
           test-label: Run Selenide accessibility tests (mocked BE)
           artifact-name: allure-results-selenide-accessibility
-
-  publish-allure:
-    needs: run-tests
-    if: always() && needs.run-tests.result != 'cancelled' && needs.run-tests.result != 'skipped'
-    runs-on: ubuntu-22.04
-
-    concurrency:
-      group: ${{ github.workflow }}-publish
-      cancel-in-progress: false
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download allure results
-        uses: actions/download-artifact@v4
-        with:
-          name: allure-results-selenide-accessibility
-          path: e2e/selenide-junit5-selenium-grid/target/allure-results
-
-      - name: Publish Allure report to GitHub Pages
-        uses: ./.github/actions/publish-selenide-allure
-        with:
-          working-directory: e2e/selenide-junit5-selenium-grid
-          destination-dir: selenide-accessibility
-          report-title: Run Selenide accessibility tests (mocked BE)

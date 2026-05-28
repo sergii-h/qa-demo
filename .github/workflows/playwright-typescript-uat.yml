@@ -1,14 +1,7 @@
 name: Run UAT tests (Playwright — full app)
 
 on:
-  pull_request:
-    branches: [ "master" ]
-  push:
-    branches: [ "master" ]
-
-permissions:
-  contents: write
-  pull-requests: write
+  workflow_call:
 
 jobs:
   run-tests:
@@ -32,28 +25,3 @@ jobs:
           browsers: chromium
           test-label: Run Playwright UAT tests (full app)
           artifact-name: allure-results-playwright-uat
-
-  publish-allure:
-    needs: run-tests
-    if: always() && needs.run-tests.result != 'cancelled' && needs.run-tests.result != 'skipped'
-    runs-on: ubuntu-22.04
-
-    concurrency:
-      group: ${{ github.workflow }}-publish
-      cancel-in-progress: false
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download allure results
-        uses: actions/download-artifact@v4
-        with:
-          name: allure-results-playwright-uat
-          path: e2e/playwright-typescript/allure-results
-
-      - name: Publish Allure report to GitHub Pages
-        uses: ./.github/actions/publish-playwright-allure
-        with:
-          working-directory: e2e/playwright-typescript
-          destination-dir: playwright-uat
-          report-title: Run Playwright UAT tests (full app)

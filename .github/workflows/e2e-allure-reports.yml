@@ -1,0 +1,61 @@
+name: E2E tests and Allure reports
+
+on:
+  pull_request:
+    branches: [ "master" ]
+  push:
+    branches: [ "master" ]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  playwright-e2e:
+    uses: ./.github/workflows/playwright-typescript-e2e.yml
+    secrets: inherit
+
+  playwright-uat:
+    uses: ./.github/workflows/playwright-typescript-uat.yml
+    secrets: inherit
+
+  playwright-accessibility:
+    uses: ./.github/workflows/playwright-typescript-accessibility.yml
+    secrets: inherit
+
+  selenide-e2e:
+    uses: ./.github/workflows/selenide-junit5-grid-e2e.yml
+    secrets: inherit
+
+  selenide-uat:
+    uses: ./.github/workflows/selenide-junit5-grid-uat.yml
+    secrets: inherit
+
+  selenide-accessibility:
+    uses: ./.github/workflows/selenide-junit5-grid-accessibility.yml
+    secrets: inherit
+
+  publish-allure:
+    needs:
+      - playwright-e2e
+      - playwright-uat
+      - playwright-accessibility
+      - selenide-e2e
+      - selenide-uat
+      - selenide-accessibility
+    if: |
+      always() &&
+      needs.playwright-e2e.result != 'cancelled' &&
+      needs.playwright-uat.result != 'cancelled' &&
+      needs.playwright-accessibility.result != 'cancelled' &&
+      needs.selenide-e2e.result != 'cancelled' &&
+      needs.selenide-uat.result != 'cancelled' &&
+      needs.selenide-accessibility.result != 'cancelled'
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish Allure reports to GitHub Pages
+        uses: ./.github/actions/publish-allure-reports

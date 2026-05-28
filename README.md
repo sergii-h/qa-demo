@@ -120,8 +120,7 @@ GitHub Actions validates every change — see [Actions](https://github.com/sergi
 | `demo-service` | Backend unit, PiTest mutation, integration (all branches) |
 | `demo-interface` | Frontend unit + integration (all branches) |
 | `pact` | Consumer contracts, provider verification, can-i-deploy (`master`) |
-| `playwright-typescript-*` | Playwright E2E mocked BE, accessibility, UAT (`master`) |
-| `selenide-junit5-grid-*` | Selenide E2E mocked BE, accessibility, UAT (`master`) |
+| `e2e-allure-reports` | All 6 E2E suites in parallel + single Allure publish to GitHub Pages (`master`) |
 | `allure-pages` | Allure reports landing page (`master`) |
 | `codeql` | SAST — CodeQL analysis for Java and TypeScript (`master`); SARIF artifacts in workflow runs |
 
@@ -132,7 +131,7 @@ Allure reports from E2E runs are published to [GitHub Pages](https://sergii-h.gi
 | Trigger | Location | How to find |
 |---|---|---|
 | Push to `master` | `https://sergii-h.github.io/qa-demo/{suite}/` | Landing page links |
-| Pull request to `master` | `https://sergii-h.github.io/qa-demo/pr/{number}/{suite}/` | Link posted as a PR comment after each E2E workflow |
+| Pull request to `master` | `https://sergii-h.github.io/qa-demo/pr/{number}/{suite}/` | Single PR comment with links after all E2E workflows finish |
 
 ---
 
