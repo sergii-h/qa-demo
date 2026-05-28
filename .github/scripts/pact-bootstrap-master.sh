@@ -46,4 +46,16 @@ pact_publish "${WORKTREE}/demo-interface/pacts" \
   --consumer-app-version "${MASTER_SHA}" \
   --branch "${PACT_MAIN_BRANCH}"
 
-echo "Bootstrapped ${PACT_MAIN_BRANCH} consumer contracts at ${MASTER_SHA}"
+(
+  cd "${WORKTREE}/demo-service"
+  PACT_BROKER_BASE_URL="${PACT_BROKER_BASE_URL}" \
+  PACT_PROVIDER_VERSION="${MASTER_SHA}" \
+  PACT_PROVIDER_BRANCH="${PACT_MAIN_BRANCH}" \
+  mvn -q verify -Pintegration-tests -Dit.test="*PactProviderTest" -Djacoco.skip=true \
+    -Dpact.verifier.publishResults=true \
+    -Dpact.provider.version="${MASTER_SHA}" \
+    -Dpact.provider.branch="${PACT_MAIN_BRANCH}" \
+    -Djunit.parallel.enabled=false
+)
+
+echo "Bootstrapped ${PACT_MAIN_BRANCH} contracts at ${MASTER_SHA}"
