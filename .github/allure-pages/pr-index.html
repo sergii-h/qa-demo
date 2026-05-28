@@ -34,6 +34,11 @@
       font-size: 1.75rem;
     }
 
+    h2 {
+      margin: 1.75rem 0 0;
+      font-size: 1.125rem;
+    }
+
     p {
       margin-top: 0;
       color: #4b5563;
@@ -73,7 +78,9 @@
 <body>
   <main>
     <h1>QA Demo Test Reports</h1>
-    <p>Allure reports for this pull request, published from CI.</p>
+    <p>Test reports for this pull request, published from CI.</p>
+
+    <h2>Allure</h2>
     <ul>
       <li><a href="./selenide-e2e/index.html">Selenide E2E (mocked backend)</a></li>
       <li><a href="./selenide-accessibility/index.html">Selenide Accessibility (mocked backend)</a></li>
@@ -81,6 +88,13 @@
       <li><a href="./playwright-e2e/index.html">Playwright E2E (mocked backend)</a></li>
       <li><a href="./playwright-accessibility/index.html">Playwright Accessibility (mocked backend)</a></li>
       <li><a href="./playwright-uat/index.html">Playwright UAT (full stack)</a></li>
+    </ul>
+
+    <h2>Playwright HTML</h2>
+    <ul>
+      <li><a href="./playwright-html-e2e/index.html">Playwright E2E (mocked backend)</a></li>
+      <li><a href="./playwright-html-accessibility/index.html">Playwright Accessibility (mocked backend)</a></li>
+      <li><a href="./playwright-html-uat/index.html">Playwright UAT (full stack)</a></li>
     </ul>
     <small>Reports are published together after all E2E suites finish in CI.</small>
   </main>

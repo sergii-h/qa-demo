@@ -1,4 +1,4 @@
-name: Clean up PR Allure reports
+name: Clean up PR test reports
 
 on:
   pull_request:
@@ -43,5 +43,5 @@ jobs:
             echo "No changes to push."
             exit 0
           fi
-          git commit -m "Remove Allure reports for PR #${{ github.event.pull_request.number }}"
+          git commit -m "Remove test reports for PR #${{ github.event.pull_request.number }}"
           git push origin gh-pages
