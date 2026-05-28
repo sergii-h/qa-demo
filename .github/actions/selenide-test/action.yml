@@ -27,6 +27,8 @@ runs:
 
     - name: ${{ inputs.test-label }}
       if: ${{ !cancelled() }}
+      continue-on-error: true
+      id: test
       shell: bash
       working-directory: e2e/selenide-junit5-selenium-grid
       run: mvn -Dtest.env=remote -P${{ inputs.maven-profile }} test
@@ -46,3 +48,8 @@ runs:
         working-directory: e2e/selenide-junit5-selenium-grid
         destination-dir: ${{ inputs.destination-dir }}
         report-title: ${{ inputs.test-label }}
+
+    - name: Fail job when tests failed
+      if: steps.test.outcome == 'failure'
+      shell: bash
+      run: exit 1
