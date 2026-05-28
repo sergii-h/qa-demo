@@ -61,7 +61,8 @@ echo "Running demo-service provider verification..."
   mvn verify -Pintegration-tests -Dit.test="*PactProviderTest" -Djacoco.skip=true \
     -Dpact.verifier.publishResults=true \
     -Dpact.provider.version="${PACT_VERSION}" \
-    -Dpact.provider.branch="${PACT_BRANCH}"
+    -Dpact.provider.branch="${PACT_BRANCH}" \
+    -Djunit.jupiter.execution.parallel.enabled=false
 )
 
 if [[ "${CURRENT_BRANCH}" != "${PACT_MAIN_BRANCH}" ]]; then

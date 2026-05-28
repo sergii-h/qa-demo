@@ -8,10 +8,6 @@ inputs:
   destination-dir:
     description: GitHub Pages subdirectory for this report
     required: true
-  publish-landing-page:
-    description: Publish the reports landing page to the site root
-    required: false
-    default: 'false'
 
 runs:
   using: composite
@@ -36,15 +32,4 @@ runs:
         github_token: ${{ github.token }}
         publish_dir: ${{ inputs.working-directory }}/allure-report
         destination_dir: ${{ inputs.destination-dir }}
-        keep_files: true
-
-    - name: Deploy reports landing page
-      if: >-
-        github.event_name == 'push' &&
-        github.ref == 'refs/heads/master' &&
-        inputs.publish-landing-page == 'true'
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ github.token }}
-        publish_dir: .github/allure-pages
         keep_files: true

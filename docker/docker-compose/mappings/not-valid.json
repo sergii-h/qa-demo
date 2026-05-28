@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/external/validate/task",
+    "bodyPatterns" : [ {
+      "matchesJsonPath" : {
+        "expression": "$.description",
+        "contains": "not valid"
+      }
+    } ]
+  },
+
+  "response": {
+    "status": 200,
+    "body": "false",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

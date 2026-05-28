@@ -1,0 +1,30 @@
+name: Publish Allure reports landing page
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - '.github/allure-pages/**'
+      - '.github/workflows/allure-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: allure-pages
+  cancel-in-progress: false
+
+jobs:
+  publish-landing-page:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy reports landing page
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ github.token }}
+          publish_dir: .github/allure-pages
+          keep_files: true

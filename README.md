@@ -122,6 +122,7 @@ GitHub Actions validates every change — see [Actions](https://github.com/sergi
 | `pact` | Consumer contracts, provider verification, can-i-deploy (`master`) |
 | `playwright-typescript-*` | Playwright E2E mocked BE, accessibility, UAT (`master`) |
 | `selenide-junit5-grid-*` | Selenide E2E mocked BE, accessibility, UAT (`master`) |
+| `allure-pages` | Allure reports landing page (`master`) |
 | `codeql` | SAST — CodeQL analysis for Java and TypeScript (`master`); SARIF artifacts in workflow runs |
 
 **GitHub platform security** (no repo config): Dependabot alerts (SCA), secret scanning, push protection.

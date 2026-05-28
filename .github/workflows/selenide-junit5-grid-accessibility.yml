@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: allure-pages
+  cancel-in-progress: false
+
 jobs:
   run-tests:
     runs-on: ubuntu-22.04

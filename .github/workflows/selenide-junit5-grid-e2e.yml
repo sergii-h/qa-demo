@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: allure-pages
+  cancel-in-progress: false
+
 jobs:
   run-tests:
     runs-on: ubuntu-22.04
@@ -31,4 +35,3 @@ jobs:
         test-label: Run e2e tests (mocked BE)
         artifact-name: allure-results-selenide-e2e
         destination-dir: selenide-e2e
-        publish-landing-page: 'true'
