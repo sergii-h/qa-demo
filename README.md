@@ -127,7 +127,12 @@ GitHub Actions validates every change — see [Actions](https://github.com/sergi
 
 **GitHub platform security** (no repo config): Dependabot alerts (SCA), secret scanning, push protection.
 
-Allure reports from E2E runs are published to GitHub Pages on push to `master`.
+Allure reports from E2E runs are published to [GitHub Pages](https://sergii-h.github.io/qa-demo/):
+
+| Trigger | Location | How to find |
+|---|---|---|
+| Push to `master` | `https://sergii-h.github.io/qa-demo/{suite}/` | Landing page links |
+| Pull request to `master` | `https://sergii-h.github.io/qa-demo/pr/{number}/{suite}/` | Link posted as a PR comment after each E2E workflow |
 
 ---
 

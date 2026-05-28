@@ -5,9 +5,9 @@ import au.com.dius.pact.provider.junitsupport.State;
 import com.example.demo.data.Task;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.parallel.ResourceLock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
+import org.wiremock.spring.InjectWireMock;
 
 import java.util.Map;
 import java.util.UUID;
@@ -20,7 +20,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 @ResourceLock("wiremock-8085")
 public class GetIsValidPactProviderTest extends PactProviderTestBase {
 
-    @Autowired
+    @InjectWireMock
     private WireMockServer wireMockServer;
 
     @State("validation result is true for the task")

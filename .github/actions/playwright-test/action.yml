@@ -74,3 +74,4 @@ runs:
       with:
         working-directory: e2e/playwright-typescript
         destination-dir: ${{ inputs.destination-dir }}
+        report-title: ${{ inputs.test-label }}
