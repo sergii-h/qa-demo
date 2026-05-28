@@ -1,0 +1,19 @@
+[2026-05-28T10:29:45.403Z] [SEVERE] http://172.17.0.1:5173/ - Access to script at 'http://172.17.0.1:5173/@vite/client' from origin 'http://172.17.0.1:5173' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `local`.
+
+[2026-05-28T10:29:45.407Z] [SEVERE] http://172.17.0.1:5173/@vite/client - Failed to load resource: net::ERR_FAILED
+
+[2026-05-28T10:29:45.407Z] [SEVERE] http://172.17.0.1:5173/ - Access to script at 'http://172.17.0.1:5173/src/index.tsx' from origin 'http://172.17.0.1:5173' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `local`.
+
+[2026-05-28T10:29:45.407Z] [SEVERE] http://172.17.0.1:5173/src/index.tsx - Failed to load resource: net::ERR_FAILED
+
+[2026-05-28T10:29:45.407Z] [SEVERE] http://172.17.0.1:5173/ - Access to manifest at 'http://172.17.0.1:5173/manifest.json' from origin 'http://172.17.0.1:5173' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `local`.
+
+[2026-05-28T10:29:45.407Z] [SEVERE] http://172.17.0.1:5173/manifest.json - Failed to load resource: net::ERR_FAILED
+
+[2026-05-28T10:29:45.407Z] [SEVERE] http://172.17.0.1:5173/ - Access to script at 'http://172.17.0.1:5173/@react-refresh' from origin 'http://172.17.0.1:5173' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `local`.
+
+[2026-05-28T10:29:45.407Z] [SEVERE] http://172.17.0.1:5173/@react-refresh - Failed to load resource: net::ERR_FAILED
+
+[2026-05-28T10:29:45.486Z] [SEVERE] http://172.17.0.1:5173/ - Access to resource at 'http://172.17.0.1:5173/favicon.ico' from origin 'http://172.17.0.1:5173' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `local`.
+
+[2026-05-28T10:29:45.486Z] [SEVERE] http://172.17.0.1:5173/favicon.ico - Failed to load resource: net::ERR_FAILED
