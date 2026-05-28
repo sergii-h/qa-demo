@@ -41,21 +41,23 @@ runs:
         staging="allure-pages-staging"
         rm -rf "$staging"
         mkdir -p "$staging"
-        comment_file="${RUNNER_TEMP}/allure-comment.md"
-        : > "$comment_file"
         published=0
 
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          cp .github/allure-pages/pr-index.html "$staging/index.html"
+        fi
+
         reports=(
-          "allure-results-playwright-e2e|playwright-e2e|Run Playwright e2e tests (mocked BE)"
-          "allure-results-playwright-uat|playwright-uat|Run Playwright UAT tests (full app)"
-          "allure-results-playwright-accessibility|playwright-accessibility|Run Playwright accessibility tests (mocked BE)"
-          "allure-results-selenide-e2e|selenide-e2e|Run Selenide e2e tests (mocked BE)"
-          "allure-results-selenide-uat|selenide-uat|Run Selenide UAT tests (full app)"
-          "allure-results-selenide-accessibility|selenide-accessibility|Run Selenide accessibility tests (mocked BE)"
+          "allure-results-playwright-e2e|playwright-e2e"
+          "allure-results-playwright-uat|playwright-uat"
+          "allure-results-playwright-accessibility|playwright-accessibility"
+          "allure-results-selenide-e2e|selenide-e2e"
+          "allure-results-selenide-uat|selenide-uat"
+          "allure-results-selenide-accessibility|selenide-accessibility"
         )
 
         for report in "${reports[@]}"; do
-          IFS='|' read -r artifact destination title <<< "$report"
+          IFS='|' read -r artifact destination <<< "$report"
           workdir="${RUNNER_TEMP}/allure-${destination}"
           rm -rf "$workdir"
           mkdir -p "$workdir/results"
@@ -66,7 +68,6 @@ runs:
           fi
 
           allure generate "$workdir/results" --clean -o "$staging/$destination"
-          echo "**${title}** — [View Allure report](${PAGES_BASE}/${destination}/)" >> "$comment_file"
           published=$((published + 1))
         done
 
@@ -77,11 +78,7 @@ runs:
         fi
 
         echo "published=true" >> "$GITHUB_OUTPUT"
-        {
-          echo "comment<<EOF"
-          cat "$comment_file"
-          echo "EOF"
-        } >> "$GITHUB_OUTPUT"
+        echo "pages-url=${PAGES_BASE}/" >> "$GITHUB_OUTPUT"
 
     - name: Deploy Allure reports to GitHub Pages
       if: steps.publish.outputs.enabled == 'true' && steps.generate.outputs.published == 'true'
@@ -92,7 +89,7 @@ runs:
         destination_dir: ${{ steps.publish.outputs.destination }}
         keep_files: true
 
-    - name: Comment Allure report links on PR
+    - name: Comment Allure report link on PR
       if: github.event_name == 'pull_request' && steps.publish.outputs.enabled == 'true' && steps.generate.outputs.published == 'true'
       uses: peter-evans/create-or-update-comment@v4
       with:
@@ -100,6 +97,4 @@ runs:
         body-includes: '<!-- allure-reports -->'
         body: |
           <!-- allure-reports -->
-          ### Allure reports
-
-          ${{ steps.generate.outputs.comment }}
+          **Allure reports** — [View reports](${{ steps.generate.outputs.pages-url }})

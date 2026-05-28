@@ -131,7 +131,7 @@ Allure reports from E2E runs are published to [GitHub Pages](https://sergii-h.gi
 | Trigger | Location | How to find |
 |---|---|---|
 | Push to `master` | `https://sergii-h.github.io/qa-demo/{suite}/` | Landing page links |
-| Pull request to `master` | `https://sergii-h.github.io/qa-demo/pr/{number}/{suite}/` | Single PR comment with links after all E2E workflows finish |
+| Pull request to `master` | `https://sergii-h.github.io/qa-demo/pr/{number}/` | Single PR comment with link after all E2E workflows finish |
 
 ---
 
