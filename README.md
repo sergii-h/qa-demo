@@ -1,7 +1,7 @@
 # QA Demo Project - Task Management Application
 
 [![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk)](https://openjdk.org/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.9-brightgreen?logo=spring)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.12-brightgreen?logo=spring)](https://spring.io/projects/spring-boot)
 [![Node](https://img.shields.io/badge/Node-22-green?logo=node.js)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18-blue?logo=react)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
@@ -56,7 +56,7 @@ A full-stack Task Management app used as a testing pyramid demo. The domain is i
 
 | Layer | Stack |
 |---|---|
-| Backend | Java 21 · SpringBoot 3.2.9 · MongoDB 4.4 · Kafka 3.3.2 · WireMock 3.9.2 |
+| Backend | Java 21 · SpringBoot 3.5.12 · MongoDB 4.4 · Kafka 3.3.2 · WireMock 3.9.2 |
 | Frontend | TypeScript 5 · React 18 · PrimeReact 10 · Vite 8 · Node 22 |
 | Unit | JUnit5 + Mockito (BE) · Vitest 4 (FE) |
 | Integration | JUnit5 + TestContainers (BE) · Vitest 4 (FE) |

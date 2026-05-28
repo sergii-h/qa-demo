@@ -44,6 +44,9 @@
       "last 1 safari version"
     ]
   },
+  "overrides": {
+    "qs": "6.15.2"
+  },
   "devDependencies": {
     "@stryker-mutator/core": "^9.6.0",
     "@stryker-mutator/vitest-runner": "^9.6.0",
