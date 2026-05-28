@@ -5,6 +5,7 @@ import { AllureEpic } from '@/data/AllureEpic';
 test.beforeAll(async () => {
   await allure.epic(AllureEpic.ACCESSIBILITY);
   await allure.feature('Create task');
+  await allure.tms('100');
 });
 
 test.describe('Create task form - accessibility', () => {

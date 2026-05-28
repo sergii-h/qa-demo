@@ -8,6 +8,7 @@ import { AllureEpic } from '@/data/AllureEpic';
 test.beforeAll(async () => {
   await allure.epic(AllureEpic.TRANSLATION);
   await allure.feature('Language support');
+  await allure.tms('104');
 });
 
 test.describe('Language support', () => {
