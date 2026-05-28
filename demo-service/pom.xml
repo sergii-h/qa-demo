@@ -16,6 +16,7 @@
         <pact.verifier.publishResults>false</pact.verifier.publishResults>
         <pact.provider.version></pact.provider.version>
         <pact.provider.branch></pact.provider.branch>
+        <junit.parallel.enabled>true</junit.parallel.enabled>
     </properties>
     <dependencies>
         <dependency>
@@ -250,7 +251,7 @@
                             </includes>
                             <properties>
                                 <configurationParameters>
-                                    junit.jupiter.execution.parallel.enabled = true
+                                    junit.jupiter.execution.parallel.enabled = ${junit.parallel.enabled}
                                     junit.jupiter.execution.parallel.mode.default = concurrent
                                     junit.jupiter.execution.parallel.mode.classes.default = concurrent
                                 </configurationParameters>
