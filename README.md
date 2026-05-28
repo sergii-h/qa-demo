@@ -122,6 +122,7 @@ GitHub Actions validates every change — see [Actions](https://github.com/sergi
 | `pact` | Consumer contracts, provider verification, can-i-deploy (`master`) |
 | `e2e-allure-reports` | All 6 E2E suites in parallel + single Allure publish to GitHub Pages (`master`) |
 | `allure-pages` | Allure reports landing page (`master`) |
+| `allure-pages-cleanup` | Remove PR report folder from GitHub Pages when a PR closes |
 | `codeql` | SAST — CodeQL analysis for Java and TypeScript (`master`); SARIF artifacts in workflow runs |
 
 **GitHub platform security** (no repo config): Dependabot alerts (SCA), secret scanning, push protection.
@@ -131,7 +132,7 @@ Allure reports from E2E runs are published to [GitHub Pages](https://sergii-h.gi
 | Trigger | Location | How to find |
 |---|---|---|
 | Push to `master` | `https://sergii-h.github.io/qa-demo/{suite}/` | Landing page links |
-| Pull request to `master` | `https://sergii-h.github.io/qa-demo/pr/{number}/` | Single PR comment with link after all E2E workflows finish |
+| Pull request to `master` | `https://sergii-h.github.io/qa-demo/pr/{number}/` | Single PR comment with link after all E2E workflows finish; removed when the PR closes |
 
 ---
 
