@@ -18,6 +18,7 @@
 
 [![Testing Pyramid](https://img.shields.io/badge/Strategy-Testing%20Pyramid-blue)](doc/testing-guide.md)
 [![Shift-Left](https://img.shields.io/badge/Methodology-Shift--Left-blue)](doc/testing-guide.md)
+[![Live Reports](https://img.shields.io/badge/Live%20Reports-GitHub%20Pages-blue?logo=github)](https://sergii-h.github.io/qa-demo/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A full-stack QA engineering demo project applying the **Testing Pyramid** and **shift-left** methodology.
