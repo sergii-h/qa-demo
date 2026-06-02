@@ -1,12 +1,18 @@
 package com.example.demo.ui.taskform
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.demo.R
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskRequest
 import com.example.demo.data.model.TaskStatus
+import com.example.demo.locale.AppLocale
 import com.example.demo.repository.TaskRepository
+import com.example.demo.ui.i18n.isDuplicateTitleError
+import com.example.demo.ui.i18n.mapTaskError
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,10 +38,11 @@ data class TaskFormUiState(
 )
 
 class TaskFormViewModel(
+    application: Application,
     private val repository: TaskRepository,
     private val taskId: String?,
     private val mode: TaskFormMode
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(TaskFormUiState(mode = mode))
     val uiState: StateFlow<TaskFormUiState> = _uiState.asStateFlow()
@@ -65,7 +72,7 @@ class TaskFormViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            loadError = repository.mapError(error)
+                            loadError = mapTaskError(getApplication(), error)
                         )
                     }
                 }
@@ -92,7 +99,14 @@ class TaskFormViewModel(
         val state = _uiState.value
         if (state.title.trim().isEmpty()) return
         if (state.title.trim().length > 100) {
-            _uiState.update { it.copy(titleError = "Title must not exceed 100 characters") }
+            _uiState.update {
+                it.copy(
+                    titleError = AppLocale.getString(
+                        getApplication(),
+                        R.string.error_title_too_long
+                    )
+                )
+            }
             return
         }
 
@@ -116,16 +130,16 @@ class TaskFormViewModel(
                     _uiState.update { it.copy(isSaving = false, saveSucceeded = true) }
                 }
                 .onFailure { error ->
-                    val message = repository.mapError(error)
-                    val titleError = if (message.contains("already exists", ignoreCase = true)) {
-                        "Task with this title already exists"
+                    val app = getApplication<Application>()
+                    val titleError = if (isDuplicateTitleError(error)) {
+                        AppLocale.getString(app, R.string.error_title_already_exists)
                     } else {
                         null
                     }
                     _uiState.update {
                         it.copy(
                             isSaving = false,
-                            titleError = titleError ?: message
+                            titleError = titleError ?: mapTaskError(app, error)
                         )
                     }
                 }
@@ -133,13 +147,14 @@ class TaskFormViewModel(
     }
 
     class Factory(
+        private val application: Application,
         private val repository: TaskRepository,
         private val taskId: String?,
         private val mode: TaskFormMode
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return TaskFormViewModel(repository, taskId, mode) as T
+            return TaskFormViewModel(application, repository, taskId, mode) as T
         }
     }
 }

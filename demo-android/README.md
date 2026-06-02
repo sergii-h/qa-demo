@@ -8,6 +8,13 @@ Native Android client for the QA Demo task management API. Same CRUD functionali
 - Retrofit + Moshi · ViewModel + StateFlow
 - Min SDK 26 · Target SDK 35
 
+## Localization
+
+- UI strings: `app/src/main/res/values/strings.xml` (English) and `values-es/strings.xml` (Spanish)
+- **EN / ES** switcher on the task list screen (top bar); choice is persisted across restarts
+- Language changes recompose the UI in place (no activity restart / screen blink)
+- On first launch, Spanish is used when the device language is `es` / `es-*`; otherwise English (same rule as the web app)
+
 ## Features
 
 | Screen | API |
@@ -59,11 +66,22 @@ After changing `api.base.url`, rebuild the app.
 
 ## Build from CLI
 
+Gradle needs **JDK 17+** on your `PATH` (Android Studio’s bundled JBR is fine). If `java` is not found in the terminal, point `JAVA_HOME` at Android Studio’s runtime:
+
+```bash
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+
 ```bash
 cd demo-android
 ./gradlew assembleDebug
 ./gradlew installDebug   # device/emulator connected
 ```
+
+### Gradle daemon JVM error
+
+If you see `No defined toolchain download url for MAC_OS on aarch64` with `vendor=JetBrains`, remove `gradle/gradle-daemon-jvm.properties` (or regenerate it with `./gradlew updateDaemonJvm` after JDK 17+ is installed). That file pins the Gradle daemon to a JetBrains JDK without download URLs for Apple Silicon.
 
 ## Project layout
 

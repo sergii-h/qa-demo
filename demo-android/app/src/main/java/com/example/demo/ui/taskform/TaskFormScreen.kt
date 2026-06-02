@@ -1,5 +1,6 @@
 package com.example.demo.ui.taskform
 
+import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,12 +21,11 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,11 +35,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.demo.R
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
 import com.example.demo.repository.TaskRepository
+import com.example.demo.ui.i18n.taskPriorityLabel
+import com.example.demo.ui.i18n.taskStatusLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,9 +55,10 @@ fun TaskFormScreen(
     onBack: () -> Unit,
     onSaved: () -> Unit
 ) {
+    val application = LocalContext.current.applicationContext as Application
     val viewModel: TaskFormViewModel = viewModel(
         key = "${mode.name}-$taskId",
-        factory = TaskFormViewModel.Factory(repository, taskId, mode)
+        factory = TaskFormViewModel.Factory(application, repository, taskId, mode)
     )
     val uiState by viewModel.uiState.collectAsState()
 
@@ -67,15 +73,20 @@ fun TaskFormScreen(
             TopAppBar(
                 title = {
                     Text(
-                        when (mode) {
-                            TaskFormMode.CREATE -> "New task"
-                            TaskFormMode.EDIT -> "Edit task"
-                        }
+                        stringResource(
+                            when (mode) {
+                                TaskFormMode.CREATE -> R.string.new_task
+                                TaskFormMode.EDIT -> R.string.edit_task
+                            }
+                        )
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 }
             )
@@ -99,7 +110,7 @@ fun TaskFormScreen(
                         .padding(padding),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(uiState.loadError ?: "Failed to load task")
+                    Text(uiState.loadError ?: stringResource(R.string.failed_load_task))
                 }
             }
             else -> {
@@ -114,7 +125,7 @@ fun TaskFormScreen(
                     OutlinedTextField(
                         value = uiState.title,
                         onValueChange = viewModel::onTitleChange,
-                        label = { Text("Title *") },
+                        label = { Text(stringResource(R.string.field_title)) },
                         isError = uiState.titleError != null,
                         supportingText = uiState.titleError?.let { { Text(it) } },
                         modifier = Modifier.fillMaxWidth(),
@@ -124,24 +135,24 @@ fun TaskFormScreen(
                     OutlinedTextField(
                         value = uiState.description,
                         onValueChange = viewModel::onDescriptionChange,
-                        label = { Text("Description") },
+                        label = { Text(stringResource(R.string.field_description)) },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 4
                     )
 
                     EnumDropdown(
-                        label = "Status *",
+                        label = stringResource(R.string.field_status),
                         value = uiState.status,
                         options = TaskStatus.entries,
-                        optionLabel = { statusLabel(it) },
+                        optionLabel = { taskStatusLabel(it) },
                         onSelected = viewModel::onStatusChange
                     )
 
                     EnumDropdown(
-                        label = "Priority *",
+                        label = stringResource(R.string.field_priority),
                         value = uiState.priority,
                         options = TaskPriority.entries,
-                        optionLabel = { priorityLabel(it) },
+                        optionLabel = { taskPriorityLabel(it) },
                         onSelected = viewModel::onPriorityChange
                     )
 
@@ -159,10 +170,12 @@ fun TaskFormScreen(
                             )
                         } else {
                             Text(
-                                when (mode) {
-                                    TaskFormMode.CREATE -> "Create"
-                                    TaskFormMode.EDIT -> "Save"
-                                }
+                                stringResource(
+                                    when (mode) {
+                                        TaskFormMode.CREATE -> R.string.create
+                                        TaskFormMode.EDIT -> R.string.save
+                                    }
+                                )
                             )
                         }
                     }
@@ -178,7 +191,7 @@ private fun <T> EnumDropdown(
     label: String,
     value: T,
     options: List<T>,
-    optionLabel: (T) -> String,
+    optionLabel: @Composable (T) -> String,
     onSelected: (T) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -212,16 +225,4 @@ private fun <T> EnumDropdown(
             }
         }
     }
-}
-
-private fun statusLabel(status: TaskStatus): String = when (status) {
-    TaskStatus.TODO -> "To Do"
-    TaskStatus.IN_PROGRESS -> "In Progress"
-    TaskStatus.DONE -> "Done"
-}
-
-private fun priorityLabel(priority: TaskPriority): String = when (priority) {
-    TaskPriority.LOW -> "Low"
-    TaskPriority.MEDIUM -> "Medium"
-    TaskPriority.HIGH -> "High"
 }

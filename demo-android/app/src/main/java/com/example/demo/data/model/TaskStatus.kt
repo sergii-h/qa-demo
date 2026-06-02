@@ -4,11 +4,10 @@ enum class TaskStatus {
     TODO,
     IN_PROGRESS,
     DONE
+}
+
+enum class TaskPriority {
     LOW,
     MEDIUM,
     HIGH
 }
-
-}
-
-enum class TaskPriority {

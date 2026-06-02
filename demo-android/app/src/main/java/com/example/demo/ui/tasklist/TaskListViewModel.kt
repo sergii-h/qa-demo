@@ -1,10 +1,13 @@
 package com.example.demo.ui.tasklist
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.demo.data.model.Task
 import com.example.demo.repository.TaskRepository
+import com.example.demo.ui.i18n.mapTaskError
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,13 +18,13 @@ data class TaskListUiState(
     val tasks: List<Task> = emptyList(),
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
-    val taskToDelete: Task? = null,
-    val isDeleting: Boolean = false
+    val deletingTaskIds: Set<String> = emptySet()
 )
 
 class TaskListViewModel(
+    application: Application,
     private val repository: TaskRepository
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(TaskListUiState())
     val uiState: StateFlow<TaskListUiState> = _uiState.asStateFlow()
@@ -42,41 +45,30 @@ class TaskListViewModel(
                         it.copy(
                             tasks = emptyList(),
                             isLoading = false,
-                            errorMessage = repository.mapError(error)
+                            errorMessage = mapTaskError(getApplication(), error)
                         )
                     }
                 }
         }
     }
 
-    fun requestDelete(task: Task) {
-        _uiState.update { it.copy(taskToDelete = task) }
-    }
-
-    fun dismissDeleteDialog() {
-        _uiState.update { it.copy(taskToDelete = null) }
-    }
-
-    fun confirmDelete() {
-        val task = _uiState.value.taskToDelete ?: return
+    fun deleteTask(task: Task) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isDeleting = true) }
+            _uiState.update { it.copy(deletingTaskIds = it.deletingTaskIds + task.id) }
             runCatching { repository.deleteTask(task.id) }
                 .onSuccess {
                     _uiState.update {
                         it.copy(
                             tasks = it.tasks.filter { item -> item.id != task.id },
-                            taskToDelete = null,
-                            isDeleting = false
+                            deletingTaskIds = it.deletingTaskIds - task.id
                         )
                     }
                 }
                 .onFailure { error ->
                     _uiState.update {
                         it.copy(
-                            taskToDelete = null,
-                            isDeleting = false,
-                            errorMessage = repository.mapError(error)
+                            deletingTaskIds = it.deletingTaskIds - task.id,
+                            errorMessage = mapTaskError(getApplication(), error)
                         )
                     }
                 }
@@ -87,10 +79,13 @@ class TaskListViewModel(
         _uiState.update { it.copy(errorMessage = null) }
     }
 
-    class Factory(private val repository: TaskRepository) : ViewModelProvider.Factory {
+    class Factory(
+        private val application: Application,
+        private val repository: TaskRepository
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return TaskListViewModel(repository) as T
+            return TaskListViewModel(application, repository) as T
         }
     }
 }

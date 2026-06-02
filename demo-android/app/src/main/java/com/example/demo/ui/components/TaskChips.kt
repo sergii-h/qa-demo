@@ -9,6 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
+import com.example.demo.ui.i18n.taskPriorityLabel
+import com.example.demo.ui.i18n.taskStatusLabel
 import com.example.demo.ui.theme.DoneGreen
 import com.example.demo.ui.theme.HighRed
 import com.example.demo.ui.theme.InProgressOrange
@@ -19,9 +21,9 @@ import com.example.demo.ui.theme.TodoBlue
 @Composable
 fun StatusChip(status: TaskStatus, modifier: Modifier = Modifier) {
     val (label, color) = when (status) {
-        TaskStatus.TODO -> "To Do" to TodoBlue
-        TaskStatus.IN_PROGRESS -> "In Progress" to InProgressOrange
-        TaskStatus.DONE -> "Done" to DoneGreen
+        TaskStatus.TODO -> taskStatusLabel(status) to TodoBlue
+        TaskStatus.IN_PROGRESS -> taskStatusLabel(status) to InProgressOrange
+        TaskStatus.DONE -> taskStatusLabel(status) to DoneGreen
     }
     TaskChip(label = label, color = color, modifier = modifier)
 }
@@ -29,9 +31,9 @@ fun StatusChip(status: TaskStatus, modifier: Modifier = Modifier) {
 @Composable
 fun PriorityChip(priority: TaskPriority, modifier: Modifier = Modifier) {
     val (label, color) = when (priority) {
-        TaskPriority.LOW -> "Low" to LowGreen
-        TaskPriority.MEDIUM -> "Medium" to MediumOrange
-        TaskPriority.HIGH -> "High" to HighRed
+        TaskPriority.LOW -> taskPriorityLabel(priority) to LowGreen
+        TaskPriority.MEDIUM -> taskPriorityLabel(priority) to MediumOrange
+        TaskPriority.HIGH -> taskPriorityLabel(priority) to HighRed
     }
     TaskChip(label = label, color = color, modifier = modifier)
 }

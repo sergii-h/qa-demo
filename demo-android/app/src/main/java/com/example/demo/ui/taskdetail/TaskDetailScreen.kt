@@ -24,23 +24,22 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.demo.R
 import com.example.demo.repository.TaskRepository
 import com.example.demo.ui.components.PriorityChip
 import com.example.demo.ui.components.StatusChip
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Locale
-
-private val dateFormatter = DateTimeFormatter.ofPattern(
-    "MMM d, yyyy HH:mm",
-    Locale.getDefault()
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,19 +48,29 @@ fun TaskDetailScreen(
     taskId: String,
     onBack: () -> Unit
 ) {
+    val application = LocalContext.current.applicationContext as android.app.Application
     val viewModel: TaskDetailViewModel = viewModel(
         key = taskId,
-        factory = TaskDetailViewModel.Factory(repository, taskId)
+        factory = TaskDetailViewModel.Factory(application, repository, taskId)
     )
     val uiState by viewModel.uiState.collectAsState()
+    val locale = LocalConfiguration.current.locales[0]
+    val datePattern = stringResource(R.string.date_time_format)
+    val dateFormatter = remember(locale, datePattern) {
+        DateTimeFormatter.ofPattern(datePattern, locale)
+    }
+    val notAvailable = stringResource(R.string.not_available)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(uiState.task?.title ?: "Task info") },
+                title = { Text(uiState.task?.title ?: stringResource(R.string.task_info)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 }
             )
@@ -78,7 +87,7 @@ fun TaskDetailScreen(
                 }
                 uiState.errorMessage != null -> {
                     Text(
-                        text = uiState.errorMessage ?: "Failed to load task",
+                        text = uiState.errorMessage ?: stringResource(R.string.failed_load_task),
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
@@ -91,35 +100,36 @@ fun TaskDetailScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         DetailField(
-                            label = "Description",
-                            value = task.description?.takeIf { it.isNotBlank() } ?: "No description"
+                            label = stringResource(R.string.detail_description),
+                            value = task.description?.takeIf { it.isNotBlank() }
+                                ?: stringResource(R.string.no_description)
                         )
-                        DetailField(label = "Status") {
+                        DetailField(label = stringResource(R.string.detail_status)) {
                             StatusChip(status = task.status)
                         }
-                        DetailField(label = "Priority") {
+                        DetailField(label = stringResource(R.string.detail_priority)) {
                             PriorityChip(priority = task.priority)
                         }
                         DetailField(
-                            label = "Created",
-                            value = formatDate(task.createdDate)
+                            label = stringResource(R.string.detail_created),
+                            value = formatDate(task.createdDate, dateFormatter, notAvailable)
                         )
                         DetailField(
-                            label = "Last updated",
-                            value = formatDate(task.updatedDate)
+                            label = stringResource(R.string.detail_last_updated),
+                            value = formatDate(task.updatedDate, dateFormatter, notAvailable)
                         )
-                        DetailField(label = "Validated") {
+                        DetailField(label = stringResource(R.string.detail_validated)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 if (uiState.isValid) {
                                     Icon(
                                         Icons.Default.Check,
-                                        contentDescription = "Valid",
+                                        contentDescription = stringResource(R.string.valid),
                                         tint = MaterialTheme.colorScheme.primary
                                     )
                                 } else {
                                     Icon(
                                         Icons.Default.Close,
-                                        contentDescription = "Not valid",
+                                        contentDescription = stringResource(R.string.not_valid),
                                         tint = MaterialTheme.colorScheme.error
                                     )
                                 }
@@ -164,10 +174,14 @@ private fun DetailField(
     }
 }
 
-private fun formatDate(value: String?): String {
-    if (value.isNullOrBlank()) return "N/A"
+private fun formatDate(
+    value: String?,
+    formatter: DateTimeFormatter,
+    notAvailable: String
+): String {
+    if (value.isNullOrBlank()) return notAvailable
     return runCatching {
         val instant = Instant.parse(value)
-        dateFormatter.format(instant.atZone(ZoneId.systemDefault()))
+        formatter.format(instant.atZone(ZoneId.systemDefault()))
     }.getOrDefault(value)
 }

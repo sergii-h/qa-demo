@@ -1,5 +1,6 @@
 package com.example.demo.ui.tasklist
 
+import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +18,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,7 +29,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,11 +37,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.demo.R
 import com.example.demo.data.model.Task
 import com.example.demo.repository.TaskRepository
+import com.example.demo.ui.components.LanguageSwitcher
 import com.example.demo.ui.components.PriorityChip
 import com.example.demo.ui.components.StatusChip
 
@@ -55,8 +58,9 @@ fun TaskListScreen(
     onTaskInfo: (String) -> Unit,
     refreshTrigger: Int = 0
 ) {
+    val application = LocalContext.current.applicationContext as Application
     val viewModel: TaskListViewModel = viewModel(
-        factory = TaskListViewModel.Factory(repository)
+        factory = TaskListViewModel.Factory(application, repository)
     )
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -76,11 +80,19 @@ fun TaskListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Tasks") })
+            TopAppBar(
+                title = { Text(stringResource(R.string.tasks_title)) },
+                actions = {
+                    LanguageSwitcher(modifier = Modifier.padding(end = 4.dp))
+                }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onCreateTask) {
-                Icon(Icons.Default.Add, contentDescription = "Create task")
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.create_task)
+                )
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -96,7 +108,7 @@ fun TaskListScreen(
                 }
                 uiState.tasks.isEmpty() -> {
                     Text(
-                        text = "No tasks yet. Tap + to create one.",
+                        text = stringResource(R.string.empty_tasks),
                         modifier = Modifier.align(Alignment.Center),
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -111,34 +123,14 @@ fun TaskListScreen(
                                 task = task,
                                 onInfo = { onTaskInfo(task.id) },
                                 onEdit = { onEditTask(task.id) },
-                                onDelete = { viewModel.requestDelete(task) }
+                                onDelete = { viewModel.deleteTask(task) },
+                                isDeleting = task.id in uiState.deletingTaskIds
                             )
                         }
                     }
                 }
             }
         }
-    }
-
-    uiState.taskToDelete?.let { task ->
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissDeleteDialog() },
-            title = { Text("Delete task") },
-            text = { Text("Delete \"${task.title}\"?") },
-            confirmButton = {
-                TextButton(
-                    onClick = { viewModel.confirmDelete() },
-                    enabled = !uiState.isDeleting
-                ) {
-                    Text("Delete")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { viewModel.dismissDeleteDialog() }) {
-                    Text("Cancel")
-                }
-            }
-        )
     }
 }
 
@@ -147,7 +139,8 @@ private fun TaskRow(
     task: Task,
     onInfo: () -> Unit,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    isDeleting: Boolean
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -167,13 +160,22 @@ private fun TaskRow(
                 horizontalArrangement = Arrangement.End
             ) {
                 IconButton(onClick = onInfo) {
-                    Icon(Icons.Default.Info, contentDescription = "Info")
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = stringResource(R.string.action_info)
+                    )
                 }
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = stringResource(R.string.action_edit)
+                    )
                 }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete")
+                IconButton(onClick = onDelete, enabled = !isDeleting) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.action_delete)
+                    )
                 }
             }
         }

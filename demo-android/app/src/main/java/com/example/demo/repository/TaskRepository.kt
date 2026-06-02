@@ -27,21 +27,4 @@ class TaskRepository(
         }
     }
 
-    fun mapError(throwable: Throwable): String {
-        if (throwable is HttpException) {
-            val message = ApiClient.parseErrorMessage(
-                throwable.response()?.errorBody()?.string()
-            )
-            if (!message.isNullOrBlank()) {
-                return message
-            }
-            return when (throwable.code()) {
-                400 -> "Invalid task data"
-                404 -> "Task not found"
-                409 -> "Task with this title already exists"
-                else -> "Request failed (${throwable.code()})"
-            }
-        }
-        return throwable.message ?: "Something went wrong"
-    }
 }

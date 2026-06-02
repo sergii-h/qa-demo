@@ -1,10 +1,13 @@
 package com.example.demo.ui.taskdetail
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.demo.data.model.Task
 import com.example.demo.repository.TaskRepository
+import com.example.demo.ui.i18n.mapTaskError
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,9 +23,10 @@ data class TaskDetailUiState(
 )
 
 class TaskDetailViewModel(
+    application: Application,
     private val repository: TaskRepository,
     private val taskId: String
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(TaskDetailUiState())
     val uiState: StateFlow<TaskDetailUiState> = _uiState.asStateFlow()
@@ -47,7 +51,7 @@ class TaskDetailViewModel(
                     it.copy(
                         isLoading = false,
                         task = null,
-                        errorMessage = repository.mapError(error)
+                        errorMessage = mapTaskError(getApplication(), error)
                     )
                 }
             }
@@ -55,12 +59,13 @@ class TaskDetailViewModel(
     }
 
     class Factory(
+        private val application: Application,
         private val repository: TaskRepository,
         private val taskId: String
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return TaskDetailViewModel(repository, taskId) as T
+            return TaskDetailViewModel(application, repository, taskId) as T
         }
     }
 }
