@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QA Demo Tasks</string>
+
+    <string name="tasks_title">Tasks</string>
+    <string name="create_task">Create task</string>
+    <string name="empty_tasks">No tasks yet. Tap + to create one.</string>
+    <string name="action_info">Info</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
+
+    <string name="new_task">New task</string>
+    <string name="edit_task">Edit task</string>
+    <string name="back">Back</string>
+    <string name="failed_load_task">Failed to load task</string>
+    <string name="field_title">Title *</string>
+    <string name="field_description">Description</string>
+    <string name="field_status">Status *</string>
+    <string name="field_priority">Priority *</string>
+    <string name="create">Create</string>
+    <string name="save">Save</string>
+
+    <string name="task_info">Task info</string>
+    <string name="detail_description">Description</string>
+    <string name="no_description">No description</string>
+    <string name="detail_status">Status</string>
+    <string name="detail_priority">Priority</string>
+    <string name="detail_created">Created</string>
+    <string name="detail_last_updated">Last updated</string>
+    <string name="detail_validated">Validated</string>
+    <string name="valid">Valid</string>
+    <string name="not_valid">Not valid</string>
+    <string name="not_available">N/A</string>
+
+    <string name="status_todo">To Do</string>
+    <string name="status_in_progress">In Progress</string>
+    <string name="status_done">Done</string>
+
+    <string name="priority_low">Low</string>
+    <string name="priority_medium">Medium</string>
+    <string name="priority_high">High</string>
+
+    <string name="error_title_too_long">Title must not exceed 100 characters</string>
+    <string name="error_title_already_exists">Task with this title already exists</string>
+    <string name="error_invalid_task_data">Invalid task data</string>
+    <string name="error_task_not_found">Task not found</string>
+    <string name="error_request_failed">Request failed (%1$d)</string>
+    <string name="error_something_went_wrong">Something went wrong</string>
+
+    <string name="language_label">Language</string>
+    <string name="language_en">EN</string>
+    <string name="language_es">ES</string>
+
+    <string name="date_time_format">MMM d, yyyy HH:mm</string>
+</resources>

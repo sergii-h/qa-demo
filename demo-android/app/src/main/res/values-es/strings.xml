@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QA Demo Tareas</string>
+
+    <string name="tasks_title">Tareas</string>
+    <string name="create_task">Crear tarea</string>
+    <string name="empty_tasks">Aún no hay tareas. Pulse + para crear una.</string>
+    <string name="action_info">Info</string>
+    <string name="action_edit">Editar</string>
+    <string name="action_delete">Eliminar</string>
+
+    <string name="new_task">Nueva tarea</string>
+    <string name="edit_task">Editar tarea</string>
+    <string name="back">Atrás</string>
+    <string name="failed_load_task">Error al cargar la tarea</string>
+    <string name="field_title">Título *</string>
+    <string name="field_description">Descripción</string>
+    <string name="field_status">Estado *</string>
+    <string name="field_priority">Prioridad *</string>
+    <string name="create">Crear</string>
+    <string name="save">Guardar</string>
+
+    <string name="task_info">Info</string>
+    <string name="detail_description">Descripción</string>
+    <string name="no_description">Sin descripción</string>
+    <string name="detail_status">Estado</string>
+    <string name="detail_priority">Prioridad</string>
+    <string name="detail_created">Creado</string>
+    <string name="detail_last_updated">Última actualización</string>
+    <string name="detail_validated">Validado</string>
+    <string name="valid">Válido</string>
+    <string name="not_valid">No válido</string>
+    <string name="not_available">N/D</string>
+
+    <string name="status_todo">Por hacer</string>
+    <string name="status_in_progress">En progreso</string>
+    <string name="status_done">Hecho</string>
+
+    <string name="priority_low">Baja</string>
+    <string name="priority_medium">Media</string>
+    <string name="priority_high">Alta</string>
+
+    <string name="error_title_too_long">El título no puede superar los 100 caracteres</string>
+    <string name="error_title_already_exists">Ya existe una tarea con este título</string>
+    <string name="error_invalid_task_data">Datos de tarea no válidos</string>
+    <string name="error_task_not_found">Tarea no encontrada</string>
+    <string name="error_request_failed">Error en la solicitud (%1$d)</string>
+    <string name="error_something_went_wrong">Algo salió mal</string>
+
+    <string name="language_label">Idioma</string>
+    <string name="language_en">EN</string>
+    <string name="language_es">ES</string>
+
+    <string name="date_time_format">d MMM yyyy, HH:mm</string>
+</resources>
