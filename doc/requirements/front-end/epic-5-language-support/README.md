@@ -1,6 +1,6 @@
 # Epic 5: Language Support
 
-i18n with browser detection (EN/ES) and a manual language switcher.
+i18n with client locale detection (EN/ES) and a manual language switcher.
 
 ## User Stories
 

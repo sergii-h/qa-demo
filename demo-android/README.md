@@ -2,6 +2,8 @@
 
 Native Android client for the QA Demo task management API. Same CRUD functionality as the React web app, using the existing Spring Boot backend.
 
+**Requirements:** [Frontend requirements](../doc/requirements/front-end/README.md)
+
 ## Stack
 
 - Kotlin · Jetpack Compose · Material 3
@@ -75,9 +77,16 @@ export PATH="$JAVA_HOME/bin:$PATH"
 
 ```bash
 cd demo-android
+./gradlew test           # JVM unit tests (no device)
 ./gradlew assembleDebug
 ./gradlew installDebug   # device/emulator connected
 ```
+
+## Unit tests
+
+- Location: `app/src/test/`
+- Stack: JUnit 4, MockK, Truth, Robolectric (ViewModels), coroutines-test
+- Naming: `should<Behavior>When<Condition>`
 
 ### Gradle daemon JVM error
 

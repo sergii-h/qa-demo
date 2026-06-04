@@ -355,7 +355,7 @@ qa-demo/
 | [Performance README](performance/README.md) | k6 scenarios and thresholds |
 | [ADR Index](doc/adr/README.md) | Architectural decisions with context and rationale |
 | [Backend Requirements](doc/requirements/back-end/README.md) | Epics and user stories |
-| [Frontend Requirements](doc/requirements/front-end/README.md) | Epics and user stories |
+| [Frontend Requirements](doc/requirements/front-end/README.md) | Epics and user stories (web and mobile) |
 
 ---
 
