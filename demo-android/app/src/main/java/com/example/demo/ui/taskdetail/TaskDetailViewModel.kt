@@ -9,6 +9,7 @@ import com.example.demo.data.model.Task
 import com.example.demo.repository.TaskRepository
 import com.example.demo.ui.i18n.mapTaskError
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,9 +40,11 @@ class TaskDetailViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             runCatching {
-                val taskDeferred = async { repository.getTask(taskId) }
-                val validDeferred = async { repository.isValid(taskId) }
-                taskDeferred.await() to validDeferred.await()
+                coroutineScope {
+                    val taskDeferred = async { repository.getTask(taskId) }
+                    val validDeferred = async { repository.isValid(taskId) }
+                    taskDeferred.await() to validDeferred.await()
+                }
             }.onSuccess { (task, isValid) ->
                 _uiState.update {
                     it.copy(isLoading = false, task = task, isValid = isValid)

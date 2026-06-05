@@ -22,7 +22,11 @@ fun taskPriorityStringRes(priority: TaskPriority): Int = when (priority) {
 }
 
 @Composable
-fun taskStatusLabel(status: TaskStatus): String = stringResource(taskStatusStringRes(status))
+fun taskStatusLabel(status: TaskStatus): String {
+    return stringResource(taskStatusStringRes(status))
+}
 
 @Composable
-fun taskPriorityLabel(priority: TaskPriority): String = stringResource(taskPriorityStringRes(priority))
+fun taskPriorityLabel(priority: TaskPriority): String {
+    return stringResource(taskPriorityStringRes(priority))
+}

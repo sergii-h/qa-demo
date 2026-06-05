@@ -10,10 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import java.util.Locale
 
 @Composable
-fun LocalizedContent(
-    languageTag: String,
-    content: @Composable () -> Unit
-) {
+fun LocalizedContent(languageTag: String, content: @Composable () -> Unit) {
     val baseContext = LocalContext.current
     val localizedContext = remember(languageTag) {
         AppLocale.localizedContext(baseContext, languageTag)

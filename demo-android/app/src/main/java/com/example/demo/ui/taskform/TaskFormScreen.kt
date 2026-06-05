@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -43,6 +44,7 @@ import com.example.demo.R
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
 import com.example.demo.repository.TaskRepository
+import com.example.demo.ui.TestTags
 import com.example.demo.ui.i18n.taskPriorityLabel
 import com.example.demo.ui.i18n.taskStatusLabel
 
@@ -73,16 +75,20 @@ fun TaskFormScreen(
             TopAppBar(
                 title = {
                     Text(
-                        stringResource(
+                        text = stringResource(
                             when (mode) {
                                 TaskFormMode.CREATE -> R.string.new_task
                                 TaskFormMode.EDIT -> R.string.edit_task
                             }
-                        )
+                        ),
+                        modifier = Modifier.testTag(TestTags.MODAL_TITLE),
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.testTag(TestTags.CLOSE_BUTTON),
+                    ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back)
@@ -100,7 +106,7 @@ fun TaskFormScreen(
                         .padding(padding),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(modifier = Modifier.testTag(TestTags.LOADING_SPINNER))
                 }
             }
             uiState.loadError != null -> {
@@ -110,7 +116,10 @@ fun TaskFormScreen(
                         .padding(padding),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(uiState.loadError ?: stringResource(R.string.failed_load_task))
+                    Text(
+                        text = uiState.loadError ?: stringResource(R.string.failed_load_task),
+                        modifier = Modifier.testTag(TestTags.LOAD_ERROR),
+                    )
                 }
             }
             else -> {
@@ -127,8 +136,22 @@ fun TaskFormScreen(
                         onValueChange = viewModel::onTitleChange,
                         label = { Text(stringResource(R.string.field_title)) },
                         isError = uiState.titleError != null,
-                        supportingText = uiState.titleError?.let { { Text(it) } },
-                        modifier = Modifier.fillMaxWidth(),
+                        supportingText = uiState.titleError?.let { error ->
+                            {
+                                Text(
+                                    text = error,
+                                    modifier = Modifier.testTag(TestTags.TITLE_ERROR),
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(
+                                when (mode) {
+                                    TaskFormMode.CREATE -> TestTags.CREATE_TASK_TITLE_INPUT
+                                    TaskFormMode.EDIT -> TestTags.EDIT_TASK_TITLE_INPUT
+                                }
+                            ),
                         singleLine = true
                     )
 
@@ -136,7 +159,9 @@ fun TaskFormScreen(
                         value = uiState.description,
                         onValueChange = viewModel::onDescriptionChange,
                         label = { Text(stringResource(R.string.field_description)) },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(TestTags.TASK_DESCRIPTION_INPUT),
                         minLines = 4
                     )
 
@@ -145,7 +170,8 @@ fun TaskFormScreen(
                         value = uiState.status,
                         options = TaskStatus.entries,
                         optionLabel = { taskStatusLabel(it) },
-                        onSelected = viewModel::onStatusChange
+                        onSelected = viewModel::onStatusChange,
+                        testTag = TestTags.STATUS_DROPDOWN,
                     )
 
                     EnumDropdown(
@@ -153,7 +179,8 @@ fun TaskFormScreen(
                         value = uiState.priority,
                         options = TaskPriority.entries,
                         optionLabel = { taskPriorityLabel(it) },
-                        onSelected = viewModel::onPriorityChange
+                        onSelected = viewModel::onPriorityChange,
+                        testTag = TestTags.PRIORITY_DROPDOWN,
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -161,11 +188,20 @@ fun TaskFormScreen(
                     Button(
                         onClick = viewModel::save,
                         enabled = uiState.title.trim().isNotEmpty() && !uiState.isSaving,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(
+                                when (mode) {
+                                    TaskFormMode.CREATE -> TestTags.CREATE_BUTTON
+                                    TaskFormMode.EDIT -> TestTags.SAVE_BUTTON
+                                }
+                            ),
                     ) {
                         if (uiState.isSaving) {
                             CircularProgressIndicator(
-                                modifier = Modifier.height(20.dp),
+                                modifier = Modifier
+                                    .height(20.dp)
+                                    .testTag(TestTags.LOADING_SPINNER),
                                 strokeWidth = 2.dp
                             )
                         } else {
@@ -192,7 +228,8 @@ private fun <T> EnumDropdown(
     value: T,
     options: List<T>,
     optionLabel: @Composable (T) -> String,
-    onSelected: (T) -> Unit
+    onSelected: (T) -> Unit,
+    testTag: String,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -208,6 +245,7 @@ private fun <T> EnumDropdown(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
+                .testTag(testTag)
                 .menuAnchor()
         )
         ExposedDropdownMenu(

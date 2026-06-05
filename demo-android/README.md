@@ -77,16 +77,30 @@ export PATH="$JAVA_HOME/bin:$PATH"
 
 ```bash
 cd demo-android
-./gradlew test           # JVM unit tests (no device)
+./gradlew test                  # JVM unit tests (no device)
 ./gradlew assembleDebug
-./gradlew installDebug   # device/emulator connected
+./gradlew installDebug          # device/emulator connected
 ```
 
 ## Unit tests
 
 - Location: `app/src/test/`
-- Stack: JUnit 4, MockK, Truth, Robolectric (ViewModels), coroutines-test
+- Stack: JUnit 4, MockK, Truth, Robolectric, coroutines-test, Compose UI Test (`createComposeRule` in `src/test` — no emulator)
 - Naming: `should<Behavior>When<Condition>`
+- UI queries: `Modifier.testTag` + `onNodeWithTag` (aligned with web `data-testid` — see `TestTags.kt`); `onNodeWithText` kept only for i18n tests
+
+### Coverage
+
+[Kover](https://github.com/Kotlin/kotlinx-kover) on JVM unit tests. `./gradlew test` runs tests and enforces thresholds (90% line, instruction, and branch; 100% per-class line coverage).
+
+Tests + HTML report:
+
+```bash
+./gradlew :app:koverHtmlReportDebug
+open app/build/reports/kover/htmlDebug/index.html
+```
+
+Kover excludes Compose compiler-generated classes (`*Kt$*`, `*ComposableSingletons*`); screen and composable coverage stays in the report.
 
 ### Gradle daemon JVM error
 
