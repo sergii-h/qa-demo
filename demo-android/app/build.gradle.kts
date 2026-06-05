@@ -63,6 +63,11 @@ android {
 
     testOptions {
         unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            if (it.name.contains("Release")) {
+                it.enabled = false
+            }
+        }
     }
 }
 

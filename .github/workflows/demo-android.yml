@@ -26,4 +26,4 @@ jobs:
 
       - name: Run unit tests
         working-directory: demo-android
-        run: ./gradlew test --no-daemon
+        run: ./gradlew testDebugUnitTest --no-daemon
