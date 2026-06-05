@@ -13,8 +13,52 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.ParameterizedRobolectricTestRunner
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+
+@RunWith(ParameterizedRobolectricTestRunner::class)
+class LanguageSwitcherDisplayTest(
+    private val scenario: String,
+    private val languageTag: String
+) {
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    private val context = RuntimeEnvironment.getApplication()
+
+    @Before
+    fun setUp() {
+        context.getSharedPreferences("demo_locale", Context.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .apply()
+        AppLocale.setLanguage(context, languageTag)
+    }
+
+    @Test
+    fun shouldShowLanguageSwitcherWhenCurrentLanguageIsSet() {
+        // When
+        composeTestRule.setContent {
+            DemoComposeTestTheme {
+                LanguageSwitcher()
+            }
+        }
+
+        // Then
+        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).assertIsDisplayed()
+    }
+
+    companion object {
+        @JvmStatic
+        @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+        fun languages() = listOf(
+            arrayOf("English", AppLocale.ENGLISH),
+            arrayOf("Spanish", AppLocale.SPANISH)
+        )
+    }
+}
 
 @RunWith(RobolectricTestRunner::class)
 class LanguageSwitcherTest {
@@ -31,35 +75,6 @@ class LanguageSwitcherTest {
             .clear()
             .apply()
         AppLocale.setLanguage(context, AppLocale.ENGLISH)
-    }
-
-    @Test
-    fun shouldShowLanguageSwitcherWhenCurrentLanguageIsEnglish() {
-        // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                LanguageSwitcher()
-            }
-        }
-
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldShowLanguageSwitcherWhenCurrentLanguageIsSpanish() {
-        // Given
-        AppLocale.setLanguage(context, AppLocale.SPANISH)
-
-        // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                LanguageSwitcher()
-            }
-        }
-
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).assertIsDisplayed()
     }
 
     @Test

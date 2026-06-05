@@ -10,89 +10,60 @@ import com.example.demo.ui.TestTags
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.ParameterizedRobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
-class TaskChipsTest {
+@RunWith(ParameterizedRobolectricTestRunner::class)
+class StatusChipDisplayTest(
+    private val status: TaskStatus
+) {
 
     @get:Rule
     val composeTestRule = createComposeRule()
 
     @Test
-    fun shouldDisplayTodoStatusChipWhenRendered() {
+    fun shouldDisplayStatusChipWhenRendered() {
         // When
         composeTestRule.setContent {
             DemoComposeTestTheme {
-                StatusChip(status = TaskStatus.TODO)
+                StatusChip(status = status)
             }
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.TODO)).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.statusTag(status)).assertIsDisplayed()
     }
 
+    companion object {
+        @JvmStatic
+        @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+        fun statuses(): List<TaskStatus> = TaskStatus.entries
+    }
+}
+
+@RunWith(ParameterizedRobolectricTestRunner::class)
+class PriorityChipDisplayTest(
+    private val priority: TaskPriority
+) {
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
     @Test
-    fun shouldDisplayInProgressStatusChipWhenRendered() {
+    fun shouldDisplayPriorityChipWhenRendered() {
         // When
         composeTestRule.setContent {
             DemoComposeTestTheme {
-                StatusChip(status = TaskStatus.IN_PROGRESS)
+                PriorityChip(priority = priority)
             }
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.IN_PROGRESS)).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.priorityTag(priority)).assertIsDisplayed()
     }
 
-    @Test
-    fun shouldDisplayDoneStatusChipWhenRendered() {
-        // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                StatusChip(status = TaskStatus.DONE)
-            }
-        }
-
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.DONE)).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldDisplayLowPriorityChipWhenRendered() {
-        // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                PriorityChip(priority = TaskPriority.LOW)
-            }
-        }
-
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskPriority.LOW)).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldDisplayMediumPriorityChipWhenRendered() {
-        // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                PriorityChip(priority = TaskPriority.MEDIUM)
-            }
-        }
-
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskPriority.MEDIUM)).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldDisplayHighPriorityChipWhenRendered() {
-        // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                PriorityChip(priority = TaskPriority.HIGH)
-            }
-        }
-
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskPriority.HIGH)).assertIsDisplayed()
+    companion object {
+        @JvmStatic
+        @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+        fun priorities(): List<TaskPriority> = TaskPriority.entries
     }
 }
