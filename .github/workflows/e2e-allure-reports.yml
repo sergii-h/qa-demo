@@ -12,32 +12,65 @@ permissions:
   actions: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-22.04
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - demo-interface/**
+              - demo-service/**
+              - e2e/**
+              - docker/**
+              - .github/workflows/**
+              - .github/actions/**
+              - '!.github/workflows/demo-android.yml'
+
   playwright-e2e:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     uses: ./.github/workflows/playwright-typescript-e2e.yml
     secrets: inherit
 
   playwright-uat:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     uses: ./.github/workflows/playwright-typescript-uat.yml
     secrets: inherit
 
   playwright-accessibility:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     uses: ./.github/workflows/playwright-typescript-accessibility.yml
     secrets: inherit
 
   selenide-e2e:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     uses: ./.github/workflows/selenide-junit5-grid-e2e.yml
     secrets: inherit
 
   selenide-uat:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     uses: ./.github/workflows/selenide-junit5-grid-uat.yml
     secrets: inherit
 
   selenide-accessibility:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     uses: ./.github/workflows/selenide-junit5-grid-accessibility.yml
     secrets: inherit
 
   publish-allure:
     needs:
+      - changes
       - playwright-e2e
       - playwright-uat
       - playwright-accessibility
@@ -45,13 +78,15 @@ jobs:
       - selenide-uat
       - selenide-accessibility
     if: |
+      needs.changes.outputs.relevant == 'true' &&
       always() &&
       needs.playwright-e2e.result != 'cancelled' &&
       needs.playwright-uat.result != 'cancelled' &&
       needs.playwright-accessibility.result != 'cancelled' &&
       needs.selenide-e2e.result != 'cancelled' &&
       needs.selenide-uat.result != 'cancelled' &&
-      needs.selenide-accessibility.result != 'cancelled'
+      needs.selenide-accessibility.result != 'cancelled' &&
+      needs.playwright-e2e.result != 'skipped'
     runs-on: ubuntu-22.04
 
     steps:

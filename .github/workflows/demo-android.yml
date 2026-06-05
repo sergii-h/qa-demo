@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - '**'
+    paths:
+      - 'demo-android/**'
+      - '.github/workflows/demo-android.yml'
 
 jobs:
   unit:
@@ -17,7 +20,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
+
+      - uses: gradle/actions/setup-gradle@v4
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -26,4 +30,4 @@ jobs:
 
       - name: Run unit tests
         working-directory: demo-android
-        run: ./gradlew testDebugUnitTest --no-daemon
+        run: ./gradlew testDebugUnitTest

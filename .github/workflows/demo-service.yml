@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - '**'
+    paths:
+      - 'demo-service/**'
+      - 'docker/**'
+      - '.github/workflows/demo-service.yml'
 
 jobs:
   unit:
