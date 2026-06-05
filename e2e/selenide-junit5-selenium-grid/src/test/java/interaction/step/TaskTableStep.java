@@ -45,7 +45,8 @@ public class TaskTableStep {
     }
 
     private String resolveTaskId(String title) {
-        String dataTestId = mainPage.taskTitleByTitle(title).getAttribute("data-testid");
+        var taskTitle = mainPage.taskTitleByTitle(title).shouldBe(visible);
+        String dataTestId = taskTitle.getAttribute("data-testid");
         return Objects.requireNonNull(dataTestId).replace("task-title-", "");
     }
 }
