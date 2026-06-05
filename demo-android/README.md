@@ -88,6 +88,7 @@ cd demo-android
 - Stack: JUnit 4, MockK, Truth, Robolectric, coroutines-test, Compose UI Test (`createComposeRule` in `src/test` — no emulator)
 - Naming: `should<Behavior>When<Condition>`
 - UI queries: `Modifier.testTag` + `onNodeWithTag` (aligned with web `data-testid` — see `TestTags.kt`); `onNodeWithText` kept only for i18n tests
+- Mutation testing: not used — Android PiTest support is experimental and a poor fit for Robolectric/Compose; Kover line coverage is the quality gate instead (same rationale as Stryker on the web app).
 
 ### Coverage
 
