@@ -8,6 +8,12 @@ on:
       - 'demo-service/**'
       - 'docker/**'
       - '.github/workflows/demo-service.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'demo-service/**'
+      - 'docker/**'
+      - '.github/workflows/demo-service.yml'
 
 jobs:
   unit:

@@ -7,6 +7,11 @@ on:
     paths:
       - 'demo-android/**'
       - '.github/workflows/demo-android.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'demo-android/**'
+      - '.github/workflows/demo-android.yml'
 
 jobs:
   unit:
