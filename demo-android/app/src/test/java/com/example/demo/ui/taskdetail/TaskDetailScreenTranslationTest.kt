@@ -1,0 +1,86 @@
+package com.example.demo.ui.taskdetail
+
+import androidx.compose.ui.test.junit4.createComposeRule
+import com.example.demo.locale.AppLocale
+import com.example.demo.repository.TaskRepository
+import com.example.demo.testing.MainDispatcherRule
+import com.example.demo.testing.RecordingLocalizedContent
+import com.example.demo.testing.TaskFixtures
+import com.example.demo.testing.advanceComposeCoroutineIdle
+import com.example.demo.testing.assertHasTranslations
+import com.example.demo.testing.waitUntilTagExists
+import com.example.demo.ui.TestTags
+import com.example.demo.ui.theme.DemoTheme
+import io.mockk.coEvery
+import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.ParameterizedRobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(ParameterizedRobolectricTestRunner::class)
+class TaskDetailScreenTranslationTest(
+    private val languageTag: String,
+) {
+
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    private val repository = mockk<TaskRepository>()
+    private val recorded = mutableListOf<Int>()
+    private val context = RuntimeEnvironment.getApplication()
+
+    @Before
+    fun setUp() {
+        recorded.clear()
+        AppLocale.setLanguage(context, languageTag)
+        coEvery { repository.getTask("task-translation") } returns TaskFixtures.sampleTask.copy(
+            id = "task-translation",
+            title = "Task title",
+            description = "Task description",
+            createdDate = "2024-01-15T10:00:00.000Z",
+            updatedDate = "2024-01-16T12:00:00.000Z",
+        )
+        coEvery { repository.isValid("task-translation") } returns true
+    }
+
+    @After
+    fun tearDown() {
+        AppLocale.setLanguage(context, AppLocale.ENGLISH)
+    }
+
+    @Test
+    fun shouldHaveTranslationsForInfoTaskModal() {
+        // Given
+        composeTestRule.setContent {
+            RecordingLocalizedContent(languageTag, recorded) {
+                DemoTheme {
+                    TaskDetailScreen(
+                        repository = repository,
+                        taskId = "task-translation",
+                        onBack = {},
+                    )
+                }
+            }
+        }
+        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+
+        // Then
+        composeTestRule.waitUntilTagExists(TestTags.DESCRIPTION)
+        assertHasTranslations(recorded, languageTag, context)
+    }
+
+    companion object {
+        @JvmStatic
+        @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+        fun languages(): List<String> = listOf(AppLocale.ENGLISH, AppLocale.SPANISH)
+    }
+}

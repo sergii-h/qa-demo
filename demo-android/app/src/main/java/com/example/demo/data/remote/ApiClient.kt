@@ -29,9 +29,14 @@ object ApiClient {
         }
         .build()
 
-    val taskApi: TaskApi = Retrofit.Builder()
-        .baseUrl(BuildConfig.API_BASE_URL)
-        .client(okHttpClient)
+    val taskApi: TaskApi = createTaskApi(BuildConfig.API_BASE_URL)
+
+    fun createTaskApi(
+        baseUrl: String,
+        client: OkHttpClient = okHttpClient
+    ): TaskApi = Retrofit.Builder()
+        .baseUrl(baseUrl)
+        .client(client)
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
         .create(TaskApi::class.java)
