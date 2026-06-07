@@ -9,8 +9,37 @@ on:
     - cron: '30 5 * * 1'
 
 jobs:
-  analyze:
-    name: Analyze (${{ matrix.language }})
+  changes:
+    runs-on: ubuntu-22.04
+    outputs:
+      java: ${{ steps.filter.outputs.java }}
+      java-android: ${{ steps.filter.outputs.java-android }}
+      typescript: ${{ steps.filter.outputs.typescript }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            java:
+              - demo-service/**
+              - notification-service/**
+              - e2e/selenide-junit5-selenium-grid/**
+              - pom.xml
+              - .github/workflows/codeql.yml
+            java-android:
+              - demo-android/**
+              - .github/workflows/codeql.yml
+            typescript:
+              - demo-interface/**
+              - e2e/playwright-typescript/**
+              - .github/workflows/codeql.yml
+
+  analyze-java:
+    name: Analyze (Java)
+    needs: changes
+    if: github.event_name == 'schedule' || needs.changes.outputs.java == 'true'
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     permissions:
@@ -18,14 +47,54 @@ jobs:
       contents: read
       security-events: write
 
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - language: java
-            build-mode: manual
-          - language: javascript-typescript
-            build-mode: none
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java
+          build-mode: manual
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
+      - name: Build Java modules
+        run: |
+          mvn -B -DskipTests compile -f demo-service/pom.xml
+          mvn -B -DskipTests compile -f notification-service/pom.xml
+          mvn -B -DskipTests compile -f e2e/selenide-junit5-selenium-grid/pom.xml
+          mvn -B -DskipTests compile -f pom.xml
+
+      - name: Perform CodeQL Analysis
+        id: analyze
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:java
+          upload: never
+          output: ${{ github.workspace }}/codeql-results
+
+      - name: Upload SARIF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-java-sarif
+          path: ${{ steps.analyze.outputs.sarif-output }}
+          retention-days: 30
+          if-no-files-found: error
+
+  analyze-java-android:
+    name: Analyze (Java Android)
+    needs: changes
+    if: github.event_name == 'schedule' || needs.changes.outputs.java-android == 'true'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
     steps:
       - uses: actions/checkout@v4
@@ -33,26 +102,64 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: ${{ matrix.language }}
-          build-mode: ${{ matrix.build-mode }}
+          languages: java
+          build-mode: manual
 
       - uses: actions/setup-java@v4
-        if: matrix.language == 'java'
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: temurin
-          cache: maven
 
-      - name: Build Java modules
-        if: matrix.language == 'java'
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: tools platform-tools platforms;android-35 build-tools;35.0.0
+
+      - name: Build Android module
+        working-directory: demo-android
         run: |
-          mvn -B -DskipTests compile -f demo-service/pom.xml
-          mvn -B -DskipTests compile -f notification-service/pom.xml
-          mvn -B -DskipTests compile -f e2e/selenide-junit5-selenium-grid/pom.xml
-          mvn -B -DskipTests compile -f pom.xml
+          ./gradlew --stop
+          ./gradlew --no-daemon --no-build-cache clean compileDebugKotlin
+
+      - name: Perform CodeQL Analysis
+        id: analyze
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:java-android
+          upload: never
+          output: ${{ github.workspace }}/codeql-results
+
+      - name: Upload SARIF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-java-android-sarif
+          path: ${{ steps.analyze.outputs.sarif-output }}
+          retention-days: 30
+          if-no-files-found: error
+
+  analyze-typescript:
+    name: Analyze (TypeScript)
+    needs: changes
+    if: github.event_name == 'schedule' || needs.changes.outputs.typescript == 'true'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          build-mode: none
 
       - uses: actions/setup-node@v4
-        if: matrix.language == 'javascript-typescript'
         with:
           node-version: '22'
           cache: npm
@@ -61,7 +168,6 @@ jobs:
             e2e/playwright-typescript/package-lock.json
 
       - name: Install TypeScript dependencies
-        if: matrix.language == 'javascript-typescript'
         run: |
           npm ci --prefix demo-interface
           npm ci --prefix e2e/playwright-typescript
@@ -70,14 +176,14 @@ jobs:
         id: analyze
         uses: github/codeql-action/analyze@v3
         with:
-          category: /language:${{ matrix.language }}
+          category: /language:javascript-typescript
           upload: never
           output: ${{ github.workspace }}/codeql-results
 
       - name: Upload SARIF artifact
         uses: actions/upload-artifact@v4
         with:
-          name: codeql-${{ matrix.language }}-sarif
+          name: codeql-typescript-sarif
           path: ${{ steps.analyze.outputs.sarif-output }}
           retention-days: 30
           if-no-files-found: error

@@ -2,6 +2,8 @@
 
 Native Android client for the QA Demo task management API. Same CRUD functionality as the React web app, using the existing Spring Boot backend.
 
+**Requirements:** [Frontend requirements](../doc/requirements/front-end/README.md)
+
 ## Stack
 
 - Kotlin · Jetpack Compose · Material 3
@@ -75,9 +77,31 @@ export PATH="$JAVA_HOME/bin:$PATH"
 
 ```bash
 cd demo-android
+./gradlew test                  # JVM unit tests (no device)
 ./gradlew assembleDebug
-./gradlew installDebug   # device/emulator connected
+./gradlew installDebug          # device/emulator connected
 ```
+
+## Unit tests
+
+- Location: `app/src/test/`
+- Stack: JUnit 4, MockK, Truth, Robolectric, coroutines-test, Compose UI Test (`createComposeRule` in `src/test` — no emulator)
+- Naming: `should<Behavior>When<Condition>`
+- UI queries: `Modifier.testTag` + `onNodeWithTag` (aligned with web `data-testid` — see `TestTags.kt`); `onNodeWithText` kept only for i18n tests
+- Mutation testing: not used — Android PiTest support is experimental and a poor fit for Robolectric/Compose; Kover line coverage is the quality gate instead (same rationale as Stryker on the web app).
+
+### Coverage
+
+[Kover](https://github.com/Kotlin/kotlinx-kover) on JVM unit tests. `./gradlew test` runs tests and enforces thresholds (90% line, instruction, and branch; 100% per-class line coverage).
+
+Tests + HTML report:
+
+```bash
+./gradlew :app:koverHtmlReportDebug
+open app/build/reports/kover/htmlDebug/index.html
+```
+
+Kover excludes Compose compiler-generated classes (`*Kt$*`, `*ComposableSingletons*`); screen and composable coverage stays in the report.
 
 ### Gradle daemon JVM error
 

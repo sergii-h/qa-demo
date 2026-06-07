@@ -13,12 +13,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import com.example.demo.R
 import com.example.demo.locale.AppLocale
+import com.example.demo.ui.TestTags
 
 @Composable
 fun LanguageSwitcher(modifier: Modifier = Modifier) {
@@ -34,7 +36,9 @@ fun LanguageSwitcher(modifier: Modifier = Modifier) {
 
     TextButton(
         onClick = { expanded = true },
-        modifier = modifier.semantics { contentDescription = accessibilityLabel }
+        modifier = modifier
+            .testTag(TestTags.LANGUAGE_SWITCHER)
+            .semantics { contentDescription = accessibilityLabel },
     ) {
         Text(
             text = selectedLabel,
@@ -51,14 +55,16 @@ fun LanguageSwitcher(modifier: Modifier = Modifier) {
             onClick = {
                 expanded = false
                 AppLocale.setLanguage(context, AppLocale.ENGLISH)
-            }
+            },
+            modifier = Modifier.testTag(TestTags.LANGUAGE_OPTION_EN),
         )
         DropdownMenuItem(
             text = { Text(stringResource(R.string.language_es)) },
             onClick = {
                 expanded = false
                 AppLocale.setLanguage(context, AppLocale.SPANISH)
-            }
+            },
+            modifier = Modifier.testTag(TestTags.LANGUAGE_OPTION_ES),
         )
     }
 }
