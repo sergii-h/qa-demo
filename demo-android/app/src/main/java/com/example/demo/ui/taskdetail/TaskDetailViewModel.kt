@@ -39,24 +39,23 @@ class TaskDetailViewModel(
     fun load() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            runCatching {
-                coroutineScope {
-                    val taskDeferred = async { repository.getTask(taskId) }
-                    val validDeferred = async { repository.isValid(taskId) }
-                    taskDeferred.await() to validDeferred.await()
-                }
-            }.onSuccess { (task, isValid) ->
-                _uiState.update {
-                    it.copy(isLoading = false, task = task, isValid = isValid)
-                }
-            }.onFailure { error ->
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        task = null,
-                        errorMessage = mapTaskError(getApplication(), error)
-                    )
-                }
+            val (taskResult, validResult) = coroutineScope {
+                val taskDeferred = async { runCatching { repository.getTask(taskId) } }
+                val validDeferred = async { runCatching { repository.isValid(taskId) } }
+                taskDeferred.await() to validDeferred.await()
+            }
+            val task = taskResult.getOrNull()
+            val isValid = validResult.getOrElse { false }
+            val errorMessage = taskResult.exceptionOrNull()?.let {
+                mapTaskError(getApplication(), it)
+            }
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    task = task,
+                    isValid = isValid,
+                    errorMessage = errorMessage
+                )
             }
         }
     }

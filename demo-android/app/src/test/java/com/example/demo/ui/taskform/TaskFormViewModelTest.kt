@@ -374,6 +374,49 @@ class TaskFormViewModelTest {
         }
 
     @Test
+    fun shouldClearTitleErrorWhenTitleChanged() = runTest(mainDispatcherRule.dispatcher) {
+        // Given
+        val viewModel = TaskFormViewModel(
+            application,
+            repository,
+            taskId = null,
+            mode = TaskFormMode.CREATE
+        )
+        viewModel.onTitleChange("a".repeat(101))
+        viewModel.save()
+        assertThat(viewModel.uiState.value.titleError).isNotNull()
+
+        // When
+        viewModel.onTitleChange("Valid title")
+
+        // Then
+        assertThat(viewModel.uiState.value.titleError).isNull()
+    }
+
+    @Test
+    fun shouldNotCallRepositoryWhenTitleIsBlankInEditMode() = runTest(mainDispatcherRule.dispatcher) {
+        // Given
+        coEvery { repository.getTask("task-1") } returns TaskFixtures.sampleTask
+        val viewModel = TaskFormViewModel(
+            application,
+            repository,
+            taskId = "task-1",
+            mode = TaskFormMode.EDIT
+        )
+        advanceUntilIdle()
+        viewModel.onTitleChange("   ")
+
+        // When
+        viewModel.save()
+        advanceUntilIdle()
+
+        // Then
+        assertThat(viewModel.uiState.value.titleError).isNull()
+        assertThat(viewModel.uiState.value.saveSucceeded).isFalse()
+        coVerify(exactly = 0) { repository.updateTask(any(), any()) }
+    }
+
+    @Test
     fun shouldNotCallRepositoryWhenTitleIsBlank() = runTest(mainDispatcherRule.dispatcher) {
         // Given
         val viewModel = TaskFormViewModel(
@@ -389,6 +432,7 @@ class TaskFormViewModelTest {
         advanceUntilIdle()
 
         // Then
+        assertThat(viewModel.uiState.value.titleError).isNull()
         assertThat(viewModel.uiState.value.saveSucceeded).isFalse()
         coVerify(exactly = 0) { repository.createTask(any()) }
     }

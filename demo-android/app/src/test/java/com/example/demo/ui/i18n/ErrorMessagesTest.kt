@@ -54,6 +54,18 @@ class ErrorMessagesTest {
     }
 
     @Test
+    fun shouldReturnApiMessageWhenHttpErrorBodyContainsUnknownMessage() {
+        // Given
+        val error = HttpExceptionFactory.create(400, """{"message":"Some other error"}""")
+
+        // When
+        val message = mapTaskError(context, error)
+
+        // Then
+        assertThat(message).isEqualTo("Some other error")
+    }
+
+    @Test
     fun shouldReturnDuplicateTitleMessageWhenHttpConflict() {
         // Given
         val error = HttpExceptionFactory.create(409)

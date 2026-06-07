@@ -81,4 +81,22 @@ class TaskDetailViewModelTest {
         assertThat(state.task).isNull()
         assertThat(state.errorMessage).isEqualTo(application.getString(R.string.error_task_not_found))
     }
+
+    @Test
+    fun shouldEmitTaskWhenValidationRequestFails() = runTest(mainDispatcherRule.dispatcher) {
+        // Given
+        coEvery { repository.getTask(taskId) } returns TaskFixtures.sampleTask
+        coEvery { repository.isValid(taskId) } throws HttpExceptionFactory.create(500)
+        val viewModel = TaskDetailViewModel(application, repository, taskId)
+
+        // When
+        advanceUntilIdle()
+
+        // Then
+        val state = viewModel.uiState.value
+        assertThat(state.isLoading).isFalse()
+        assertThat(state.task).isEqualTo(TaskFixtures.sampleTask)
+        assertThat(state.isValid).isFalse()
+        assertThat(state.errorMessage).isNull()
+    }
 }
