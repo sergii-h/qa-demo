@@ -11,6 +11,7 @@ object TestTags {
     const val MODAL_TITLE = "modal-title"
     const val CREATE_TASK_TITLE_INPUT = "create-task-title-input"
     const val EDIT_TASK_TITLE_INPUT = "edit-task-title-input"
+    const val FIELD_TITLE_LABEL = "field-title-label"
     const val TASK_DESCRIPTION_INPUT = "task-description-input"
     const val STATUS_DROPDOWN = "status-dropdown"
     const val PRIORITY_DROPDOWN = "priority-dropdown"
@@ -20,6 +21,8 @@ object TestTags {
     const val TITLE_ERROR = "title-error"
     const val LOAD_ERROR = "load-error"
     const val DESCRIPTION = "description"
+    const val DETAIL_DESCRIPTION_LABEL = "detail-description-label"
+    const val DETAIL_VALIDATED_LABEL = "detail-validated-label"
     const val CREATED_DATE = "created-date"
     const val UPDATED_DATE = "updated-date"
     const val VALID = "valid"
@@ -39,4 +42,8 @@ object TestTags {
     fun statusTag(status: TaskStatus): String = "status-tag-${status.name}"
 
     fun priorityTag(priority: TaskPriority): String = "priority-tag-${priority.name}"
+
+    fun priorityDropdownOption(priority: TaskPriority): String = "priority-dropdown-option-${priority.name}"
+
+    fun statusDropdownOption(status: TaskStatus): String = "status-dropdown-option-${status.name}"
 }

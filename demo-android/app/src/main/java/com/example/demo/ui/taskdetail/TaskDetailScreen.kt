@@ -119,6 +119,7 @@ fun TaskDetailScreen(
                             label = stringResource(R.string.detail_description),
                             value = task.description?.takeIf { it.isNotBlank() }
                                 ?: stringResource(R.string.no_description),
+                            labelTestTag = TestTags.DETAIL_DESCRIPTION_LABEL,
                             valueTestTag = TestTags.DESCRIPTION,
                         )
                         DetailField(label = stringResource(R.string.detail_status)) {
@@ -137,7 +138,10 @@ fun TaskDetailScreen(
                             value = formatDate(task.updatedDate, dateFormatter, notAvailable),
                             valueTestTag = TestTags.UPDATED_DATE,
                         )
-                        DetailField(label = stringResource(R.string.detail_validated)) {
+                        DetailField(
+                            label = stringResource(R.string.detail_validated),
+                            labelTestTag = TestTags.DETAIL_VALIDATED_LABEL,
+                        ) {
                             if (uiState.isValid) {
                                 Box(
                                     modifier = Modifier
@@ -176,12 +180,14 @@ private fun DetailField(
     label: String,
     value: String,
     valueTestTag: String,
+    labelTestTag: String? = null,
 ) {
     Column {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            modifier = labelTestTag?.let { Modifier.testTag(it) } ?: Modifier,
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
@@ -195,13 +201,15 @@ private fun DetailField(
 @Composable
 private fun DetailField(
     label: String,
-    content: @Composable () -> Unit
+    labelTestTag: String? = null,
+    content: @Composable () -> Unit,
 ) {
     Column {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            modifier = labelTestTag?.let { Modifier.testTag(it) } ?: Modifier,
         )
         Spacer(modifier = Modifier.height(4.dp))
         content()
