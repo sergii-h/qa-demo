@@ -2,10 +2,12 @@ package com.example.demo.ui.i18n
 
 import android.app.Application
 import com.example.demo.R
+import com.example.demo.testing.AppLocaleRule
 import com.example.demo.testing.HttpExceptionFactory
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
+import org.junit.Rule
 import org.junit.Test
 import retrofit2.Response
 import org.junit.runner.RunWith
@@ -14,6 +16,9 @@ import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class ErrorMessagesTest {
+
+    @get:Rule
+    val appLocaleRule = AppLocaleRule()
 
     private val context: Application = RuntimeEnvironment.getApplication()
 

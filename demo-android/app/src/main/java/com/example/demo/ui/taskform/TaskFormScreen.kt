@@ -134,7 +134,12 @@ fun TaskFormScreen(
                     OutlinedTextField(
                         value = uiState.title,
                         onValueChange = viewModel::onTitleChange,
-                        label = { Text(stringResource(R.string.field_title)) },
+                        label = {
+                            Text(
+                                text = stringResource(R.string.field_title),
+                                modifier = Modifier.testTag(TestTags.FIELD_TITLE_LABEL),
+                            )
+                        },
                         isError = uiState.titleError != null,
                         supportingText = uiState.titleError?.let { error ->
                             {
@@ -172,6 +177,7 @@ fun TaskFormScreen(
                         optionLabel = { taskStatusLabel(it) },
                         onSelected = viewModel::onStatusChange,
                         testTag = TestTags.STATUS_DROPDOWN,
+                        optionTestTag = TestTags::statusDropdownOption,
                     )
 
                     EnumDropdown(
@@ -181,6 +187,7 @@ fun TaskFormScreen(
                         optionLabel = { taskPriorityLabel(it) },
                         onSelected = viewModel::onPriorityChange,
                         testTag = TestTags.PRIORITY_DROPDOWN,
+                        optionTestTag = TestTags::priorityDropdownOption,
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -230,6 +237,7 @@ private fun <T> EnumDropdown(
     optionLabel: @Composable (T) -> String,
     onSelected: (T) -> Unit,
     testTag: String,
+    optionTestTag: (T) -> String,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -258,7 +266,8 @@ private fun <T> EnumDropdown(
                     onClick = {
                         onSelected(option)
                         expanded = false
-                    }
+                    },
+                    modifier = Modifier.testTag(optionTestTag(option)),
                 )
             }
         }

@@ -56,8 +56,8 @@ fun DemoNavHost(repository: TaskRepository) {
                 taskId = null,
                 onBack = { navController.popBackStack() },
                 onSaved = {
-                    listRefreshTrigger++
                     navController.popBackStack()
+                    listRefreshTrigger++
                 }
             )
         }
@@ -73,8 +73,8 @@ fun DemoNavHost(repository: TaskRepository) {
                 taskId = taskId,
                 onBack = { navController.popBackStack() },
                 onSaved = {
-                    listRefreshTrigger++
                     navController.popBackStack()
+                    listRefreshTrigger++
                 }
             )
         }

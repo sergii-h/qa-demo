@@ -2,8 +2,7 @@ name: Run backend tests
 
 on:
   push:
-    branches:
-      - '**'
+    branches: [master]
     paths:
       - 'demo-service/**'
       - 'docker/**'

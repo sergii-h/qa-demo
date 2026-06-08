@@ -1,11 +1,11 @@
 package com.example.demo.ui.components
 
-import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.example.demo.locale.AppLocale
+import com.example.demo.testing.AppLocaleRule
 import com.example.demo.testing.DemoComposeTestTheme
 import com.example.demo.ui.TestTags
 import com.google.common.truth.Truth.assertThat
@@ -24,16 +24,15 @@ class LanguageSwitcherDisplayTest(
 ) {
 
     @get:Rule
+    val appLocaleRule = AppLocaleRule()
+
+    @get:Rule
     val composeTestRule = createComposeRule()
 
     private val context = RuntimeEnvironment.getApplication()
 
     @Before
     fun setUp() {
-        context.getSharedPreferences("demo_locale", Context.MODE_PRIVATE)
-            .edit()
-            .clear()
-            .apply()
         AppLocale.setLanguage(context, languageTag)
     }
 
@@ -64,18 +63,12 @@ class LanguageSwitcherDisplayTest(
 class LanguageSwitcherTest {
 
     @get:Rule
+    val appLocaleRule = AppLocaleRule()
+
+    @get:Rule
     val composeTestRule = createComposeRule()
 
     private val context = RuntimeEnvironment.getApplication()
-
-    @Before
-    fun setUp() {
-        context.getSharedPreferences("demo_locale", Context.MODE_PRIVATE)
-            .edit()
-            .clear()
-            .apply()
-        AppLocale.setLanguage(context, AppLocale.ENGLISH)
-    }
 
     @Test
     fun shouldSwitchToSpanishWhenSpanishOptionSelected() {

@@ -1,9 +1,8 @@
-name: Run Android unit tests
+name: Run Android unit and integartion tests
 
 on:
   push:
-    branches:
-      - '**'
+    branches: [master]
     paths:
       - 'demo-android/**'
       - '.github/workflows/demo-android.yml'
