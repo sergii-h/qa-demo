@@ -2,8 +2,7 @@ name: Run frontend tests
 
 on:
   push:
-    branches:
-      - '**'
+    branches: [master]
     paths:
       - 'demo-interface/**'
       - '.github/workflows/demo-interface.yml'
