@@ -20,6 +20,9 @@ val localProperties = Properties().apply {
 val apiBaseUrl: String = localProperties.getProperty("api.base.url")
     ?: "http://10.0.2.2:8080/v1/"
 
+private val testParallelForks: Int =
+    (Runtime.getRuntime().availableProcessors() / 2).coerceIn(1, 4)
+
 android {
     namespace = "com.example.demo"
     compileSdk = 35
@@ -66,6 +69,8 @@ android {
         unitTests.all {
             if (it.name.contains("Release")) {
                 it.enabled = false
+            } else {
+                it.maxParallelForks = testParallelForks
             }
         }
     }

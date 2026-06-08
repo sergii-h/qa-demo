@@ -15,10 +15,12 @@ class MainDispatcherRule(
 ) : TestWatcher() {
 
     override fun starting(description: Description) {
+        AppLocaleTestSupport.resetToEnglish()
         Dispatchers.setMain(dispatcher)
     }
 
     override fun finished(description: Description) {
         Dispatchers.resetMain()
+        AppLocaleTestSupport.resetToEnglish()
     }
 }

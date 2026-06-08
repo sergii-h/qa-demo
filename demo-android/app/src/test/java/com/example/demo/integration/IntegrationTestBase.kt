@@ -1,6 +1,5 @@
 package com.example.demo.integration
 
-import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -11,7 +10,6 @@ import androidx.compose.ui.test.performScrollTo
 import com.example.demo.data.model.Task
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.locale.AppLocale
 import com.example.demo.repository.TaskRepository
 import com.example.demo.testing.DemoComposeTestTheme
 import com.example.demo.testing.MainDispatcherRule
@@ -20,6 +18,8 @@ import com.example.demo.testing.waitUntilTagExists
 import com.example.demo.ui.DemoNavHost
 import com.example.demo.ui.TestTags
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.example.demo.testing.AppLocaleTestSupport
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.robolectric.RuntimeEnvironment
@@ -38,14 +38,14 @@ abstract class IntegrationTestBase {
 
     @Before
     fun setUpIntegrationHarness() {
-        val context = RuntimeEnvironment.getApplication()
-        context.getSharedPreferences("demo_locale", Context.MODE_PRIVATE)
-            .edit()
-            .clear()
-            .apply()
-        AppLocale.setLanguage(context, AppLocale.ENGLISH)
+        AppLocaleTestSupport.resetToEnglish()
         fakeApi = FakeTaskApi()
         repository = TaskRepository(fakeApi)
+    }
+
+    @After
+    fun tearDownIntegrationHarness() {
+        AppLocaleTestSupport.resetToEnglish()
     }
 
     protected fun launchApp() {
