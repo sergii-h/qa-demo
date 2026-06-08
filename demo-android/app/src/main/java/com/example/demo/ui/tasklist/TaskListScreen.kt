@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,6 +46,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.demo.R
 import com.example.demo.data.model.Task
 import com.example.demo.repository.TaskRepository
+import com.example.demo.ui.TestTags
 import com.example.demo.ui.components.LanguageSwitcher
 import com.example.demo.ui.components.PriorityChip
 import com.example.demo.ui.components.StatusChip
@@ -81,14 +83,22 @@ fun TaskListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.tasks_title)) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.tasks_title),
+                        modifier = Modifier.testTag(TestTags.PAGE_TITLE),
+                    )
+                },
                 actions = {
                     LanguageSwitcher(modifier = Modifier.padding(end = 4.dp))
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onCreateTask) {
+            FloatingActionButton(
+                onClick = onCreateTask,
+                modifier = Modifier.testTag(TestTags.ADD_TASK_BUTTON),
+            ) {
                 Icon(
                     Icons.Default.Add,
                     contentDescription = stringResource(R.string.create_task)
@@ -104,12 +114,18 @@ fun TaskListScreen(
         ) {
             when {
                 uiState.isLoading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .testTag(TestTags.LOADING_SPINNER),
+                    )
                 }
                 uiState.tasks.isEmpty() -> {
                     Text(
                         text = stringResource(R.string.empty_tasks),
-                        modifier = Modifier.align(Alignment.Center),
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .testTag(TestTags.EMPTY_TASKS),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -146,6 +162,7 @@ private fun TaskRow(
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = task.title,
+                modifier = Modifier.testTag(TestTags.taskTitle(task.id)),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -159,19 +176,29 @@ private fun TaskRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                IconButton(onClick = onInfo) {
+                IconButton(
+                    onClick = onInfo,
+                    modifier = Modifier.testTag(TestTags.infoButton(task.id)),
+                ) {
                     Icon(
                         Icons.Default.Info,
                         contentDescription = stringResource(R.string.action_info)
                     )
                 }
-                IconButton(onClick = onEdit) {
+                IconButton(
+                    onClick = onEdit,
+                    modifier = Modifier.testTag(TestTags.editButton(task.id)),
+                ) {
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = stringResource(R.string.action_edit)
                     )
                 }
-                IconButton(onClick = onDelete, enabled = !isDeleting) {
+                IconButton(
+                    onClick = onDelete,
+                    enabled = !isDeleting,
+                    modifier = Modifier.testTag(TestTags.deleteButton(task.id)),
+                ) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = stringResource(R.string.action_delete)

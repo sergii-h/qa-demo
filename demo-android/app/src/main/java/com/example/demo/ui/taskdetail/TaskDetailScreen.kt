@@ -2,8 +2,8 @@ package com.example.demo.ui.taskdetail
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.demo.R
 import com.example.demo.repository.TaskRepository
+import com.example.demo.ui.TestTags
 import com.example.demo.ui.components.PriorityChip
 import com.example.demo.ui.components.StatusChip
 import java.time.Instant
@@ -64,9 +66,17 @@ fun TaskDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(uiState.task?.title ?: stringResource(R.string.task_info)) },
+                title = {
+                    Text(
+                        text = uiState.task?.title ?: stringResource(R.string.task_info),
+                        modifier = Modifier.testTag(TestTags.MODAL_TITLE),
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.testTag(TestTags.CLOSE_BUTTON),
+                    ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back)
@@ -83,12 +93,18 @@ fun TaskDetailScreen(
         ) {
             when {
                 uiState.isLoading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .testTag(TestTags.LOADING_SPINNER),
+                    )
                 }
                 uiState.errorMessage != null -> {
                     Text(
                         text = uiState.errorMessage ?: stringResource(R.string.failed_load_task),
-                        modifier = Modifier.align(Alignment.Center)
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .testTag(TestTags.LOAD_ERROR),
                     )
                 }
                 uiState.task != null -> {
@@ -102,7 +118,8 @@ fun TaskDetailScreen(
                         DetailField(
                             label = stringResource(R.string.detail_description),
                             value = task.description?.takeIf { it.isNotBlank() }
-                                ?: stringResource(R.string.no_description)
+                                ?: stringResource(R.string.no_description),
+                            valueTestTag = TestTags.DESCRIPTION,
                         )
                         DetailField(label = stringResource(R.string.detail_status)) {
                             StatusChip(status = task.status)
@@ -112,25 +129,37 @@ fun TaskDetailScreen(
                         }
                         DetailField(
                             label = stringResource(R.string.detail_created),
-                            value = formatDate(task.createdDate, dateFormatter, notAvailable)
+                            value = formatDate(task.createdDate, dateFormatter, notAvailable),
+                            valueTestTag = TestTags.CREATED_DATE,
                         )
                         DetailField(
                             label = stringResource(R.string.detail_last_updated),
-                            value = formatDate(task.updatedDate, dateFormatter, notAvailable)
+                            value = formatDate(task.updatedDate, dateFormatter, notAvailable),
+                            valueTestTag = TestTags.UPDATED_DATE,
                         )
                         DetailField(label = stringResource(R.string.detail_validated)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                if (uiState.isValid) {
+                            if (uiState.isValid) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .testTag(TestTags.VALID),
+                                ) {
                                     Icon(
                                         Icons.Default.Check,
                                         contentDescription = stringResource(R.string.valid),
-                                        tint = MaterialTheme.colorScheme.primary
+                                        tint = MaterialTheme.colorScheme.primary,
                                     )
-                                } else {
+                                }
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .testTag(TestTags.NOT_VALID),
+                                ) {
                                     Icon(
                                         Icons.Default.Close,
                                         contentDescription = stringResource(R.string.not_valid),
-                                        tint = MaterialTheme.colorScheme.error
+                                        tint = MaterialTheme.colorScheme.error,
                                     )
                                 }
                             }
@@ -145,7 +174,8 @@ fun TaskDetailScreen(
 @Composable
 private fun DetailField(
     label: String,
-    value: String
+    value: String,
+    valueTestTag: String,
 ) {
     Column {
         Text(
@@ -154,7 +184,11 @@ private fun DetailField(
             fontWeight = FontWeight.SemiBold
         )
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = value, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = value,
+            modifier = Modifier.testTag(valueTestTag),
+            style = MaterialTheme.typography.bodyLarge,
+        )
     }
 }
 

@@ -7,6 +7,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import com.example.demo.ui.TestTags
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
 import com.example.demo.ui.i18n.taskPriorityLabel
@@ -25,7 +27,11 @@ fun StatusChip(status: TaskStatus, modifier: Modifier = Modifier) {
         TaskStatus.IN_PROGRESS -> taskStatusLabel(status) to InProgressOrange
         TaskStatus.DONE -> taskStatusLabel(status) to DoneGreen
     }
-    TaskChip(label = label, color = color, modifier = modifier)
+    TaskChip(
+        label = label,
+        color = color,
+        modifier = modifier.testTag(TestTags.statusTag(status)),
+    )
 }
 
 @Composable
@@ -35,11 +41,15 @@ fun PriorityChip(priority: TaskPriority, modifier: Modifier = Modifier) {
         TaskPriority.MEDIUM -> taskPriorityLabel(priority) to MediumOrange
         TaskPriority.HIGH -> taskPriorityLabel(priority) to HighRed
     }
-    TaskChip(label = label, color = color, modifier = modifier)
+    TaskChip(
+        label = label,
+        color = color,
+        modifier = modifier.testTag(TestTags.priorityTag(priority)),
+    )
 }
 
 @Composable
-private fun TaskChip(label: String, color: Color, modifier: Modifier = Modifier) {
+private fun TaskChip(label: String, color: Color, modifier: Modifier) {
     AssistChip(
         onClick = {},
         enabled = false,

@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - '**'
+    paths:
+      - 'demo-interface/**'
+      - '.github/workflows/demo-interface.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'demo-interface/**'
+      - '.github/workflows/demo-interface.yml'
 
 jobs:
   run-tests:
