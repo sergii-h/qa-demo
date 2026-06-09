@@ -1,14 +1,15 @@
 package com.example.demo.ui.taskform
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import com.example.demo.locale.AppLocale
 import com.example.demo.repository.TaskRepository
 import com.example.demo.testing.MainDispatcherRule
 import com.example.demo.testing.RecordingLocalizedContent
 import com.example.demo.testing.TaskFixtures
-import com.example.demo.testing.advanceComposeCoroutineIdle
 import com.example.demo.testing.assertHasTranslations
-import com.example.demo.testing.waitUntilTagExists
+import com.example.demo.testing.runAsyncAction
 import com.example.demo.ui.TestTags
 import com.example.demo.ui.theme.DemoTheme
 import io.mockk.coEvery
@@ -57,23 +58,24 @@ class TaskFormScreenEditTranslationTest(
     @Test
     fun shouldHaveTranslationsForEditTaskModal() {
         // Given
-        composeTestRule.setContent {
-            RecordingLocalizedContent(languageTag, recorded) {
-                DemoTheme {
-                    TaskFormScreen(
-                        repository = repository,
-                        mode = TaskFormMode.EDIT,
-                        taskId = "task-translation",
-                        onBack = {},
-                        onSaved = {},
-                    )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                RecordingLocalizedContent(languageTag, recorded) {
+                    DemoTheme {
+                        TaskFormScreen(
+                            repository = repository,
+                            mode = TaskFormMode.EDIT,
+                            taskId = "task-translation",
+                            onBack = {},
+                            onSaved = {},
+                        )
+                    }
                 }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.EDIT_TASK_TITLE_INPUT)
+        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
         assertHasTranslations(recorded, languageTag, context)
     }
 

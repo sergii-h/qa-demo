@@ -11,8 +11,6 @@ import androidx.compose.ui.test.performTextInput
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskRequest
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.testing.advanceComposeCoroutineIdle
-import com.example.demo.testing.waitUntilTagExists
 import com.example.demo.ui.TestTags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -23,7 +21,7 @@ import org.robolectric.RobolectricTestRunner
 class CreateTaskIntegrationTest : IntegrationTestBase() {
 
     @Test
-    fun shouldCreateTaskWithRequiredValuesAndRefreshList() {
+    fun shouldCreateTaskWithRequiredValues() {
         // Given
         val createdTask = IntegrationTasks.task(
             id = "task-124",
@@ -46,12 +44,11 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
         assertThat(fakeApi.createTaskRequests).containsExactly(
             TaskRequest("Test Task", null, TaskStatus.TODO, TaskPriority.MEDIUM),
         )
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-124"))
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-124")).assertIsDisplayed()
     }
 
     @Test
-    fun shouldCreateTaskWithAllValuesAndRefreshList() {
+    fun shouldCreateTaskWithAllValues() {
         // Given
         val createdTask = IntegrationTasks.task(
             id = "task-123",
@@ -77,7 +74,6 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
         assertThat(fakeApi.createTaskRequests).containsExactly(
             TaskRequest("Test Task", "Test Description", TaskStatus.IN_PROGRESS, TaskPriority.HIGH),
         )
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-123"))
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-123")).assertIsDisplayed()
     }
 
@@ -91,8 +87,9 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
         composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextInput("Temporary description")
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.CLOSE_BUTTON).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.CLOSE_BUTTON).performClick()
+        }
         openCreateForm()
 
         // Then
@@ -131,7 +128,6 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
         assertThat(fakeApi.createTaskRequests).containsExactly(
             TaskRequest("Corrected title", null, TaskStatus.TODO, TaskPriority.HIGH),
         )
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-130"))
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-130")).assertIsDisplayed()
     }
 
@@ -190,7 +186,6 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
 
         // Then
         assertThat(fakeApi.createTaskRequests).containsExactly(expectedRequest, expectedRequest)
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-456"))
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-456")).assertIsDisplayed()
     }
 
@@ -233,7 +228,7 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
         assertThat(fakeApi.createTaskRequests).containsExactly(
             TaskRequest("Task with refresh failure", null, TaskStatus.TODO, TaskPriority.HIGH),
         )
-        composeTestRule.waitUntilTagExists(TestTags.ADD_TASK_BUTTON)
+        composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertDoesNotExist()
     }
 
@@ -265,11 +260,9 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
 
         // When
         launchApp()
+        openCreateForm()
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.ADD_TASK_BUTTON)
-        composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
         composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
     }
 
@@ -278,7 +271,6 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
         // Given
         enqueueTasksForLanguageSwitch()
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.LANGUAGE_SWITCHER)
         switchToSpanish()
 
         // When
@@ -290,26 +282,20 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
         composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().assertTextEquals("Crear")
     }
 
-    private fun openCreateForm() {
-        composeTestRule.waitUntilTagExists(TestTags.ADD_TASK_BUTTON)
-        composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
-        composeTestRule.waitUntilTagExists(TestTags.CREATE_TASK_TITLE_INPUT)
-    }
-
     private fun fillCreateTitle(title: String) {
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performTextInput(title)
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performTextInput(title)
+        }
         composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().assertIsEnabled()
     }
 
     private fun submitCreateForm(expectList: Boolean = true) {
-        composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().performClick()
+        }
         if (expectList) {
-            composeTestRule.waitUntilTagExists(TestTags.ADD_TASK_BUTTON)
-            composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+            composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).assertIsDisplayed()
+            flushAsyncWork()
         }
     }
-
 }

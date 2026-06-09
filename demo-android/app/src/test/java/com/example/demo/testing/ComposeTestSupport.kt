@@ -26,6 +26,14 @@ fun ComposeContentTestRule.advanceComposeCoroutineIdle(dispatcher: TestDispatche
     waitForIdle()
 }
 
+inline fun ComposeContentTestRule.runAsyncAction(
+    dispatcher: TestDispatcher,
+    crossinline action: ComposeContentTestRule.() -> Unit,
+) {
+    action()
+    advanceComposeCoroutineIdle(dispatcher)
+}
+
 fun ComposeContentTestRule.waitUntilTextExists(text: String, timeoutMillis: Long = 5_000) {
     waitUntil(timeoutMillis) {
         onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()

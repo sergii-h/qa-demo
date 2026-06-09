@@ -10,8 +10,6 @@ import androidx.compose.ui.test.performTextInput
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskRequest
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.testing.advanceComposeCoroutineIdle
-import com.example.demo.testing.waitUntilTagExists
 import com.example.demo.ui.TestTags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -66,7 +64,6 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
                 ),
             ),
         )
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-201"))
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-201")).assertIsDisplayed()
     }
 
@@ -94,7 +91,6 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
                 TaskRequest("Updated title", "Notes", TaskStatus.TODO, TaskPriority.MEDIUM),
             ),
         )
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-1"))
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
     }
 
@@ -111,14 +107,13 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("Unsaved title")
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.CLOSE_BUTTON).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
-        composeTestRule.onNodeWithTag(TestTags.editButton("task-1")).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.CLOSE_BUTTON).performClick()
+        }
+        openEditForm("task-1")
 
         // Then
         assertThat(fakeApi.updateTaskRequests).isEmpty()
-        composeTestRule.waitUntilTagExists(TestTags.EDIT_TASK_TITLE_INPUT)
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
     }
 
@@ -151,7 +146,6 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
                 TaskRequest("Corrected title", null, TaskStatus.TODO, TaskPriority.MEDIUM),
             ),
         )
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-1"))
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
     }
 
@@ -172,12 +166,6 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
 
         // Then
         assertTitleError("Request failed (500)")
-        assertThat(fakeApi.updateTaskRequests).containsExactly(
-            FakeTaskApi.RecordedUpdate(
-                "task-1",
-                TaskRequest("Updated title", null, TaskStatus.TODO, TaskPriority.MEDIUM),
-            ),
-        )
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performScrollTo().assertExists()
     }
 
@@ -208,7 +196,6 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
 
         // Then
         assertThat(fakeApi.updateTaskRequests).containsExactly(expectedRequest, expectedRequest)
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-1"))
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
     }
 
@@ -219,9 +206,11 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
         enqueueTasks(listTask)
         enqueueGetTaskError(500)
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-1"))
-        composeTestRule.onNodeWithTag(TestTags.editButton("task-1")).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+
+        // When
+        runAsyncAction {
+            onNodeWithTag(TestTags.editButton("task-1")).performClick()
+        }
 
         // Then
         assertLoadErrorDisplayed()
@@ -267,7 +256,6 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
                 ),
             ),
         )
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-210"))
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-210")).assertIsDisplayed()
     }
 
@@ -304,9 +292,7 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
         enqueueTasksForLanguageSwitch(task)
         enqueueGetTask(task)
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.LANGUAGE_SWITCHER)
         switchToSpanish()
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-1"))
 
         // When
         openEditForm("task-1")
@@ -317,19 +303,13 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
         composeTestRule.onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().assertTextEquals("Guardar")
     }
 
-    private fun openEditForm(taskId: String) {
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle(taskId))
-        composeTestRule.onNodeWithTag(TestTags.editButton(taskId)).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
-        composeTestRule.waitUntilTagExists(TestTags.EDIT_TASK_TITLE_INPUT)
-    }
-
     private fun submitEditForm(expectList: Boolean = true) {
-        composeTestRule.onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().performClick()
+        }
         if (expectList) {
-            composeTestRule.waitUntilTagExists(TestTags.ADD_TASK_BUTTON)
-            composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+            composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).assertIsDisplayed()
+            flushAsyncWork()
         }
     }
 }

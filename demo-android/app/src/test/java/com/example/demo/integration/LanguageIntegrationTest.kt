@@ -2,12 +2,10 @@ package com.example.demo.integration
 
 import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.example.demo.locale.AppLocale
-import com.example.demo.testing.advanceComposeCoroutineIdle
-import com.example.demo.testing.waitUntilTagExists
-import androidx.compose.ui.test.assertTextEquals
 import com.example.demo.ui.TestTags
 import org.junit.Before
 import org.junit.Test
@@ -49,11 +47,9 @@ class LanguageIntegrationTest : IntegrationTestBase() {
         // Given
         enqueueTasksForLanguageSwitch()
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.LANGUAGE_SWITCHER)
 
         // When
         switchToSpanish()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.PAGE_TITLE).assertTextEquals("Tareas")
@@ -64,7 +60,6 @@ class LanguageIntegrationTest : IntegrationTestBase() {
         // Given
         enqueueTasksForLanguageSwitch()
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.LANGUAGE_SWITCHER)
         switchToSpanish()
         composeTestRule.onNodeWithTag(TestTags.PAGE_TITLE).assertTextEquals("Tareas")
 

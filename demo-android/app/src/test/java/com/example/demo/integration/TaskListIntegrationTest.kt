@@ -8,8 +8,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.testing.advanceComposeCoroutineIdle
-import com.example.demo.testing.waitUntilTagExists
 import com.example.demo.ui.TestTags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -32,7 +30,6 @@ class TaskListIntegrationTest : IntegrationTestBase() {
         launchApp()
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("1"))
         composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.taskTitle("3")).performScrollTo().assertIsDisplayed()
@@ -49,7 +46,6 @@ class TaskListIntegrationTest : IntegrationTestBase() {
 
         // When
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("1"))
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.TODO)).performScrollTo().assertIsDisplayed()
@@ -67,7 +63,6 @@ class TaskListIntegrationTest : IntegrationTestBase() {
 
         // When
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("10"))
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.infoButton("10")).assertIsDisplayed()
@@ -84,7 +79,6 @@ class TaskListIntegrationTest : IntegrationTestBase() {
         launchApp()
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.EMPTY_TASKS)
         composeTestRule.onNodeWithTag(TestTags.EMPTY_TASKS).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.infoButton("1")).assertDoesNotExist()
@@ -95,11 +89,9 @@ class TaskListIntegrationTest : IntegrationTestBase() {
         // Given
         enqueueTasks(IntegrationTasks.task("10", "Modal Task", description = "Modal description"))
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("10"))
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        openCreateForm()
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
@@ -113,14 +105,11 @@ class TaskListIntegrationTest : IntegrationTestBase() {
         enqueueGetTask(task)
         enqueueValidation(true)
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("10"))
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.infoButton("10")).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        openDetail("10")
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.DESCRIPTION)
         composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertIsDisplayed()
     }
 
@@ -131,14 +120,11 @@ class TaskListIntegrationTest : IntegrationTestBase() {
         enqueueTasks(task)
         enqueueGetTask(task)
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("10"))
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.editButton("10")).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        openEditForm("10")
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.EDIT_TASK_TITLE_INPUT)
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
     }
 
@@ -151,11 +137,11 @@ class TaskListIntegrationTest : IntegrationTestBase() {
         )
         enqueueDeleteSuccess()
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("1"))
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.deleteButton("1")).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.deleteButton("1")).performClick()
+        }
 
         // Then
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
@@ -175,11 +161,11 @@ class TaskListIntegrationTest : IntegrationTestBase() {
         )
         enqueueDeleteSuccess()
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("1"))
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.deleteButton("1")).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.deleteButton("1")).performClick()
+        }
 
         // Then
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
@@ -201,11 +187,11 @@ class TaskListIntegrationTest : IntegrationTestBase() {
         )
         enqueueDeleteError(500, "Delete failed")
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("1"))
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.deleteButton("1")).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.deleteButton("1")).performClick()
+        }
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
@@ -222,11 +208,11 @@ class TaskListIntegrationTest : IntegrationTestBase() {
         )
         enqueueDeleteNetworkFailure()
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("1"))
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.deleteButton("1")).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.deleteButton("1")).performClick()
+        }
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
@@ -244,13 +230,12 @@ class TaskListIntegrationTest : IntegrationTestBase() {
         enqueueDeleteError(500, "Delete failed")
         enqueueDeleteSuccess()
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("1"))
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.deleteButton("1")).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
-        composeTestRule.onNodeWithTag(TestTags.deleteButton("1")).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.deleteButton("1")).performClick()
+            onNodeWithTag(TestTags.deleteButton("1")).performClick()
+        }
 
         // Then
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
@@ -267,11 +252,9 @@ class TaskListIntegrationTest : IntegrationTestBase() {
 
         // When
         launchApp()
+        openCreateForm()
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.ADD_TASK_BUTTON)
-        composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
         composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
     }
 
@@ -284,7 +267,6 @@ class TaskListIntegrationTest : IntegrationTestBase() {
         launchApp()
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.ADD_TASK_BUTTON)
         composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).assertIsDisplayed()
     }
 
@@ -294,13 +276,11 @@ class TaskListIntegrationTest : IntegrationTestBase() {
         val task = IntegrationTasks.task("1", "Task One", status = TaskStatus.TODO, priority = TaskPriority.LOW)
         enqueueTasksForLanguageSwitch(task)
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.LANGUAGE_SWITCHER)
 
         // When
         switchToSpanish()
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("1"))
         composeTestRule.onNodeWithTag(TestTags.PAGE_TITLE).assertTextEquals("Tareas")
         composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.TODO))
             .performScrollTo()
