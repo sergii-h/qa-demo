@@ -71,6 +71,7 @@ android {
                 it.enabled = false
             } else {
                 it.maxParallelForks = testParallelForks
+                it.exclude("**/pact/**")
             }
         }
     }
@@ -125,6 +126,30 @@ afterEvaluate {
     tasks.named("testDebugUnitTest") {
         finalizedBy("koverVerifyDebug")
     }
+
+    tasks.register<Test>("pactTest") {
+        description = "Runs Pact consumer contract tests"
+        group = "verification"
+
+        val unitTest = tasks.named<Test>("testDebugUnitTest")
+        dependsOn(
+            "compileDebugUnitTestKotlin",
+            "compileDebugUnitTestJavaWithJavac",
+            "processDebugUnitTestJavaRes"
+        )
+        testClassesDirs = files(
+            layout.buildDirectory.dir("tmp/kotlin-classes/debugUnitTest"),
+            layout.buildDirectory.dir("intermediates/javac/debugUnitTest/compileDebugUnitTestJavaWithJavac/classes")
+        )
+        classpath = unitTest.get().classpath
+
+        useJUnitPlatform()
+        maxParallelForks = 1
+        systemProperty(
+            "pact.rootDir",
+            layout.buildDirectory.dir("pacts").get().asFile.absolutePath
+        )
+    }
 }
 
 dependencies {
@@ -152,6 +177,8 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
+    testImplementation("au.com.dius.pact.consumer:junit5:4.6.17")
     testImplementation("com.google.truth:truth:1.4.4")
     testImplementation("io.mockk:mockk:1.13.13")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
