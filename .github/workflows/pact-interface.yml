@@ -52,6 +52,12 @@ jobs:
             sleep 2
           done
 
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -82,12 +88,6 @@ jobs:
           PACT_CONSUMER_VERSION: ${{ github.sha }}
           PACT_BRANCH: ${{ github.ref_name }}
         run: npm run pact:publish
-
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: temurin
-          cache: maven
 
       - name: Run task API provider pact verification
         working-directory: demo-service
