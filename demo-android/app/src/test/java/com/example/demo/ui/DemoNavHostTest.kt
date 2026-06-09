@@ -9,8 +9,7 @@ import com.example.demo.repository.TaskRepository
 import com.example.demo.testing.DemoComposeTestTheme
 import com.example.demo.testing.MainDispatcherRule
 import com.example.demo.testing.TaskFixtures
-import com.example.demo.testing.advanceComposeCoroutineIdle
-import com.example.demo.testing.waitUntilTagExists
+import com.example.demo.testing.runAsyncAction
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,19 +35,21 @@ class DemoNavHostTest {
         // Given
         coEvery { repository.getTasks() } returns emptyList()
 
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                DemoNavHost(repository = repository)
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    DemoNavHost(repository = repository)
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).assertIsDisplayed()
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick()
+        }
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.MODAL_TITLE).assertIsDisplayed()
@@ -61,19 +62,21 @@ class DemoNavHostTest {
         coEvery { repository.getTasks() } returns listOf(TaskFixtures.sampleTask)
         coEvery { repository.getTask("task-1") } returns TaskFixtures.sampleTask
 
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                DemoNavHost(repository = repository)
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    DemoNavHost(repository = repository)
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.editButton("task-1")).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            onNodeWithTag(TestTags.editButton("task-1")).performClick()
+        }
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.EDIT_TASK_TITLE_INPUT)
+        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.MODAL_TITLE).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().assertIsDisplayed()
     }
@@ -85,19 +88,21 @@ class DemoNavHostTest {
         coEvery { repository.getTask("task-1") } returns TaskFixtures.sampleTask
         coEvery { repository.isValid("task-1") } returns true
 
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                DemoNavHost(repository = repository)
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    DemoNavHost(repository = repository)
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.infoButton("task-1")).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            onNodeWithTag(TestTags.infoButton("task-1")).performClick()
+        }
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.DESCRIPTION)
+        composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskFixtures.sampleTask.priority)).assertIsDisplayed()
     }
 }

@@ -12,8 +12,7 @@ import com.example.demo.repository.TaskRepository
 import com.example.demo.testing.DemoComposeTestTheme
 import com.example.demo.testing.MainDispatcherRule
 import com.example.demo.testing.TaskFixtures
-import com.example.demo.testing.advanceComposeCoroutineIdle
-import com.example.demo.testing.waitUntilTagExists
+import com.example.demo.testing.runAsyncAction
 import com.example.demo.ui.TestTags
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -39,21 +38,21 @@ class TaskFormScreenTest {
     @Test
     fun shouldShowCreateFormWhenCreateMode() {
         // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskFormScreen(
-                    repository = repository,
-                    mode = TaskFormMode.CREATE,
-                    taskId = null,
-                    onBack = {},
-                    onSaved = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskFormScreen(
+                        repository = repository,
+                        mode = TaskFormMode.CREATE,
+                        taskId = null,
+                        onBack = {},
+                        onSaved = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.MODAL_TITLE)
         composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().assertIsDisplayed()
     }
@@ -64,21 +63,22 @@ class TaskFormScreenTest {
         coEvery { repository.getTask("task-1") } returns TaskFixtures.sampleTask
 
         // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskFormScreen(
-                    repository = repository,
-                    mode = TaskFormMode.EDIT,
-                    taskId = "task-1",
-                    onBack = {},
-                    onSaved = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskFormScreen(
+                        repository = repository,
+                        mode = TaskFormMode.EDIT,
+                        taskId = "task-1",
+                        onBack = {},
+                        onSaved = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.EDIT_TASK_TITLE_INPUT)
+        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.MODAL_TITLE).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().assertIsDisplayed()
     }
@@ -86,18 +86,19 @@ class TaskFormScreenTest {
     @Test
     fun shouldDisableCreateButtonWhenTitleIsBlank() {
         // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskFormScreen(
-                    repository = repository,
-                    mode = TaskFormMode.CREATE,
-                    taskId = null,
-                    onBack = {},
-                    onSaved = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskFormScreen(
+                        repository = repository,
+                        mode = TaskFormMode.CREATE,
+                        taskId = null,
+                        onBack = {},
+                        onSaved = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().assertIsNotEnabled()
@@ -109,18 +110,19 @@ class TaskFormScreenTest {
         coEvery { repository.getTask("task-1") } returns TaskFixtures.sampleTask.copy(title = "")
 
         // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskFormScreen(
-                    repository = repository,
-                    mode = TaskFormMode.EDIT,
-                    taskId = "task-1",
-                    onBack = {},
-                    onSaved = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskFormScreen(
+                        repository = repository,
+                        mode = TaskFormMode.EDIT,
+                        taskId = "task-1",
+                        onBack = {},
+                        onSaved = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().assertIsNotEnabled()
@@ -129,18 +131,19 @@ class TaskFormScreenTest {
     @Test
     fun shouldShowDefaultStatusAndPriorityWhenCreateMode() {
         // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskFormScreen(
-                    repository = repository,
-                    mode = TaskFormMode.CREATE,
-                    taskId = null,
-                    onBack = {},
-                    onSaved = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskFormScreen(
+                        repository = repository,
+                        mode = TaskFormMode.CREATE,
+                        taskId = null,
+                        onBack = {},
+                        onSaved = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.STATUS_DROPDOWN).assertIsDisplayed()
@@ -157,18 +160,19 @@ class TaskFormScreenTest {
             TaskFixtures.sampleTask
         }
 
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskFormScreen(
-                    repository = repository,
-                    mode = TaskFormMode.CREATE,
-                    taskId = null,
-                    onBack = {},
-                    onSaved = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskFormScreen(
+                        repository = repository,
+                        mode = TaskFormMode.CREATE,
+                        taskId = null,
+                        onBack = {},
+                        onSaved = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // When
         composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performTextInput("New task")

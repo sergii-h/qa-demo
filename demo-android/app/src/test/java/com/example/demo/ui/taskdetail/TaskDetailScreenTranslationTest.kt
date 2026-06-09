@@ -1,14 +1,15 @@
 package com.example.demo.ui.taskdetail
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import com.example.demo.locale.AppLocale
 import com.example.demo.repository.TaskRepository
 import com.example.demo.testing.MainDispatcherRule
 import com.example.demo.testing.RecordingLocalizedContent
 import com.example.demo.testing.TaskFixtures
-import com.example.demo.testing.advanceComposeCoroutineIdle
 import com.example.demo.testing.assertHasTranslations
-import com.example.demo.testing.waitUntilTagExists
+import com.example.demo.testing.runAsyncAction
 import com.example.demo.ui.TestTags
 import com.example.demo.ui.theme.DemoTheme
 import io.mockk.coEvery
@@ -60,21 +61,22 @@ class TaskDetailScreenTranslationTest(
     @Test
     fun shouldHaveTranslationsForInfoTaskModal() {
         // Given
-        composeTestRule.setContent {
-            RecordingLocalizedContent(languageTag, recorded) {
-                DemoTheme {
-                    TaskDetailScreen(
-                        repository = repository,
-                        taskId = "task-translation",
-                        onBack = {},
-                    )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                RecordingLocalizedContent(languageTag, recorded) {
+                    DemoTheme {
+                        TaskDetailScreen(
+                            repository = repository,
+                            taskId = "task-translation",
+                            onBack = {},
+                        )
+                    }
                 }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.DESCRIPTION)
+        composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertIsDisplayed()
         assertHasTranslations(recorded, languageTag, context)
     }
 

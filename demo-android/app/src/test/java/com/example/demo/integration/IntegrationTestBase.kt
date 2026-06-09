@@ -2,6 +2,7 @@ package com.example.demo.integration
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -11,18 +12,17 @@ import com.example.demo.data.model.Task
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
 import com.example.demo.repository.TaskRepository
+import com.example.demo.testing.AppLocaleTestSupport
 import com.example.demo.testing.DemoComposeTestTheme
 import com.example.demo.testing.MainDispatcherRule
 import com.example.demo.testing.advanceComposeCoroutineIdle
-import com.example.demo.testing.waitUntilTagExists
+import com.example.demo.testing.runAsyncAction
 import com.example.demo.ui.DemoNavHost
 import com.example.demo.ui.TestTags
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import com.example.demo.testing.AppLocaleTestSupport
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
-import org.robolectric.RuntimeEnvironment
 
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class IntegrationTestBase {
@@ -48,13 +48,50 @@ abstract class IntegrationTestBase {
         AppLocaleTestSupport.resetToEnglish()
     }
 
+    protected fun runAsyncAction(action: ComposeContentTestRule.() -> Unit) {
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher, action)
+    }
+
+    protected fun flushAsyncWork() {
+        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+    }
+
     protected fun launchApp() {
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                DemoNavHost(repository = repository)
+        runAsyncAction {
+            setContent {
+                DemoComposeTestTheme {
+                    DemoNavHost(repository = repository)
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+    }
+
+    protected fun openCreateForm() {
+        runAsyncAction {
+            onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick()
+        }
+        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
+    }
+
+    protected fun openEditForm(taskId: String) {
+        runAsyncAction {
+            onNodeWithTag(TestTags.editButton(taskId)).performClick()
+        }
+        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
+    }
+
+    protected fun openDetail(taskId: String) {
+        runAsyncAction {
+            onNodeWithTag(TestTags.infoButton(taskId)).performClick()
+        }
+        composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertIsDisplayed()
+    }
+
+    protected fun openDetailExpectingLoadError(taskId: String) {
+        runAsyncAction {
+            onNodeWithTag(TestTags.infoButton(taskId)).performClick()
+        }
+        composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertIsDisplayed()
     }
 
     protected fun enqueueTasks(vararg tasks: Task) {
@@ -144,15 +181,17 @@ abstract class IntegrationTestBase {
     }
 
     protected fun switchToSpanish() {
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).performClick()
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_OPTION_ES).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.LANGUAGE_SWITCHER).performClick()
+            onNodeWithTag(TestTags.LANGUAGE_OPTION_ES).performClick()
+        }
     }
 
     protected fun switchToEnglish() {
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).performClick()
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_OPTION_EN).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.LANGUAGE_SWITCHER).performClick()
+            onNodeWithTag(TestTags.LANGUAGE_OPTION_EN).performClick()
+        }
     }
 
     protected fun assertTitleError(expectedText: String) {
@@ -166,12 +205,10 @@ abstract class IntegrationTestBase {
     }
 
     protected fun assertLoadErrorDisplayed() {
-        composeTestRule.waitUntilTagExists(TestTags.LOAD_ERROR)
         composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertIsDisplayed()
     }
 
     protected fun assertDescriptionText(expectedText: String) {
-        composeTestRule.waitUntilTagExists(TestTags.DESCRIPTION)
         composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertTextEquals(expectedText)
     }
 
@@ -187,15 +224,15 @@ abstract class IntegrationTestBase {
 
     protected fun selectPriority(priority: TaskPriority) {
         composeTestRule.onNodeWithTag(TestTags.PRIORITY_DROPDOWN).performScrollTo().performClick()
-        composeTestRule.waitUntilTagExists(TestTags.priorityDropdownOption(priority))
-        composeTestRule.onNodeWithTag(TestTags.priorityDropdownOption(priority)).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.priorityDropdownOption(priority)).performClick()
+        }
     }
 
     protected fun selectStatus(status: TaskStatus) {
         composeTestRule.onNodeWithTag(TestTags.STATUS_DROPDOWN).performScrollTo().performClick()
-        composeTestRule.waitUntilTagExists(TestTags.statusDropdownOption(status))
-        composeTestRule.onNodeWithTag(TestTags.statusDropdownOption(status)).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.statusDropdownOption(status)).performClick()
+        }
     }
 }

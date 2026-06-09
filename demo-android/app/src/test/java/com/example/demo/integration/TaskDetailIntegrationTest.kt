@@ -6,8 +6,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.testing.advanceComposeCoroutineIdle
-import com.example.demo.testing.waitUntilTagExists
 import com.example.demo.ui.TestTags
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -73,7 +71,6 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
         openDetail("task-2")
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.NOT_VALID)
         composeTestRule.onNodeWithTag(TestTags.NOT_VALID).assertExists()
         composeTestRule.onNodeWithTag(TestTags.VALID).assertDoesNotExist()
     }
@@ -89,11 +86,11 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
         openDetail("task-1")
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.CLOSE_BUTTON).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
+        runAsyncAction {
+            onNodeWithTag(TestTags.CLOSE_BUTTON).performClick()
+        }
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.ADD_TASK_BUTTON)
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
     }
 
@@ -122,7 +119,6 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
         openDetail("task-3")
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.DESCRIPTION)
         composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.NOT_VALID).assertExists()
         composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertDoesNotExist()
@@ -172,9 +168,7 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
         enqueueGetTask(task)
         enqueueValidation(true)
         launchApp()
-        composeTestRule.waitUntilTagExists(TestTags.LANGUAGE_SWITCHER)
         switchToSpanish()
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-1"))
 
         // When
         openDetail("task-1")
@@ -183,19 +177,5 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
         assertFieldLabel(TestTags.DETAIL_DESCRIPTION_LABEL, "Descripción")
         assertFieldLabel(TestTags.DETAIL_VALIDATED_LABEL, "Validado")
         composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.TODO)).assertTextEquals("Por hacer")
-    }
-
-    private fun openDetail(taskId: String) {
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle(taskId))
-        composeTestRule.onNodeWithTag(TestTags.infoButton(taskId)).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
-        composeTestRule.waitUntilTagExists(TestTags.DESCRIPTION)
-    }
-
-    private fun openDetailExpectingLoadError(taskId: String) {
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle(taskId))
-        composeTestRule.onNodeWithTag(TestTags.infoButton(taskId)).performClick()
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
-        composeTestRule.waitUntilTagExists(TestTags.LOAD_ERROR)
     }
 }

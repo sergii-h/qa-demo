@@ -10,8 +10,7 @@ import com.example.demo.testing.DemoComposeTestTheme
 import com.example.demo.testing.HttpExceptionFactory
 import com.example.demo.testing.MainDispatcherRule
 import com.example.demo.testing.TaskFixtures
-import com.example.demo.testing.advanceComposeCoroutineIdle
-import com.example.demo.testing.waitUntilTagExists
+import com.example.demo.testing.runAsyncAction
 import com.example.demo.testing.waitUntilTextExists
 import com.example.demo.ui.TestTags
 import io.mockk.coEvery
@@ -41,20 +40,19 @@ class TaskDetailScreenTest {
         coEvery { repository.isValid("task-1") } returns true
 
         // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskDetailScreen(
-                    repository = repository,
-                    taskId = "task-1",
-                    onBack = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskDetailScreen(
+                        repository = repository,
+                        taskId = "task-1",
+                        onBack = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.DESCRIPTION)
-        composeTestRule.waitUntilTagExists(TestTags.VALID)
         composeTestRule.onNodeWithTag(TestTags.MODAL_TITLE).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.statusTag(TaskFixtures.sampleTask.status)).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskFixtures.sampleTask.priority)).assertIsDisplayed()
@@ -71,19 +69,19 @@ class TaskDetailScreenTest {
         coEvery { repository.isValid("task-1") } returns true
 
         // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskDetailScreen(
-                    repository = repository,
-                    taskId = "task-1",
-                    onBack = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskDetailScreen(
+                        repository = repository,
+                        taskId = "task-1",
+                        onBack = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.CREATED_DATE)
         composeTestRule.onNodeWithTag(TestTags.CREATED_DATE).assertTextEquals("N/A")
         composeTestRule.onNodeWithTag(TestTags.UPDATED_DATE).assertTextEquals("N/A")
     }
@@ -98,19 +96,19 @@ class TaskDetailScreenTest {
         coEvery { repository.isValid("task-1") } returns true
 
         // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskDetailScreen(
-                    repository = repository,
-                    taskId = "task-1",
-                    onBack = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskDetailScreen(
+                        repository = repository,
+                        taskId = "task-1",
+                        onBack = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.CREATED_DATE)
         composeTestRule.onNodeWithTag(TestTags.CREATED_DATE).assertTextEquals(invalidDate)
     }
 
@@ -121,16 +119,17 @@ class TaskDetailScreenTest {
         coEvery { repository.isValid("task-1") } returns false
 
         // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskDetailScreen(
-                    repository = repository,
-                    taskId = "task-1",
-                    onBack = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskDetailScreen(
+                        repository = repository,
+                        taskId = "task-1",
+                        onBack = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertIsDisplayed()
@@ -143,19 +142,19 @@ class TaskDetailScreenTest {
         coEvery { repository.isValid("task-1") } returns false
 
         // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskDetailScreen(
-                    repository = repository,
-                    taskId = "task-1",
-                    onBack = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskDetailScreen(
+                        repository = repository,
+                        taskId = "task-1",
+                        onBack = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.NOT_VALID)
         composeTestRule.onNodeWithTag(TestTags.NOT_VALID).assertExists()
         composeTestRule.onNodeWithTag(TestTags.VALID).assertDoesNotExist()
     }
@@ -167,19 +166,19 @@ class TaskDetailScreenTest {
         coEvery { repository.isValid("task-1") } returns true
 
         // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskDetailScreen(
-                    repository = repository,
-                    taskId = "task-1",
-                    onBack = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskDetailScreen(
+                        repository = repository,
+                        taskId = "task-1",
+                        onBack = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.VALID)
         composeTestRule.waitUntilTextExists("Validated")
         composeTestRule.onNodeWithText("Validated").assertExists()
     }
@@ -191,19 +190,19 @@ class TaskDetailScreenTest {
         coEvery { repository.isValid("task-1") } returns true
 
         // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskDetailScreen(
-                    repository = repository,
-                    taskId = "task-1",
-                    onBack = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskDetailScreen(
+                        repository = repository,
+                        taskId = "task-1",
+                        onBack = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.DESCRIPTION)
         composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertTextEquals("No description")
     }
 
@@ -214,19 +213,19 @@ class TaskDetailScreenTest {
         coEvery { repository.isValid("task-1") } throws HttpExceptionFactory.create(500)
 
         // When
-        composeTestRule.setContent {
-            DemoComposeTestTheme {
-                TaskDetailScreen(
-                    repository = repository,
-                    taskId = "task-1",
-                    onBack = {}
-                )
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskDetailScreen(
+                        repository = repository,
+                        taskId = "task-1",
+                        onBack = {}
+                    )
+                }
             }
         }
-        composeTestRule.advanceComposeCoroutineIdle(mainDispatcherRule.dispatcher)
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.DESCRIPTION)
         composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertTextEquals(TaskFixtures.sampleTask.description!!)
         composeTestRule.onNodeWithTag(TestTags.NOT_VALID).assertExists()
         composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertDoesNotExist()
