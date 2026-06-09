@@ -14,7 +14,6 @@ Native Android client for the QA Demo task management API. Same CRUD functionali
 
 - UI strings: `app/src/main/res/values/strings.xml` (English) and `values-es/strings.xml` (Spanish)
 - **EN / ES** switcher on the task list screen (top bar); choice is persisted across restarts
-- Language changes recompose the UI in place (no activity restart / screen blink)
 - On first launch, Spanish is used when the device language is `es` / `es-*`; otherwise English (same rule as the web app)
 
 ## Features
@@ -86,8 +85,6 @@ cd demo-android
 
 - Location: `app/src/test/`
 - Stack: JUnit 4, MockK, Truth, Robolectric, coroutines-test, Compose UI Test (`createComposeRule` in `src/test` — no emulator)
-- Naming: `should<Behavior>When<Condition>`
-- UI queries: `Modifier.testTag` + `onNodeWithTag` (aligned with web `data-testid` — see `TestTags.kt`); `onNodeWithText` kept only for i18n tests
 - Mutation testing: not used — Android PiTest support is experimental and a poor fit for Robolectric/Compose; Kover line coverage is the quality gate instead (same rationale as Stryker on the web app).
 
 ### Coverage
