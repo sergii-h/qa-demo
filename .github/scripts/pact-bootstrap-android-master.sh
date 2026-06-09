@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-WORKTREE="${PACT_MASTER_WORKTREE:-/tmp/pact-master-worktree}"
+WORKTREE="${PACT_MASTER_WORKTREE:-/tmp/pact-android-master-worktree}"
 
 # shellcheck source=pact-participants.sh
 source "${SCRIPT_DIR}/pact-participants.sh"
@@ -30,19 +30,10 @@ cleanup() {
 trap cleanup EXIT
 
 (
-  cd "${WORKTREE}/notification-service"
-  mvn -q test
+  cd "${WORKTREE}/demo-android"
+  ./gradlew pactTest
 )
-pact_publish "${WORKTREE}/notification-service/target/pacts" \
-  --consumer-app-version "${MASTER_SHA}" \
-  --branch "${PACT_MAIN_BRANCH}"
-
-(
-  cd "${WORKTREE}/demo-interface"
-  npm ci
-  npm run test:pact
-)
-pact_publish "${WORKTREE}/demo-interface/pacts" \
+pact_publish "${WORKTREE}/demo-android/app/build/pacts" \
   --consumer-app-version "${MASTER_SHA}" \
   --branch "${PACT_MAIN_BRANCH}"
 
@@ -51,11 +42,13 @@ pact_publish "${WORKTREE}/demo-interface/pacts" \
   PACT_BROKER_BASE_URL="${PACT_BROKER_BASE_URL}" \
   PACT_PROVIDER_VERSION="${MASTER_SHA}" \
   PACT_PROVIDER_BRANCH="${PACT_MAIN_BRANCH}" \
-  mvn -q verify -Pintegration-tests -Dit.test="*PactProviderTest" -Djacoco.skip=true \
+  mvn -q verify -Pintegration-tests \
+    -Dit.test="${PACT_TASK_API_PROVIDER_IT_TESTS}" \
+    -Djacoco.skip=true \
     -Dpact.verifier.publishResults=true \
     -Dpact.provider.version="${MASTER_SHA}" \
     -Dpact.provider.branch="${PACT_MAIN_BRANCH}" \
     -Djunit.parallel.enabled=false
 )
 
-echo "Bootstrapped ${PACT_MAIN_BRANCH} contracts at ${MASTER_SHA}"
+echo "Bootstrapped ${PACT_MAIN_BRANCH} Android contracts at ${MASTER_SHA}"

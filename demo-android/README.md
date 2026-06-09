@@ -77,9 +77,35 @@ export PATH="$JAVA_HOME/bin:$PATH"
 ```bash
 cd demo-android
 ./gradlew test                  # JVM unit tests (no device)
+./gradlew pactTest              # Pact consumer contract tests (JUnit 5, separate task)
 ./gradlew assembleDebug
 ./gradlew installDebug          # device/emulator connected
 ```
+
+## Pact (consumer contract tests)
+
+Consumer-driven contracts for the task API, aligned with `demo-interface` and verified by `demo-service` provider tests.
+
+```bash
+./gradlew pactTest
+# pact files written to app/build/pacts/
+```
+
+Publish locally as part of the Android-only pipeline:
+
+```bash
+bash ../.github/scripts/pact-run-local-android.sh
+```
+
+Or the full pipeline (web + notification-service + Android):
+
+```bash
+bash ../.github/scripts/pact-run-local.sh
+```
+
+CI runs Android Pact separately via `.github/workflows/pact-android.yml` when `demo-android/**` changes.
+
+Pact tests run on the JVM via a dedicated Gradle task — no emulator. They use JUnit 5 while other unit tests stay on JUnit 4.
 
 ## Unit tests
 

@@ -31,30 +31,9 @@ echo "Configuring pacticipants..."
 bash "${SCRIPT_DIR}/pact-configure-broker.sh"
 
 if [[ "${CURRENT_BRANCH}" != "${PACT_MAIN_BRANCH}" ]]; then
-  echo "Bootstrapping ${PACT_MAIN_BRANCH} contracts..."
-  bash "${SCRIPT_DIR}/pact-bootstrap-notification-master.sh"
-  bash "${SCRIPT_DIR}/pact-bootstrap-interface-master.sh"
+  echo "Bootstrapping ${PACT_MAIN_BRANCH} Android contracts..."
   bash "${SCRIPT_DIR}/pact-bootstrap-android-master.sh"
 fi
-
-echo "Running notification-service consumer pact tests..."
-(
-  cd "${ROOT}/notification-service"
-  mvn test
-)
-pact_publish "${ROOT}/notification-service/target/pacts" \
-  --consumer-app-version "${PACT_VERSION}" \
-  --branch "${PACT_BRANCH}"
-
-echo "Running demo-interface consumer pact tests..."
-(
-  cd "${ROOT}/demo-interface"
-  npm ci
-  npm run test:pact
-)
-pact_publish "${ROOT}/demo-interface/pacts" \
-  --consumer-app-version "${PACT_VERSION}" \
-  --branch "${PACT_BRANCH}"
 
 echo "Running demo-android consumer pact tests..."
 (
@@ -78,9 +57,9 @@ echo "Running demo-service provider verification..."
 
 if [[ "${CURRENT_BRANCH}" != "${PACT_MAIN_BRANCH}" ]]; then
   echo "Running can-i-merge check..."
-  PACT_VERSION="${PACT_VERSION}" PACT_MERGE_PROFILE=all bash "${SCRIPT_DIR}/pact-can-i-merge.sh"
+  PACT_VERSION="${PACT_VERSION}" PACT_MERGE_PROFILE=android bash "${SCRIPT_DIR}/pact-can-i-merge.sh"
 else
   echo "On ${PACT_MAIN_BRANCH}; skipping can-i-merge."
 fi
 
-echo "Pact pipeline completed successfully."
+echo "Android Pact pipeline completed successfully."
