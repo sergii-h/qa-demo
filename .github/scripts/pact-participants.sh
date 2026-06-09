@@ -10,16 +10,52 @@ else
   PACT_USE_HOST_NETWORK=true
 fi
 
-PACT_PARTICIPANTS=(
-  "demo-interface"
-  "notification-service"
+PACT_TASK_API_PROVIDER_PARTICIPANTS=(
   "demo-service-tasks-create"
   "demo-service-tasks-delete"
   "demo-service-tasks-get-all"
   "demo-service-tasks-get-by-id"
   "demo-service-tasks-get-is-valid"
   "demo-service-tasks-update"
+)
+
+PACT_EVENT_PROVIDER_PARTICIPANTS=(
   "demo-service-tasks-events"
+)
+
+PACT_PROVIDER_PARTICIPANTS=(
+  "${PACT_TASK_API_PROVIDER_PARTICIPANTS[@]}"
+  "${PACT_EVENT_PROVIDER_PARTICIPANTS[@]}"
+)
+
+PACT_TASK_API_PROVIDER_IT_TESTS="CreateTaskPactProviderTest,DeleteTaskPactProviderTest,GetAllTasksPactProviderTest,GetTaskByIdPactProviderTest,GetIsValidPactProviderTest,UpdateTaskPactProviderTest"
+
+PACT_PARTICIPANTS=(
+  "demo-interface"
+  "demo-android"
+  "notification-service"
+  "${PACT_PROVIDER_PARTICIPANTS[@]}"
+)
+
+PACT_INTERFACE_MERGE_PARTICIPANTS=(
+  "demo-interface"
+  "${PACT_TASK_API_PROVIDER_PARTICIPANTS[@]}"
+)
+
+PACT_NOTIFICATION_MERGE_PARTICIPANTS=(
+  "notification-service"
+  "${PACT_EVENT_PROVIDER_PARTICIPANTS[@]}"
+)
+
+PACT_WEB_MERGE_PARTICIPANTS=(
+  "demo-interface"
+  "notification-service"
+  "${PACT_PROVIDER_PARTICIPANTS[@]}"
+)
+
+PACT_ANDROID_MERGE_PARTICIPANTS=(
+  "demo-android"
+  "${PACT_TASK_API_PROVIDER_PARTICIPANTS[@]}"
 )
 
 pact_cli() {

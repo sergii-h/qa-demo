@@ -160,12 +160,17 @@ Code-based stubs only — `POST /external/validate/task` → `true` / `false` (i
 
 ### Pipeline Checks
 
-| When | What runs |
+All workflows trigger on **push or pull request to `master` only** — pushes to other branches do not run CI unless opened as a PR targeting `master`. Most workflows are also **path-filtered** (they skip when unrelated files change).
+
+| Trigger | What runs |
 |---|---|
-| Push to any branch | `demo-service` — unit, PiTest mutation, integration (excl. Pact provider) |
-| Push to any branch | `demo-interface` — Vitest unit + integration |
-| Push / PR to `master` | `pact` — consumers, provider verification, can-i-deploy |
-| Push / PR to `master` | Playwright + Selenide — mocked BE, accessibility, UAT |
+| Push / PR to `master`, `demo-service/**` (or `docker/**`) | `demo-service` — unit, PiTest mutation, integration (excl. Pact provider) |
+| Push / PR to `master`, `demo-interface/**` | `demo-interface` — Vitest unit + integration |
+| Push / PR to `master`, `demo-android/**` | `demo-android` — JVM unit + integration tests (Robolectric; pact excluded) |
+| Push / PR to `master`, relevant consumer / provider paths | `pact-interface` — `demo-interface` consumer, task API provider verify, can-i-merge |
+| Push / PR to `master`, relevant consumer / provider paths | `pact-notification` — `notification-service` consumer, events provider verify, can-i-merge |
+| Push / PR to `master`, relevant consumer / provider paths | `pact-android` — `demo-android` consumer, task API provider verify, can-i-merge |
+| Push / PR to `master`, `demo-interface/**` / `demo-service/**` / `e2e/**` | Playwright + Selenide — mocked BE, accessibility, UAT |
 | Push / PR to `master` | `codeql` — SAST (see Security below) |
 
 - [ ] **All required workflows green** before merging to `master`
@@ -183,7 +188,7 @@ A ticket is **DONE** when:
 - [ ] Applicable checklist items above are implemented (unit → integration → contract/E2E as needed)
 - [ ] All tests pass locally
 - [ ] Unit coverage ≥90%; backend PiTest ≥80% when Java logic changed
-- [ ] CI green — branch workflows always; `master` workflows (Pact, E2E) before merge to `master`
+- [ ] CI green — required workflows on the PR to `master` (path-filtered where applicable)
 - [ ] Code reviewed and approved
 - [ ] README or this guide updated if test commands or CI changed
 

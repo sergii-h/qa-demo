@@ -118,9 +118,12 @@ GitHub Actions validates every change — see [Actions](https://github.com/sergi
 
 | Workflow | Scope |
 |---|---|
-| `demo-service` | Backend unit, PiTest mutation, integration (all branches) |
-| `demo-interface` | Frontend unit + integration (all branches) |
-| `pact` | Consumer contracts, provider verification, can-i-deploy (`master`) |
+| `demo-service` | Backend unit, PiTest mutation, integration — push / PR to `master`, path-filtered |
+| `demo-interface` | Frontend unit + integration — push / PR to `master`, path-filtered |
+| `demo-android` | Android unit + integration tests — push / PR to `master`, path-filtered |
+| `pact-interface` | `demo-interface` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
+| `pact-notification` | `notification-service` consumer contracts, events provider verify, can-i-merge — push / PR to `master` |
+| `pact-android` | `demo-android` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
 | `e2e-allure-reports` | All 6 E2E suites in parallel + single Allure publish to GitHub Pages (`master`) |
 | `allure-pages` | Allure reports landing page (`master`) |
 | `allure-pages-cleanup` | Remove PR report folder (Allure + Playwright HTML) from GitHub Pages when a PR closes |
@@ -204,9 +207,20 @@ npm run test:ui       # interactive Vitest UI
 
 This demo uses an **ephemeral Pact Broker** started fresh in Docker on each CI run. CI bootstraps `master` contracts first so `can-i-merge` has a baseline to compare against.
 
+Each consumer runs in its own GitHub Actions workflow when its app (or `demo-service`) changes:
+
+| Workflow | Consumer | Provider surface |
+|----------|----------|------------------|
+| `pact-interface.yml` | `demo-interface` | Task HTTP API |
+| `pact-notification.yml` | `notification-service` | Task events (async) |
+| `pact-android.yml` | `demo-android` | Task HTTP API |
+
 ```bash
-# Run the full Pact pipeline locally (consumers → publish → provider verify → can-i-merge)
+# Run the full Pact pipeline locally (all consumers → publish → provider verify → can-i-merge)
 bash .github/scripts/pact-run-local.sh
+
+# Android-only pipeline
+bash .github/scripts/pact-run-local-android.sh
 ```
 
 Or run each phase manually:

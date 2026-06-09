@@ -1,4 +1,4 @@
-name: Run pact tests
+name: Run demo-interface pact tests
 
 on:
   pull_request:
@@ -21,12 +21,11 @@ jobs:
             relevant:
               - demo-interface/**
               - demo-service/**
-              - notification-service/**
               - docker/**
               - .github/scripts/pact-*.sh
-              - .github/workflows/pact.yml
+              - .github/workflows/pact-interface.yml
 
-  pact:
+  pact-interface:
     needs: changes
     if: needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-22.04
@@ -53,12 +52,6 @@ jobs:
             sleep 2
           done
 
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: temurin
-          cache: maven
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -68,40 +61,21 @@ jobs:
       - name: Configure Pact Broker main branches
         run: bash .github/scripts/pact-configure-broker.sh
 
-      - name: Bootstrap master branch contracts in Pact Broker
+      - name: Bootstrap master branch demo-interface contracts in Pact Broker
         if: github.ref_name != 'master'
         env:
           DOCKER_HOST: unix:///var/run/docker.sock
-        run: bash .github/scripts/pact-bootstrap-master.sh
-
-      - name: Run notification-service consumer pact tests
-        working-directory: notification-service
-        run: mvn test
-
-      - name: Publish notification-service pacts to broker
-        working-directory: notification-service
-        env:
-          PACT_BROKER_BASE_URL: http://localhost:9292
-          PACT_CONSUMER_VERSION: ${{ github.sha }}
-          PACT_BRANCH: ${{ github.ref_name }}
-        run: |
-          docker run --rm --network=host \
-            -v "$PWD/target/pacts:/pacts" \
-            -e PACT_BROKER_BASE_URL=${PACT_BROKER_BASE_URL} \
-            pactfoundation/pact-cli:latest \
-            pact-broker publish /pacts \
-            --consumer-app-version ${PACT_CONSUMER_VERSION} \
-            --branch ${PACT_BRANCH}
+        run: bash .github/scripts/pact-bootstrap-interface-master.sh
 
       - name: Install FE dependencies
         working-directory: demo-interface
         run: npm ci
 
-      - name: Run consumer pact tests
+      - name: Run demo-interface consumer pact tests
         working-directory: demo-interface
         run: npm run test:pact
 
-      - name: Publish pacts to broker
+      - name: Publish demo-interface pacts to broker
         working-directory: demo-interface
         env:
           PACT_BROKER_BASE_URL: http://localhost:9292
@@ -109,15 +83,29 @@ jobs:
           PACT_BRANCH: ${{ github.ref_name }}
         run: npm run pact:publish
 
-      - name: Run provider pact verification
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
+      - name: Run task API provider pact verification
         working-directory: demo-service
         env:
           DOCKER_HOST: unix:///var/run/docker.sock
           PACT_BROKER_BASE_URL: http://localhost:9292
-        run: mvn verify -Pintegration-tests -Dit.test="*PactProviderTest" -Djacoco.skip=true -Dpact.verifier.publishResults=true -Dpact.provider.version=${{ github.sha }} -Dpact.provider.branch=${{ github.ref_name }} -Djunit.parallel.enabled=false
+        run: >-
+          mvn verify -Pintegration-tests
+          -Dit.test="CreateTaskPactProviderTest,DeleteTaskPactProviderTest,GetAllTasksPactProviderTest,GetTaskByIdPactProviderTest,GetIsValidPactProviderTest,UpdateTaskPactProviderTest"
+          -Djacoco.skip=true
+          -Dpact.verifier.publishResults=true
+          -Dpact.provider.version=${{ github.sha }}
+          -Dpact.provider.branch=${{ github.ref_name }}
+          -Djunit.parallel.enabled=false
 
       - name: Can I merge to master
         if: github.ref_name != 'master'
         env:
           PACT_VERSION: ${{ github.sha }}
+          PACT_MERGE_PROFILE: interface
         run: bash .github/scripts/pact-can-i-merge.sh
