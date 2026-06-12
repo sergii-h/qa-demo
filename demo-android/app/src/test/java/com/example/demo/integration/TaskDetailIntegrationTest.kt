@@ -6,6 +6,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
+import com.example.demo.integration.support.IntegrationTasks
+import com.example.demo.integration.support.IntegrationTestBase
+import com.example.demo.integration.support.LanguageOption
 import com.example.demo.ui.TestTags
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,14 +27,14 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.IN_PROGRESS,
             priority = TaskPriority.HIGH,
         )
-        enqueueTasks(task)
-        enqueueGetTask(task)
-        enqueueValidation(true)
+        fakeApi.enqueueGetTasks(task)
+        fakeApi.enqueueGetTask(task)
+        fakeApi.enqueueIsValid(true)
         launchApp()
         openDetail("task-301")
 
         // Then
-        assertDescriptionText("Info description")
+        commonAssertions.assertDescriptionText("Info description")
         composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.IN_PROGRESS)).assertExists()
         composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskPriority.HIGH)).assertExists()
         composeTestRule.onNodeWithTag(TestTags.VALID).assertExists()
@@ -47,14 +50,14 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.TODO,
             priority = TaskPriority.MEDIUM,
         )
-        enqueueTasks(task)
-        enqueueGetTask(task)
-        enqueueValidation(true)
+        fakeApi.enqueueGetTasks(task)
+        fakeApi.enqueueGetTask(task)
+        fakeApi.enqueueIsValid(true)
         launchApp()
         openDetail("task-305")
 
         // Then
-        assertDescriptionText("No description")
+        commonAssertions.assertDescriptionText("No description")
         composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.TODO)).assertExists()
         composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskPriority.MEDIUM)).assertExists()
         composeTestRule.onNodeWithTag(TestTags.VALID).assertExists()
@@ -64,9 +67,9 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     fun shouldShowNotValidIndicatorWhenValidationReturnsFalse() {
         // Given
         val task = IntegrationTasks.task("task-2", "Invalid Task", description = "Details")
-        enqueueTasks(task)
-        enqueueGetTask(task)
-        enqueueValidation(false)
+        fakeApi.enqueueGetTasks(task)
+        fakeApi.enqueueGetTask(task)
+        fakeApi.enqueueIsValid(false)
         launchApp()
         openDetail("task-2")
 
@@ -79,9 +82,9 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     fun shouldCloseDetailFlowWhenBackPressed() {
         // Given
         val task = IntegrationTasks.task("task-1", "Info Task", description = "Info description")
-        enqueueTasks(task)
-        enqueueGetTask(task)
-        enqueueValidation(true)
+        fakeApi.enqueueGetTasks(task)
+        fakeApi.enqueueGetTask(task)
+        fakeApi.enqueueIsValid(true)
         launchApp()
         openDetail("task-1")
 
@@ -98,23 +101,23 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     fun shouldKeepDetailFlowAvailableWhenTaskLoadFails() {
         // Given
         val listTask = IntegrationTasks.task("task-1", "Info Task")
-        enqueueTasks(listTask)
-        enqueueGetTaskError(500)
-        enqueueValidation(false)
+        fakeApi.enqueueGetTasks(listTask)
+        fakeApi.enqueueGetTaskError(500)
+        fakeApi.enqueueIsValid(false)
         launchApp()
         openDetailExpectingLoadError("task-1")
 
         // Then
-        assertLoadErrorDisplayed()
+        commonAssertions.assertLoadErrorDisplayed()
     }
 
     @Test
     fun shouldKeepDetailFlowAvailableWhenValidationRequestFails() {
         // Given
         val task = IntegrationTasks.task("task-3", "Validation Task", description = "Validation description")
-        enqueueTasks(task)
-        enqueueGetTask(task)
-        enqueueValidationError(500, "Validation failed")
+        fakeApi.enqueueGetTasks(task)
+        fakeApi.enqueueGetTask(task)
+        fakeApi.enqueueIsValidError(500, "Validation failed")
         launchApp()
         openDetail("task-3")
 
@@ -128,14 +131,14 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     fun shouldKeepDetailFlowAvailableWhenTaskDetailsRequestIsRejected() {
         // Given
         val listTask = IntegrationTasks.task("task-308", "Task reject task", description = "Task reject description")
-        enqueueTasks(listTask)
-        enqueueGetTaskNetworkFailure()
-        enqueueValidation(false)
+        fakeApi.enqueueGetTasks(listTask)
+        fakeApi.enqueueGetTaskNetworkFailure()
+        fakeApi.enqueueIsValid(false)
         launchApp()
         openDetailExpectingLoadError("task-308")
 
         // Then
-        assertLoadErrorDisplayed()
+        commonAssertions.assertLoadErrorDisplayed()
     }
 
     @Test
@@ -148,14 +151,14 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.DONE,
             priority = TaskPriority.HIGH,
         )
-        enqueueTasks(task)
-        enqueueGetTask(task)
-        enqueueValidationNetworkFailure()
+        fakeApi.enqueueGetTasks(task)
+        fakeApi.enqueueGetTask(task)
+        fakeApi.enqueueIsValidNetworkFailure()
         launchApp()
         openDetail("task-304")
 
         // Then
-        assertDescriptionText("Validation reject description")
+        commonAssertions.assertDescriptionText("Validation reject description")
         composeTestRule.onNodeWithTag(TestTags.NOT_VALID).assertExists()
         composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertDoesNotExist()
     }
@@ -164,18 +167,32 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     fun shouldShowSpanishDetailFlowStringsWhenEsSelected() {
         // Given
         val task = IntegrationTasks.task("task-1", "Info Task", description = "Info description")
-        enqueueTasksForLanguageSwitch(task)
-        enqueueGetTask(task)
-        enqueueValidation(true)
+        fakeApi.enqueueGetTasksForLanguageSwitch(task)
+        fakeApi.enqueueGetTask(task)
+        fakeApi.enqueueIsValid(true)
         launchApp()
-        switchToSpanish()
+        switchLanguage(LanguageOption.ES)
 
         // When
         openDetail("task-1")
 
         // Then
-        assertFieldLabel(TestTags.DETAIL_DESCRIPTION_LABEL, "Descripción")
-        assertFieldLabel(TestTags.DETAIL_VALIDATED_LABEL, "Validado")
+        commonAssertions.assertFieldLabel(TestTags.DETAIL_DESCRIPTION_LABEL, "Descripción")
+        commonAssertions.assertFieldLabel(TestTags.DETAIL_VALIDATED_LABEL, "Validado")
         composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.TODO)).assertTextEquals("Por hacer")
+    }
+
+    private fun openDetailExpectingLoadError(taskId: String) {
+        runAsyncAction {
+            onNodeWithTag(TestTags.infoButton(taskId)).performClick()
+        }
+        composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertIsDisplayed()
+    }
+
+    private fun openDetail(taskId: String) {
+        runAsyncAction {
+            onNodeWithTag(TestTags.infoButton(taskId)).performClick()
+        }
+        composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertIsDisplayed()
     }
 }

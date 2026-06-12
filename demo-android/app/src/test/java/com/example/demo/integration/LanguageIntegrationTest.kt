@@ -5,6 +5,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.example.demo.integration.support.IntegrationTestBase
+import com.example.demo.integration.support.LanguageOption
 import com.example.demo.locale.AppLocale
 import com.example.demo.ui.TestTags
 import org.junit.Before
@@ -30,7 +32,7 @@ class LanguageIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldRenderLanguageSwitcherWhenListShown() {
         // Given
-        enqueueTasks()
+        fakeApi.enqueueGetTasks()
 
         // When
         launchApp()
@@ -45,11 +47,11 @@ class LanguageIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldShowSpanishListTitleWhenEsSelected() {
         // Given
-        enqueueTasksForLanguageSwitch()
+        fakeApi.enqueueGetTasksForLanguageSwitch()
         launchApp()
 
         // When
-        switchToSpanish()
+        switchLanguage(LanguageOption.ES)
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.PAGE_TITLE).assertTextEquals("Tareas")
@@ -58,14 +60,14 @@ class LanguageIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldChangeLanguageWhenUserSelectsAnotherLanguageOption() {
         // Given
-        enqueueTasksForLanguageSwitch()
+        fakeApi.enqueueGetTasksForLanguageSwitch()
         launchApp()
-        switchToSpanish()
+        switchLanguage(LanguageOption.ES)
         composeTestRule.onNodeWithTag(TestTags.PAGE_TITLE).assertTextEquals("Tareas")
 
         // When
-        enqueueTasksAfterLanguageSwitch()
-        switchToEnglish()
+        fakeApi.enqueueGetTasks()
+        switchLanguage(LanguageOption.EN)
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.PAGE_TITLE).assertTextEquals("Tasks")

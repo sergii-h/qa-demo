@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 data class TaskListUiState(
     val tasks: List<Task> = emptyList(),
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
     val errorMessage: String? = null,
     val deletingTaskIds: Set<String> = emptySet()
 )
@@ -45,6 +46,25 @@ class TaskListViewModel(
                         it.copy(
                             tasks = emptyList(),
                             isLoading = false,
+                            errorMessage = mapTaskError(getApplication(), error)
+                        )
+                    }
+                }
+        }
+    }
+
+    fun refreshTasks() {
+        if (_uiState.value.isRefreshing) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isRefreshing = true, errorMessage = null) }
+            runCatching { repository.getTasks() }
+                .onSuccess { tasks ->
+                    _uiState.update { it.copy(tasks = tasks, isRefreshing = false) }
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            isRefreshing = false,
                             errorMessage = mapTaskError(getApplication(), error)
                         )
                     }

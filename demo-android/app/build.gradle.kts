@@ -1,3 +1,4 @@
+import java.net.URI
 import java.util.Properties
 import kotlinx.kover.gradle.plugin.dsl.AggregationType
 import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
@@ -17,11 +18,24 @@ val localProperties = Properties().apply {
     }
 }
 
-val apiBaseUrl: String = localProperties.getProperty("api.base.url")
+val apiBaseUrl: String = (findProperty("api.base.url") as String?)
+    ?: localProperties.getProperty("api.base.url")
     ?: "http://10.0.2.2:8080/v1/"
+
+fun wiremockHostFromApiBaseUrl(apiBaseUrl: String): String {
+    val uri = URI(apiBaseUrl)
+    val port = uri.port.takeIf { it != -1 }?.let { ":$it" } ?: ""
+    return "${uri.scheme}://${uri.host}$port"
+}
+
+val wiremockUrl: String = (findProperty("wiremock.url") as String?)
+    ?: localProperties.getProperty("wiremock.url")
+    ?: wiremockHostFromApiBaseUrl(apiBaseUrl)
 
 private val testParallelForks: Int =
     (Runtime.getRuntime().availableProcessors() / 2).coerceIn(1, 4)
+
+private val allureKotlinVersion = "2.4.0"
 
 android {
     namespace = "com.example.demo"
@@ -34,6 +48,10 @@ android {
         versionCode = 1
         versionName = "1.0"
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+        buildConfigField("String", "WIREMOCK_URL", "\"$wiremockUrl\"")
+        testInstrumentationRunner = "io.qameta.allure.android.runners.AllureAndroidJUnitRunner"
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
+        testInstrumentationRunnerArguments["additionalTestOutputDir"] = "/sdcard/googletest/test_outputfiles"
     }
 
     androidResources {
@@ -65,6 +83,8 @@ android {
     }
 
     testOptions {
+        animationsDisabled = true
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
         unitTests.isIncludeAndroidResources = true
         unitTests.all {
             if (it.name.contains("Release")) {
@@ -150,11 +170,15 @@ afterEvaluate {
             layout.buildDirectory.dir("pacts").get().asFile.absolutePath
         )
     }
+
+    tasks.matching { it.name.startsWith("connected") && it.name.endsWith("AndroidTest") }.configureEach {
+        finalizedBy("pullAllureResults")
+    }
 }
 
 dependencies {
     implementation("androidx.appcompat:appcompat:1.7.1")
-    val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
+    val composeBom = platform("androidx.compose:compose-bom:2025.05.01")
 
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
@@ -166,7 +190,7 @@ dependencies {
     implementation(composeBom)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3:1.4.0")
     implementation("androidx.compose.material:material-icons-extended")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
@@ -187,9 +211,94 @@ dependencies {
     testImplementation(composeBom)
     testImplementation("androidx.compose.ui:ui-test-junit4")
     testImplementation("androidx.compose.ui:ui")
-    testImplementation("androidx.compose.material3:material3")
+    testImplementation("androidx.compose.material3:material3:1.4.0")
     testImplementation("androidx.compose.material:material-icons-extended")
     testImplementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     testImplementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     testImplementation("androidx.navigation:navigation-compose:2.8.5")
+
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test:runner:1.7.0")
+    androidTestImplementation("androidx.test:rules:1.7.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
+    androidTestImplementation("com.google.truth:truth:1.4.4")
+    androidTestImplementation("io.qameta.allure:allure-kotlin-model:$allureKotlinVersion")
+    androidTestImplementation("io.qameta.allure:allure-kotlin-commons:$allureKotlinVersion")
+    androidTestImplementation("io.qameta.allure:allure-kotlin-junit4:$allureKotlinVersion")
+    androidTestImplementation("io.qameta.allure:allure-kotlin-android:$allureKotlinVersion")
+    androidTestUtil("androidx.test:orchestrator:1.5.1")
+    androidTestImplementation(composeBom)
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4-accessibility")
+    androidTestImplementation("androidx.compose.material3:material3:1.4.0")
+    androidTestDebugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+val allureResultsDir = layout.buildDirectory.dir("allure-results")
+
+tasks.register("pullAllureResults") {
+    group = "verification"
+    description = "Pull Allure results from the connected device or emulator"
+    doLast {
+        val outputDir = allureResultsDir.get().asFile
+        outputDir.mkdirs()
+
+        var pulledFromDevice = false
+        exec {
+            commandLine(
+                "bash",
+                "-c",
+                """
+                set +e
+                adb exec-out sh -c 'cd /sdcard/googletest/test_outputfiles && tar cf - allure-results 2>/dev/null' \
+                  | tar xf - --strip-components=1 -C "${outputDir.absolutePath}" 2>/dev/null
+                if [ ! "$(ls -A "${outputDir.absolutePath}" 2>/dev/null)" ]; then
+                  adb exec-out run-as com.example.demo sh -c 'cd files && tar cf - allure-results 2>/dev/null' \
+                    | tar xf - --strip-components=1 -C "${outputDir.absolutePath}" 2>/dev/null
+                fi
+                """.trimIndent(),
+            )
+        }
+        pulledFromDevice = outputDir.listFiles()?.any { it.name.endsWith("-result.json") } == true
+
+        if (!pulledFromDevice) {
+            val agpOutputRoot = layout.buildDirectory.dir("outputs/androidTest-results/connected").get().asFile
+            if (agpOutputRoot.exists()) {
+                agpOutputRoot.walkTopDown()
+                    .filter { it.isDirectory && it.name == "allure-results" }
+                    .forEach { source ->
+                        source.listFiles()?.forEach { file ->
+                            file.copyTo(outputDir.resolve(file.name), overwrite = true)
+                        }
+                    }
+            }
+        }
+
+        exec {
+            commandLine(
+                "python3",
+                "-c",
+                """
+                import json
+                from pathlib import Path
+
+                results_dir = Path("${outputDir.absolutePath}")
+                by_history = {}
+                for path in results_dir.glob("*-result.json"):
+                    data = json.loads(path.read_text())
+                    history_id = data.get("historyId") or path.name
+                    step_count = len(data.get("steps") or [])
+                    current = by_history.get(history_id)
+                    if current is None or step_count > current[0]:
+                        by_history[history_id] = (step_count, path)
+
+                for history_id, (_, keep) in by_history.items():
+                    for path in results_dir.glob("*-result.json"):
+                        data = json.loads(path.read_text())
+                        if (data.get("historyId") or path.name) == history_id and path != keep:
+                            path.unlink(missing_ok=True)
+                """.trimIndent(),
+            )
+        }
+    }
 }

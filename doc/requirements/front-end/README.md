@@ -9,7 +9,7 @@ Acceptance criteria use platform-neutral wording. Backend and frontend epic numb
 
 | Epic | Points |
 |------|--------|
-| [Epic 1: Task Display](epic-1-task-display/README.md) | 5 |
+| [Epic 1: Task Display](epic-1-task-display/README.md) | 7 |
 | [Epic 2: Task Creation](epic-2-task-creation/README.md) | 5 |
 | [Epic 3: Task Editing](epic-3-task-editing/README.md) | 5 |
 | [Epic 4: Task Information](epic-4-task-information/README.md) | 5 |
@@ -21,6 +21,7 @@ Acceptance criteria use platform-neutral wording. Backend and frontend epic numb
 |-------|------|
 | [UI-001](epic-1-task-display/UI-001-tasks-table.md) | Task list display |
 | [UI-002](epic-1-task-display/UI-002-delete-task.md) | Delete task |
+| [UI-008](epic-1-task-display/UI-008-pull-to-refresh.md) | Pull-to-refresh task list (native) |
 | [UI-003](epic-2-task-creation/UI-003-create-task-modal.md) | Create task |
 | [UI-004](epic-3-task-editing/UI-004-edit-task-modal.md) | Edit task |
 | [UI-005](epic-4-task-information/UI-005-info-task-modal.md) | Task detail view |

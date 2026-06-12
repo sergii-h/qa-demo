@@ -1,0 +1,62 @@
+name: Android E2E tests
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'demo-android/**'
+      - 'demo-service/**'
+      - 'docker/**'
+      - '.github/workflows/android-e2e.yml'
+      - '.github/workflows/android-compose-e2e.yml'
+      - '.github/workflows/android-compose-accessibility.yml'
+      - '.github/workflows/android-compose-uat.yml'
+      - '.github/actions/**'
+  push:
+    branches: [master]
+    paths:
+      - 'demo-android/**'
+      - 'demo-service/**'
+      - 'docker/**'
+      - '.github/workflows/android-e2e.yml'
+      - '.github/workflows/android-compose-e2e.yml'
+      - '.github/workflows/android-compose-accessibility.yml'
+      - '.github/workflows/android-compose-uat.yml'
+      - '.github/actions/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  android-compose-e2e:
+    uses: ./.github/workflows/android-compose-e2e.yml
+    secrets: inherit
+
+  android-compose-accessibility:
+    uses: ./.github/workflows/android-compose-accessibility.yml
+    secrets: inherit
+
+  android-compose-uat:
+    uses: ./.github/workflows/android-compose-uat.yml
+    secrets: inherit
+
+  publish-allure:
+    needs:
+      - android-compose-e2e
+      - android-compose-accessibility
+      - android-compose-uat
+    if: |
+      always() &&
+      needs.android-compose-e2e.result != 'cancelled' &&
+      needs.android-compose-accessibility.result != 'cancelled' &&
+      needs.android-compose-uat.result != 'cancelled' &&
+      needs.android-compose-e2e.result != 'skipped'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish Allure reports to GitHub Pages
+        uses: ./.github/actions/publish-allure-reports

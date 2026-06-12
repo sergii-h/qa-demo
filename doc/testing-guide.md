@@ -109,6 +109,8 @@ Before starting any testing work:
 
 **Avoid:** Testing every permutation - this is what unit/integration tests are for
 
+**Framework structure:** use domain-grouped `StepProvider` and `ValidationProvider` as the test-facing API (`steps.tasks`, `validate.task`, …). See [ADR 005](adr/005-domain-grouped-step-and-validation-providers-for-e2e.md).
+
 ---
 
 ## ♿ Accessibility Testing

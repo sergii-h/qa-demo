@@ -1,5 +1,6 @@
 package com.example.demo.ui.tasklist
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -10,6 +11,7 @@ import com.example.demo.testing.HttpExceptionFactory
 import com.example.demo.testing.MainDispatcherRule
 import com.example.demo.testing.TaskFixtures
 import com.example.demo.testing.runAsyncAction
+import com.example.demo.testing.waitUntilTagExists
 import com.example.demo.ui.TestTags
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
@@ -53,6 +55,7 @@ class TaskListScreenTest {
         }
 
         // Then
+        composeTestRule.onNodeWithTag(TestTags.TASK_LIST).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.EMPTY_TASKS).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).assertIsDisplayed()
     }
@@ -78,6 +81,40 @@ class TaskListScreenTest {
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
+    }
+
+    @Test
+    fun shouldReloadTasksWhenRefreshTriggerIncrements() {
+        // Given
+        coEvery { repository.getTasks() } returnsMany listOf(
+            emptyList(),
+            listOf(TaskFixtures.sampleTask),
+        )
+        val refreshTrigger = mutableStateOf(0)
+
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
+            setContent {
+                DemoComposeTestTheme {
+                    TaskListScreen(
+                        repository = repository,
+                        onCreateTask = {},
+                        onEditTask = {},
+                        onTaskInfo = {},
+                        refreshTrigger = refreshTrigger.value,
+                    )
+                }
+            }
+        }
+        composeTestRule.onNodeWithTag(TestTags.EMPTY_TASKS).assertIsDisplayed()
+
+        // When
+        refreshTrigger.value = 1
+        composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) { }
+
+        // Then
+        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-1"))
+        composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
+        coVerify(exactly = 2) { repository.getTasks() }
     }
 
     @Test

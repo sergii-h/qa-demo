@@ -107,6 +107,68 @@ CI runs Android Pact separately via `.github/workflows/pact-android.yml` when `d
 
 Pact tests run on the JVM via a dedicated Gradle task — no emulator. They use JUnit 5 while other unit tests stay on JUnit 4.
 
+## E2E tests (instrumented Compose UI Test)
+
+Mirrors the Playwright web E2E split: mocked-backend flows, accessibility scans, and one full-stack UAT smoke test. Step and validation wiring follows [ADR 005](../doc/adr/005-domain-grouped-step-and-validation-providers-for-e2e.md) (`StepProvider`, `ValidationProvider`).
+
+| Suite | Base class | Backend | When to run |
+|-------|------------|---------|-------------|
+| Mocked BE | `MockedBackendTestBase` | WireMock on host at `10.0.2.2:8085` | Every CI run |
+| Accessibility | `AccessibilityTestBase` (`@Accessibility`) | WireMock on host | Every CI run (API 34+ emulator) |
+| UAT | `UatTestBase` (`@Uat`) | Real Spring Boot at `10.0.2.2:8080` | CI with full Docker stack |
+
+**Prerequisites:** emulator or device connected; API 34+ for accessibility checks.
+
+Mocked E2E and accessibility suites call WireMock’s admin API from the instrumented test process and point the app at WireMock via `BuildConfig.API_BASE_URL`. Start WireMock before running those suites:
+
+```bash
+docker network create qa-demo-e2e || true
+docker compose -f docker/docker-compose/run-application.yml up -d qa-demo-wiremock
+```
+
+UAT uses the real backend (see [Prerequisites](#prerequisites) above).
+
+```bash
+cd demo-android
+
+# Mocked E2E (create, edit, delete, task info, language)
+./gradlew connectedDebugAndroidTest \
+  -Papi.base.url=http://10.0.2.2:8085/v1/ \
+  -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.example.demo.e2e.test.base.Uat,com.example.demo.e2e.test.base.Accessibility
+
+# Accessibility (ATF via Compose UI Test — Android equivalent of axe-core)
+./gradlew connectedDebugAndroidTest \
+  -Papi.base.url=http://10.0.2.2:8085/v1/ \
+  -Pandroid.testInstrumentationRunnerArguments.annotation=com.example.demo.e2e.test.base.Accessibility
+
+# UAT smoke test — start backend first (see Prerequisites above)
+./gradlew connectedDebugAndroidTest \
+  -Pandroid.testInstrumentationRunnerArguments.annotation=com.example.demo.e2e.test.base.Uat
+```
+
+Location: `app/src/androidTest/java/com/example/demo/e2e/`
+
+CI: `.github/workflows/android-e2e.yml` (mocked BE, accessibility, UAT in parallel). Allure results are published to [GitHub Pages](https://sergii-h.github.io/qa-demo/) with the web E2E suites.
+
+### Allure report
+
+E2E tests use [allure-kotlin](https://github.com/allure-framework/allure-kotlin) with the same epics, features, TMS links, and step labels as the Selenide mobile tests. Steps use `Allure.step { }` (allure-kotlin does not support AspectJ `@Step` weaving on device). Failed tests attach a screenshot, logcat, and window hierarchy.
+
+Results are written on the device during the run; `connectedDebugAndroidTest` pulls them automatically via `pullAllureResults`.
+
+```bash
+cd demo-android
+
+# Run tests (example: mocked E2E) — results land in app/build/allure-results/
+./gradlew connectedDebugAndroidTest \
+  -Papi.base.url=http://10.0.2.2:8085/v1/ \
+  -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.example.demo.e2e.test.base.Uat,com.example.demo.e2e.test.base.Accessibility
+
+# Generate and open the HTML report locally (requires Allure CLI)
+allure generate app/build/allure-results --clean -o app/build/allure-report
+allure open app/build/allure-report
+```
+
 ## Unit tests
 
 - Location: `app/src/test/`
@@ -138,6 +200,23 @@ demo-android/
 │   ├── data/           # Models + Retrofit API
 │   ├── repository/     # TaskRepository
 │   └── ui/             # Compose screens + navigation
+├── app/src/androidTest/java/com/example/demo/e2e/
+│   ├── context/            # TaskContext
+│   ├── provider/           # StepProvider, ValidationProvider, SupportProvider
+│   ├── interaction/
+│   │   ├── page/           # Screen/modal element lookups (Compose page objects)
+│   │   ├── step/
+│   │   └── validation/
+│   ├── support/            # Mock clients, UAT API client
+│   │   └── mock/           # WireMockClient, ApiRouteMock, ApiRouteMockClient
+│   └── test/               # Scenarios + bases (mirrors Selenide test/)
+│       ├── base/           # Bases + suite tags (@Uat, @Accessibility)
+│       ├── create/
+│       ├── edit/
+│       ├── delete/
+│       ├── taskinfo/
+│       ├── tasktable/
+│       └── translation/
 └── README.md
 ```
 
