@@ -35,6 +35,6 @@ object ApiClient {
 
     fun parseErrorMessage(errorBody: String?): String? {
         if (errorBody.isNullOrBlank()) return null
-        return errorResponseAdapter.fromJson(errorBody)?.message
+        return runCatching { errorResponseAdapter.fromJson(errorBody)?.message }.getOrNull()
     }
 }

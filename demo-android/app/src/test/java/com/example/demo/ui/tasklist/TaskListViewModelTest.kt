@@ -53,6 +53,65 @@ class TaskListViewModelTest {
     }
 
     @Test
+    fun shouldEmitTasksWhenRefreshTasksSucceeds() = runTest(mainDispatcherRule.dispatcher) {
+        // Given
+        val tasks = listOf(TaskFixtures.sampleTask)
+        coEvery { repository.getTasks() } returnsMany listOf(emptyList(), tasks)
+        val viewModel = TaskListViewModel(application, repository)
+        advanceUntilIdle()
+
+        // When
+        viewModel.refreshTasks()
+        advanceUntilIdle()
+
+        // Then
+        val state = viewModel.uiState.value
+        assertThat(state.isRefreshing).isFalse()
+        assertThat(state.tasks).isEqualTo(tasks)
+        coVerify(exactly = 2) { repository.getTasks() }
+    }
+
+    @Test
+    fun shouldEmitErrorWhenRefreshTasksFails() = runTest(mainDispatcherRule.dispatcher) {
+        // Given
+        coEvery { repository.getTasks() } returns emptyList() andThenThrows HttpExceptionFactory.create(500)
+        val viewModel = TaskListViewModel(application, repository)
+        advanceUntilIdle()
+
+        // When
+        viewModel.refreshTasks()
+        advanceUntilIdle()
+
+        // Then
+        val state = viewModel.uiState.value
+        assertThat(state.isRefreshing).isFalse()
+        assertThat(state.tasks).isEmpty()
+        assertThat(state.errorMessage)
+            .isEqualTo(application.getString(R.string.error_request_failed, 500))
+    }
+
+    @Test
+    fun shouldPreserveTasksWhenRefreshTasksFails() = runTest(mainDispatcherRule.dispatcher) {
+        // Given
+        val task = TaskFixtures.sampleTask
+        coEvery { repository.getTasks() } returns listOf(task) andThenThrows HttpExceptionFactory.create(500)
+        val viewModel = TaskListViewModel(application, repository)
+        advanceUntilIdle()
+
+        // When
+        viewModel.refreshTasks()
+        advanceUntilIdle()
+
+        // Then
+        val state = viewModel.uiState.value
+        assertThat(state.isRefreshing).isFalse()
+        assertThat(state.isLoading).isFalse()
+        assertThat(state.tasks).containsExactly(task)
+        assertThat(state.errorMessage)
+            .isEqualTo(application.getString(R.string.error_request_failed, 500))
+    }
+
+    @Test
     fun shouldEmitErrorWhenLoadTasksFails() = runTest(mainDispatcherRule.dispatcher) {
         // Given
         coEvery { repository.getTasks() } throws HttpExceptionFactory.create(500)

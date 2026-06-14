@@ -43,7 +43,10 @@ runs:
         mkdir -p "$staging"
 
         if [ "${{ github.event_name }}" = "pull_request" ]; then
-          cp .github/allure-pages/pr-index.html "$staging/index.html"
+          cp .github/allure-pages/index.html "$staging/index.html"
+          cp .github/allure-pages/styles.css "$staging/styles.css"
+          cp .github/allure-pages/reports.js "$staging/reports.js"
+          cp -R .github/allure-pages/assets "$staging/assets"
         fi
 
         allure_reports=(
@@ -53,6 +56,9 @@ runs:
           "allure-results-selenide-e2e|selenide-e2e"
           "allure-results-selenide-uat|selenide-uat"
           "allure-results-selenide-accessibility|selenide-accessibility"
+          "allure-results-android-e2e|android-compose-e2e"
+          "allure-results-android-uat|android-compose-uat"
+          "allure-results-android-accessibility|android-compose-accessibility"
         )
 
         for report in "${allure_reports[@]}"; do

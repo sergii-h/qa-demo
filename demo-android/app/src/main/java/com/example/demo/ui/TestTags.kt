@@ -5,6 +5,8 @@ import com.example.demo.data.model.TaskStatus
 
 object TestTags {
     const val PAGE_TITLE = "page-title"
+    const val TASK_LIST = "task-list"
+    const val REFRESHING = "refreshing"
     const val ADD_TASK_BUTTON = "add-task-button"
     const val EMPTY_TASKS = "empty-tasks"
     const val LOADING_SPINNER = "loading-spinner"
