@@ -35,8 +35,7 @@ jobs:
           arch: x86_64
           disable-animations: true
           script: |
-            cd demo-android
-            ./gradlew connectedDebugAndroidTest \
+            cd demo-android && ./gradlew connectedDebugAndroidTest \
               -Pandroid.testInstrumentationRunnerArguments.annotation=com.example.demo.e2e.test.base.Uat
 
       - name: Upload allure results
