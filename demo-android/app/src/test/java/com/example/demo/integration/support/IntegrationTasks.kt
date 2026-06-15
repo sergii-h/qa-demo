@@ -1,4 +1,4 @@
-package com.example.demo.integration
+package com.example.demo.integration.support
 
 import com.example.demo.data.model.Task
 import com.example.demo.data.model.TaskPriority

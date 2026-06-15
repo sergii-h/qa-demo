@@ -43,15 +43,6 @@ public class TaskTestContext {
                 .build();
     }
 
-    public TaskRequest createTaskRequest() {
-        return TaskRequest.builder()
-                .title(title)
-                .description(description)
-                .status(status)
-                .priority(priority)
-                .build();
-    }
-
     public TaskResponse createTaskResponse() {
         return TaskResponse.builder()
                 .id(id)

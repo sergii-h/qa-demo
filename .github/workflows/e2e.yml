@@ -33,8 +33,7 @@ on:
       - '.github/actions/**'
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
   actions: read
 
 jobs:
@@ -61,28 +60,3 @@ jobs:
   selenide-accessibility:
     uses: ./.github/workflows/selenide-junit5-grid-accessibility.yml
     secrets: inherit
-
-  publish-allure:
-    needs:
-      - playwright-e2e
-      - playwright-uat
-      - playwright-accessibility
-      - selenide-e2e
-      - selenide-uat
-      - selenide-accessibility
-    if: |
-      always() &&
-      needs.playwright-e2e.result != 'cancelled' &&
-      needs.playwright-uat.result != 'cancelled' &&
-      needs.playwright-accessibility.result != 'cancelled' &&
-      needs.selenide-e2e.result != 'cancelled' &&
-      needs.selenide-uat.result != 'cancelled' &&
-      needs.selenide-accessibility.result != 'cancelled' &&
-      needs.playwright-e2e.result != 'skipped'
-    runs-on: ubuntu-22.04
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Publish Allure reports to GitHub Pages
-        uses: ./.github/actions/publish-allure-reports

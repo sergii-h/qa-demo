@@ -54,8 +54,9 @@ jobs:
 
       - uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: temurin
+          cache: maven
 
       - uses: gradle/actions/setup-gradle@v4
 
@@ -91,12 +92,6 @@ jobs:
             pact-broker publish /pacts \
             --consumer-app-version ${PACT_CONSUMER_VERSION} \
             --branch ${PACT_BRANCH}
-
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: temurin
-          cache: maven
 
       - name: Run task API provider pact verification
         working-directory: demo-service

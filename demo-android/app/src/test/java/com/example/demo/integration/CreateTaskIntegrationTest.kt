@@ -11,6 +11,9 @@ import androidx.compose.ui.test.performTextInput
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskRequest
 import com.example.demo.data.model.TaskStatus
+import com.example.demo.integration.support.IntegrationTasks
+import com.example.demo.integration.support.IntegrationTestBase
+import com.example.demo.integration.support.LanguageOption
 import com.example.demo.ui.TestTags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -30,9 +33,9 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.TODO,
             priority = TaskPriority.MEDIUM,
         )
-        enqueueTasks()
-        enqueueCreateTask(createdTask)
-        enqueueTasks(createdTask)
+        fakeApi.enqueueGetTasks()
+        fakeApi.enqueueCreateTask(createdTask)
+        fakeApi.enqueueGetTasks(createdTask)
         launchApp()
         openCreateForm()
 
@@ -57,9 +60,9 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.IN_PROGRESS,
             priority = TaskPriority.HIGH,
         )
-        enqueueTasks()
-        enqueueCreateTask(createdTask)
-        enqueueTasks(createdTask)
+        fakeApi.enqueueGetTasks()
+        fakeApi.enqueueCreateTask(createdTask)
+        fakeApi.enqueueGetTasks(createdTask)
         launchApp()
         openCreateForm()
 
@@ -80,7 +83,7 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldResetFormWhenCreateFlowClosedAndReopened() {
         // Given
-        enqueueTasks()
+        fakeApi.enqueueGetTasks()
         launchApp()
         openCreateForm()
         composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performTextInput("Temporary title")
@@ -108,14 +111,14 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.TODO,
             priority = TaskPriority.HIGH,
         )
-        enqueueTasks()
-        enqueueCreateTask(createdTask)
-        enqueueTasks(createdTask)
+        fakeApi.enqueueGetTasks()
+        fakeApi.enqueueCreateTask(createdTask)
+        fakeApi.enqueueGetTasks(createdTask)
         launchApp()
         openCreateForm()
         fillCreateTitle("a".repeat(101))
         submitCreateForm(expectList = false)
-        assertTitleError("Title must not exceed 100 characters")
+        commonAssertions.assertTitleError("Title must not exceed 100 characters")
         assertThat(fakeApi.createTaskRequests).isEmpty()
 
         // When
@@ -134,8 +137,8 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldDisplayGenericErrorWhenPostFailsWithServerError() {
         // Given
-        enqueueTasks()
-        enqueueCreateTaskError(500)
+        fakeApi.enqueueGetTasks()
+        fakeApi.enqueueCreateTaskError(500)
         launchApp()
         openCreateForm()
         fillCreateTitle("Invalid Task")
@@ -145,7 +148,7 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
         submitCreateForm(expectList = false)
 
         // Then
-        assertTitleError("Request failed (500)")
+        commonAssertions.assertTitleError("Request failed (500)")
         assertThat(fakeApi.createTaskRequests).containsExactly(
             TaskRequest("Invalid Task", "Some description", TaskStatus.TODO, TaskPriority.MEDIUM),
         )
@@ -162,10 +165,10 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.TODO,
             priority = TaskPriority.HIGH,
         )
-        enqueueTasks()
-        enqueueCreateTaskError(500)
-        enqueueCreateTask(createdTask)
-        enqueueTasks(createdTask)
+        fakeApi.enqueueGetTasks()
+        fakeApi.enqueueCreateTaskError(500)
+        fakeApi.enqueueCreateTask(createdTask)
+        fakeApi.enqueueGetTasks(createdTask)
         launchApp()
         openCreateForm()
         fillCreateTitle("Retry Task")
@@ -180,7 +183,7 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
             TaskPriority.HIGH,
         )
         submitCreateForm(expectList = false)
-        assertTitleError("Request failed (500)")
+        commonAssertions.assertTitleError("Request failed (500)")
         assertThat(fakeApi.createTaskRequests).containsExactly(expectedRequest)
         submitCreateForm()
 
@@ -192,7 +195,7 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldKeepCreateFlowAvailableWhenInitialGetFails() {
         // Given
-        enqueueGetTasksError(500)
+        fakeApi.enqueueGetTasksError(500)
 
         // When
         launchApp()
@@ -213,9 +216,9 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.TODO,
             priority = TaskPriority.HIGH,
         )
-        enqueueTasks()
-        enqueueCreateTask(createdTask)
-        enqueueGetTasksError(500)
+        fakeApi.enqueueGetTasks()
+        fakeApi.enqueueCreateTask(createdTask)
+        fakeApi.enqueueGetTasksError(500)
         launchApp()
         openCreateForm()
         fillCreateTitle("Task with refresh failure")
@@ -235,8 +238,8 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldDisplayErrorWhenPostRequestIsRejected() {
         // Given
-        enqueueTasks()
-        enqueueCreateTaskNetworkFailure()
+        fakeApi.enqueueGetTasks()
+        fakeApi.enqueueCreateTaskNetworkFailure()
         launchApp()
         openCreateForm()
         fillCreateTitle("Test Task")
@@ -246,7 +249,7 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
         submitCreateForm(expectList = false)
 
         // Then
-        assertTitleError("Network request failed")
+        commonAssertions.assertTitleError("Network request failed")
         assertThat(fakeApi.createTaskRequests).containsExactly(
             TaskRequest("Test Task", null, TaskStatus.TODO, TaskPriority.HIGH),
         )
@@ -256,7 +259,7 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldKeepCreateFlowAvailableWhenInitialGetRequestIsRejected() {
         // Given
-        enqueueGetTasksNetworkFailure()
+        fakeApi.enqueueGetTasksNetworkFailure()
 
         // When
         launchApp()
@@ -269,16 +272,16 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldShowSpanishCreateFlowStringsWhenEsSelected() {
         // Given
-        enqueueTasksForLanguageSwitch()
+        fakeApi.enqueueGetTasksForLanguageSwitch()
         launchApp()
-        switchToSpanish()
+        switchLanguage(LanguageOption.ES)
 
         // When
         openCreateForm()
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.MODAL_TITLE).assertTextEquals("Nueva tarea")
-        assertFieldLabel(TestTags.FIELD_TITLE_LABEL, "Título *")
+        commonAssertions.assertFieldLabel(TestTags.FIELD_TITLE_LABEL, "Título *")
         composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().assertTextEquals("Crear")
     }
 
@@ -296,6 +299,27 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
         if (expectList) {
             composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).assertIsDisplayed()
             flushAsyncWork()
+        }
+    }
+
+    private fun openCreateForm() {
+        runAsyncAction {
+            onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick()
+        }
+        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
+    }
+
+    private fun selectPriority(priority: TaskPriority) {
+        composeTestRule.onNodeWithTag(TestTags.PRIORITY_DROPDOWN).performScrollTo().performClick()
+        runAsyncAction {
+            onNodeWithTag(TestTags.priorityDropdownOption(priority)).performClick()
+        }
+    }
+
+    private fun selectStatus(status: TaskStatus) {
+        composeTestRule.onNodeWithTag(TestTags.STATUS_DROPDOWN).performScrollTo().performClick()
+        runAsyncAction {
+            onNodeWithTag(TestTags.statusDropdownOption(status)).performClick()
         }
     }
 }

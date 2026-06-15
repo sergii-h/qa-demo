@@ -30,6 +30,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -66,10 +69,17 @@ fun TaskListScreen(
     )
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val pullToRefreshState = rememberPullToRefreshState()
 
     LaunchedEffect(refreshTrigger) {
         if (refreshTrigger > 0) {
-            viewModel.loadTasks()
+            viewModel.refreshTasks()
+        }
+    }
+
+    LaunchedEffect(uiState.isRefreshing) {
+        if (!uiState.isRefreshing) {
+            pullToRefreshState.animateToHidden()
         }
     }
 
@@ -107,40 +117,74 @@ fun TaskListScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        Box(
+        PullToRefreshBox(
+            state = pullToRefreshState,
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = viewModel::refreshTasks,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
+            indicator = {
+                PullToRefreshDefaults.Indicator(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    isRefreshing = uiState.isRefreshing,
+                    state = pullToRefreshState,
+                )
+            },
         ) {
-            when {
-                uiState.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .testTag(TestTags.LOADING_SPINNER),
-                    )
-                }
-                uiState.tasks.isEmpty() -> {
-                    Text(
-                        text = stringResource(R.string.empty_tasks),
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .testTag(TestTags.EMPTY_TASKS),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-                else -> {
-                    LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
+            if (uiState.isRefreshing) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .testTag(TestTags.REFRESHING),
+                )
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag(TestTags.TASK_LIST),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                when {
+                    uiState.isLoading -> {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillParentMaxSize()
+                                    .padding(vertical = 48.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.testTag(TestTags.LOADING_SPINNER),
+                                )
+                            }
+                        }
+                    }
+                    uiState.tasks.isEmpty() -> {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillParentMaxSize()
+                                    .testTag(TestTags.EMPTY_TASKS),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.empty_tasks),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                            }
+                        }
+                    }
+                    else -> {
                         items(uiState.tasks, key = { it.id }) { task ->
                             TaskRow(
                                 task = task,
                                 onInfo = { onTaskInfo(task.id) },
                                 onEdit = { onEditTask(task.id) },
                                 onDelete = { viewModel.deleteTask(task) },
-                                isDeleting = task.id in uiState.deletingTaskIds
+                                isDeleting = task.id in uiState.deletingTaskIds,
                             )
                         }
                     }

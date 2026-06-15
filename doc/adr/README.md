@@ -31,6 +31,7 @@ Each ADR follows this structure:
 | [002](002-test-context-pattern-with-object-comparison.md) | Test Context Pattern with Object Comparison | Accepted | 2026-01-03 | Builder-based test contexts; sync dynamic fields; assert full objects instead of field-by-field checks |
 | [003](003-test-plan-integration-in-user-stories.md) | Test Plan Integration in User Stories | Accepted | 2026-02-17 | Integrate explicit test plans into user stories specifying UT/IT/Pact/E2E/Accessibility/UAT levels. Follows testing pyramid and shift-left principles with clear test ownership per story |
 | [004](004-api-level-integration-tests-as-sole-integration-layer.md) | Public-Facing Integration Tests as Sole Integration Layer | Accepted | 2026-03-17 | Integration tests only through public HTTP API (BE) and full component tree (FE); no intermediate integration layers unless explicitly justified |
+| [005](005-domain-grouped-step-and-validation-providers-for-e2e.md) | Domain-Grouped Step and Validation Providers for E2E | Accepted | 2026-06-09 | StepProvider and ValidationProvider as domain-grouped composition roots; consistent E2E vocabulary across Playwright, Selenide, and Android |
 
 ---
 

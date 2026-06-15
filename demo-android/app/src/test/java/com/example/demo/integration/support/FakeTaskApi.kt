@@ -1,9 +1,10 @@
-package com.example.demo.integration
+package com.example.demo.integration.support
 
 import com.example.demo.data.model.Task
 import com.example.demo.data.model.TaskRequest
 import com.example.demo.data.remote.TaskApi
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.HttpException
 import retrofit2.Response
@@ -26,6 +27,20 @@ class FakeTaskApi : TaskApi {
 
     fun enqueueGetTasks(tasks: List<Task>) {
         getTasksScripts.addLast(ScriptedCall.Success(tasks))
+    }
+
+    fun enqueueGetTasks(vararg tasks: Task) {
+        enqueueGetTasks(tasks.toList())
+    }
+
+    /**
+     * Enqueues two identical list responses. Required when a test switches language:
+     * LocalizedContent rebuilds the tree and TaskListViewModel loads tasks again.
+     */
+    fun enqueueGetTasksForLanguageSwitch(vararg tasks: Task) {
+        val list = tasks.toList()
+        enqueueGetTasks(list)
+        enqueueGetTasks(list)
     }
 
     fun enqueueGetTask(task: Task) {
@@ -163,7 +178,7 @@ class FakeTaskApi : TaskApi {
 
         private fun networkException(): IOException = IOException("Network request failed")
 
-        private fun errorBody(code: Int, message: String?): okhttp3.ResponseBody =
+        private fun errorBody(code: Int, message: String?): ResponseBody =
             if (message.isNullOrBlank()) {
                 "".toResponseBody("application/json".toMediaType())
             } else {

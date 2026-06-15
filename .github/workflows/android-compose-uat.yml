@@ -1,0 +1,34 @@
+name: Run UAT tests (Android Compose — full app)
+
+on:
+  workflow_call:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: full
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Run Android Compose UAT smoke test
+        uses: ./.github/actions/run-android-emulator-tests
+        with:
+          gradle-args: >-
+            -Pandroid.testInstrumentationRunnerArguments.annotation=com.example.demo.e2e.test.base.Uat
+
+      - name: Upload allure results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-android-uat
+          path: demo-android/app/build/allure-results
+          retention-days: 7
+          if-no-files-found: warn

@@ -1,21 +1,36 @@
 name: Publish all E2E test reports
 description: Generate Allure HTML and publish Allure and Playwright reports to GitHub Pages in a single push
 
+inputs:
+  trigger-event:
+    description: Event that started the E2E workflows (push or pull_request)
+    required: true
+  head-sha:
+    description: Commit SHA to collect workflow artifacts from
+    required: true
+  pr-number:
+    description: Pull request number for PR comments and destination path
+    required: false
+    default: ''
+
 runs:
   using: composite
   steps:
     - name: Resolve publish destination
       id: publish
       shell: bash
+      env:
+        TRIGGER_EVENT: ${{ inputs.trigger-event }}
+        PR_NUMBER: ${{ inputs.pr-number }}
       run: |
-        if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/master" ]; then
+        if [ "$TRIGGER_EVENT" = "push" ]; then
           echo "enabled=true" >> "$GITHUB_OUTPUT"
           echo "destination=" >> "$GITHUB_OUTPUT"
           echo "pages-base=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}" >> "$GITHUB_OUTPUT"
-        elif [ "${{ github.event_name }}" = "pull_request" ]; then
+        elif [ "$TRIGGER_EVENT" = "pull_request" ] && [ -n "$PR_NUMBER" ]; then
           echo "enabled=true" >> "$GITHUB_OUTPUT"
-          echo "destination=pr/${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
-          echo "pages-base=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr/${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          echo "destination=pr/${PR_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "pages-base=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr/${PR_NUMBER}" >> "$GITHUB_OUTPUT"
         else
           echo "enabled=false" >> "$GITHUB_OUTPUT"
         fi
@@ -36,15 +51,35 @@ runs:
       env:
         GH_TOKEN: ${{ github.token }}
         PAGES_BASE: ${{ steps.publish.outputs.pages-base }}
+        HEAD_SHA: ${{ inputs.head-sha }}
+        TRIGGER_EVENT: ${{ inputs.trigger-event }}
       run: |
         set -euo pipefail
         staging="allure-pages-staging"
         rm -rf "$staging"
         mkdir -p "$staging"
 
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-          cp .github/allure-pages/pr-index.html "$staging/index.html"
+        if [ "$TRIGGER_EVENT" = "pull_request" ]; then
+          cp .github/allure-pages/index.html "$staging/index.html"
+          cp .github/allure-pages/styles.css "$staging/styles.css"
+          cp .github/allure-pages/reports.js "$staging/reports.js"
+          cp -R .github/allure-pages/assets "$staging/assets"
         fi
+
+        mapfile -t RUN_IDS < <(gh api \
+          "repos/${{ github.repository }}/actions/runs?head_sha=${HEAD_SHA}&event=${TRIGGER_EVENT}&per_page=100" \
+          --jq '.workflow_runs[] | select(.name == "E2E tests" or .name == "Android E2E tests") | .id')
+
+        download_artifact() {
+          local artifact="$1"
+          local destination="$2"
+          for run_id in "${RUN_IDS[@]}"; do
+            if gh run download "$run_id" -n "$artifact" -D "$destination" 2>/dev/null; then
+              return 0
+            fi
+          done
+          return 1
+        }
 
         allure_reports=(
           "allure-results-playwright-e2e|playwright-e2e"
@@ -53,6 +88,9 @@ runs:
           "allure-results-selenide-e2e|selenide-e2e"
           "allure-results-selenide-uat|selenide-uat"
           "allure-results-selenide-accessibility|selenide-accessibility"
+          "allure-results-android-e2e|android-compose-e2e"
+          "allure-results-android-uat|android-compose-uat"
+          "allure-results-android-accessibility|android-compose-accessibility"
         )
 
         for report in "${allure_reports[@]}"; do
@@ -61,7 +99,7 @@ runs:
           rm -rf "$workdir"
           mkdir -p "$workdir/results"
 
-          if ! gh run download "${{ github.run_id }}" -n "$artifact" -D "$workdir/results"; then
+          if ! download_artifact "$artifact" "$workdir/results"; then
             echo "No Allure results for ${destination} (${artifact}); skipping."
             continue
           fi
@@ -79,7 +117,7 @@ runs:
           IFS='|' read -r artifact destination <<< "$report"
           rm -rf "$staging/$destination"
 
-          if ! gh run download "${{ github.run_id }}" -n "$artifact" -D "$staging/$destination"; then
+          if ! download_artifact "$artifact" "$staging/$destination"; then
             echo "No Playwright HTML report for ${destination} (${artifact}); skipping."
             continue
           fi
@@ -104,10 +142,10 @@ runs:
         keep_files: true
 
     - name: Comment test report link on PR
-      if: github.event_name == 'pull_request' && steps.publish.outputs.enabled == 'true' && steps.generate.outputs.published == 'true'
+      if: inputs.trigger-event == 'pull_request' && inputs.pr-number != '' && steps.publish.outputs.enabled == 'true' && steps.generate.outputs.published == 'true'
       uses: peter-evans/create-or-update-comment@v4
       with:
-        issue-number: ${{ github.event.pull_request.number }}
+        issue-number: ${{ inputs.pr-number }}
         body-includes: '<!-- allure-reports -->'
         body: |
           <!-- allure-reports -->
