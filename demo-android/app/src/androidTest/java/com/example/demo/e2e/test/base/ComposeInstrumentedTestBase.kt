@@ -1,8 +1,11 @@
 package com.example.demo.e2e.test.base
 
+import android.os.Build
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.services.storage.TestStorage
+import com.example.demo.BuildConfig
 import com.example.demo.MainActivity
 import com.example.demo.e2e.interaction.page.MainPage
 import com.example.demo.e2e.provider.StepProvider
@@ -11,6 +14,7 @@ import com.example.demo.e2e.provider.ValidationProvider
 import io.qameta.allure.android.rules.LogcatRule
 import io.qameta.allure.android.rules.ScreenshotRule
 import io.qameta.allure.android.rules.WindowHierarchyRule
+import io.qameta.allure.kotlin.util.PropertiesUtils
 import org.junit.AfterClass
 import org.junit.Before
 import org.junit.rules.RuleChain
@@ -40,24 +44,46 @@ abstract class ComposeInstrumentedTestBase {
 
     companion object {
         private const val ALLURE_FRAMEWORK = "Android Compose"
-        private const val ALLURE_RESULTS_DIR = "allure-results"
         private const val ALLURE_ENV_FILE = "environment.properties"
+        private var allureEnvironmentWritten = false
 
         @AfterClass
         @JvmStatic
         fun writeAllureEnvironment() {
-            val context = InstrumentationRegistry.getInstrumentation().targetContext
-            val resultsDir = File(context.filesDir, ALLURE_RESULTS_DIR)
-            resultsDir.mkdirs()
-
-            val envFile = File(resultsDir, ALLURE_ENV_FILE)
-            if (envFile.exists()) {
+            if (allureEnvironmentWritten) {
                 return
             }
+            allureEnvironmentWritten = true
 
-            Properties().apply {
+            val resultsDir = PropertiesUtils.resultsDirectoryPath
+            val envPath = "$resultsDir/$ALLURE_ENV_FILE"
+            val properties = Properties().apply {
                 setProperty("Framework", ALLURE_FRAMEWORK)
-            }.store(envFile.outputStream(), null)
+                setProperty("Device", "${Build.MANUFACTURER} ${Build.MODEL}")
+                setProperty("Android.API", Build.VERSION.SDK_INT.toString())
+                setProperty("Android.Release", Build.VERSION.RELEASE)
+                setProperty("API.Base.URL", BuildConfig.API_BASE_URL)
+            }
+
+            if (useTestStorage()) {
+                TestStorage().openOutputFile(envPath).use { stream ->
+                    properties.store(stream, null)
+                }
+            } else {
+                val outputDir = File(
+                    InstrumentationRegistry.getInstrumentation().targetContext.filesDir,
+                    resultsDir,
+                )
+                outputDir.mkdirs()
+                File(outputDir, ALLURE_ENV_FILE).outputStream().use { stream ->
+                    properties.store(stream, null)
+                }
+            }
         }
+
+        private fun useTestStorage(): Boolean =
+            PropertiesUtils.loadAllureProperties()
+                .getProperty("allure.results.useTestStorage", "false")
+                .toBoolean()
     }
 }
