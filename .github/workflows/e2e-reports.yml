@@ -1,0 +1,67 @@
+name: Publish E2E test reports
+
+on:
+  workflow_run:
+    workflows: ["E2E tests", "Android E2E tests"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: e2e-reports-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    if: github.event.workflow_run.conclusion != 'cancelled'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for all E2E workflows to complete
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          repo="${{ github.repository }}"
+          sha="${{ github.event.workflow_run.head_sha }}"
+          event="${{ github.event.workflow_run.event }}"
+
+          incomplete=$(gh api \
+            "repos/${repo}/actions/runs?head_sha=${sha}&event=${event}&per_page=100" \
+            --jq '[.workflow_runs[] | select(.name == "E2E tests" or .name == "Android E2E tests") | select(.status != "completed")] | length')
+
+          if [ "$incomplete" -gt 0 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "${incomplete} E2E workflow run(s) still in progress for ${sha}; deferring publish."
+            exit 0
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve PR number
+        id: pr
+        if: steps.gate.outputs.skip != 'true' && github.event.workflow_run.event == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          pr_number=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}" \
+            --jq '.pull_requests[0].number // empty')
+          if [ -z "$pr_number" ]; then
+            pr_number=$(gh api "repos/${{ github.repository }}/commits/${{ github.event.workflow_run.head_sha }}/pulls" \
+              --jq '.[0].number // empty')
+          fi
+          echo "number=${pr_number}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish Allure reports to GitHub Pages
+        if: steps.gate.outputs.skip != 'true'
+        uses: ./.github/actions/publish-allure-reports
+        with:
+          trigger-event: ${{ github.event.workflow_run.event }}
+          head-sha: ${{ github.event.workflow_run.head_sha }}
+          pr-number: ${{ steps.pr.outputs.number }}

@@ -124,7 +124,7 @@ GitHub Actions validates every change — see [Actions](https://github.com/sergi
 | `pact-interface` | `demo-interface` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
 | `pact-notification` | `notification-service` consumer contracts, events provider verify, can-i-merge — push / PR to `master` |
 | `pact-android` | `demo-android` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
-| `e2e-allure-reports` | All 6 E2E suites in parallel + single Allure publish to GitHub Pages (`master`) |
+| `e2e-reports` | Publish Allure and Playwright reports to GitHub Pages after all web and Android E2E workflows finish |
 | `allure-pages` | Allure reports landing page (`master`) |
 | `allure-pages-cleanup` | Remove PR report folder (Allure + Playwright HTML) from GitHub Pages when a PR closes |
 | `codeql` | SAST — CodeQL analysis for Java and TypeScript (`master`); SARIF artifacts in workflow runs |

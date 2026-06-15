@@ -25,8 +25,7 @@ on:
       - '.github/actions/**'
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
   actions: read
 
 jobs:
@@ -41,22 +40,3 @@ jobs:
   android-compose-uat:
     uses: ./.github/workflows/android-compose-uat.yml
     secrets: inherit
-
-  publish-allure:
-    needs:
-      - android-compose-e2e
-      - android-compose-accessibility
-      - android-compose-uat
-    if: |
-      always() &&
-      needs.android-compose-e2e.result != 'cancelled' &&
-      needs.android-compose-accessibility.result != 'cancelled' &&
-      needs.android-compose-uat.result != 'cancelled' &&
-      needs.android-compose-e2e.result != 'skipped'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Publish Allure reports to GitHub Pages
-        uses: ./.github/actions/publish-allure-reports
