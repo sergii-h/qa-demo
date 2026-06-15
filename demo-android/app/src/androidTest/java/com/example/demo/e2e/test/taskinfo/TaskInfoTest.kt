@@ -7,13 +7,13 @@ import com.example.demo.e2e.test.base.MockedBackendTestBase
 import io.qameta.allure.kotlin.Epic
 import io.qameta.allure.kotlin.Feature
 import io.qameta.allure.kotlin.TmsLink
+import io.qameta.allure.kotlin.TmsLinks
 import org.junit.Before
 import org.junit.Test
 
 @Epic(TASK_MANAGEMENT)
 @Feature("View task info")
-@TmsLink("102")
-@TmsLink("115")
+@TmsLinks(TmsLink("102"), TmsLink("115"))
 class TaskInfoTest : MockedBackendTestBase() {
     private lateinit var context: TaskTestContext
     private lateinit var response: TaskResponse
