@@ -1,1 +1,1 @@
-[]
+[{"values":["http://10.0.2.2:8085/v1/"],"name":"API.Base.URL"},{"values":["34"],"name":"Android.API"},{"values":["14"],"name":"Android.Release"},{"values":["Android Compose"],"name":"Framework"},{"values":["Google sdk_gphone64_x86_64"],"name":"Device"}]
