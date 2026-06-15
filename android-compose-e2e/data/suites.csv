@@ -1,0 +1,6 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","8567","shouldSwitchUiToSpanishWhenEsSelected","","Mon Jun 15 09:26:06 UTC 2026","passed","Mon Jun 15 09:26:15 UTC 2026","","com.example.demo.e2e.test.translation.LanguageSupportTest","com.example.demo.e2e.test.translation.LanguageSupportTest","shouldSwitchUiToSpanishWhenEsSelected"
+"","10959","shouldViewTaskInfo","","Mon Jun 15 09:25:54 UTC 2026","passed","Mon Jun 15 09:26:05 UTC 2026","","com.example.demo.e2e.test.taskinfo.TaskInfoTest","com.example.demo.e2e.test.taskinfo.TaskInfoTest","shouldViewTaskInfo"
+"","11276","shouldCreateTask","","Mon Jun 15 09:25:11 UTC 2026","passed","Mon Jun 15 09:25:23 UTC 2026","","com.example.demo.e2e.test.create.CreateTaskTest","com.example.demo.e2e.test.create.CreateTaskTest","shouldCreateTask"
+"","17993","shouldEditTask","","Mon Jun 15 09:25:34 UTC 2026","passed","Mon Jun 15 09:25:52 UTC 2026","","com.example.demo.e2e.test.edit.EditTaskTest","com.example.demo.e2e.test.edit.EditTaskTest","shouldEditTask"
+"","8697","shouldDeleteTask","","Mon Jun 15 09:25:24 UTC 2026","passed","Mon Jun 15 09:25:33 UTC 2026","","com.example.demo.e2e.test.delete.DeleteTaskTest","com.example.demo.e2e.test.delete.DeleteTaskTest","shouldDeleteTask"
