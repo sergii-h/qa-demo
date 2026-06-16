@@ -2,6 +2,10 @@
 
 Native Android client for the QA Demo task management API. Same CRUD functionality as the React web app, using the existing Spring Boot backend.
 
+<p style="text-align: center;">
+  <img src="../doc/assets/qa-demo-android.gif" alt="QA Demo Android App" width="540"/>
+</p>
+
 **Requirements:** [Frontend requirements](../doc/requirements/front-end/README.md)
 
 ## Stack
