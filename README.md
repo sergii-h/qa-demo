@@ -23,8 +23,8 @@
 
 A full-stack QA engineering demo project applying the **Testing Pyramid** and **shift-left** methodology.
 
-<p align="center">
-  <img src="doc/assets/qa-demo-app.gif" alt="QA Demo App" width="800"/>
+<p style="text-align: center;">
+  <img src="doc/assets/qa-demo-app.gif" alt="QA Demo App" width="960"/>
 </p>
 
 ---
@@ -59,14 +59,15 @@ A full-stack Task Management app used as a testing pyramid demo. The domain is i
 |---|---|
 | Backend | Java 21 · SpringBoot 3.5.12 · MongoDB 4.4 · Kafka 3.3.2 · WireMock 3.9.2 |
 | Frontend | TypeScript 5 · React 18 · PrimeReact 10 · Vite 8 · Node 22 |
-| Unit | JUnit5 + Mockito (BE) · Vitest 4 (FE) |
+| Android | Kotlin · Jetpack Compose · Material 3 · Retrofit + Moshi · ViewModel + StateFlow · Min SDK 26 · Target SDK 35 |
+| Unit | JUnit5 + Mockito (BE) · Vitest 4 (FE) · JUnit4 + MockK + Robolectric (Android) |
 | Integration | JUnit5 + TestContainers (BE) · Vitest 4 (FE) |
-| Contract | Pact — HTTP (FE↔BE) + Kafka message (notification-service↔BE) |
-| E2E | Selenide + JUnit5 + Selenium Grid (Java) · Playwright + TypeScript |
+| Contract | Pact — HTTP (FE↔BE + Android↔BE) + Kafka message (notification-service↔BE) |
+| E2E | Selenide + JUnit5 + Selenium Grid (Java) · Playwright + TypeScript · Compose UI Test (Android) |
 | Mutation | PiTest (BE) · Stryker (FE, on-demand) |
 | Performance | k6 |
 | Security | CodeQL (SAST) · Dependabot alerts (SCA) · GitHub secret scanning & push protection (platform) |
-| Coverage | JaCoCo ≥90% (BE) · Istanbul ≥90% (FE) |
+| Coverage | JaCoCo ≥90% (BE) · Istanbul ≥90% (FE) · Kover ≥90% (Android) |
 
 ---
 
@@ -93,7 +94,7 @@ A full-stack Task Management app used as a testing pyramid demo. The domain is i
 |---|---|---|
 | Unit | ~90% | Business logic, component behavior |
 | Integration + Pact | ~7-8% | API integration; Pact decouples FE↔BE verification |
-| E2E — Mocked BE | ~1-2% | Playwright `page.route()` — fast, no real BE required |
+| E2E — Mocked BE | ~1-2% | Fast, no real BE required |
 | E2E — Full Stack | <1% | Smoke only — confirms deployment wiring, not business logic |
 
 ### E2E Test Suites
@@ -104,7 +105,7 @@ Each E2E framework under `e2e/` follows the same three-suite split regardless of
 |---|---|---|---|
 | Mocked BE | *(no tag)* | Browser-level user flows with mocked backend | Every CI run |
 | Accessibility | `@accessibility` | axe-core scans for WCAG violations on key UI states | Every CI run |
-| UAT | `@uat` | Single smoke test against the real running app | Staging / post-deploy only |
+| UAT | `@uat` | Single smoke test against the real running app | Every CI run |
 
 The UAT suite is intentionally one test (the most critical happy path). Business logic is already covered by the layers below; UAT exists only to confirm all services are wired together correctly in a real environment.
 
@@ -183,122 +184,34 @@ VITE_BE_API=http://localhost:8080/v1 npm start
 
 ### Unit & Integration Tests
 
-**Backend:**
-```bash
-cd demo-service
-mvn verify -DskipITs                                                                      # unit + coverage (JaCoCo)
-mvn verify -Pintegration-tests -Dfailsafe.excludes='**/*PactProviderTest.java' -Djacoco.skip=true  # integration
-mvn verify -Pmutation-tests -DskipITs                                                     # mutation (PiTest ≥80%)
-open target/site/jacoco/index.html   # coverage report
-open target/pit-reports/index.html  # mutation report
-```
+**Backend** — unit, integration, mutation, coverage: see [demo-service README](demo-service/README.md).
 
-**Frontend:**
-```bash
-cd demo-interface
-npm test              # unit + coverage (Istanbul)
-npm run test:ui       # interactive Vitest UI
-```
-
-> Stryker mutation testing is configured (`stryker.config.json`) but excluded from the regular test run — it is too slow and resource-intensive to run on every CI build. Run manually with `npm run test:stryker` when validating assertion quality.
-
+**Frontend** — unit, integration, coverage, Stryker mutation: see [demo-interface README](demo-interface/README.md).
 
 ### Pact (Consumer-Driven Contract Tests)
 
-This demo uses an **ephemeral Pact Broker** started fresh in Docker on each CI run. CI bootstraps `master` contracts first so `can-i-merge` has a baseline to compare against.
-
-Each consumer runs in its own GitHub Actions workflow when its app (or `demo-service`) changes:
-
-| Workflow | Consumer | Provider surface |
-|----------|----------|------------------|
-| `pact-interface.yml` | `demo-interface` | Task HTTP API |
-| `pact-notification.yml` | `notification-service` | Task events (async) |
-| `pact-android.yml` | `demo-android` | Task HTTP API |
+Ephemeral broker per CI run; three consumers (`demo-interface`, `notification-service`, `demo-android`) verified against `demo-service`.
 
 ```bash
-# Run the full Pact pipeline locally (all consumers → publish → provider verify → can-i-merge)
-bash .github/scripts/pact-run-local.sh
-
-# Android-only pipeline
-bash .github/scripts/pact-run-local-android.sh
+bash .github/scripts/pact-run-local.sh          # full pipeline (all consumers)
+bash .github/scripts/pact-run-local-android.sh  # Android-only pipeline
 ```
 
-Or run each phase manually:
-
-```bash
-# 1) Start broker
-cd demo-interface && npm run pact:broker:up
-
-# 2) Frontend consumer contracts
-npm run test:pact
-PACT_CONSUMER_VERSION=$(git rev-parse --short HEAD) npm run pact:publish
-
-# 3) Notification service consumer contract
-cd ../notification-service && mvn test
-# then publish via pact-cli docker image (see pact-run-local.sh for the full command)
-
-# 4) Provider verification
-cd ../demo-service
-PACT_BROKER_BASE_URL=http://localhost:9292 mvn verify -Pintegration-tests -Dit.test="*PactProviderTest" -Djacoco.skip=true
-
-# 5) Can-i-merge gate
-cd ../demo-interface
-PACT_CONSUMER_VERSION=$(git rev-parse --short HEAD) npm run pact:can-i-deploy
-```
-
-> In production, a persistent broker (PactFlow or self-hosted) replaces the ephemeral approach and removes the bootstrap step.
+See [doc/pact.md](doc/pact.md) for the step-by-step manual run and broker notes.
 
 ### E2E Tests
 
-#### Playwright + TypeScript
+Each E2E framework has three suites: **Mocked BE** (user flows), **Accessibility** (axe-core), **UAT** (smoke against the real app).
 
-```bash
-cd e2e/playwright-typescript && npm install
-
-npm run test:e2e           # with mocked BE
-npm run test:accessibility  # axe-core scans (no real backend needed)
-npm run test:uat    # UAT smoke test (requires full app running)
-npm test            # all suites
-```
-
-Copy `.env.e2e` to `.env.e2e.local` and set `E2E_TEST_ENV_URL` before running UAT tests.
-
-```bash
-npm run allure:serve  # Allure report (after tests)
-```
-
-See [Playwright E2E README](e2e/playwright-typescript/README.md) for full options.
-
-#### Selenide + JUnit5 + Selenium Grid (Java)
-
-```bash
-# Local browser
-cd e2e/selenide-junit5-selenium-grid
-mvn -Dproperties.file.name=test.local.properties clean test
-mvn -Pe2e clean test       # with mocked BE
-mvn -Paccessibility clean test  # axe-core scans (no real backend needed)
-mvn -Puat clean test  # UAT smoke test (requires full app running)
-
-# Docker + Selenium Grid
-docker network create qa-demo-e2e
-docker compose -f docker/docker-compose/run-application.yml up -d
-docker compose -f docker/docker-compose/run-selenium-grid.yml up -d
-docker compose -f docker/docker-compose/run-tests-selenide-junit5-selenium-grid.yml up
-```
-
-See [Selenide E2E README](e2e/selenide-junit5-selenium-grid/README.md) for full options.
+See [Playwright E2E README](e2e/playwright-typescript/README.md) · [Selenide E2E README](e2e/selenide-junit5-selenium-grid/README.md) for setup and run commands.
 
 ### Performance Tests (k6)
 
 ```bash
-# Requires full app running
 k6 run performance/baseline-load.js
-k6 run performance/create-under-load.js
-k6 run performance/concurrent-uniqueness.js
-k6 run performance/spike-test.js
 ```
 
-See [Performance README](performance/README.md) for thresholds and scenario details.
+See [Performance README](performance/README.md) for all scenarios, thresholds, and environment variables.
 
 ---
 
@@ -337,17 +250,33 @@ qa-demo/
 │       ├── interfaces/
 │       └── services/          # API service layer
 │
+├── demo-android/              # Native Android app (Kotlin · Jetpack Compose · Min SDK 26)
+│   └── app/src/
+│       ├── main/java/com/example/demo/
+│       │   ├── data/          # Models + Retrofit API
+│       │   ├── repository/    # TaskRepository
+│       │   └── ui/            # Compose screens + navigation
+│       ├── test/              # JVM unit tests (JUnit4 · MockK · Robolectric) + Pact consumer
+│       └── androidTest/java/com/example/demo/e2e/
+│           ├── context/       # TaskContext
+│           ├── interaction/   # Page objects, steps, validations
+│           ├── provider/      # StepProvider · ValidationProvider · SupportProvider
+│           ├── support/       # WireMock client · UAT API client
+│           └── test/          # Suites + bases (@Uat · @Accessibility)
+│
 ├── e2e/
-│   ├── playwright-typescript/ # Playwright + TypeScript
-│   │   ├── tests/             # Per-feature: *.spec.ts · *.axe.spec.ts · *.uat.spec.ts
-│   │   ├── interactions/      # Page objects, step orchestrators, validators
-│   │   ├── fixtures/          # Playwright fixtures
-│   │   └── support/           # API client & mock helpers
+│   ├── playwright-typescript/          # Playwright + TypeScript
+│   │   ├── tests/                      # Domain suites: create-task · edit-task · delete-task · task-info · task-table · translation
+│   │   ├── interactions/               # pages · steps · validators
+│   │   ├── providers/                  # StepProvider · ValidationProvider · SupportProvider
+│   │   ├── support/                    # api · mocks
+│   │   ├── context/ · data/ · fixtures/ · decorators/
 │   └── selenide-junit5-selenium-grid/  # Selenide + JUnit5 (Java)
-│       └── src/test/java/test/
-│           ├── desktop/       # 1920×1080
-│           └── mobile/        # iPhone viewport
-│   # appium-*/                # (planned) Appium mobile testing
+│       └── src/test/java/
+│           ├── test/                   # spec/ · desktop/ · mobile/ — same domain subdirs per suite
+│           ├── interaction/            # page · step · validation
+│           ├── provider/
+│           └── support/ · context/ · data/ · config/ · extension/ · util/
 │
 ├── performance/               # k6 load & spike scripts
 │
@@ -366,6 +295,11 @@ qa-demo/
 |---|---|
 | [Testing Guide](doc/testing-guide.md) | Public checklists, pyramid workflow, definition of done |
 | Private testing rules | Detailed FE/BE unit & integration rules — private [`.cursor/rules`](.cursor/rules) submodule; available on request |
+| [Pact Guide](doc/pact.md) | Full Pact pipeline, step-by-step manual run, broker notes |
+| [Backend README](demo-service/README.md) | Running backend unit, integration, and mutation tests |
+| [Frontend README](demo-interface/README.md) | Running frontend unit, integration, and mutation tests |
+| [Playwright E2E README](e2e/playwright-typescript/README.md) | Playwright test suites, configuration, and run commands |
+| [Selenide E2E README](e2e/selenide-junit5-selenium-grid/README.md) | Selenide test suites, Selenium Grid Docker setup |
 | [Performance README](performance/README.md) | k6 scenarios and thresholds |
 | [ADR Index](doc/adr/README.md) | Architectural decisions with context and rationale |
 | [Backend Requirements](doc/requirements/back-end/README.md) | Epics and user stories |
