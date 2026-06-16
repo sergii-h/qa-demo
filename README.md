@@ -59,14 +59,15 @@ A full-stack Task Management app used as a testing pyramid demo. The domain is i
 |---|---|
 | Backend | Java 21 · SpringBoot 3.5.12 · MongoDB 4.4 · Kafka 3.3.2 · WireMock 3.9.2 |
 | Frontend | TypeScript 5 · React 18 · PrimeReact 10 · Vite 8 · Node 22 |
-| Unit | JUnit5 + Mockito (BE) · Vitest 4 (FE) |
+| Android | Kotlin · Jetpack Compose · Material 3 · Retrofit + Moshi · ViewModel + StateFlow · Min SDK 26 · Target SDK 35 |
+| Unit | JUnit5 + Mockito (BE) · Vitest 4 (FE) · JUnit4 + MockK + Robolectric (Android) |
 | Integration | JUnit5 + TestContainers (BE) · Vitest 4 (FE) |
-| Contract | Pact — HTTP (FE↔BE) + Kafka message (notification-service↔BE) |
-| E2E | Selenide + JUnit5 + Selenium Grid (Java) · Playwright + TypeScript |
+| Contract | Pact — HTTP (FE↔BE + Android↔BE) + Kafka message (notification-service↔BE) |
+| E2E | Selenide + JUnit5 + Selenium Grid (Java) · Playwright + TypeScript · Compose UI Test (Android) |
 | Mutation | PiTest (BE) · Stryker (FE, on-demand) |
 | Performance | k6 |
 | Security | CodeQL (SAST) · Dependabot alerts (SCA) · GitHub secret scanning & push protection (platform) |
-| Coverage | JaCoCo ≥90% (BE) · Istanbul ≥90% (FE) |
+| Coverage | JaCoCo ≥90% (BE) · Istanbul ≥90% (FE) · Kover ≥90% (Android) |
 
 ---
 
@@ -93,7 +94,7 @@ A full-stack Task Management app used as a testing pyramid demo. The domain is i
 |---|---|---|
 | Unit | ~90% | Business logic, component behavior |
 | Integration + Pact | ~7-8% | API integration; Pact decouples FE↔BE verification |
-| E2E — Mocked BE | ~1-2% | Playwright `page.route()` — fast, no real BE required |
+| E2E — Mocked BE | ~1-2% | Fast, no real BE required |
 | E2E — Full Stack | <1% | Smoke only — confirms deployment wiring, not business logic |
 
 ### E2E Test Suites
@@ -104,7 +105,7 @@ Each E2E framework under `e2e/` follows the same three-suite split regardless of
 |---|---|---|---|
 | Mocked BE | *(no tag)* | Browser-level user flows with mocked backend | Every CI run |
 | Accessibility | `@accessibility` | axe-core scans for WCAG violations on key UI states | Every CI run |
-| UAT | `@uat` | Single smoke test against the real running app | Staging / post-deploy only |
+| UAT | `@uat` | Single smoke test against the real running app | Every CI run |
 
 The UAT suite is intentionally one test (the most critical happy path). Business logic is already covered by the layers below; UAT exists only to confirm all services are wired together correctly in a real environment.
 
@@ -249,17 +250,33 @@ qa-demo/
 │       ├── interfaces/
 │       └── services/          # API service layer
 │
+├── demo-android/              # Native Android app (Kotlin · Jetpack Compose · Min SDK 26)
+│   └── app/src/
+│       ├── main/java/com/example/demo/
+│       │   ├── data/          # Models + Retrofit API
+│       │   ├── repository/    # TaskRepository
+│       │   └── ui/            # Compose screens + navigation
+│       ├── test/              # JVM unit tests (JUnit4 · MockK · Robolectric) + Pact consumer
+│       └── androidTest/java/com/example/demo/e2e/
+│           ├── context/       # TaskContext
+│           ├── interaction/   # Page objects, steps, validations
+│           ├── provider/      # StepProvider · ValidationProvider · SupportProvider
+│           ├── support/       # WireMock client · UAT API client
+│           └── test/          # Suites + bases (@Uat · @Accessibility)
+│
 ├── e2e/
-│   ├── playwright-typescript/ # Playwright + TypeScript
-│   │   ├── tests/             # Per-feature: *.spec.ts · *.axe.spec.ts · *.uat.spec.ts
-│   │   ├── interactions/      # Page objects, step orchestrators, validators
-│   │   ├── fixtures/          # Playwright fixtures
-│   │   └── support/           # API client & mock helpers
+│   ├── playwright-typescript/          # Playwright + TypeScript
+│   │   ├── tests/                      # Domain suites: create-task · edit-task · delete-task · task-info · task-table · translation
+│   │   ├── interactions/               # pages · steps · validators
+│   │   ├── providers/                  # StepProvider · ValidationProvider · SupportProvider
+│   │   ├── support/                    # api · mocks
+│   │   ├── context/ · data/ · fixtures/ · decorators/
 │   └── selenide-junit5-selenium-grid/  # Selenide + JUnit5 (Java)
-│       └── src/test/java/test/
-│           ├── desktop/       # 1920×1080
-│           └── mobile/        # iPhone viewport
-│   # appium-*/                # (planned) Appium mobile testing
+│       └── src/test/java/
+│           ├── test/                   # spec/ · desktop/ · mobile/ — same domain subdirs per suite
+│           ├── interaction/            # page · step · validation
+│           ├── provider/
+│           └── support/ · context/ · data/ · config/ · extension/ · util/
 │
 ├── performance/               # k6 load & spike scripts
 │
