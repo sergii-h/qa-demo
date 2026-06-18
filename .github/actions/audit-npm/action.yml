@@ -1,0 +1,15 @@
+name: Audit npm dependencies
+description: Fail when high or critical vulnerabilities are found in npm dependencies
+
+inputs:
+  working-directory:
+    description: Directory containing package-lock.json (run npm ci first)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Audit npm dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm audit --audit-level=high

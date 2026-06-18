@@ -1,0 +1,79 @@
+name: Audit dependencies with OSV-Scanner
+description: Fail when known high or critical vulnerabilities are found (Maven, Gradle lockfiles, npm, etc.)
+
+inputs:
+  path:
+    description: Project directory to scan (relative to repository root)
+    required: true
+  prepare-gradle-locks:
+    description: Generate Gradle lockfiles with ./gradlew before scanning
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Scan dependencies
+      shell: bash
+      env:
+        SCAN_PATH: ${{ github.workspace }}/${{ inputs.path }}
+      run: |
+        set -euo pipefail
+        if [ ! -d "$SCAN_PATH" ]; then
+          echo "Scan path does not exist: $SCAN_PATH" >&2
+          exit 1
+        fi
+
+        if [ "${{ inputs.prepare-gradle-locks }}" = "true" ]; then
+          if [ ! -x "$SCAN_PATH/gradlew" ]; then
+            echo "Gradle wrapper not found in $SCAN_PATH" >&2
+            exit 1
+          fi
+          (cd "$SCAN_PATH" && ./gradlew :app:dependencies --write-locks)
+        fi
+
+        osv_scanner="$RUNNER_TEMP/osv-scanner"
+        results="$RUNNER_TEMP/osv-results.json"
+        curl -sSfL "https://github.com/google/osv-scanner/releases/download/v2.3.8/osv-scanner_linux_amd64" \
+          -o "$osv_scanner"
+        chmod +x "$osv_scanner"
+
+        set +e
+        scan_output=$("$osv_scanner" scan source \
+          -r \
+          --format=json \
+          --verbosity=error \
+          --output-file="$results" \
+          "$SCAN_PATH" 2>&1)
+        scan_exit=$?
+        set -e
+
+        if [ ! -f "$results" ]; then
+          echo "$scan_output"
+          echo "OSV-Scanner did not produce results for $SCAN_PATH." >&2
+          echo "Gradle projects need lockfiles (enable prepare-gradle-locks). Maven needs pom.xml." >&2
+          exit 1
+        fi
+
+        if [ "$scan_exit" -eq 128 ]; then
+          echo "$scan_output"
+          echo "OSV-Scanner found no packages to scan in $SCAN_PATH." >&2
+          exit 1
+        fi
+
+        if [ "$scan_exit" -ge 127 ]; then
+          echo "$scan_output"
+          echo "OSV-Scanner failed with exit code $scan_exit" >&2
+          exit "$scan_exit"
+        fi
+
+        high_or_critical=$(jq '[.results[]?.packages[]?.vulnerabilities[]?
+          | select((.database_specific.severity // "" | ascii_upcase) | IN("HIGH", "CRITICAL"))] | length' "$results")
+        if [ "$high_or_critical" -gt 0 ]; then
+          echo "Found $high_or_critical high or critical vulnerabilities"
+          jq -r '.results[]?.packages[]? | .package as $pkg
+            | .vulnerabilities[]?
+            | select((.database_specific.severity // "" | ascii_upcase) | IN("HIGH", "CRITICAL"))
+            | "\(.id) [\(.database_specific.severity)] \($pkg.name)"' "$results"
+          exit 1
+        fi

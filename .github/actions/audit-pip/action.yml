@@ -1,0 +1,23 @@
+name: Audit Python dependencies
+description: Fail when known vulnerabilities are found in installed Python packages
+
+inputs:
+  working-directory:
+    description: Python project directory (run uv sync or pip install first)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Audit Python dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        set -euo pipefail
+        if [ -f uv.lock ]; then
+          unset VIRTUAL_ENV
+          uv run --with pip-audit pip-audit -l
+        else
+          python -m pip install --quiet pip-audit
+          pip-audit -l
+        fi

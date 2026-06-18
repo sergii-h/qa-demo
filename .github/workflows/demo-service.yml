@@ -26,6 +26,11 @@ jobs:
           distribution: temurin
           cache: maven
 
+      - name: Audit dependencies
+        uses: ./.github/actions/audit-osv
+        with:
+          path: demo-service
+
       - name: Run unit tests
         working-directory: demo-service
         run: mvn verify -DskipITs

@@ -29,14 +29,40 @@ permissions:
   actions: read
 
 jobs:
+  audit-android-dependencies:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: tools platform-tools platforms;android-35 build-tools;35.0.0
+
+      - name: Audit demo-android dependencies
+        uses: ./.github/actions/audit-osv
+        with:
+          path: demo-android
+          prepare-gradle-locks: 'true'
+
   android-compose-e2e:
+    needs: audit-android-dependencies
     uses: ./.github/workflows/android-compose-e2e.yml
     secrets: inherit
 
   android-compose-accessibility:
+    needs: audit-android-dependencies
     uses: ./.github/workflows/android-compose-accessibility.yml
     secrets: inherit
 
   android-compose-uat:
+    needs: audit-android-dependencies
     uses: ./.github/workflows/android-compose-uat.yml
     secrets: inherit

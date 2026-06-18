@@ -24,16 +24,21 @@ From `e2e/playwright-python`:
 asdf plugin add python
 asdf install
 
-# create venv and install dependencies
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -e .
-python -m playwright install chromium webkit
+# install uv (first time only)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# install dependencies from the lock file
+uv sync --frozen
+uv run playwright install chromium webkit
 ```
 
-`.tool-versions` pins Python 3.12.8 for asdf. After `asdf install`, `python` and `pip` resolve via asdf shims in this directory.
+`.tool-versions` pins Python 3.12.8 for asdf. `uv.lock` pins all Python package versions for reproducible installs locally and in CI.
 
-Use `python -m pip` instead of bare `pip` if your shell does not pick up the asdf shim.
+To refresh the lock file after changing `pyproject.toml`:
+
+```bash
+uv lock
+```
 
 ## Test Suites
 
@@ -48,13 +53,12 @@ Tests run in parallel via `pytest-xdist` (`-n auto` in `pyproject.toml`). Use `-
 
 ```bash
 cd e2e/playwright-python
-source .venv/bin/activate
 
-pytest -m "not uat and not accessibility"   # browser-level user flows with mocked backend
-pytest -m accessibility                     # axe-core WCAG scans
-pytest -m uat                               # smoke test against the real running app
-pytest                                      # all suites
-pytest -n 0                                 # sequential (debugging)
+uv run pytest -m "not uat and not accessibility"   # browser-level user flows with mocked backend
+uv run pytest -m accessibility                     # axe-core WCAG scans
+uv run pytest -m uat                               # smoke test against the real running app
+uv run pytest                                      # all suites
+uv run pytest -n 0                                 # sequential (debugging)
 ```
 
 ## Viewports
@@ -70,16 +74,16 @@ Configured in `conftest.py` via `browser_context_args` (device per `browser_name
 
 ```bash
 # default: desktop + mobile (10 mocked user-flow tests = 5 × 2)
-pytest -m "not uat and not accessibility"
+uv run pytest -m "not uat and not accessibility"
 
 # desktop only
-pytest -m "not uat and not accessibility" --browser chromium
+uv run pytest -m "not uat and not accessibility" --browser chromium
 
 # mobile only
-pytest -m "not uat and not accessibility" --browser webkit
+uv run pytest -m "not uat and not accessibility" --browser webkit
 
 # override device for all browsers in the run
-pytest --browser chromium --browser webkit --device "iPhone 14 Pro Max"
+uv run pytest --browser chromium --browser webkit --device "iPhone 14 Pro Max"
 ```
 
 `is_mobile` is `true` for `webkit` (or when `--device` is set explicitly).
@@ -87,8 +91,8 @@ pytest --browser chromium --browser webkit --device "iPhone 14 Pro Max"
 ## Single test / debug
 
 ```bash
-pytest tests/create_task/test_create_task.py -v
-pytest tests/create_task/test_create_task.py -v --headed
+uv run pytest tests/create_task/test_create_task.py -v
+uv run pytest tests/create_task/test_create_task.py -v --headed
 ```
 
 ## Reports
@@ -105,13 +109,13 @@ allure serve allure-results
 
 ```bash
 # open the trace for a failed test (interactive HTML viewer)
-playwright show-trace test-results/<test-name>/trace.zip
-
+uv run playwright show-trace test-results/<test-name>/trace.zip
+```
 
 To record traces for every test (not only failures):
 
 ```bash
-pytest --tracing on
+uv run pytest --tracing on
 ```
 
 ## Run application
