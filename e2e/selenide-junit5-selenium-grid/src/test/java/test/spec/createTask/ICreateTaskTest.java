@@ -21,10 +21,11 @@ public interface ICreateTaskTest {
     default void init() {
         var response = context.createTaskResponse();
 
-        support().mock.api().getTasks(List.of(response));
-        support().mock.api().createTask(response);
-        support().mock.api().getTask(response.getId(), response);
-        support().mock.api().getIsValid(response.getId(), true);
+        support().mock.api()
+                .getTasks(List.of(response))
+                .createTask(response)
+                .getTask(response.getId(), response)
+                .getIsValid(response.getId(), true);
     }
 
     @Test

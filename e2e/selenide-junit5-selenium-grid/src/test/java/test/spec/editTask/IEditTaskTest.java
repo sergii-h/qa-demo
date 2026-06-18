@@ -27,9 +27,10 @@ public interface IEditTaskTest {
 
         var response = context.createTaskResponse();
 
-        support().mock.api().getTasks(List.of(response));
-        support().mock.api().getTask(response.getId(), response);
-        support().mock.api().getIsValid(response.getId(), true);
+        support().mock.api()
+                .getTasks(List.of(response))
+                .getTask(response.getId(), response)
+                .getIsValid(response.getId(), true);
     }
 
     @Test
@@ -53,9 +54,10 @@ public interface IEditTaskTest {
 
         var updatedResponse = updatedContext.createTaskResponse();
 
-        support().mock.api().updateTask(updatedContext.getId(), updatedResponse);
-        support().mock.api().getTasks(List.of(updatedResponse));
-        support().mock.api().getTask(updatedContext.getId(), updatedResponse);
+        support().mock.api()
+                .updateTask(updatedContext.getId(), updatedResponse)
+                .getTasks(List.of(updatedResponse))
+                .getTask(updatedContext.getId(), updatedResponse);
 
         editTaskStep.submitForm();
         steps.tasks.openTaskInfoForm(updatedContext.getTitle());

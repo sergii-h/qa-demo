@@ -26,8 +26,9 @@ public interface ILanguageSupportTest {
 
         var response = context.createTaskResponse();
 
-        support().mock.api().getTasks(List.of(response));
-        support().mock.api().createTask(response);
+        support().mock.api()
+                .getTasks(List.of(response))
+                .createTask(response);
     }
 
     @Test
