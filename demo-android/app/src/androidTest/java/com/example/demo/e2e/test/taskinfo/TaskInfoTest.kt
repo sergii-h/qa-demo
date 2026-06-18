@@ -23,9 +23,10 @@ class TaskInfoTest : MockedBackendTestBase() {
         context = TaskTestContext()
         response = context.createTaskResponse()
 
-        support().mock.api().getTasks(response.toTask())
-        support().mock.api().getTask(response.toTask())
-        support().mock.api().getIsValid(true)
+        support().mock.api()
+            .getTasks(response.toTask())
+            .getTask(response.toTask())
+            .getIsValid(true)
     }
 
     @Test

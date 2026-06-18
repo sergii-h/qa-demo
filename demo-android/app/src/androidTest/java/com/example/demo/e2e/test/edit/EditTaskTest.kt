@@ -28,9 +28,10 @@ class EditTaskTest : MockedBackendTestBase() {
         )
         response = context.createTaskResponse()
 
-        support().mock.api().getTasks(response.toTask())
-        support().mock.api().getTask(response.toTask())
-        support().mock.api().getIsValid(true)
+        support().mock.api()
+            .getTasks(response.toTask())
+            .getTask(response.toTask())
+            .getIsValid(true)
     }
 
     @Test
@@ -52,11 +53,12 @@ class EditTaskTest : MockedBackendTestBase() {
             .openTaskEditForm(response.title)
             .setTaskData(updatedContext.createTaskData())
 
-        support().mock.api().updateTask(updatedResponse.toTask())
-        support().mock.api().getTasks(updatedResponse.toTask())
-        support().mock.api().getTasks(updatedResponse.toTask())
-        support().mock.api().getTask(updatedResponse.toTask())
-        support().mock.api().getIsValid(true)
+        support().mock.api()
+            .updateTask(updatedResponse.toTask())
+            .getTasks(updatedResponse.toTask())
+            .getTasks(updatedResponse.toTask())
+            .getTask(updatedResponse.toTask())
+            .getIsValid(true)
 
         editTaskStep.submitForm()
 

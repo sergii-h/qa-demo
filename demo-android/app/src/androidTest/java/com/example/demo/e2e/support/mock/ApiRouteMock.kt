@@ -17,7 +17,7 @@ class ApiRouteMock(
         Types.newParameterizedType(List::class.java, Task::class.java),
     )
 
-    fun getTasks(vararg tasks: Task) {
+    fun getTasks(vararg tasks: Task): ApiRouteMock {
         wireMock.addScenarioMapping(
             scenarioName = "get-tasks",
             request = JSONObject()
@@ -25,9 +25,10 @@ class ApiRouteMock(
                 .put("urlPath", TASKS_PATH),
             response = jsonResponse(200, tasksAdapter.toJson(tasks.toList())),
         )
+        return this
     }
 
-    fun getTask(task: Task) {
+    fun getTask(task: Task): ApiRouteMock {
         wireMock.addScenarioMapping(
             scenarioName = "get-task",
             request = JSONObject()
@@ -35,9 +36,10 @@ class ApiRouteMock(
                 .put("urlPathPattern", TASK_BY_ID_PATH),
             response = jsonResponse(200, taskAdapter.toJson(task)),
         )
+        return this
     }
 
-    fun getIsValid(isValid: Boolean) {
+    fun getIsValid(isValid: Boolean): ApiRouteMock {
         wireMock.addScenarioMapping(
             scenarioName = "is-valid",
             request = JSONObject()
@@ -45,9 +47,10 @@ class ApiRouteMock(
                 .put("urlPathPattern", IS_VALID_PATH),
             response = jsonResponse(200, isValid.toString()),
         )
+        return this
     }
 
-    fun createTask(task: Task) {
+    fun createTask(task: Task): ApiRouteMock {
         wireMock.addScenarioMapping(
             scenarioName = "create-task",
             request = JSONObject()
@@ -55,9 +58,10 @@ class ApiRouteMock(
                 .put("urlPath", TASKS_PATH),
             response = jsonResponse(200, taskAdapter.toJson(task)),
         )
+        return this
     }
 
-    fun updateTask(task: Task) {
+    fun updateTask(task: Task): ApiRouteMock {
         wireMock.addScenarioMapping(
             scenarioName = "update-task",
             request = JSONObject()
@@ -65,9 +69,10 @@ class ApiRouteMock(
                 .put("urlPathPattern", TASK_BY_ID_PATH),
             response = jsonResponse(200, taskAdapter.toJson(task)),
         )
+        return this
     }
 
-    fun deleteTask() {
+    fun deleteTask(): ApiRouteMock {
         wireMock.addScenarioMapping(
             scenarioName = "delete-task",
             request = JSONObject()
@@ -75,6 +80,7 @@ class ApiRouteMock(
                 .put("urlPathPattern", TASK_BY_ID_PATH),
             response = JSONObject().put("status", 204),
         )
+        return this
     }
 
     private fun jsonResponse(status: Int, body: String): JSONObject = JSONObject()
