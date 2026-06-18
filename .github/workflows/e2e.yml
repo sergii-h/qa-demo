@@ -12,6 +12,9 @@ on:
       - '.github/workflows/playwright-typescript-e2e.yml'
       - '.github/workflows/playwright-typescript-uat.yml'
       - '.github/workflows/playwright-typescript-accessibility.yml'
+      - '.github/workflows/playwright-python-e2e.yml'
+      - '.github/workflows/playwright-python-uat.yml'
+      - '.github/workflows/playwright-python-accessibility.yml'
       - '.github/workflows/selenide-junit5-grid-e2e.yml'
       - '.github/workflows/selenide-junit5-grid-uat.yml'
       - '.github/workflows/selenide-junit5-grid-accessibility.yml'
@@ -27,6 +30,9 @@ on:
       - '.github/workflows/playwright-typescript-e2e.yml'
       - '.github/workflows/playwright-typescript-uat.yml'
       - '.github/workflows/playwright-typescript-accessibility.yml'
+      - '.github/workflows/playwright-python-e2e.yml'
+      - '.github/workflows/playwright-python-uat.yml'
+      - '.github/workflows/playwright-python-accessibility.yml'
       - '.github/workflows/selenide-junit5-grid-e2e.yml'
       - '.github/workflows/selenide-junit5-grid-uat.yml'
       - '.github/workflows/selenide-junit5-grid-accessibility.yml'
@@ -47,6 +53,18 @@ jobs:
 
   playwright-accessibility:
     uses: ./.github/workflows/playwright-typescript-accessibility.yml
+    secrets: inherit
+
+  playwright-python-e2e:
+    uses: ./.github/workflows/playwright-python-e2e.yml
+    secrets: inherit
+
+  playwright-python-uat:
+    uses: ./.github/workflows/playwright-python-uat.yml
+    secrets: inherit
+
+  playwright-python-accessibility:
+    uses: ./.github/workflows/playwright-python-accessibility.yml
     secrets: inherit
 
   selenide-e2e:

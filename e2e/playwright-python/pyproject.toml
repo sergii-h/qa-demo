@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "playwright-python-e2e"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "pytest",
+    "pytest-playwright",
+    "pytest-xdist",
+    "allure-pytest",
+    "python-dotenv",
+    "requests",
+    "axe-playwright-python",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--alluredir=allure-results -v -n auto --browser chromium --browser webkit --tracing retain-on-failure --screenshot only-on-failure"
+markers = [
+    "uat: user acceptance tests",
+    "accessibility: accessibility tests",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["context*", "data*", "decorators*", "interactions*", "providers*", "support*"]

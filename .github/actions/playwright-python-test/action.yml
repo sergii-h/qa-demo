@@ -1,0 +1,92 @@
+name: Run Playwright Python tests
+description: Run pytest Playwright suite and upload Allure results and trace artifacts
+
+inputs:
+  test-suite:
+    description: Test suite to run (e2e, accessibility, uat)
+    required: true
+  app-mode:
+    description: frontend (mocked BE) or full (full stack)
+    required: true
+  browsers:
+    description: Playwright browsers to install
+    required: false
+    default: chromium webkit
+  test-label:
+    description: Label for the pytest step
+    required: true
+  artifact-name:
+    description: Artifact name for raw Allure results
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: pip
+        cache-dependency-path: e2e/playwright-python/pyproject.toml
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: e2e/playwright-python
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+
+    - name: Install Playwright browsers
+      shell: bash
+      working-directory: e2e/playwright-python
+      run: python -m playwright install --with-deps ${{ inputs.browsers }}
+
+    - name: ${{ inputs.test-label }}
+      if: ${{ !cancelled() }}
+      continue-on-error: true
+      id: test
+      shell: bash
+      working-directory: e2e/playwright-python
+      run: |
+        case "${{ inputs.test-suite }}" in
+          e2e)
+            pytest -m "not uat and not accessibility"
+            ;;
+          accessibility)
+            pytest -m accessibility
+            ;;
+          uat)
+            pytest -m uat \
+              -o "addopts=--alluredir=allure-results -v -n auto --browser chromium --tracing retain-on-failure --screenshot only-on-failure"
+            ;;
+          *)
+            echo "Unknown test suite: ${{ inputs.test-suite }}" >&2
+            exit 1
+            ;;
+        esac
+      env:
+        E2E_TEST_ENV_URL: http://localhost:5173
+        E2E_API_URL: ${{ inputs.app-mode == 'full' && 'http://localhost:8080' || '' }}
+        E2E_WIREMOCK_URL: ${{ inputs.app-mode == 'full' && 'http://localhost:8085' || '' }}
+
+    - name: Upload allure results
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: e2e/playwright-python/allure-results
+        retention-days: 7
+
+    - name: Upload Playwright trace artifacts
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-python-test-results-${{ inputs.test-suite }}
+        path: e2e/playwright-python/test-results/
+        retention-days: 7
+        if-no-files-found: ignore
+
+    - name: Fail job when tests failed
+      if: steps.test.outcome == 'failure'
+      shell: bash
+      run: exit 1

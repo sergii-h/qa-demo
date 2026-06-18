@@ -29,6 +29,7 @@ const BADGES = {
   seleniumGrid: greenBadge('Selenium Grid', 'selenium', '43B02A'),
   junit5: greenBadge('JUnit5', 'junit5', '25A162'),
   typescript5: 'https://img.shields.io/badge/TypeScript-5-blue?logo=typescript',
+  python312: 'https://img.shields.io/badge/Python-3.12-blue?logo=python',
   kotlin: 'https://img.shields.io/badge/Kotlin-purple?logo=kotlin',
   android: greenBadge('Android', 'android', '3DDC84'),
   compose: 'https://img.shields.io/badge/Compose-blue?logo=jetpackcompose',
@@ -64,7 +65,7 @@ const TEST_RUNS = [
   },
   {
     titleEmphasis: 'Playwright',
-    titleSuffix: 'test-run',
+    titleSuffix: 'test-run (TypeScript)',
     subtitle: 'Web · Desktop Chrome & Mobile Safari (webkit)',
     headerLogos: [
       BADGES.typescript5,
@@ -89,6 +90,20 @@ const TEST_RUNS = [
         allure: './playwright-uat/index.html',
         playwrightHtml: './playwright-html-uat/index.html',
       },
+    ],
+  },
+  {
+    titleEmphasis: 'Playwright',
+    titleSuffix: 'test-run (Python)',
+    subtitle: 'Web · Desktop Chrome & Mobile Safari (webkit)',
+    headerLogos: [
+      BADGES.python312,
+      PLAYWRIGHT_BRAND,
+    ],
+    suites: [
+      { suite: 'E2E', meta: 'mocked backend', allure: './playwright-python-e2e/index.html' },
+      { suite: 'Accessibility', meta: 'mocked backend', allure: './playwright-python-accessibility/index.html' },
+      { suite: 'UAT', meta: 'full stack', allure: './playwright-python-uat/index.html' },
     ],
   },
   {
