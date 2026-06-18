@@ -43,15 +43,15 @@ permissions:
   actions: read
 
 jobs:
-  playwright-e2e:
+  playwright-typescript-e2e:
     uses: ./.github/workflows/playwright-typescript-e2e.yml
     secrets: inherit
 
-  playwright-uat:
+  playwright-typescript-uat:
     uses: ./.github/workflows/playwright-typescript-uat.yml
     secrets: inherit
 
-  playwright-accessibility:
+  playwright-typescript-accessibility:
     uses: ./.github/workflows/playwright-typescript-accessibility.yml
     secrets: inherit
 
