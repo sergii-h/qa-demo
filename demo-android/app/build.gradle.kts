@@ -178,7 +178,23 @@ afterEvaluate {
 
 configurations.configureEach {
     if (isCanBeResolved) {
-        resolutionStrategy.activateDependencyLocking()
+        resolutionStrategy {
+            activateDependencyLocking()
+            force(
+                "com.google.protobuf:protobuf-java:3.25.5",
+                "com.google.protobuf:protobuf-javalite:3.25.5",
+                "com.google.protobuf:protobuf-kotlin:3.25.5",
+                "commons-beanutils:commons-beanutils:1.11.0",
+                "org.apache.tika:tika-core:3.2.2",
+                "org.bouncycastle:bcprov-jdk18on:1.84",
+            )
+            eachDependency {
+                if (requested.group == "io.netty") {
+                    useVersion("4.1.135.Final")
+                    because("Fix GHSA netty vulnerabilities")
+                }
+            }
+        }
     }
 }
 

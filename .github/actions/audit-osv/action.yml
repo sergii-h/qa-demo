@@ -55,7 +55,13 @@ runs:
           exit 1
         fi
 
-        if [ "$scan_exit" -ne 0 ] && [ "$scan_exit" -ne 128 ]; then
+        if [ "$scan_exit" -eq 128 ]; then
+          echo "$scan_output"
+          echo "OSV-Scanner found no packages to scan in $SCAN_PATH." >&2
+          exit 1
+        fi
+
+        if [ "$scan_exit" -ge 127 ]; then
           echo "$scan_output"
           echo "OSV-Scanner failed with exit code $scan_exit" >&2
           exit "$scan_exit"
