@@ -55,6 +55,20 @@ export const InfoTaskModal = (props: IProps) => {
         }
     };
 
+    const tagPt = (severity: 'info' | 'warning' | 'success' | 'danger') => {
+        const colors: Record<typeof severity, string> = {
+            info: '#0d47a1',
+            warning: '#5c4b00',
+            success: '#1b5e20',
+            danger: '#b71c1c',
+        };
+        const backgroundColor = colors[severity];
+        return {
+            root: { style: { backgroundColor, borderColor: backgroundColor } },
+            value: { style: { color: '#ffffff' } },
+        };
+    };
+
     const renderFooter = () => (
         <Button label={t('common.close')} data-testid="close-button" onClick={onHide} className="p-button-outlined close-button" />
     );
@@ -67,12 +81,26 @@ export const InfoTaskModal = (props: IProps) => {
 
                 <label className="block">{t('infoTaskModal.status')}</label>
                 <p data-testid="status">
-                    {task?.status && <Tag data-testid={`status-tag-${task.status}`} value={t(`common.taskStatus.${task.status}`)} severity={getSeverityForStatus(task.status)} />}
+                    {task?.status && (
+                        <Tag
+                            data-testid={`status-tag-${task.status}`}
+                            value={t(`common.taskStatus.${task.status}`)}
+                            severity={getSeverityForStatus(task.status)}
+                            pt={tagPt(getSeverityForStatus(task.status))}
+                        />
+                    )}
                 </p>
 
                 <label className="block">{t('infoTaskModal.priority')}</label>
                 <p data-testid="priority">
-                    {task?.priority && <Tag data-testid={`priority-tag-${task.priority}`} value={t(`common.taskPriority.${task.priority}`)} severity={getSeverityForPriority(task.priority)} />}
+                    {task?.priority && (
+                        <Tag
+                            data-testid={`priority-tag-${task.priority}`}
+                            value={t(`common.taskPriority.${task.priority}`)}
+                            severity={getSeverityForPriority(task.priority)}
+                            pt={tagPt(getSeverityForPriority(task.priority))}
+                        />
+                    )}
                 </p>
 
                 <label className="block">{t('infoTaskModal.created')}</label>
