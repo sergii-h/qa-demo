@@ -176,6 +176,12 @@ afterEvaluate {
     }
 }
 
+configurations.configureEach {
+    if (isCanBeResolved) {
+        resolutionStrategy.activateDependencyLocking()
+    }
+}
+
 dependencies {
     implementation("androidx.appcompat:appcompat:1.7.1")
     val composeBom = platform("androidx.compose:compose-bom:2025.05.01")

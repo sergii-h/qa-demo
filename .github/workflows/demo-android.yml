@@ -36,6 +36,7 @@ jobs:
         uses: ./.github/actions/audit-osv
         with:
           path: demo-android
+          prepare-gradle-locks: 'true'
 
       - name: Run unit and integration tests
         working-directory: demo-android
