@@ -68,7 +68,7 @@ jobs:
         run: bash .github/scripts/pact-bootstrap-notification-master.sh
 
       - name: Audit dependencies
-        uses: ./.github/actions/audit-maven
+        uses: ./.github/actions/audit-osv
         with:
           path: notification-service
 

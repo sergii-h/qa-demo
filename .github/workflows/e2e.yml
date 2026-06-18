@@ -79,7 +79,7 @@ jobs:
           working-directory: e2e/playwright-python
 
       - name: Audit Selenide dependencies
-        uses: ./.github/actions/audit-maven
+        uses: ./.github/actions/audit-osv
         with:
           path: e2e/selenide-junit5-selenium-grid
 

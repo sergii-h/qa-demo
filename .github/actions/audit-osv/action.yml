@@ -1,0 +1,22 @@
+name: Audit dependencies with OSV-Scanner
+description: Fail when known high or critical vulnerabilities are found (Maven, Gradle, and other lockfiles)
+
+inputs:
+  path:
+    description: Project directory to scan
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Scan dependencies
+      shell: bash
+      run: |
+        curl -sSfL "https://github.com/google/osv-scanner/releases/download/v2.3.8/osv-scanner_linux_amd64" \
+          -o /usr/local/bin/osv-scanner
+        chmod +x /usr/local/bin/osv-scanner
+        osv-scanner scan source \
+          -r \
+          --skip-git \
+          --min-severity=HIGH \
+          "${{ inputs.path }}"

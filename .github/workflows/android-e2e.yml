@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Audit demo-android dependencies
-        uses: ./.github/actions/audit-gradle
+        uses: ./.github/actions/audit-osv
         with:
           path: demo-android
 

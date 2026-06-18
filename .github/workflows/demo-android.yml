@@ -33,7 +33,7 @@ jobs:
           packages: tools platform-tools platforms;android-35 build-tools;35.0.0
 
       - name: Audit dependencies
-        uses: ./.github/actions/audit-gradle
+        uses: ./.github/actions/audit-osv
         with:
           path: demo-android
 

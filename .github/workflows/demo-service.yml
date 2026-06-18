@@ -27,7 +27,7 @@ jobs:
           cache: maven
 
       - name: Audit dependencies
-        uses: ./.github/actions/audit-maven
+        uses: ./.github/actions/audit-osv
         with:
           path: demo-service
 
