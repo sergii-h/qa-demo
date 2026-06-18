@@ -12,11 +12,25 @@ runs:
     - name: Scan dependencies
       shell: bash
       run: |
+        set -euo pipefail
+        osv_scanner="$RUNNER_TEMP/osv-scanner"
+        results="$RUNNER_TEMP/osv-results.json"
         curl -sSfL "https://github.com/google/osv-scanner/releases/download/v2.3.8/osv-scanner_linux_amd64" \
-          -o /usr/local/bin/osv-scanner
-        chmod +x /usr/local/bin/osv-scanner
-        osv-scanner scan source \
+          -o "$osv_scanner"
+        chmod +x "$osv_scanner"
+        "$osv_scanner" scan source \
           -r \
-          --skip-git \
-          --min-severity=HIGH \
-          "${{ inputs.path }}"
+          --format=json \
+          --verbosity=error \
+          --output-file="$results" \
+          "${{ inputs.path }}" || true
+        high_or_critical=$(jq '[.results[]?.packages[]?.vulnerabilities[]?
+          | select((.database_specific.severity // "" | ascii_upcase) | IN("HIGH", "CRITICAL"))] | length' "$results")
+        if [ "$high_or_critical" -gt 0 ]; then
+          echo "Found $high_or_critical high or critical vulnerabilities"
+          jq -r '.results[]?.packages[]? | .package as $pkg
+            | .vulnerabilities[]?
+            | select((.database_specific.severity // "" | ascii_upcase) | IN("HIGH", "CRITICAL"))
+            | "\(.id) [\(.database_specific.severity)] \($pkg.name)"' "$results"
+          exit 1
+        fi
