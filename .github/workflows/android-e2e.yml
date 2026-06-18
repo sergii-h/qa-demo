@@ -29,14 +29,27 @@ permissions:
   actions: read
 
 jobs:
+  audit-android-dependencies:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Audit demo-android dependencies
+        uses: ./.github/actions/audit-gradle
+        with:
+          path: demo-android
+
   android-compose-e2e:
+    needs: audit-android-dependencies
     uses: ./.github/workflows/android-compose-e2e.yml
     secrets: inherit
 
   android-compose-accessibility:
+    needs: audit-android-dependencies
     uses: ./.github/workflows/android-compose-accessibility.yml
     secrets: inherit
 
   android-compose-uat:
+    needs: audit-android-dependencies
     uses: ./.github/workflows/android-compose-uat.yml
     secrets: inherit

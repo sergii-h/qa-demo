@@ -32,6 +32,11 @@ jobs:
         with:
           packages: tools platform-tools platforms;android-35 build-tools;35.0.0
 
+      - name: Audit dependencies
+        uses: ./.github/actions/audit-gradle
+        with:
+          path: demo-android
+
       - name: Run unit and integration tests
         working-directory: demo-android
         run: ./gradlew testDebugUnitTest

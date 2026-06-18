@@ -43,38 +43,87 @@ permissions:
   actions: read
 
 jobs:
+  audit-e2e-dependencies:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: e2e/playwright-typescript/package-lock.json
+
+      - name: Install Playwright TypeScript dependencies
+        working-directory: e2e/playwright-typescript
+        run: npm ci
+
+      - name: Audit Playwright TypeScript dependencies
+        uses: ./.github/actions/audit-npm
+        with:
+          working-directory: e2e/playwright-typescript
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: '3.12'
+          enable-cache: true
+          cache-dependency-path: e2e/playwright-python/uv.lock
+
+      - name: Install Playwright Python dependencies
+        working-directory: e2e/playwright-python
+        run: uv sync --frozen
+
+      - name: Audit Playwright Python dependencies
+        uses: ./.github/actions/audit-pip
+        with:
+          working-directory: e2e/playwright-python
+
+      - name: Audit Selenide dependencies
+        uses: ./.github/actions/audit-maven
+        with:
+          path: e2e/selenide-junit5-selenium-grid
+
   playwright-typescript-e2e:
+    needs: audit-e2e-dependencies
     uses: ./.github/workflows/playwright-typescript-e2e.yml
     secrets: inherit
 
   playwright-typescript-uat:
+    needs: audit-e2e-dependencies
     uses: ./.github/workflows/playwright-typescript-uat.yml
     secrets: inherit
 
   playwright-typescript-accessibility:
+    needs: audit-e2e-dependencies
     uses: ./.github/workflows/playwright-typescript-accessibility.yml
     secrets: inherit
 
   playwright-python-e2e:
+    needs: audit-e2e-dependencies
     uses: ./.github/workflows/playwright-python-e2e.yml
     secrets: inherit
 
   playwright-python-uat:
+    needs: audit-e2e-dependencies
     uses: ./.github/workflows/playwright-python-uat.yml
     secrets: inherit
 
   playwright-python-accessibility:
+    needs: audit-e2e-dependencies
     uses: ./.github/workflows/playwright-python-accessibility.yml
     secrets: inherit
 
   selenide-e2e:
+    needs: audit-e2e-dependencies
     uses: ./.github/workflows/selenide-junit5-grid-e2e.yml
     secrets: inherit
 
   selenide-uat:
+    needs: audit-e2e-dependencies
     uses: ./.github/workflows/selenide-junit5-grid-uat.yml
     secrets: inherit
 
   selenide-accessibility:
+    needs: audit-e2e-dependencies
     uses: ./.github/workflows/selenide-junit5-grid-accessibility.yml
     secrets: inherit

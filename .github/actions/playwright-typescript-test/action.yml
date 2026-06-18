@@ -1,5 +1,5 @@
-name: Run Playwright tests
-description: Run Playwright npm script and upload Allure results
+name: Run Playwright TypeScript tests
+description: Run Playwright TypeScript npm script and upload Allure results
 
 inputs:
   npm-script:

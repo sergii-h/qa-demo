@@ -1,0 +1,21 @@
+name: Audit Python dependencies
+description: Fail when high or critical vulnerabilities are found in Python dependencies
+
+inputs:
+  working-directory:
+    description: Python project directory (run dependency install first)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Audit Python dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        if [ -f uv.lock ]; then
+          uv run --with pip-audit pip-audit --severity high
+        else
+          python -m pip install --quiet pip-audit
+          pip-audit --severity high
+        fi

@@ -18,7 +18,7 @@ jobs:
           docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Run Playwright accessibility tests
-        uses: ./.github/actions/playwright-test
+        uses: ./.github/actions/playwright-typescript-test
         with:
           npm-script: accessibility
           app-mode: frontend

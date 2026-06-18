@@ -29,6 +29,11 @@ jobs:
         working-directory: demo-interface
         run: npm ci
 
+      - name: Audit dependencies
+        uses: ./.github/actions/audit-npm
+        with:
+          working-directory: demo-interface
+
       - name: Run unit and integration tests
         working-directory: demo-interface
         run: npm test

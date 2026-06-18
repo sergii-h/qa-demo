@@ -1,0 +1,19 @@
+name: Audit Maven dependencies
+description: Fail when known high or critical vulnerabilities are found in Maven dependencies
+
+inputs:
+  path:
+    description: Maven module directory to scan
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Scan Maven dependencies
+      uses: google/osv-scanner-action/osv-scanner-action@v2
+      with:
+        scan-args: |-
+          -r
+          --skip-git
+          --min-severity=HIGH
+          ${{ inputs.path }}
