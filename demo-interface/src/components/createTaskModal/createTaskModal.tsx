@@ -88,7 +88,7 @@ export const CreateTaskModal = (props: IProps) => {
     const renderFooter = () => {
         return (
             <>
-                <Button label={t('common.close')} icon="pi pi-times" onClick={onHide} className="p-button-text close-button" data-testid="close-button" />
+                <Button label={t('common.close')} icon="pi pi-times" onClick={onHide} className="p-button-outlined close-button" data-testid="close-button" />
                 <Button 
                     label={t('createTaskModal.create')} 
                     icon="pi pi-check" 

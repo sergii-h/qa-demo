@@ -23,8 +23,9 @@ class DeleteTaskTest : MockedBackendTestBase() {
         context = TaskTestContext()
         response = context.createTaskResponse()
 
-        support().mock.api().getTasks(response.toTask())
-        support().mock.api().deleteTask()
+        support().mock.api()
+            .getTasks(response.toTask())
+            .deleteTask()
     }
 
     @Test

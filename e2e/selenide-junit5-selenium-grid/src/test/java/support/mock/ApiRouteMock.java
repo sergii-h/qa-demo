@@ -36,29 +36,35 @@ public class ApiRouteMock {
         interceptor = new NetworkInterceptor(driver, filter);
     }
 
-    public void getTasks(List<TaskResponse> tasks) {
+    public ApiRouteMock getTasks(List<TaskResponse> tasks) {
         getTasksResponse.clear();
         getTasksResponse.addAll(tasks);
+        return this;
     }
 
-    public void getTask(String id, TaskResponse response) {
+    public ApiRouteMock getTask(String id, TaskResponse response) {
         getTaskResponses.put(id, response);
+        return this;
     }
 
-    public void getIsValid(String id, boolean isValid) {
+    public ApiRouteMock getIsValid(String id, boolean isValid) {
         getIsValidResponses.put(id, isValid);
+        return this;
     }
 
-    public void createTask(TaskResponse response) {
+    public ApiRouteMock createTask(TaskResponse response) {
         createTaskResponses.put(response.getId(), response);
+        return this;
     }
 
-    public void updateTask(String id, TaskResponse response) {
+    public ApiRouteMock updateTask(String id, TaskResponse response) {
         updateTaskResponses.put(id, response);
+        return this;
     }
 
-    public void deleteTask(String id) {
+    public ApiRouteMock deleteTask(String id) {
         deleteTaskIds.add(id);
+        return this;
     }
 
     private Optional<HttpResponse> matchRequest(HttpRequest request) {

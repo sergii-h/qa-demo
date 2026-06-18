@@ -12,6 +12,7 @@
 [![JUnit5](https://img.shields.io/badge/Unit-JUnit5-green?logo=junit5)](https://junit.org/junit5/)
 [![Selenide](https://img.shields.io/badge/E2E-Selenide-blue)](https://selenide.org/)
 [![Playwright](https://img.shields.io/badge/E2E-Playwright-green?logo=playwright)](https://playwright.dev/)
+[![Python](https://img.shields.io/badge/E2E-Python%203.12-blue?logo=python)](https://www.python.org/)
 [![Coverage](https://img.shields.io/badge/Coverage-90%25-brightgreen)](doc/testing-guide.md)
 <!-- When adding a new E2E framework: add a badge here, a sub-bullet in Tech Stack > Testing Frameworks,
      a new #### section under Running Tests > E2E Tests, and replace the matching placeholder in Project Structure -->
@@ -63,7 +64,7 @@ A full-stack Task Management app used as a testing pyramid demo. The domain is i
 | Unit | JUnit5 + Mockito (BE) · Vitest 4 (FE) · JUnit4 + MockK + Robolectric (Android) |
 | Integration | JUnit5 + TestContainers (BE) · Vitest 4 (FE) |
 | Contract | Pact — HTTP (FE↔BE + Android↔BE) + Kafka message (notification-service↔BE) |
-| E2E | Selenide + JUnit5 + Selenium Grid (Java) · Playwright + TypeScript · Compose UI Test (Android) |
+| E2E | Selenide + JUnit5 + Selenium Grid (Java) · Playwright + TypeScript · Playwright + Python · Compose UI Test (Android) |
 | Mutation | PiTest (BE) · Stryker (FE, on-demand) |
 | Performance | k6 |
 | Security | CodeQL (SAST) · Dependabot alerts (SCA) · GitHub secret scanning & push protection (platform) |
@@ -125,6 +126,7 @@ GitHub Actions validates every change — see [Actions](https://github.com/sergi
 | `pact-interface` | `demo-interface` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
 | `pact-notification` | `notification-service` consumer contracts, events provider verify, can-i-merge — push / PR to `master` |
 | `pact-android` | `demo-android` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
+| `e2e` | Web E2E — Playwright (TypeScript + Python), Selenide — mocked BE, accessibility, and UAT suites — push / PR to `master`, path-filtered |
 | `e2e-reports` | Publish Allure and Playwright reports to GitHub Pages after all web and Android E2E workflows finish |
 | `allure-pages` | Allure reports landing page (`master`) |
 | `allure-pages-cleanup` | Remove PR report folder (Allure + Playwright HTML) from GitHub Pages when a PR closes |
@@ -136,16 +138,16 @@ Allure and Playwright HTML reports from E2E runs are published to [GitHub Pages]
 
 | Trigger | Location | How to find |
 |---|---|---|
-| Push to `master` | `https://sergii-h.github.io/qa-demo/` | Landing page links to Allure (`{suite}/`) and Playwright HTML (`playwright-html-{suite}/`) |
+| Push to `master` | `https://sergii-h.github.io/qa-demo/` | Landing page links to Allure (`{suite}/`) and Playwright HTML (`playwright-html-{suite}/`, TypeScript only) |
 | Pull request to `master` | `https://sergii-h.github.io/qa-demo/pr/{number}/` | Single PR comment with link after all E2E workflows finish; removed when the PR closes |
 
-Raw Allure results and Playwright HTML reports are also kept as workflow artifacts for 7 days.
+Raw Allure results, Playwright HTML reports (TypeScript), and Playwright trace artifacts (Python) are also kept as workflow artifacts for 7 days.
 
 ---
 
 ## 🚀 Getting Started
 
-**Prerequisites:** JDK 21 · Maven 3.9+ · Node 22 (≥22.12.0) · Docker · k6 (performance tests only)
+**Prerequisites:** JDK 21 · Maven 3.9+ · Node 22 (≥22.12.0) · Python 3.12+ (Playwright Python E2E) · Docker · k6 (performance tests only)
 
 One-time setup:
 
@@ -203,7 +205,7 @@ See [doc/pact.md](doc/pact.md) for the step-by-step manual run and broker notes.
 
 Each E2E framework has three suites: **Mocked BE** (user flows), **Accessibility** (axe-core), **UAT** (smoke against the real app).
 
-See [Playwright E2E README](e2e/playwright-typescript/README.md) · [Selenide E2E README](e2e/selenide-junit5-selenium-grid/README.md) for setup and run commands.
+See [Playwright TypeScript E2E README](e2e/playwright-typescript/README.md) · [Playwright Python E2E README](e2e/playwright-python/README.md) · [Selenide E2E README](e2e/selenide-junit5-selenium-grid/README.md) for setup and run commands.
 
 ### Performance Tests (k6)
 
@@ -271,6 +273,12 @@ qa-demo/
 │   │   ├── providers/                  # StepProvider · ValidationProvider · SupportProvider
 │   │   ├── support/                    # api · mocks
 │   │   ├── context/ · data/ · fixtures/ · decorators/
+│   ├── playwright-python/              # Playwright + Python (pytest · pytest-playwright · pytest-xdist)
+│   │   ├── tests/                      # Same domain suites as TypeScript
+│   │   ├── interactions/               # pages · steps · validators
+│   │   ├── providers/                  # StepProvider · ValidationProvider · SupportProvider
+│   │   ├── support/                    # api · mocks
+│   │   └── context/ · data/ · decorators/
 │   └── selenide-junit5-selenium-grid/  # Selenide + JUnit5 (Java)
 │       └── src/test/java/
 │           ├── test/                   # spec/ · desktop/ · mobile/ — same domain subdirs per suite
@@ -298,7 +306,8 @@ qa-demo/
 | [Pact Guide](doc/pact.md) | Full Pact pipeline, step-by-step manual run, broker notes |
 | [Backend README](demo-service/README.md) | Running backend unit, integration, and mutation tests |
 | [Frontend README](demo-interface/README.md) | Running frontend unit, integration, and mutation tests |
-| [Playwright E2E README](e2e/playwright-typescript/README.md) | Playwright test suites, configuration, and run commands |
+| [Playwright TypeScript E2E README](e2e/playwright-typescript/README.md) | Playwright + TypeScript test suites, configuration, and run commands |
+| [Playwright Python E2E README](e2e/playwright-python/README.md) | Playwright + Python test suites, viewports, Allure and trace reports |
 | [Selenide E2E README](e2e/selenide-junit5-selenium-grid/README.md) | Selenide test suites, Selenium Grid Docker setup |
 | [Performance README](performance/README.md) | k6 scenarios and thresholds |
 | [ADR Index](doc/adr/README.md) | Architectural decisions with context and rationale |

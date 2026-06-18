@@ -46,22 +46,80 @@
 }
 
 .p-tag.p-tag-info {
-    background-color: #0277bd;
+    background-color: #0d47a1 !important;
+    border-color: #0d47a1 !important;
 }
 
-.p-button-outlined:not(.p-button-danger),
-.p-button-outlined:not(.p-button-danger):enabled:hover,
-.p-button-outlined:not(.p-button-danger):enabled:active {
+.p-tag.p-tag-warning {
+    background-color: #5c4b00 !important;
+    border-color: #5c4b00 !important;
+}
+
+.p-tag.p-tag-success {
+    background-color: #1b5e20 !important;
+    border-color: #1b5e20 !important;
+}
+
+.p-tag.p-tag-danger {
+    background-color: #b71c1c !important;
+    border-color: #b71c1c !important;
+}
+
+.p-tag.p-tag-info .p-tag-value,
+.p-tag.p-tag-warning .p-tag-value,
+.p-tag.p-tag-success .p-tag-value,
+.p-tag.p-tag-danger .p-tag-value {
+    color: #ffffff !important;
+}
+
+.p-button-outlined:not(.p-button-danger):not(.close-button),
+.p-button-outlined:not(.p-button-danger):not(.close-button):enabled:hover,
+.p-button-outlined:not(.p-button-danger):not(.close-button):enabled:active {
     color: #1565c0;
     border-color: #1565c0;
+}
+
+.p-dialog .p-dialog-header,
+.p-dialog .p-dialog-content {
+    background-color: #ffffff;
+}
+
+.p-dialog [data-testid="modal-title"],
+.p-dialog .p-dialog-title {
+    color: #212529 !important;
+}
+
+.p-dialog .p-inputtext,
+.p-dialog .p-inputtextarea,
+.p-dialog .p-dropdown-label {
+    color: #212529 !important;
+}
+
+.p-dialog-header .p-dialog-header-close,
+.p-dialog-header .p-dialog-header-close:enabled:hover,
+.p-dialog-header .p-dialog-header-close:enabled:active,
+.p-dialog-header .p-dialog-header-close .p-button-label {
+    color: #0d47a1 !important;
+}
+
+.p-dialog label.block,
+.field > label.block {
+    color: #212529 !important;
+}
+
+.p-dialog p {
+    color: #212529;
 }
 
 .p-dialog-footer .close-button.p-button-text,
 .p-dialog-footer .close-button.p-button-text:enabled:hover,
+.p-dialog-footer .close-button.p-button-text:enabled:active,
 .p-dialog-footer .close-button.p-button-outlined,
-.p-dialog-footer .close-button.p-button-outlined:enabled:hover {
-    color: #1565c0;
-    border-color: #1565c0;
+.p-dialog-footer .close-button.p-button-outlined:enabled:hover,
+.p-dialog-footer .close-button.p-button-outlined:enabled:active,
+.p-dialog-footer .close-button .p-button-label {
+    color: #0d47a1 !important;
+    border-color: #0d47a1 !important;
 }
 
 @media screen and (max-width: 768px) {

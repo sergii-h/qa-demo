@@ -32,8 +32,9 @@ class LanguageSupportTest : MockedBackendTestBase() {
             priority = TaskPriority.LOW,
         )
 
-        support().mock.api().getTasks(testContext.createTaskResponse().toTask())
-        support().mock.api().getTasks(testContext.createTaskResponse().toTask())
+        support().mock.api()
+            .getTasks(testContext.createTaskResponse().toTask())
+            .getTasks(testContext.createTaskResponse().toTask())
     }
 
     @Before

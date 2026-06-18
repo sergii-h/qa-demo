@@ -21,8 +21,9 @@ public interface IDeleteTaskTest {
     default void init() {
         var response = context.createTaskResponse();
 
-        support().mock.api().getTasks(List.of(response));
-        support().mock.api().deleteTask(response.getId());
+        support().mock.api()
+                .getTasks(List.of(response))
+                .deleteTask(response.getId());
     }
 
     @Test

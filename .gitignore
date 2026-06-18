@@ -24,3 +24,10 @@ selenide-selenoid-junit5-example/allure-results/
 /demo-interface/dist/
 /demo-interface/tsconfig.tsbuildinfo
 /e2e/playwright-typescript/test-results/
+/e2e/playwright-python/.venv/
+/e2e/playwright-python/allure-results/
+/e2e/playwright-python/.pytest_cache/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
