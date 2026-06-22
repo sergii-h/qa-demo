@@ -5,27 +5,16 @@ on:
 
 jobs:
   run-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create shared Docker network
-        run: docker network create qa-demo-e2e || true
-
-      - name: Start WireMock
-        run: docker compose -f docker/docker-compose/run-application.yml up -d qa-demo-wiremock
-
-      - name: Wait for WireMock
-        run: |
-          for i in {1..30}; do
-            curl -sf http://localhost:8085/__admin/mappings && exit 0
-            echo "Waiting for WireMock... ($i/30)"
-            sleep 2
-          done
-          echo "WireMock did not become ready in time"
-          exit 1
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: wiremock
 
       - name: Run Android Compose accessibility tests
         uses: ./.github/actions/run-android-emulator-tests

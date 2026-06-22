@@ -1,0 +1,32 @@
+name: Verify task API provider Pact contracts
+description: Run demo-service provider Pact verification tests against the local Pact Broker
+
+inputs:
+  pact-provider-version:
+    description: Provider version (typically github.sha)
+    required: true
+  pact-provider-branch:
+    description: Provider branch (typically github.ref_name)
+    required: true
+  pact-broker-base-url:
+    description: URL of the Pact Broker
+    required: false
+    default: http://localhost:9292
+
+runs:
+  using: composite
+  steps:
+    - name: Verify task API provider pact contracts
+      shell: bash
+      working-directory: demo-service
+      env:
+        DOCKER_HOST: unix:///var/run/docker.sock
+        PACT_BROKER_BASE_URL: ${{ inputs.pact-broker-base-url }}
+      run: >-
+        mvn verify -Pintegration-tests
+        -Dit.test="CreateTaskPactProviderTest,DeleteTaskPactProviderTest,GetAllTasksPactProviderTest,GetTaskByIdPactProviderTest,GetIsValidPactProviderTest,UpdateTaskPactProviderTest"
+        -Djacoco.skip=true
+        -Dpact.verifier.publishResults=true
+        -Dpact.provider.version=${{ inputs.pact-provider-version }}
+        -Dpact.provider.branch=${{ inputs.pact-provider-branch }}
+        -Djunit.parallel.enabled=false

@@ -1,4 +1,4 @@
-name: Run Android unit and integartion tests
+name: Run Android unit and integration tests
 
 on:
   push:
