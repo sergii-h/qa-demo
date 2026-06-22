@@ -27,9 +27,9 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.IN_PROGRESS,
             priority = TaskPriority.HIGH,
         )
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValid(true)
+        mockServer.enqueueGetTasks(task)
+        mockServer.enqueueGetTask(task)
+        mockServer.enqueueIsValid(true)
         launchApp()
         openDetail("task-301")
 
@@ -50,9 +50,9 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.TODO,
             priority = TaskPriority.MEDIUM,
         )
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValid(true)
+        mockServer.enqueueGetTasks(task)
+        mockServer.enqueueGetTask(task)
+        mockServer.enqueueIsValid(true)
         launchApp()
         openDetail("task-305")
 
@@ -67,9 +67,9 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     fun shouldShowNotValidIndicatorWhenValidationReturnsFalse() {
         // Given
         val task = IntegrationTasks.task("task-2", "Invalid Task", description = "Details")
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValid(false)
+        mockServer.enqueueGetTasks(task)
+        mockServer.enqueueGetTask(task)
+        mockServer.enqueueIsValid(false)
         launchApp()
         openDetail("task-2")
 
@@ -82,9 +82,9 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     fun shouldCloseDetailFlowWhenBackPressed() {
         // Given
         val task = IntegrationTasks.task("task-1", "Info Task", description = "Info description")
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValid(true)
+        mockServer.enqueueGetTasks(task)
+        mockServer.enqueueGetTask(task)
+        mockServer.enqueueIsValid(true)
         launchApp()
         openDetail("task-1")
 
@@ -101,9 +101,9 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     fun shouldKeepDetailFlowAvailableWhenTaskLoadFails() {
         // Given
         val listTask = IntegrationTasks.task("task-1", "Info Task")
-        fakeApi.enqueueGetTasks(listTask)
-        fakeApi.enqueueGetTaskError(500)
-        fakeApi.enqueueIsValid(false)
+        mockServer.enqueueGetTasks(listTask)
+        mockServer.enqueueGetTaskError(500)
+        mockServer.enqueueIsValid(false)
         launchApp()
         openDetailExpectingLoadError("task-1")
 
@@ -115,9 +115,9 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     fun shouldKeepDetailFlowAvailableWhenValidationRequestFails() {
         // Given
         val task = IntegrationTasks.task("task-3", "Validation Task", description = "Validation description")
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValidError(500, "Validation failed")
+        mockServer.enqueueGetTasks(task)
+        mockServer.enqueueGetTask(task)
+        mockServer.enqueueIsValidError(500, "Validation failed")
         launchApp()
         openDetail("task-3")
 
@@ -131,9 +131,9 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     fun shouldKeepDetailFlowAvailableWhenTaskDetailsRequestIsRejected() {
         // Given
         val listTask = IntegrationTasks.task("task-308", "Task reject task", description = "Task reject description")
-        fakeApi.enqueueGetTasks(listTask)
-        fakeApi.enqueueGetTaskNetworkFailure()
-        fakeApi.enqueueIsValid(false)
+        mockServer.enqueueGetTasks(listTask)
+        mockServer.enqueueGetTaskNetworkFailure()
+        mockServer.enqueueIsValid(false)
         launchApp()
         openDetailExpectingLoadError("task-308")
 
@@ -151,9 +151,9 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.DONE,
             priority = TaskPriority.HIGH,
         )
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValidNetworkFailure()
+        mockServer.enqueueGetTasks(task)
+        mockServer.enqueueGetTask(task)
+        mockServer.enqueueIsValidNetworkFailure()
         launchApp()
         openDetail("task-304")
 
@@ -167,9 +167,9 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     fun shouldShowSpanishDetailFlowStringsWhenEsSelected() {
         // Given
         val task = IntegrationTasks.task("task-1", "Info Task", description = "Info description")
-        fakeApi.enqueueGetTasksForLanguageSwitch(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValid(true)
+        mockServer.enqueueGetTasksForLanguageSwitch(task)
+        mockServer.enqueueGetTask(task)
+        mockServer.enqueueIsValid(true)
         launchApp()
         switchLanguage(LanguageOption.ES)
 
@@ -182,17 +182,4 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
         composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.TODO)).assertTextEquals("Por hacer")
     }
 
-    private fun openDetailExpectingLoadError(taskId: String) {
-        runAsyncAction {
-            onNodeWithTag(TestTags.infoButton(taskId)).performClick()
-        }
-        composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertIsDisplayed()
-    }
-
-    private fun openDetail(taskId: String) {
-        runAsyncAction {
-            onNodeWithTag(TestTags.infoButton(taskId)).performClick()
-        }
-        composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertIsDisplayed()
-    }
 }

@@ -6,7 +6,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.junit.runners.Parameterized.Parameters
 
-class ApiClientTest {
+class ErrorBodyParserTest {
 
     @Test
     fun shouldReturnMessageWhenErrorBodyContainsMessage() {
@@ -14,7 +14,7 @@ class ApiClientTest {
         val body = """{"message":"Title already exists"}"""
 
         // When
-        val result = ApiClient.parseErrorMessage(body)
+        val result = parseErrorBody(body)
 
         // Then
         assertThat(result).isEqualTo("Title already exists")
@@ -22,7 +22,7 @@ class ApiClientTest {
 }
 
 @RunWith(Parameterized::class)
-class ApiClientNullErrorMessageTest(
+class ErrorBodyParserNullResultTest(
     private val scenario: String,
     private val errorBody: String?
 ) {
@@ -30,7 +30,7 @@ class ApiClientNullErrorMessageTest(
     @Test
     fun shouldReturnNullWhenErrorBodyIsInvalid() {
         // When
-        val result = ApiClient.parseErrorMessage(errorBody)
+        val result = parseErrorBody(errorBody)
 
         // Then
         assertThat(result).isNull()

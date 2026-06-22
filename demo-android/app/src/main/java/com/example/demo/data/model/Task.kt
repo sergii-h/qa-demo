@@ -1,5 +1,9 @@
 package com.example.demo.data.model
 
+object TaskValidation {
+    const val MAX_TITLE_LENGTH = 100
+}
+
 data class Task(
     val id: String,
     val title: String,

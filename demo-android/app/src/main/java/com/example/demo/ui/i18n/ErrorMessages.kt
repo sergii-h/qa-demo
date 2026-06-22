@@ -2,13 +2,13 @@ package com.example.demo.ui.i18n
 
 import android.content.Context
 import com.example.demo.R
-import com.example.demo.data.remote.ApiClient
+import com.example.demo.data.remote.parseErrorBody
 import com.example.demo.locale.AppLocale
 import retrofit2.HttpException
 
 fun mapTaskError(context: Context, throwable: Throwable): String {
     if (throwable is HttpException) {
-        val message = ApiClient.parseErrorMessage(
+        val message = parseErrorBody(
             throwable.response()?.errorBody()?.string()
         )
         if (!message.isNullOrBlank()) {

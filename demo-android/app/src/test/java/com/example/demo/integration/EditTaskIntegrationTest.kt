@@ -10,7 +10,7 @@ import androidx.compose.ui.test.performTextInput
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskRequest
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.integration.support.FakeTaskApi
+import com.example.demo.integration.support.IntegrationMockServer
 import com.example.demo.integration.support.IntegrationTasks
 import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
@@ -40,10 +40,10 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.DONE,
             priority = TaskPriority.HIGH,
         )
-        fakeApi.enqueueGetTasks(originalTask)
-        fakeApi.enqueueGetTask(originalTask)
-        fakeApi.enqueueUpdateTask(updatedTask)
-        fakeApi.enqueueGetTasks(updatedTask)
+        mockServer.enqueueGetTasks(originalTask)
+        mockServer.enqueueGetTask(originalTask)
+        mockServer.enqueueUpdateTask(updatedTask)
+        mockServer.enqueueGetTasks(updatedTask)
         launchApp()
         openEditForm("task-201")
 
@@ -54,11 +54,11 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
         composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextInput("Updated description")
         selectStatus(TaskStatus.DONE)
         selectPriority(TaskPriority.HIGH)
-        submitEditForm()
+        submitEditFormAndExpectList()
 
         // Then
-        assertThat(fakeApi.updateTaskRequests).containsExactly(
-            FakeTaskApi.RecordedUpdate(
+        assertThat(mockServer.updateTaskRequests).containsExactly(
+            IntegrationMockServer.RecordedUpdate(
                 "task-201",
                 TaskRequest(
                     "Updated title",
@@ -68,6 +68,7 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
                 ),
             ),
         )
+        waitUntilTaskTitleVisible("task-201")
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-201")).assertIsDisplayed()
     }
 
@@ -76,25 +77,26 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
         // Given
         val originalTask = IntegrationTasks.task("task-1", "Original title", description = "Notes")
         val updatedTask = IntegrationTasks.task("task-1", "Updated title", description = "Notes")
-        fakeApi.enqueueGetTasks(originalTask)
-        fakeApi.enqueueGetTask(originalTask)
-        fakeApi.enqueueUpdateTask(updatedTask)
-        fakeApi.enqueueGetTasks(updatedTask)
+        mockServer.enqueueGetTasks(originalTask)
+        mockServer.enqueueGetTask(originalTask)
+        mockServer.enqueueUpdateTask(updatedTask)
+        mockServer.enqueueGetTasks(updatedTask)
         launchApp()
         openEditForm("task-1")
 
         // When
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("Updated title")
-        submitEditForm()
+        submitEditFormAndExpectList()
 
         // Then
-        assertThat(fakeApi.updateTaskRequests).containsExactly(
-            FakeTaskApi.RecordedUpdate(
+        assertThat(mockServer.updateTaskRequests).containsExactly(
+            IntegrationMockServer.RecordedUpdate(
                 "task-1",
                 TaskRequest("Updated title", "Notes", TaskStatus.TODO, TaskPriority.MEDIUM),
             ),
         )
+        waitUntilTaskTitleVisible("task-1")
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
     }
 
@@ -102,9 +104,9 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     fun shouldCloseEditFlowWithoutSavingChanges() {
         // Given
         val task = IntegrationTasks.task("task-1", "Original title", description = "Notes")
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueGetTask(task)
+        mockServer.enqueueGetTasks(task)
+        mockServer.enqueueGetTask(task)
+        mockServer.enqueueGetTask(task)
         launchApp()
         openEditForm("task-1")
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
@@ -117,7 +119,7 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
         openEditForm("task-1")
 
         // Then
-        assertThat(fakeApi.updateTaskRequests).isEmpty()
+        assertThat(mockServer.updateTaskRequests).isEmpty()
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
     }
 
@@ -126,30 +128,31 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
         // Given
         val originalTask = IntegrationTasks.task("task-1", "Original title")
         val updatedTask = IntegrationTasks.task("task-1", "Corrected title")
-        fakeApi.enqueueGetTasks(originalTask)
-        fakeApi.enqueueGetTask(originalTask)
-        fakeApi.enqueueUpdateTask(updatedTask)
-        fakeApi.enqueueGetTasks(updatedTask)
+        mockServer.enqueueGetTasks(originalTask)
+        mockServer.enqueueGetTask(originalTask)
+        mockServer.enqueueUpdateTask(updatedTask)
+        mockServer.enqueueGetTasks(updatedTask)
         launchApp()
         openEditForm("task-1")
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("a".repeat(101))
-        submitEditForm(expectList = false)
+        submitEditFormAndStayOnForm()
         commonAssertions.assertTitleError("Title must not exceed 100 characters")
-        assertThat(fakeApi.updateTaskRequests).isEmpty()
+        assertThat(mockServer.updateTaskRequests).isEmpty()
 
         // When
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("Corrected title")
-        submitEditForm()
+        submitEditFormAndExpectList()
 
         // Then
-        assertThat(fakeApi.updateTaskRequests).containsExactly(
-            FakeTaskApi.RecordedUpdate(
+        assertThat(mockServer.updateTaskRequests).containsExactly(
+            IntegrationMockServer.RecordedUpdate(
                 "task-1",
                 TaskRequest("Corrected title", null, TaskStatus.TODO, TaskPriority.MEDIUM),
             ),
         )
+        waitUntilTaskTitleVisible("task-1")
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
     }
 
@@ -157,19 +160,19 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     fun shouldDisplayGenericErrorWhenPutFailsWithServerError() {
         // Given
         val task = IntegrationTasks.task("task-1", "Original title")
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueUpdateTaskError(500)
+        mockServer.enqueueGetTasks(task)
+        mockServer.enqueueGetTask(task)
+        mockServer.enqueueUpdateTaskError(500)
         launchApp()
         openEditForm("task-1")
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("Updated title")
 
         // When
-        submitEditForm(expectList = false)
+        submitEditFormAndStayOnForm()
 
         // Then
-        commonAssertions.assertTitleError("Request failed (500)")
+        commonAssertions.assertSaveError("Request failed (500)")
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performScrollTo().assertExists()
     }
 
@@ -178,28 +181,29 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
         // Given
         val originalTask = IntegrationTasks.task("task-1", "Original title")
         val updatedTask = IntegrationTasks.task("task-1", "Updated title")
-        fakeApi.enqueueGetTasks(originalTask)
-        fakeApi.enqueueGetTask(originalTask)
-        fakeApi.enqueueUpdateTaskError(500)
-        fakeApi.enqueueUpdateTask(updatedTask)
-        fakeApi.enqueueGetTasks(updatedTask)
+        mockServer.enqueueGetTasks(originalTask)
+        mockServer.enqueueGetTask(originalTask)
+        mockServer.enqueueUpdateTaskError(500)
+        mockServer.enqueueUpdateTask(updatedTask)
+        mockServer.enqueueGetTasks(updatedTask)
         launchApp()
         openEditForm("task-1")
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("Updated title")
 
         // When
-        val expectedRequest = FakeTaskApi.RecordedUpdate(
+        val expectedRequest = IntegrationMockServer.RecordedUpdate(
             "task-1",
             TaskRequest("Updated title", null, TaskStatus.TODO, TaskPriority.MEDIUM),
         )
-        submitEditForm(expectList = false)
-        commonAssertions.assertTitleError("Request failed (500)")
-        assertThat(fakeApi.updateTaskRequests).containsExactly(expectedRequest)
-        submitEditForm()
+        submitEditFormAndStayOnForm()
+        commonAssertions.assertSaveError("Request failed (500)")
+        assertThat(mockServer.updateTaskRequests).containsExactly(expectedRequest)
+        submitEditFormAndExpectList()
 
         // Then
-        assertThat(fakeApi.updateTaskRequests).containsExactly(expectedRequest, expectedRequest)
+        assertThat(mockServer.updateTaskRequests).containsExactly(expectedRequest, expectedRequest)
+        waitUntilTaskTitleVisible("task-1")
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
     }
 
@@ -207,8 +211,8 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     fun shouldKeepEditFlowAvailableWhenInitialGetFails() {
         // Given
         val listTask = IntegrationTasks.task("task-1", "Original title")
-        fakeApi.enqueueGetTasks(listTask)
-        fakeApi.enqueueGetTaskError(500)
+        mockServer.enqueueGetTasks(listTask)
+        mockServer.enqueueGetTaskError(500)
         launchApp()
 
         // When
@@ -237,20 +241,20 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.IN_PROGRESS,
             priority = TaskPriority.MEDIUM,
         )
-        fakeApi.enqueueGetTasks(originalTask)
-        fakeApi.enqueueGetTask(originalTask)
-        fakeApi.enqueueUpdateTask(updatedTask)
-        fakeApi.enqueueGetTasks(updatedTask)
+        mockServer.enqueueGetTasks(originalTask)
+        mockServer.enqueueGetTask(originalTask)
+        mockServer.enqueueUpdateTask(updatedTask)
+        mockServer.enqueueGetTasks(updatedTask)
         launchApp()
         openEditForm("task-210")
         composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextClearance()
 
         // When
-        submitEditForm()
+        submitEditFormAndExpectList()
 
         // Then
-        assertThat(fakeApi.updateTaskRequests).containsExactly(
-            FakeTaskApi.RecordedUpdate(
+        assertThat(mockServer.updateTaskRequests).containsExactly(
+            IntegrationMockServer.RecordedUpdate(
                 "task-210",
                 TaskRequest(
                     "Task with description",
@@ -260,6 +264,7 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
                 ),
             ),
         )
+        waitUntilTaskTitleVisible("task-210")
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-210")).assertIsDisplayed()
     }
 
@@ -267,21 +272,21 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     fun shouldDisplayErrorWhenPutRequestIsRejected() {
         // Given
         val task = IntegrationTasks.task("task-1", "Original title", description = "Notes")
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueUpdateTaskNetworkFailure()
+        mockServer.enqueueGetTasks(task)
+        mockServer.enqueueGetTask(task)
+        mockServer.enqueueUpdateTaskNetworkFailure()
         launchApp()
         openEditForm("task-1")
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("Updated title")
 
         // When
-        submitEditForm(expectList = false)
+        submitEditFormAndStayOnForm()
 
         // Then
-        commonAssertions.assertTitleError("Network request failed")
-        assertThat(fakeApi.updateTaskRequests).containsExactly(
-            FakeTaskApi.RecordedUpdate(
+        commonAssertions.assertSaveError("End of input")
+        assertThat(mockServer.updateTaskRequests).containsExactly(
+            IntegrationMockServer.RecordedUpdate(
                 "task-1",
                 TaskRequest("Updated title", "Notes", TaskStatus.TODO, TaskPriority.MEDIUM),
             ),
@@ -293,8 +298,8 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     fun shouldShowSpanishEditFlowStringsWhenEsSelected() {
         // Given
         val task = IntegrationTasks.task("task-1", "Original title", description = "Notes")
-        fakeApi.enqueueGetTasksForLanguageSwitch(task)
-        fakeApi.enqueueGetTask(task)
+        mockServer.enqueueGetTasksForLanguageSwitch(task)
+        mockServer.enqueueGetTask(task)
         launchApp()
         switchLanguage(LanguageOption.ES)
 
@@ -307,21 +312,18 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
         composeTestRule.onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().assertTextEquals("Guardar")
     }
 
-    private fun submitEditForm(expectList: Boolean = true) {
+    private fun submitEditFormAndExpectList() {
         runAsyncAction {
             onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().performClick()
         }
-        if (expectList) {
-            composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).assertIsDisplayed()
-            flushAsyncWork()
-        }
+        waitUntilEditFormClosed()
+        waitUntilListLoaded()
     }
 
-    private fun openEditForm(taskId: String) {
+    private fun submitEditFormAndStayOnForm() {
         runAsyncAction {
-            onNodeWithTag(TestTags.editButton(taskId)).performClick()
+            onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().performClick()
         }
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
     }
 
     private fun selectPriority(priority: TaskPriority) {

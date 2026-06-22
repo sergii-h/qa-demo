@@ -239,7 +239,7 @@ class TaskFormViewModelTest {
     }
 
     @Test
-    fun shouldSetTitleErrorWhenSaveFailsWithNonConflictError() = runTest(mainDispatcherRule.dispatcher) {
+    fun shouldSetSaveErrorWhenSaveFailsWithNonConflictError() = runTest(mainDispatcherRule.dispatcher) {
         // Given
         coEvery { repository.createTask(any()) } throws HttpExceptionFactory.create(500)
         val viewModel = TaskFormViewModel(
@@ -255,8 +255,9 @@ class TaskFormViewModelTest {
         advanceUntilIdle()
 
         // Then
-        assertThat(viewModel.uiState.value.titleError)
+        assertThat(viewModel.uiState.value.saveError)
             .isEqualTo(application.getString(R.string.error_request_failed, 500))
+        assertThat(viewModel.uiState.value.titleError).isNull()
         assertThat(viewModel.uiState.value.saveSucceeded).isFalse()
     }
 
@@ -328,7 +329,7 @@ class TaskFormViewModelTest {
     }
 
     @Test
-    fun shouldSetTitleErrorWhenUpdateFailsWithNonConflictError() = runTest(mainDispatcherRule.dispatcher) {
+    fun shouldSetSaveErrorWhenUpdateFailsWithNonConflictError() = runTest(mainDispatcherRule.dispatcher) {
         // Given
         coEvery { repository.getTask("task-1") } returns TaskFixtures.sampleTask
         coEvery { repository.updateTask("task-1", any()) } throws HttpExceptionFactory.create(500)
@@ -346,13 +347,14 @@ class TaskFormViewModelTest {
         advanceUntilIdle()
 
         // Then
-        assertThat(viewModel.uiState.value.titleError)
+        assertThat(viewModel.uiState.value.saveError)
             .isEqualTo(application.getString(R.string.error_request_failed, 500))
+        assertThat(viewModel.uiState.value.titleError).isNull()
         assertThat(viewModel.uiState.value.saveSucceeded).isFalse()
     }
 
     @Test
-    fun shouldSetTitleErrorWhenSaveInvokedInEditModeWithoutTaskId() =
+    fun shouldSetSaveErrorWhenSaveInvokedInEditModeWithoutTaskId() =
         runTest(mainDispatcherRule.dispatcher) {
             // Given
             val viewModel = TaskFormViewModel(
@@ -369,7 +371,8 @@ class TaskFormViewModelTest {
 
             // Then
             assertThat(viewModel.uiState.value.saveSucceeded).isFalse()
-            assertThat(viewModel.uiState.value.titleError).isNotNull()
+            assertThat(viewModel.uiState.value.saveError).isNotNull()
+            assertThat(viewModel.uiState.value.titleError).isNull()
             coVerify(exactly = 0) { repository.updateTask(any(), any()) }
         }
 

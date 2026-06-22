@@ -32,7 +32,7 @@ class LanguageIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldRenderLanguageSwitcherWhenListShown() {
         // Given
-        fakeApi.enqueueGetTasks()
+        mockServer.enqueueGetTasks()
 
         // When
         launchApp()
@@ -47,7 +47,7 @@ class LanguageIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldShowSpanishListTitleWhenEsSelected() {
         // Given
-        fakeApi.enqueueGetTasksForLanguageSwitch()
+        mockServer.enqueueGetTasksForLanguageSwitch()
         launchApp()
 
         // When
@@ -60,13 +60,13 @@ class LanguageIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldChangeLanguageWhenUserSelectsAnotherLanguageOption() {
         // Given
-        fakeApi.enqueueGetTasksForLanguageSwitch()
+        mockServer.enqueueGetTasksForLanguageSwitch()
         launchApp()
         switchLanguage(LanguageOption.ES)
         composeTestRule.onNodeWithTag(TestTags.PAGE_TITLE).assertTextEquals("Tareas")
 
         // When
-        fakeApi.enqueueGetTasks()
+        mockServer.enqueueGetTasks()
         switchLanguage(LanguageOption.EN)
 
         // Then

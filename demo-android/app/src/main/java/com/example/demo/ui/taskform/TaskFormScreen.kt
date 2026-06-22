@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -189,6 +190,15 @@ fun TaskFormScreen(
                         testTag = TestTags.PRIORITY_DROPDOWN,
                         optionTestTag = TestTags::priorityDropdownOption,
                     )
+
+                    uiState.saveError?.let { error ->
+                        Text(
+                            text = error,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.testTag(TestTags.SAVE_ERROR),
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 

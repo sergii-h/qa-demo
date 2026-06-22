@@ -35,7 +35,7 @@ class EditTaskTest : MockedBackendTestBase() {
     }
 
     @Test
-    fun shouldEditTask() {
+    fun shouldUpdateTaskWhenEditFormSubmitted() {
         // Given
         val updatedContext = context.copy(
             title = "${context.title}-Updated",

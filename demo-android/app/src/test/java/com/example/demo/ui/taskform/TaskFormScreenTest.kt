@@ -1,9 +1,9 @@
 package com.example.demo.ui.taskform
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -147,9 +147,9 @@ class TaskFormScreenTest {
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.STATUS_DROPDOWN).assertIsDisplayed()
-        composeTestRule.onNodeWithText("To Do").assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.STATUS_DROPDOWN).assertTextContains("To Do")
         composeTestRule.onNodeWithTag(TestTags.PRIORITY_DROPDOWN).assertIsDisplayed()
-        composeTestRule.onNodeWithText("Medium").assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.PRIORITY_DROPDOWN).assertTextContains("Medium")
     }
 
     @Test

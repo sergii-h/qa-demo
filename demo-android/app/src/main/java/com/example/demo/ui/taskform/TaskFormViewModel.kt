@@ -9,6 +9,7 @@ import com.example.demo.R
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskRequest
 import com.example.demo.data.model.TaskStatus
+import com.example.demo.data.model.TaskValidation
 import com.example.demo.locale.AppLocale
 import com.example.demo.repository.TaskRepository
 import com.example.demo.ui.i18n.isDuplicateTitleError
@@ -33,6 +34,7 @@ data class TaskFormUiState(
     val status: TaskStatus = TaskStatus.TODO,
     val priority: TaskPriority = TaskPriority.MEDIUM,
     val titleError: String? = null,
+    val saveError: String? = null,
     val loadError: String? = null,
     val saveSucceeded: Boolean = false
 )
@@ -98,7 +100,7 @@ class TaskFormViewModel(
     fun save() {
         val state = _uiState.value
         if (state.title.trim().isEmpty()) return
-        if (state.title.trim().length > 100) {
+        if (state.title.trim().length > TaskValidation.MAX_TITLE_LENGTH) {
             _uiState.update {
                 it.copy(
                     titleError = AppLocale.getString(
@@ -131,16 +133,20 @@ class TaskFormViewModel(
                 }
                 .onFailure { error ->
                     val app = getApplication<Application>()
-                    val titleError = if (isDuplicateTitleError(error)) {
-                        AppLocale.getString(app, R.string.error_title_already_exists)
+                    if (isDuplicateTitleError(error)) {
+                        _uiState.update {
+                            it.copy(
+                                isSaving = false,
+                                titleError = AppLocale.getString(app, R.string.error_title_already_exists)
+                            )
+                        }
                     } else {
-                        null
-                    }
-                    _uiState.update {
-                        it.copy(
-                            isSaving = false,
-                            titleError = titleError ?: mapTaskError(app, error)
-                        )
+                        _uiState.update {
+                            it.copy(
+                                isSaving = false,
+                                saveError = mapTaskError(app, error)
+                            )
+                        }
                     }
                 }
         }

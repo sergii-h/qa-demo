@@ -33,20 +33,21 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.TODO,
             priority = TaskPriority.MEDIUM,
         )
-        fakeApi.enqueueGetTasks()
-        fakeApi.enqueueCreateTask(createdTask)
-        fakeApi.enqueueGetTasks(createdTask)
+        mockServer.enqueueGetTasks()
+        mockServer.enqueueCreateTask(createdTask)
+        mockServer.enqueueGetTasks(createdTask)
         launchApp()
         openCreateForm()
 
         // When
         fillCreateTitle("Test Task")
-        submitCreateForm()
+        submitCreateFormAndExpectList()
 
         // Then
-        assertThat(fakeApi.createTaskRequests).containsExactly(
+        assertThat(mockServer.createTaskRequests).containsExactly(
             TaskRequest("Test Task", null, TaskStatus.TODO, TaskPriority.MEDIUM),
         )
+        waitUntilTaskTitleVisible("task-124")
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-124")).assertIsDisplayed()
     }
 
@@ -60,9 +61,9 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.IN_PROGRESS,
             priority = TaskPriority.HIGH,
         )
-        fakeApi.enqueueGetTasks()
-        fakeApi.enqueueCreateTask(createdTask)
-        fakeApi.enqueueGetTasks(createdTask)
+        mockServer.enqueueGetTasks()
+        mockServer.enqueueCreateTask(createdTask)
+        mockServer.enqueueGetTasks(createdTask)
         launchApp()
         openCreateForm()
 
@@ -71,19 +72,20 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
         composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextInput("Test Description")
         selectStatus(TaskStatus.IN_PROGRESS)
         selectPriority(TaskPriority.HIGH)
-        submitCreateForm()
+        submitCreateFormAndExpectList()
 
         // Then
-        assertThat(fakeApi.createTaskRequests).containsExactly(
+        assertThat(mockServer.createTaskRequests).containsExactly(
             TaskRequest("Test Task", "Test Description", TaskStatus.IN_PROGRESS, TaskPriority.HIGH),
         )
+        waitUntilTaskTitleVisible("task-123")
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-123")).assertIsDisplayed()
     }
 
     @Test
     fun shouldResetFormWhenCreateFlowClosedAndReopened() {
         // Given
-        fakeApi.enqueueGetTasks()
+        mockServer.enqueueGetTasks()
         launchApp()
         openCreateForm()
         composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performTextInput("Temporary title")
@@ -96,7 +98,7 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
         openCreateForm()
 
         // Then
-        assertThat(fakeApi.createTaskRequests).isEmpty()
+        assertThat(mockServer.createTaskRequests).isEmpty()
         composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
         composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().assertIsDisplayed()
     }
@@ -111,45 +113,46 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.TODO,
             priority = TaskPriority.HIGH,
         )
-        fakeApi.enqueueGetTasks()
-        fakeApi.enqueueCreateTask(createdTask)
-        fakeApi.enqueueGetTasks(createdTask)
+        mockServer.enqueueGetTasks()
+        mockServer.enqueueCreateTask(createdTask)
+        mockServer.enqueueGetTasks(createdTask)
         launchApp()
         openCreateForm()
         fillCreateTitle("a".repeat(101))
-        submitCreateForm(expectList = false)
+        submitCreateFormAndStayOnForm()
         commonAssertions.assertTitleError("Title must not exceed 100 characters")
-        assertThat(fakeApi.createTaskRequests).isEmpty()
+        assertThat(mockServer.createTaskRequests).isEmpty()
 
         // When
         composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performTextClearance()
         fillCreateTitle("Corrected title")
         selectPriority(TaskPriority.HIGH)
-        submitCreateForm()
+        submitCreateFormAndExpectList()
 
         // Then
-        assertThat(fakeApi.createTaskRequests).containsExactly(
+        assertThat(mockServer.createTaskRequests).containsExactly(
             TaskRequest("Corrected title", null, TaskStatus.TODO, TaskPriority.HIGH),
         )
+        waitUntilTaskTitleVisible("task-130")
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-130")).assertIsDisplayed()
     }
 
     @Test
     fun shouldDisplayGenericErrorWhenPostFailsWithServerError() {
         // Given
-        fakeApi.enqueueGetTasks()
-        fakeApi.enqueueCreateTaskError(500)
+        mockServer.enqueueGetTasks()
+        mockServer.enqueueCreateTaskError(500)
         launchApp()
         openCreateForm()
         fillCreateTitle("Invalid Task")
         composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextInput("Some description")
 
         // When
-        submitCreateForm(expectList = false)
+        submitCreateFormAndStayOnForm()
 
         // Then
-        commonAssertions.assertTitleError("Request failed (500)")
-        assertThat(fakeApi.createTaskRequests).containsExactly(
+        commonAssertions.assertSaveError("Request failed (500)")
+        assertThat(mockServer.createTaskRequests).containsExactly(
             TaskRequest("Invalid Task", "Some description", TaskStatus.TODO, TaskPriority.MEDIUM),
         )
         composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performScrollTo().assertExists()
@@ -165,10 +168,10 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.TODO,
             priority = TaskPriority.HIGH,
         )
-        fakeApi.enqueueGetTasks()
-        fakeApi.enqueueCreateTaskError(500)
-        fakeApi.enqueueCreateTask(createdTask)
-        fakeApi.enqueueGetTasks(createdTask)
+        mockServer.enqueueGetTasks()
+        mockServer.enqueueCreateTaskError(500)
+        mockServer.enqueueCreateTask(createdTask)
+        mockServer.enqueueGetTasks(createdTask)
         launchApp()
         openCreateForm()
         fillCreateTitle("Retry Task")
@@ -182,20 +185,21 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
             TaskStatus.TODO,
             TaskPriority.HIGH,
         )
-        submitCreateForm(expectList = false)
-        commonAssertions.assertTitleError("Request failed (500)")
-        assertThat(fakeApi.createTaskRequests).containsExactly(expectedRequest)
-        submitCreateForm()
+        submitCreateFormAndStayOnForm()
+        commonAssertions.assertSaveError("Request failed (500)")
+        assertThat(mockServer.createTaskRequests).containsExactly(expectedRequest)
+        submitCreateFormAndExpectList()
 
         // Then
-        assertThat(fakeApi.createTaskRequests).containsExactly(expectedRequest, expectedRequest)
+        assertThat(mockServer.createTaskRequests).containsExactly(expectedRequest, expectedRequest)
+        waitUntilTaskTitleVisible("task-456")
         composeTestRule.onNodeWithTag(TestTags.taskTitle("task-456")).assertIsDisplayed()
     }
 
     @Test
     fun shouldKeepCreateFlowAvailableWhenInitialGetFails() {
         // Given
-        fakeApi.enqueueGetTasksError(500)
+        mockServer.enqueueGetTasksError(500)
 
         // When
         launchApp()
@@ -216,19 +220,19 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
             status = TaskStatus.TODO,
             priority = TaskPriority.HIGH,
         )
-        fakeApi.enqueueGetTasks()
-        fakeApi.enqueueCreateTask(createdTask)
-        fakeApi.enqueueGetTasksError(500)
+        mockServer.enqueueGetTasks()
+        mockServer.enqueueCreateTask(createdTask)
+        mockServer.enqueueGetTasksError(500)
         launchApp()
         openCreateForm()
         fillCreateTitle("Task with refresh failure")
         selectPriority(TaskPriority.HIGH)
 
         // When
-        submitCreateForm()
+        submitCreateFormAndExpectList()
 
         // Then
-        assertThat(fakeApi.createTaskRequests).containsExactly(
+        assertThat(mockServer.createTaskRequests).containsExactly(
             TaskRequest("Task with refresh failure", null, TaskStatus.TODO, TaskPriority.HIGH),
         )
         composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).assertIsDisplayed()
@@ -238,19 +242,19 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldDisplayErrorWhenPostRequestIsRejected() {
         // Given
-        fakeApi.enqueueGetTasks()
-        fakeApi.enqueueCreateTaskNetworkFailure()
+        mockServer.enqueueGetTasks()
+        mockServer.enqueueCreateTaskNetworkFailure()
         launchApp()
         openCreateForm()
         fillCreateTitle("Test Task")
         selectPriority(TaskPriority.HIGH)
 
         // When
-        submitCreateForm(expectList = false)
+        submitCreateFormAndStayOnForm()
 
         // Then
-        commonAssertions.assertTitleError("Network request failed")
-        assertThat(fakeApi.createTaskRequests).containsExactly(
+        commonAssertions.assertSaveError("End of input")
+        assertThat(mockServer.createTaskRequests).containsExactly(
             TaskRequest("Test Task", null, TaskStatus.TODO, TaskPriority.HIGH),
         )
         composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performScrollTo().assertExists()
@@ -259,7 +263,7 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldKeepCreateFlowAvailableWhenInitialGetRequestIsRejected() {
         // Given
-        fakeApi.enqueueGetTasksNetworkFailure()
+        mockServer.enqueueGetTasksNetworkFailure()
 
         // When
         launchApp()
@@ -272,7 +276,7 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldShowSpanishCreateFlowStringsWhenEsSelected() {
         // Given
-        fakeApi.enqueueGetTasksForLanguageSwitch()
+        mockServer.enqueueGetTasksForLanguageSwitch()
         launchApp()
         switchLanguage(LanguageOption.ES)
 
@@ -292,21 +296,18 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
         composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().assertIsEnabled()
     }
 
-    private fun submitCreateForm(expectList: Boolean = true) {
+    private fun submitCreateFormAndExpectList() {
         runAsyncAction {
             onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().performClick()
         }
-        if (expectList) {
-            composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).assertIsDisplayed()
-            flushAsyncWork()
-        }
+        waitUntilCreateFormClosed()
+        waitUntilListLoaded()
     }
 
-    private fun openCreateForm() {
+    private fun submitCreateFormAndStayOnForm() {
         runAsyncAction {
-            onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick()
+            onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().performClick()
         }
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
     }
 
     private fun selectPriority(priority: TaskPriority) {

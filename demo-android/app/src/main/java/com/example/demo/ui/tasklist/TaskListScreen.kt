@@ -115,7 +115,7 @@ fun TaskListScreen(
                 )
             }
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState, modifier = Modifier.testTag(TestTags.ERROR_SNACKBAR)) }
     ) { padding ->
         PullToRefreshBox(
             state = pullToRefreshState,
