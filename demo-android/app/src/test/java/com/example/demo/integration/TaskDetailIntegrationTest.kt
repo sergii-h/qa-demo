@@ -4,9 +4,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.example.demo.data.model.Task
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.integration.support.IntegrationTasks
 import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
 import com.example.demo.ui.TestTags
@@ -20,12 +20,14 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldDisplayTaskDetailsWithAllValuesWhenInfoOpened() {
         // Given
-        val task = IntegrationTasks.task(
+        val task = Task(
             id = "task-301",
             title = "Info task",
             description = "Info description",
             status = TaskStatus.IN_PROGRESS,
             priority = TaskPriority.HIGH,
+            createdDate = null,
+            updatedDate = null,
         )
         mockServer.enqueueGetTasks(task)
         mockServer.enqueueGetTask(task)
@@ -43,12 +45,14 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldDisplayTaskDetailsWithRequiredValuesWhenInfoOpened() {
         // Given
-        val task = IntegrationTasks.task(
+        val task = Task(
             id = "task-305",
             title = "Info required task",
             description = null,
             status = TaskStatus.TODO,
             priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
         )
         mockServer.enqueueGetTasks(task)
         mockServer.enqueueGetTask(task)
@@ -66,7 +70,15 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldShowNotValidIndicatorWhenValidationReturnsFalse() {
         // Given
-        val task = IntegrationTasks.task("task-2", "Invalid Task", description = "Details")
+        val task = Task(
+            id = "task-2",
+            title = "Invalid Task",
+            description = "Details",
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(task)
         mockServer.enqueueGetTask(task)
         mockServer.enqueueIsValid(false)
@@ -81,7 +93,15 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldCloseDetailFlowWhenBackPressed() {
         // Given
-        val task = IntegrationTasks.task("task-1", "Info Task", description = "Info description")
+        val task = Task(
+            id = "task-1",
+            title = "Info Task",
+            description = "Info description",
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(task)
         mockServer.enqueueGetTask(task)
         mockServer.enqueueIsValid(true)
@@ -100,7 +120,15 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldKeepDetailFlowAvailableWhenTaskLoadFails() {
         // Given
-        val listTask = IntegrationTasks.task("task-1", "Info Task")
+        val listTask = Task(
+            id = "task-1",
+            title = "Info Task",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(listTask)
         mockServer.enqueueGetTaskError(500)
         mockServer.enqueueIsValid(false)
@@ -114,7 +142,15 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldKeepDetailFlowAvailableWhenValidationRequestFails() {
         // Given
-        val task = IntegrationTasks.task("task-3", "Validation Task", description = "Validation description")
+        val task = Task(
+            id = "task-3",
+            title = "Validation Task",
+            description = "Validation description",
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(task)
         mockServer.enqueueGetTask(task)
         mockServer.enqueueIsValidError(500, "Validation failed")
@@ -130,7 +166,15 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldKeepDetailFlowAvailableWhenTaskDetailsRequestIsRejected() {
         // Given
-        val listTask = IntegrationTasks.task("task-308", "Task reject task", description = "Task reject description")
+        val listTask = Task(
+            id = "task-308",
+            title = "Task reject task",
+            description = "Task reject description",
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(listTask)
         mockServer.enqueueGetTaskNetworkFailure()
         mockServer.enqueueIsValid(false)
@@ -144,12 +188,14 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldKeepDetailFlowAvailableWhenValidationRequestIsRejected() {
         // Given
-        val task = IntegrationTasks.task(
+        val task = Task(
             id = "task-304",
             title = "Validation reject task",
             description = "Validation reject description",
             status = TaskStatus.DONE,
             priority = TaskPriority.HIGH,
+            createdDate = null,
+            updatedDate = null,
         )
         mockServer.enqueueGetTasks(task)
         mockServer.enqueueGetTask(task)
@@ -166,7 +212,15 @@ class TaskDetailIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldShowSpanishDetailFlowStringsWhenEsSelected() {
         // Given
-        val task = IntegrationTasks.task("task-1", "Info Task", description = "Info description")
+        val task = Task(
+            id = "task-1",
+            title = "Info Task",
+            description = "Info description",
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasksForLanguageSwitch(task)
         mockServer.enqueueGetTask(task)
         mockServer.enqueueIsValid(true)

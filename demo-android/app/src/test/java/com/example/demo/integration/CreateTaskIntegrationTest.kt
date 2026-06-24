@@ -8,10 +8,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import com.example.demo.data.model.Task
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskRequest
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.integration.support.IntegrationTasks
 import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
 import com.example.demo.ui.TestTags
@@ -26,12 +26,14 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldCreateTaskWithRequiredValues() {
         // Given
-        val createdTask = IntegrationTasks.task(
+        val createdTask = Task(
             id = "task-124",
             title = "Test Task",
             description = null,
             status = TaskStatus.TODO,
             priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
         )
         mockServer.enqueueGetTasks()
         mockServer.enqueueCreateTask(createdTask)
@@ -54,12 +56,14 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldCreateTaskWithAllValues() {
         // Given
-        val createdTask = IntegrationTasks.task(
+        val createdTask = Task(
             id = "task-123",
             title = "Test Task",
             description = "Test Description",
             status = TaskStatus.IN_PROGRESS,
             priority = TaskPriority.HIGH,
+            createdDate = null,
+            updatedDate = null,
         )
         mockServer.enqueueGetTasks()
         mockServer.enqueueCreateTask(createdTask)
@@ -106,12 +110,14 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldProceedWithCreationAfterInvalidTitleCorrected() {
         // Given
-        val createdTask = IntegrationTasks.task(
+        val createdTask = Task(
             id = "task-130",
             title = "Corrected title",
             description = null,
             status = TaskStatus.TODO,
             priority = TaskPriority.HIGH,
+            createdDate = null,
+            updatedDate = null,
         )
         mockServer.enqueueGetTasks()
         mockServer.enqueueCreateTask(createdTask)
@@ -161,12 +167,14 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldRetryAndCreateTaskAfterInitialPostFailure() {
         // Given
-        val createdTask = IntegrationTasks.task(
+        val createdTask = Task(
             id = "task-456",
             title = "Retry Task",
             description = "Retry Description",
             status = TaskStatus.TODO,
             priority = TaskPriority.HIGH,
+            createdDate = null,
+            updatedDate = null,
         )
         mockServer.enqueueGetTasks()
         mockServer.enqueueCreateTaskError(500)
@@ -213,12 +221,14 @@ class CreateTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldCloseCreateFlowWhenRefreshGetFailsAfterSuccessfulPost() {
         // Given
-        val createdTask = IntegrationTasks.task(
+        val createdTask = Task(
             id = "task-778",
             title = "Task with refresh failure",
             description = null,
             status = TaskStatus.TODO,
             priority = TaskPriority.HIGH,
+            createdDate = null,
+            updatedDate = null,
         )
         mockServer.enqueueGetTasks()
         mockServer.enqueueCreateTask(createdTask)

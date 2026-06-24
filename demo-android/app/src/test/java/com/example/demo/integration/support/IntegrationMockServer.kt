@@ -7,12 +7,14 @@ import com.example.demo.data.remote.TaskApi
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okhttp3.mockwebserver.SocketPolicy
 import java.util.ArrayDeque
+import java.util.concurrent.TimeUnit
 
 class IntegrationMockServer {
     private val server = MockWebServer()
@@ -54,7 +56,14 @@ class IntegrationMockServer {
         server.shutdown()
     }
 
-    fun createTaskApi(): TaskApi = ApiClient.createTaskApi("${server.url("/")}v1/")
+    fun createTaskApi(): TaskApi {
+        val client = OkHttpClient.Builder()
+            .retryOnConnectionFailure(false)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .build()
+        return ApiClient.createTaskApi("${server.url("/")}v1/", client)
+    }
 
     fun enqueueGetTasks(tasks: List<Task>) {
         getTasksScripts.addLast(ScriptedResponse.Http(jsonResponse(200, taskListAdapter.toJson(tasks)!!)))
@@ -135,7 +144,15 @@ class IntegrationMockServer {
     }
 
     fun enqueueDeleteNetworkFailure() {
-        deleteTaskScripts.addLast(ScriptedResponse.NetworkFailure)
+        deleteTaskScripts.addLast(
+            ScriptedResponse.Http(
+                MockResponse()
+                    .setResponseCode(503)
+                    .setBody("")
+                    .addHeader("Content-Type", "application/json")
+                    .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY),
+            ),
+        )
     }
 
     private fun dispatchRequest(request: RecordedRequest): MockResponse {

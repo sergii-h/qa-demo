@@ -10,8 +10,8 @@ import androidx.compose.ui.test.performTextInput
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskRequest
 import com.example.demo.data.model.TaskStatus
+import com.example.demo.data.model.Task
 import com.example.demo.integration.support.IntegrationMockServer
-import com.example.demo.integration.support.IntegrationTasks
 import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
 import com.example.demo.ui.TestTags
@@ -26,19 +26,23 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldUpdateTaskWithAllFieldsAndRefreshList() {
         // Given
-        val originalTask = IntegrationTasks.task(
+        val originalTask = Task(
             id = "task-201",
             title = "Existing title",
             description = "Existing description",
             status = TaskStatus.TODO,
             priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
         )
-        val updatedTask = IntegrationTasks.task(
+        val updatedTask = Task(
             id = "task-201",
             title = "Updated title",
             description = "Updated description",
             status = TaskStatus.DONE,
             priority = TaskPriority.HIGH,
+            createdDate = null,
+            updatedDate = null,
         )
         mockServer.enqueueGetTasks(originalTask)
         mockServer.enqueueGetTask(originalTask)
@@ -75,8 +79,24 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldUpdateTaskAndRefreshList() {
         // Given
-        val originalTask = IntegrationTasks.task("task-1", "Original title", description = "Notes")
-        val updatedTask = IntegrationTasks.task("task-1", "Updated title", description = "Notes")
+        val originalTask = Task(
+            id = "task-1",
+            title = "Original title",
+            description = "Notes",
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
+        val updatedTask = Task(
+            id = "task-1",
+            title = "Updated title",
+            description = "Notes",
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(originalTask)
         mockServer.enqueueGetTask(originalTask)
         mockServer.enqueueUpdateTask(updatedTask)
@@ -103,7 +123,15 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldCloseEditFlowWithoutSavingChanges() {
         // Given
-        val task = IntegrationTasks.task("task-1", "Original title", description = "Notes")
+        val task = Task(
+            id = "task-1",
+            title = "Original title",
+            description = "Notes",
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(task)
         mockServer.enqueueGetTask(task)
         mockServer.enqueueGetTask(task)
@@ -126,8 +154,24 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldProceedWithSaveAfterInvalidTitleCorrected() {
         // Given
-        val originalTask = IntegrationTasks.task("task-1", "Original title")
-        val updatedTask = IntegrationTasks.task("task-1", "Corrected title")
+        val originalTask = Task(
+            id = "task-1",
+            title = "Original title",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
+        val updatedTask = Task(
+            id = "task-1",
+            title = "Corrected title",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(originalTask)
         mockServer.enqueueGetTask(originalTask)
         mockServer.enqueueUpdateTask(updatedTask)
@@ -159,7 +203,15 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldDisplayGenericErrorWhenPutFailsWithServerError() {
         // Given
-        val task = IntegrationTasks.task("task-1", "Original title")
+        val task = Task(
+            id = "task-1",
+            title = "Original title",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(task)
         mockServer.enqueueGetTask(task)
         mockServer.enqueueUpdateTaskError(500)
@@ -179,8 +231,24 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldRetryAndSaveAfterInitialPutFailure() {
         // Given
-        val originalTask = IntegrationTasks.task("task-1", "Original title")
-        val updatedTask = IntegrationTasks.task("task-1", "Updated title")
+        val originalTask = Task(
+            id = "task-1",
+            title = "Original title",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
+        val updatedTask = Task(
+            id = "task-1",
+            title = "Updated title",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(originalTask)
         mockServer.enqueueGetTask(originalTask)
         mockServer.enqueueUpdateTaskError(500)
@@ -210,7 +278,15 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldKeepEditFlowAvailableWhenInitialGetFails() {
         // Given
-        val listTask = IntegrationTasks.task("task-1", "Original title")
+        val listTask = Task(
+            id = "task-1",
+            title = "Original title",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(listTask)
         mockServer.enqueueGetTaskError(500)
         launchApp()
@@ -227,19 +303,23 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldUpdateTaskWithRemovedDescriptionAndRefreshList() {
         // Given
-        val originalTask = IntegrationTasks.task(
+        val originalTask = Task(
             id = "task-210",
             title = "Task with description",
             description = "Description to remove",
             status = TaskStatus.IN_PROGRESS,
             priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
         )
-        val updatedTask = IntegrationTasks.task(
+        val updatedTask = Task(
             id = "task-210",
             title = "Task with description",
             description = null,
             status = TaskStatus.IN_PROGRESS,
             priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
         )
         mockServer.enqueueGetTasks(originalTask)
         mockServer.enqueueGetTask(originalTask)
@@ -271,7 +351,15 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldDisplayErrorWhenPutRequestIsRejected() {
         // Given
-        val task = IntegrationTasks.task("task-1", "Original title", description = "Notes")
+        val task = Task(
+            id = "task-1",
+            title = "Original title",
+            description = "Notes",
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(task)
         mockServer.enqueueGetTask(task)
         mockServer.enqueueUpdateTaskNetworkFailure()
@@ -297,7 +385,15 @@ class EditTaskIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldShowSpanishEditFlowStringsWhenEsSelected() {
         // Given
-        val task = IntegrationTasks.task("task-1", "Original title", description = "Notes")
+        val task = Task(
+            id = "task-1",
+            title = "Original title",
+            description = "Notes",
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasksForLanguageSwitch(task)
         mockServer.enqueueGetTask(task)
         launchApp()

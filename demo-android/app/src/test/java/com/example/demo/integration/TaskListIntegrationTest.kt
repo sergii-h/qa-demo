@@ -4,14 +4,14 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
+import com.example.demo.data.model.Task
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.integration.support.IntegrationTasks
 import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
 import com.example.demo.ui.TestTags
@@ -26,14 +26,29 @@ class TaskListIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldShowNewTaskWhenPullToRefreshReturnsUpdatedList() {
         // Given
-        mockServer.enqueueGetTasks(IntegrationTasks.task("1", "First Task"))
+        val firstTask = Task(
+            id = "1",
+            title = "First Task",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
+        val secondTask = Task(
+            id = "2",
+            title = "Second Task",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
+        mockServer.enqueueGetTasks(firstTask)
         launchApp()
         assertTaskListHasSize(1)
         composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
-        mockServer.enqueueGetTasks(
-            IntegrationTasks.task("1", "First Task"),
-            IntegrationTasks.task("2", "Second Task"),
-        )
+        mockServer.enqueueGetTasks(firstTask, secondTask)
 
         // When
         pullToRefresh()
@@ -47,7 +62,15 @@ class TaskListIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldKeepExistingTasksWhenPullToRefreshReturnsSameList() {
         // Given
-        val task = IntegrationTasks.task("1", "Stable Task")
+        val task = Task(
+            id = "1",
+            title = "Stable Task",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(task)
         launchApp()
         assertTaskListHasSize(1)
@@ -65,10 +88,25 @@ class TaskListIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldKeepExistingTasksWhenPullToRefreshFailsWithServerError() {
         // Given
-        mockServer.enqueueGetTasks(
-            IntegrationTasks.task("1", "Keep Me", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Also Keep", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
+        val firstTask = Task(
+            id = "1",
+            title = "Keep Me",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.LOW,
+            createdDate = null,
+            updatedDate = null,
         )
+        val secondTask = Task(
+            id = "2",
+            title = "Also Keep",
+            description = null,
+            status = TaskStatus.DONE,
+            priority = TaskPriority.HIGH,
+            createdDate = null,
+            updatedDate = null,
+        )
+        mockServer.enqueueGetTasks(firstTask, secondTask)
         launchApp()
         assertTaskListHasSize(2)
         composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
@@ -87,11 +125,7 @@ class TaskListIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldRenderTaskListWithFetchedDataWhenListFirstShown() {
         // Given
-        mockServer.enqueueGetTasks(
-            IntegrationTasks.task("1", "Task One", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Task Two", status = TaskStatus.IN_PROGRESS, priority = TaskPriority.MEDIUM),
-            IntegrationTasks.task("3", "Task Three", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
-        )
+        mockServer.enqueueGetTasks(*tagVariantTasks.toTypedArray())
 
         // When
         launchApp()
@@ -106,11 +140,7 @@ class TaskListIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldDisplayStatusAndPriorityTagsForAllTaskVariants() {
         // Given
-        mockServer.enqueueGetTasks(
-            IntegrationTasks.task("1", "Task One", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Task Two", status = TaskStatus.IN_PROGRESS, priority = TaskPriority.MEDIUM),
-            IntegrationTasks.task("3", "Task Three", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
-        )
+        mockServer.enqueueGetTasks(*tagVariantTasks.toTypedArray())
 
         // When
         launchApp()
@@ -128,7 +158,16 @@ class TaskListIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldRenderActionButtonsForEachTask() {
         // Given
-        mockServer.enqueueGetTasks(IntegrationTasks.task("10", "Modal Task", description = "Modal description"))
+        val task = Task(
+            id = "10",
+            title = "Modal Task",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
+        mockServer.enqueueGetTasks(task)
 
         // When
         launchApp()
@@ -158,7 +197,16 @@ class TaskListIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldOpenCreateFlowFromAddTaskButton() {
         // Given
-        mockServer.enqueueGetTasks(IntegrationTasks.task("10", "Modal Task", description = "Modal description"))
+        val task = Task(
+            id = "10",
+            title = "Modal Task",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
+        mockServer.enqueueGetTasks(task)
         launchApp()
 
         // When
@@ -171,14 +219,22 @@ class TaskListIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldOpenDetailFlowFromInfoButton() {
         // Given
-        val task = IntegrationTasks.task("10", "Modal Task", description = "Modal description")
+        val task = Task(
+            id = "10",
+            title = "Modal Task",
+            description = "Modal description",
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(task)
         mockServer.enqueueGetTask(task)
         mockServer.enqueueIsValid(true)
         launchApp()
 
         // When
-        openDetail("10")
+        openDetail(task.id)
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertIsDisplayed()
@@ -187,13 +243,21 @@ class TaskListIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldOpenEditFlowFromEditButton() {
         // Given
-        val task = IntegrationTasks.task("10", "Modal Task", description = "Modal description")
+        val task = Task(
+            id = "10",
+            title = "Modal Task",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.MEDIUM,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasks(task)
         mockServer.enqueueGetTask(task)
         launchApp()
 
         // When
-        openEditForm("10")
+        openEditForm(task.id)
 
         // Then
         composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
@@ -202,129 +266,201 @@ class TaskListIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldRemoveTaskFromListWhenDeleteSucceeds() {
         // Given
-        mockServer.enqueueGetTasks(
-            IntegrationTasks.task("1", "Delete Me", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Keep Me", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
+        val deleteTask = Task(
+            id = "1",
+            title = "Delete Me",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.LOW,
+            createdDate = null,
+            updatedDate = null,
         )
+        val keepTask = Task(
+            id = "2",
+            title = "Keep Me",
+            description = null,
+            status = TaskStatus.DONE,
+            priority = TaskPriority.HIGH,
+            createdDate = null,
+            updatedDate = null,
+        )
+        mockServer.enqueueGetTasks(deleteTask, keepTask)
         mockServer.enqueueDeleteSuccess()
         launchApp()
 
         // When
         runAsyncAction {
-            onNodeWithTag(TestTags.deleteButton("1")).performClick()
+            onNodeWithTag(TestTags.deleteButton(deleteTask.id)).performClick()
         }
         waitUntilCondition {
-            mockServer.deletedTaskIds.contains("1")
+            mockServer.deletedTaskIds.contains(deleteTask.id)
         }
 
         // Then
         waitUntilTaskListHasSize(1)
         assertTaskListHasSize(1)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).assertIsDisplayed()
-        assertThat(mockServer.deletedTaskIds).containsExactly("1")
+        composeTestRule.onNodeWithTag(TestTags.taskTitle(keepTask.id)).assertIsDisplayed()
+        assertThat(mockServer.deletedTaskIds).containsExactly(deleteTask.id)
     }
 
     @Test
     fun shouldUpdateListWithoutFullClientReloadWhenDeleteSucceeds() {
         // Given
-        mockServer.enqueueGetTasks(
-            IntegrationTasks.task("1", "Delete Me", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Keep Me", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
+        val deleteTask = Task(
+            id = "1",
+            title = "Delete Me",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.LOW,
+            createdDate = null,
+            updatedDate = null,
         )
+        val keepTask = Task(
+            id = "2",
+            title = "Keep Me",
+            description = null,
+            status = TaskStatus.DONE,
+            priority = TaskPriority.HIGH,
+            createdDate = null,
+            updatedDate = null,
+        )
+        mockServer.enqueueGetTasks(deleteTask, keepTask)
         mockServer.enqueueDeleteSuccess()
         launchApp()
 
         // When
         runAsyncAction {
-            onNodeWithTag(TestTags.deleteButton("1")).performClick()
+            onNodeWithTag(TestTags.deleteButton(deleteTask.id)).performClick()
         }
         waitUntilCondition {
-            mockServer.deletedTaskIds.contains("1")
+            mockServer.deletedTaskIds.contains(deleteTask.id)
         }
 
         // Then
         waitUntilTaskListHasSize(1)
         assertTaskListHasSize(1)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.taskTitle(keepTask.id)).assertIsDisplayed()
     }
 
     @Test
     fun shouldKeepTaskInListWhenDeleteFailsWithServerError() {
         // Given
-        mockServer.enqueueGetTasks(
-            IntegrationTasks.task("1", "Delete Me", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Keep Me", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
+        val deleteTask = Task(
+            id = "1",
+            title = "Delete Me",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.LOW,
+            createdDate = null,
+            updatedDate = null,
         )
+        val keepTask = Task(
+            id = "2",
+            title = "Keep Me",
+            description = null,
+            status = TaskStatus.DONE,
+            priority = TaskPriority.HIGH,
+            createdDate = null,
+            updatedDate = null,
+        )
+        mockServer.enqueueGetTasks(deleteTask, keepTask)
         mockServer.enqueueDeleteError(500, "Delete failed")
         launchApp()
 
         // When
         runAsyncAction {
-            onNodeWithTag(TestTags.deleteButton("1")).performClick()
+            onNodeWithTag(TestTags.deleteButton(deleteTask.id)).performClick()
         }
         waitUntilCondition {
-            mockServer.deletedTaskIds.contains("1")
+            mockServer.deletedTaskIds.contains(deleteTask.id)
         }
 
         // Then
         assertTaskListHasSize(2)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.taskTitle(deleteTask.id)).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.taskTitle(keepTask.id)).assertIsDisplayed()
         commonAssertions.assertErrorSnackbarDisplayed()
-        assertThat(mockServer.deletedTaskIds).containsExactly("1")
+        assertThat(mockServer.deletedTaskIds).containsExactly(deleteTask.id)
     }
 
     @Test
     fun shouldKeepTaskInListWhenDeleteFailsDueToNetworkError() {
         // Given
-        mockServer.enqueueGetTasks(
-            IntegrationTasks.task("1", "Delete Me", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Keep Me", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
+        val deleteTask = Task(
+            id = "1",
+            title = "Delete Me",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.LOW,
+            createdDate = null,
+            updatedDate = null,
         )
+        val keepTask = Task(
+            id = "2",
+            title = "Keep Me",
+            description = null,
+            status = TaskStatus.DONE,
+            priority = TaskPriority.HIGH,
+            createdDate = null,
+            updatedDate = null,
+        )
+        mockServer.enqueueGetTasks(deleteTask, keepTask)
         mockServer.enqueueDeleteNetworkFailure()
         launchApp()
         assertTaskListHasSize(2)
 
         // When
         runAsyncAction {
-            onNodeWithTag(TestTags.deleteButton("1")).performClick()
-        }
-        waitUntilCondition {
-            mockServer.deletedTaskIds.contains("1")
+            onNodeWithTag(TestTags.deleteButton(deleteTask.id)).performClick()
         }
 
         // Then
-        assertTaskListHasSize(2)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).assertIsDisplayed()
         commonAssertions.assertErrorSnackbarDisplayed()
-        assertThat(mockServer.deletedTaskIds).containsExactly("1")
+        waitUntilTaskListHasSize(2)
+        composeTestRule.onNodeWithTag(TestTags.taskTitle(deleteTask.id)).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.taskTitle(keepTask.id)).assertIsDisplayed()
+        assertThat(mockServer.deletedTaskIds).containsExactly(deleteTask.id)
     }
 
     @Test
     fun shouldRemoveTaskWhenDeleteRetrySucceeds() {
         // Given
-        mockServer.enqueueGetTasks(
-            IntegrationTasks.task("1", "Delete Me", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Keep Me", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
+        val deleteTask = Task(
+            id = "1",
+            title = "Delete Me",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.LOW,
+            createdDate = null,
+            updatedDate = null,
         )
+        val keepTask = Task(
+            id = "2",
+            title = "Keep Me",
+            description = null,
+            status = TaskStatus.DONE,
+            priority = TaskPriority.HIGH,
+            createdDate = null,
+            updatedDate = null,
+        )
+        mockServer.enqueueGetTasks(deleteTask, keepTask)
         mockServer.enqueueDeleteError(500, "Delete failed")
         mockServer.enqueueDeleteSuccess()
         launchApp()
 
         // When
         runAsyncAction {
-            onNodeWithTag(TestTags.deleteButton("1")).performClick()
+            onNodeWithTag(TestTags.deleteButton(deleteTask.id)).performClick()
         }
         commonAssertions.assertErrorSnackbarDisplayed()
         runAsyncAction {
-            onNodeWithTag(TestTags.deleteButton("1")).performClick()
+            onNodeWithTag(TestTags.deleteButton(deleteTask.id)).performClick()
         }
 
         // Then
         waitUntilTaskListHasSize(1)
         assertTaskListHasSize(1)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(TestTags.taskTitle(keepTask.id)).assertIsDisplayed()
     }
 
     @Test
@@ -355,7 +491,15 @@ class TaskListIntegrationTest : IntegrationTestBase() {
     @Test
     fun shouldShowSpanishTaskListStringsWhenEsSelected() {
         // Given
-        val task = IntegrationTasks.task("1", "Task One", status = TaskStatus.TODO, priority = TaskPriority.LOW)
+        val task = Task(
+            id = "1",
+            title = "Task One",
+            description = null,
+            status = TaskStatus.TODO,
+            priority = TaskPriority.LOW,
+            createdDate = null,
+            updatedDate = null,
+        )
         mockServer.enqueueGetTasksForLanguageSwitch(task)
         launchApp()
 
@@ -407,4 +551,35 @@ class TaskListIntegrationTest : IntegrationTestBase() {
             .fetchSemanticsNodes()
             .size
 
+    companion object {
+        private val tagVariantTasks = listOf(
+            Task(
+                id = "1",
+                title = "Task One",
+                description = null,
+                status = TaskStatus.TODO,
+                priority = TaskPriority.LOW,
+                createdDate = null,
+                updatedDate = null,
+            ),
+            Task(
+                id = "2",
+                title = "Task Two",
+                description = null,
+                status = TaskStatus.IN_PROGRESS,
+                priority = TaskPriority.MEDIUM,
+                createdDate = null,
+                updatedDate = null,
+            ),
+            Task(
+                id = "3",
+                title = "Task Three",
+                description = null,
+                status = TaskStatus.DONE,
+                priority = TaskPriority.HIGH,
+                createdDate = null,
+                updatedDate = null,
+            ),
+        )
+    }
 }
