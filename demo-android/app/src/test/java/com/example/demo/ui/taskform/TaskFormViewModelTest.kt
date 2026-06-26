@@ -196,7 +196,7 @@ class TaskFormViewModelTest {
     }
 
     @Test
-    fun shouldEmitLoadErrorWhenEditModeLoadFails() = runTest(mainDispatcherRule.dispatcher) {
+    fun shouldKeepEditFormAvailableWhenLoadFails() = runTest(mainDispatcherRule.dispatcher) {
         // Given
         coEvery { repository.getTask("task-1") } throws HttpExceptionFactory.create(404)
         val viewModel = TaskFormViewModel(
@@ -211,8 +211,10 @@ class TaskFormViewModelTest {
 
         // Then
         assertThat(viewModel.uiState.value.isLoading).isFalse()
-        assertThat(viewModel.uiState.value.loadError)
-            .isEqualTo(application.getString(R.string.error_task_not_found))
+        assertThat(viewModel.uiState.value.title).isEmpty()
+        assertThat(viewModel.uiState.value.description).isEmpty()
+        assertThat(viewModel.uiState.value.status).isEqualTo(com.example.demo.data.model.TaskStatus.TODO)
+        assertThat(viewModel.uiState.value.priority).isEqualTo(com.example.demo.data.model.TaskPriority.MEDIUM)
     }
 
     @Test

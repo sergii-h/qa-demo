@@ -35,7 +35,6 @@ data class TaskFormUiState(
     val priority: TaskPriority = TaskPriority.MEDIUM,
     val titleError: String? = null,
     val saveError: String? = null,
-    val loadError: String? = null,
     val saveSucceeded: Boolean = false
 )
 
@@ -57,7 +56,7 @@ class TaskFormViewModel(
 
     private fun loadTask(taskId: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, loadError = null) }
+            _uiState.update { it.copy(isLoading = true) }
             runCatching { repository.getTask(taskId) }
                 .onSuccess { task ->
                     _uiState.update {
@@ -70,11 +69,14 @@ class TaskFormViewModel(
                         )
                     }
                 }
-                .onFailure { error ->
+                .onFailure {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            loadError = mapTaskError(getApplication(), error)
+                            title = "",
+                            description = "",
+                            status = TaskStatus.TODO,
+                            priority = TaskPriority.MEDIUM
                         )
                     }
                 }

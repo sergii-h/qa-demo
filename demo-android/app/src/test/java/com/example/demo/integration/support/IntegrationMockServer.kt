@@ -2,6 +2,7 @@ package com.example.demo.integration.support
 
 import com.example.demo.data.model.Task
 import com.example.demo.data.model.TaskRequest
+import com.example.demo.integration.context.TaskUpdateRequest
 import com.example.demo.data.remote.ApiClient
 import com.example.demo.data.remote.TaskApi
 import com.squareup.moshi.Moshi
@@ -35,14 +36,14 @@ class IntegrationMockServer {
     private val taskRequestAdapter = moshi.adapter(TaskRequest::class.java)
 
     private val _createTaskRequests = mutableListOf<TaskRequest>()
-    private val _updateTaskRequests = mutableListOf<RecordedUpdate>()
+    private val _updateTaskRequests = mutableListOf<TaskUpdateRequest>()
     private val _deletedTaskIds = mutableListOf<String>()
+    private var _getTasksRequestCount = 0
 
     val createTaskRequests: List<TaskRequest> get() = _createTaskRequests
-    val updateTaskRequests: List<RecordedUpdate> get() = _updateTaskRequests
+    val updateTaskRequests: List<TaskUpdateRequest> get() = _updateTaskRequests
     val deletedTaskIds: List<String> get() = _deletedTaskIds
-
-    data class RecordedUpdate(val taskId: String, val request: TaskRequest)
+    val getTasksRequestCount: Int get() = _getTasksRequestCount
 
     fun start() {
         server.dispatcher = object : Dispatcher() {
@@ -65,85 +66,110 @@ class IntegrationMockServer {
         return ApiClient.createTaskApi("${server.url("/")}v1/", client)
     }
 
-    fun enqueueGetTasks(tasks: List<Task>) {
+    fun enqueueGetTasks(tasks: List<Task>): IntegrationMockServer {
         getTasksScripts.addLast(ScriptedResponse.Http(jsonResponse(200, taskListAdapter.toJson(tasks)!!)))
+        return this
     }
 
-    fun enqueueGetTasks(vararg tasks: Task) {
+    fun enqueueGetTasksDelayed(tasks: List<Task>, delayMillis: Long): IntegrationMockServer {
+        getTasksScripts.addLast(
+            ScriptedResponse.Http(
+                jsonResponse(200, taskListAdapter.toJson(tasks)!!)
+                    .setBodyDelay(delayMillis, TimeUnit.MILLISECONDS),
+            ),
+        )
+        return this
+    }
+
+    fun enqueueGetTasks(vararg tasks: Task): IntegrationMockServer =
         enqueueGetTasks(tasks.toList())
-    }
 
-    fun enqueueGetTasksForLanguageSwitch(vararg tasks: Task) {
+    fun enqueueGetTasksForLanguageSwitch(vararg tasks: Task): IntegrationMockServer {
         val list = tasks.toList()
-        enqueueGetTasks(list)
-        enqueueGetTasks(list)
+        return enqueueGetTasks(list).enqueueGetTasks(list)
     }
 
-    fun enqueueGetTask(task: Task) {
+    fun enqueueGetTask(task: Task): IntegrationMockServer {
         getTaskScripts.addLast(ScriptedResponse.Http(jsonResponse(200, taskAdapter.toJson(task)!!)))
+        return this
     }
 
-    fun enqueueIsValid(isValid: Boolean) {
+    fun enqueueIsValid(isValid: Boolean): IntegrationMockServer {
         isValidScripts.addLast(ScriptedResponse.Http(jsonResponse(200, isValid.toString())))
+        return this
     }
 
-    fun enqueueCreateTask(task: Task) {
+    fun enqueueCreateTask(task: Task): IntegrationMockServer {
         createTaskScripts.addLast(ScriptedResponse.Http(jsonResponse(200, taskAdapter.toJson(task)!!)))
+        return this
     }
 
-    fun enqueueUpdateTask(task: Task) {
+    fun enqueueUpdateTask(task: Task): IntegrationMockServer {
         updateTaskScripts.addLast(ScriptedResponse.Http(jsonResponse(200, taskAdapter.toJson(task)!!)))
+        return this
     }
 
-    fun enqueueGetTasksError(code: Int, message: String? = null) {
+    fun enqueueGetTasksError(code: Int, message: String? = null): IntegrationMockServer {
         getTasksScripts.addLast(ScriptedResponse.Http(errorResponse(code, message)))
+        return this
     }
 
-    fun enqueueGetTaskError(code: Int, message: String? = null) {
+    fun enqueueGetTaskError(code: Int, message: String? = null): IntegrationMockServer {
         getTaskScripts.addLast(ScriptedResponse.Http(errorResponse(code, message)))
+        return this
     }
 
-    fun enqueueIsValidError(code: Int, message: String? = null) {
+    fun enqueueIsValidError(code: Int, message: String? = null): IntegrationMockServer {
         isValidScripts.addLast(ScriptedResponse.Http(errorResponse(code, message)))
+        return this
     }
 
-    fun enqueueCreateTaskError(code: Int, message: String? = null) {
+    fun enqueueCreateTaskError(code: Int, message: String? = null): IntegrationMockServer {
         createTaskScripts.addLast(ScriptedResponse.Http(errorResponse(code, message)))
+        return this
     }
 
-    fun enqueueUpdateTaskError(code: Int, message: String? = null) {
+    fun enqueueUpdateTaskError(code: Int, message: String? = null): IntegrationMockServer {
         updateTaskScripts.addLast(ScriptedResponse.Http(errorResponse(code, message)))
+        return this
     }
 
-    fun enqueueDeleteSuccess() {
+    fun enqueueDeleteSuccess(): IntegrationMockServer {
         deleteTaskScripts.addLast(ScriptedResponse.Http(MockResponse().setResponseCode(204)))
+        return this
     }
 
-    fun enqueueDeleteError(code: Int, message: String? = null) {
+    fun enqueueDeleteError(code: Int, message: String? = null): IntegrationMockServer {
         deleteTaskScripts.addLast(ScriptedResponse.Http(errorResponse(code, message)))
+        return this
     }
 
-    fun enqueueGetTasksNetworkFailure() {
+    fun enqueueGetTasksNetworkFailure(): IntegrationMockServer {
         getTasksScripts.addLast(ScriptedResponse.NetworkFailure)
+        return this
     }
 
-    fun enqueueGetTaskNetworkFailure() {
+    fun enqueueGetTaskNetworkFailure(): IntegrationMockServer {
         getTaskScripts.addLast(ScriptedResponse.NetworkFailure)
+        return this
     }
 
-    fun enqueueIsValidNetworkFailure() {
+    fun enqueueIsValidNetworkFailure(): IntegrationMockServer {
         isValidScripts.addLast(ScriptedResponse.NetworkFailure)
+        return this
     }
 
-    fun enqueueCreateTaskNetworkFailure() {
+    fun enqueueCreateTaskNetworkFailure(): IntegrationMockServer {
         createTaskScripts.addLast(ScriptedResponse.NetworkFailure)
+        return this
     }
 
-    fun enqueueUpdateTaskNetworkFailure() {
+    fun enqueueUpdateTaskNetworkFailure(): IntegrationMockServer {
         updateTaskScripts.addLast(ScriptedResponse.NetworkFailure)
+        return this
     }
 
-    fun enqueueDeleteNetworkFailure() {
+    fun enqueueDeleteNetworkFailure(): IntegrationMockServer {
         deleteTaskScripts.addLast(
             ScriptedResponse.Http(
                 MockResponse()
@@ -153,6 +179,7 @@ class IntegrationMockServer {
                     .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY),
             ),
         )
+        return this
     }
 
     private fun dispatchRequest(request: RecordedRequest): MockResponse {
@@ -160,8 +187,10 @@ class IntegrationMockServer {
         return when {
             request.method == "GET" && path.matches(IS_VALID_PATH) ->
                 nextScript(isValidScripts, "GET $path")
-            request.method == "GET" && path == TASKS_PATH ->
+            request.method == "GET" && path == TASKS_PATH -> {
+                _getTasksRequestCount++
                 nextScript(getTasksScripts, "GET $path")
+            }
             request.method == "GET" && path.matches(TASK_BY_ID_PATH) ->
                 nextScript(getTaskScripts, "GET $path")
             request.method == "POST" && path == TASKS_PATH -> {
@@ -173,7 +202,7 @@ class IntegrationMockServer {
             request.method == "PUT" && path.matches(TASK_BY_ID_PATH) -> {
                 val taskId = path.removePrefix("$TASKS_PATH/")
                 _updateTaskRequests.add(
-                    RecordedUpdate(
+                    TaskUpdateRequest(
                         taskId,
                         taskRequestAdapter.fromJson(request.body.readUtf8())!!,
                     ),

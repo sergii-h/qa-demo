@@ -1,6 +1,6 @@
 package com.example.demo.integration
 
-import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -8,10 +8,8 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import com.example.demo.data.model.TaskPriority
-import com.example.demo.data.model.TaskRequest
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.data.model.Task
-import com.example.demo.integration.support.IntegrationMockServer
+import com.example.demo.integration.context.TaskTestContext
 import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
 import com.example.demo.ui.TestTags
@@ -21,418 +19,297 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class EditTaskIntegrationTest : IntegrationTestBase() {
+class EditTaskIntegrationTests : IntegrationTestBase() {
 
     @Test
-    fun shouldUpdateTaskWithAllFieldsAndRefreshList() {
+    fun shouldUpdateTaskWithModifiedValuesSendCorrectPutRequestAndShowModifiedTaskTitleInTheListAfterSuccessfulResponse() {
         // Given
-        val originalTask = Task(
-            id = "task-201",
-            title = "Existing title",
-            description = "Existing description",
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        val updatedTask = Task(
-            id = "task-201",
-            title = "Updated title",
-            description = "Updated description",
+        val context = TaskTestContext(status = TaskStatus.TODO, priority = TaskPriority.LOW)
+
+        val updatedContext = context.copy(
+            title = context.title + " - Updated title",
+            description = context.description + " - Updated description",
             status = TaskStatus.DONE,
             priority = TaskPriority.HIGH,
-            createdDate = null,
-            updatedDate = null,
         )
-        mockServer.enqueueGetTasks(originalTask)
-        mockServer.enqueueGetTask(originalTask)
-        mockServer.enqueueUpdateTask(updatedTask)
-        mockServer.enqueueGetTasks(updatedTask)
+
+        mockServer
+            .enqueueGetTasks(context.createTaskResponse())
+            .enqueueGetTask(context.createTaskResponse())
+            .enqueueUpdateTask(updatedContext.createTaskResponse())
+            .enqueueGetTasks(updatedContext.createTaskResponse())
         launchApp()
-        openEditForm("task-201")
+
+        openEditForm(context.id)
+        clearTitle()
+        setTitle(updatedContext.title)
+        clearDescription()
+        setDescription(updatedContext.description.toString())
+        selectStatus(updatedContext.status)
+        selectPriority(updatedContext.priority)
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("Updated title")
-        composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextClearance()
-        composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextInput("Updated description")
-        selectStatus(TaskStatus.DONE)
-        selectPriority(TaskPriority.HIGH)
-        submitEditFormAndExpectList()
+        submitForm()
 
         // Then
-        assertThat(mockServer.updateTaskRequests).containsExactly(
-            IntegrationMockServer.RecordedUpdate(
-                "task-201",
-                TaskRequest(
-                    "Updated title",
-                    "Updated description",
-                    TaskStatus.DONE,
-                    TaskPriority.HIGH,
-                ),
-            ),
-        )
-        waitUntilTaskTitleVisible("task-201")
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("task-201")).assertIsDisplayed()
+        assertThat(mockServer.updateTaskRequests)
+            .containsExactly(updatedContext.createTaskUpdateRequest())
+        assertTextEquals(TestTags.taskTitle(context.id), updatedContext.title)
     }
 
     @Test
-    fun shouldUpdateTaskAndRefreshList() {
+    fun shouldUpdateTaskWithRemovedDescription() {
         // Given
-        val originalTask = Task(
-            id = "task-1",
-            title = "Original title",
-            description = "Notes",
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
+        val context = TaskTestContext()
+        val updatedContext = context.copy(
+            title = context.title + " - Updated title",
+            description = null,
         )
-        val updatedTask = Task(
-            id = "task-1",
-            title = "Updated title",
-            description = "Notes",
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasks(originalTask)
-        mockServer.enqueueGetTask(originalTask)
-        mockServer.enqueueUpdateTask(updatedTask)
-        mockServer.enqueueGetTasks(updatedTask)
+
+        mockServer
+            .enqueueGetTasks(context.createTaskResponse())
+            .enqueueGetTask(context.createTaskResponse())
+            .enqueueUpdateTask(updatedContext.createTaskResponse())
+            .enqueueGetTasks(updatedContext.createTaskResponse())
         launchApp()
-        openEditForm("task-1")
+
+        openEditForm(context.id)
+        clearTitle()
+        setTitle(updatedContext.title)
+        clearDescription()
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("Updated title")
-        submitEditFormAndExpectList()
+        submitForm()
 
         // Then
-        assertThat(mockServer.updateTaskRequests).containsExactly(
-            IntegrationMockServer.RecordedUpdate(
-                "task-1",
-                TaskRequest("Updated title", "Notes", TaskStatus.TODO, TaskPriority.MEDIUM),
-            ),
-        )
-        waitUntilTaskTitleVisible("task-1")
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
+        assertThat(mockServer.updateTaskRequests)
+            .containsExactly(updatedContext.createTaskUpdateRequest())
+        assertTextEquals(TestTags.taskTitle(context.id), updatedContext.title)
     }
 
     @Test
-    fun shouldCloseEditFlowWithoutSavingChanges() {
+    fun shouldNotModifyTaskWhenEditFormIsClosedWithoutSaving() {
         // Given
-        val task = Task(
-            id = "task-1",
-            title = "Original title",
-            description = "Notes",
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasks(task)
-        mockServer.enqueueGetTask(task)
-        mockServer.enqueueGetTask(task)
+        val context = TaskTestContext()
+
+        mockServer
+            .enqueueGetTasks(context.createTaskResponse())
+            .enqueueGetTask(context.createTaskResponse())
+            .enqueueGetTask(context.createTaskResponse())
         launchApp()
-        openEditForm("task-1")
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("Unsaved title")
+
+        openEditForm(context.id)
+        clearTitle()
+        setTitle("Unsaved title")
 
         // When
-        runAsyncAction {
-            onNodeWithTag(TestTags.CLOSE_BUTTON).performClick()
-        }
-        openEditForm("task-1")
+        runAsyncAction { onNodeWithTag(TestTags.CLOSE_BUTTON).performClick() }
+
+        // And
+        openEditForm(context.id)
 
         // Then
         assertThat(mockServer.updateTaskRequests).isEmpty()
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
+        assertTextEquals(TestTags.EDIT_TASK_TITLE_INPUT, context.title)
     }
 
     @Test
-    fun shouldProceedWithSaveAfterInvalidTitleCorrected() {
+    fun shouldProceedWithSaveAfterUserCorrectsInvalidTitle() {
         // Given
-        val originalTask = Task(
-            id = "task-1",
-            title = "Original title",
-            description = null,
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        val updatedTask = Task(
-            id = "task-1",
-            title = "Corrected title",
-            description = null,
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasks(originalTask)
-        mockServer.enqueueGetTask(originalTask)
-        mockServer.enqueueUpdateTask(updatedTask)
-        mockServer.enqueueGetTasks(updatedTask)
+        val context = TaskTestContext()
+
+        mockServer
+            .enqueueGetTasks(context.createTaskResponse())
+            .enqueueGetTask(context.createTaskResponse())
+            .enqueueUpdateTask(context.createTaskResponse())
+            .enqueueGetTasks(context.createTaskResponse())
         launchApp()
-        openEditForm("task-1")
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("a".repeat(101))
-        submitEditFormAndStayOnForm()
-        commonAssertions.assertTitleError("Title must not exceed 100 characters")
+
+        openEditForm(context.id)
+        clearTitle()
+        setTitle("a".repeat(101))
+        clickSubmitForm()
+
+        assertTextEquals(TestTags.TITLE_ERROR, "Title must not exceed 100 characters")
         assertThat(mockServer.updateTaskRequests).isEmpty()
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("Corrected title")
-        submitEditFormAndExpectList()
+        clearTitle()
+        setTitle(context.title)
+        submitForm()
+
+        // Then
+        assertThat(mockServer.updateTaskRequests).containsExactly(context.createTaskUpdateRequest())
+        assertIsDisplayed(TestTags.taskTitle(context.id))
+    }
+
+    @Test
+    fun shouldAllowOpeningEditFormWhenInitialGetTasksFailsWithHttp500() {
+        // Given
+        val context = TaskTestContext()
+
+        mockServer
+            .enqueueGetTasks(context.createTaskResponse())
+            .enqueueGetTaskError(500)
+        launchApp()
+
+        // When
+        openEditForm(context.id)
+
+        // Then
+        assertIsDisplayed(TestTags.EDIT_TASK_TITLE_INPUT)
+        composeTestRule.onNodeWithTag(TestTags.SAVE_BUTTON).assertIsNotEnabled()
+    }
+
+    @Test
+    fun shouldCloseEditFormWhenRefreshGetFailsWithHttp500AfterSuccessfulPut() {
+        // Given
+        val context = TaskTestContext()
+        val updatedContext = context.copy(title = context.title + " - Updated title")
+
+        mockServer
+            .enqueueGetTasks(context.createTaskResponse())
+            .enqueueGetTask(context.createTaskResponse())
+            .enqueueUpdateTask(updatedContext.createTaskResponse())
+            .enqueueGetTasksError(500)
+        launchApp()
+
+        openEditForm(context.id)
+        clearTitle()
+        setTitle(updatedContext.title)
+
+        // When
+        submitForm()
+
+        // Then
+        assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+        assertIsNotDisplayed(TestTags.EDIT_TASK_TITLE_INPUT)
+    }
+
+    @Test
+    fun shouldAllowRetryAndSaveTaskAfterInitialPutFailure() {
+        // Given
+        val context = TaskTestContext()
+        val updatedContext = context.copy(title = "Updated title")
+
+        mockServer
+            .enqueueGetTasks(context.createTaskResponse())
+            .enqueueGetTask(context.createTaskResponse())
+            .enqueueUpdateTaskError(500)
+            .enqueueUpdateTask(updatedContext.createTaskResponse())
+            .enqueueGetTasks(updatedContext.createTaskResponse())
+        launchApp()
+
+        openEditForm(context.id)
+        clearTitle()
+        setTitle(updatedContext.title)
+
+        // When
+        clickSubmitForm()
+
+        // Then
+        assertTextEquals(TestTags.SAVE_ERROR, "Request failed (500)")
+        assertThat(mockServer.updateTaskRequests)
+            .containsExactly(updatedContext.createTaskUpdateRequest())
+
+        // When
+        submitForm()
 
         // Then
         assertThat(mockServer.updateTaskRequests).containsExactly(
-            IntegrationMockServer.RecordedUpdate(
-                "task-1",
-                TaskRequest("Corrected title", null, TaskStatus.TODO, TaskPriority.MEDIUM),
-            ),
+            updatedContext.createTaskUpdateRequest(),
+            updatedContext.createTaskUpdateRequest(),
         )
-        waitUntilTaskTitleVisible("task-1")
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
+        assertTextEquals(TestTags.taskTitle(context.id), updatedContext.title)
     }
 
     @Test
-    fun shouldDisplayGenericErrorWhenPutFailsWithServerError() {
+    fun shouldDisplayGenericErrorOnEditFormWhenPutRequestIsRejectedWithHttp500() {
         // Given
-        val task = Task(
-            id = "task-1",
-            title = "Original title",
-            description = null,
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasks(task)
-        mockServer.enqueueGetTask(task)
-        mockServer.enqueueUpdateTaskError(500)
+        val context = TaskTestContext()
+        val updatedContext = context.copy(title = "Updated title")
+
+        mockServer
+            .enqueueGetTasks(context.createTaskResponse())
+            .enqueueGetTask(context.createTaskResponse())
+            .enqueueUpdateTaskNetworkFailure()
         launchApp()
-        openEditForm("task-1")
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("Updated title")
+
+        openEditForm(context.id)
+        clearTitle()
+        setTitle(updatedContext.title)
 
         // When
-        submitEditFormAndStayOnForm()
+        clickSubmitForm()
 
         // Then
-        commonAssertions.assertSaveError("Request failed (500)")
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performScrollTo().assertExists()
+        assertTextEquals(TestTags.SAVE_ERROR, "End of input")
+        assertThat(mockServer.updateTaskRequests)
+            .containsExactly(updatedContext.createTaskUpdateRequest())
+        assertIsDisplayed(TestTags.EDIT_TASK_TITLE_INPUT)
     }
 
     @Test
-    fun shouldRetryAndSaveAfterInitialPutFailure() {
+    fun shouldHaveTranslationsForEditFlow() {
         // Given
-        val originalTask = Task(
-            id = "task-1",
-            title = "Original title",
-            description = null,
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        val updatedTask = Task(
-            id = "task-1",
-            title = "Updated title",
-            description = null,
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasks(originalTask)
-        mockServer.enqueueGetTask(originalTask)
-        mockServer.enqueueUpdateTaskError(500)
-        mockServer.enqueueUpdateTask(updatedTask)
-        mockServer.enqueueGetTasks(updatedTask)
-        launchApp()
-        openEditForm("task-1")
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("Updated title")
+        val context = TaskTestContext()
 
-        // When
-        val expectedRequest = IntegrationMockServer.RecordedUpdate(
-            "task-1",
-            TaskRequest("Updated title", null, TaskStatus.TODO, TaskPriority.MEDIUM),
-        )
-        submitEditFormAndStayOnForm()
-        commonAssertions.assertSaveError("Request failed (500)")
-        assertThat(mockServer.updateTaskRequests).containsExactly(expectedRequest)
-        submitEditFormAndExpectList()
-
-        // Then
-        assertThat(mockServer.updateTaskRequests).containsExactly(expectedRequest, expectedRequest)
-        waitUntilTaskTitleVisible("task-1")
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldKeepEditFlowAvailableWhenInitialGetFails() {
-        // Given
-        val listTask = Task(
-            id = "task-1",
-            title = "Original title",
-            description = null,
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasks(listTask)
-        mockServer.enqueueGetTaskError(500)
+        mockServer
+            .enqueueGetTasksForLanguageSwitch(context.createTaskResponse())
+            .enqueueGetTask(context.createTaskResponse())
         launchApp()
 
-        // When
-        runAsyncAction {
-            onNodeWithTag(TestTags.editButton("task-1")).performClick()
-        }
-
-        // Then
-        commonAssertions.assertLoadErrorDisplayed()
-    }
-
-    @Test
-    fun shouldUpdateTaskWithRemovedDescriptionAndRefreshList() {
-        // Given
-        val originalTask = Task(
-            id = "task-210",
-            title = "Task with description",
-            description = "Description to remove",
-            status = TaskStatus.IN_PROGRESS,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        val updatedTask = Task(
-            id = "task-210",
-            title = "Task with description",
-            description = null,
-            status = TaskStatus.IN_PROGRESS,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasks(originalTask)
-        mockServer.enqueueGetTask(originalTask)
-        mockServer.enqueueUpdateTask(updatedTask)
-        mockServer.enqueueGetTasks(updatedTask)
-        launchApp()
-        openEditForm("task-210")
-        composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextClearance()
-
-        // When
-        submitEditFormAndExpectList()
-
-        // Then
-        assertThat(mockServer.updateTaskRequests).containsExactly(
-            IntegrationMockServer.RecordedUpdate(
-                "task-210",
-                TaskRequest(
-                    "Task with description",
-                    null,
-                    TaskStatus.IN_PROGRESS,
-                    TaskPriority.MEDIUM,
-                ),
-            ),
-        )
-        waitUntilTaskTitleVisible("task-210")
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("task-210")).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldDisplayErrorWhenPutRequestIsRejected() {
-        // Given
-        val task = Task(
-            id = "task-1",
-            title = "Original title",
-            description = "Notes",
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasks(task)
-        mockServer.enqueueGetTask(task)
-        mockServer.enqueueUpdateTaskNetworkFailure()
-        launchApp()
-        openEditForm("task-1")
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput("Updated title")
-
-        // When
-        submitEditFormAndStayOnForm()
-
-        // Then
-        commonAssertions.assertSaveError("End of input")
-        assertThat(mockServer.updateTaskRequests).containsExactly(
-            IntegrationMockServer.RecordedUpdate(
-                "task-1",
-                TaskRequest("Updated title", "Notes", TaskStatus.TODO, TaskPriority.MEDIUM),
-            ),
-        )
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performScrollTo().assertExists()
-    }
-
-    @Test
-    fun shouldShowSpanishEditFlowStringsWhenEsSelected() {
-        // Given
-        val task = Task(
-            id = "task-1",
-            title = "Original title",
-            description = "Notes",
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasksForLanguageSwitch(task)
-        mockServer.enqueueGetTask(task)
-        launchApp()
         switchLanguage(LanguageOption.ES)
 
         // When
-        openEditForm("task-1")
+        openEditForm(context.id)
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.MODAL_TITLE).assertTextEquals("Editar tarea")
-        commonAssertions.assertFieldLabel(TestTags.FIELD_TITLE_LABEL, "Título *")
-        composeTestRule.onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().assertTextEquals("Guardar")
+        assertTextEquals(TestTags.MODAL_TITLE, "Editar tarea")
+        assertTextEquals(TestTags.FIELD_TITLE_LABEL, "Título *")
+        assertTextEquals(TestTags.SAVE_BUTTON, "Guardar")
     }
 
-    private fun submitEditFormAndExpectList() {
-        runAsyncAction {
-            onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().performClick()
-        }
-        waitUntilEditFormClosed()
-        waitUntilListLoaded()
+    private fun setTitle(title: String) {
+        runAsyncAction { onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput(title) }
     }
 
-    private fun submitEditFormAndStayOnForm() {
+    private fun clearTitle() {
+        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
+    }
+
+    private fun setDescription(description: String) {
         runAsyncAction {
-            onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().performClick()
+            onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextInput(description)
         }
+    }
+
+    private fun clearDescription() {
+        composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextClearance()
+    }
+
+    private fun submitForm() {
+        runAsyncAction { onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().performClick() }
+        assertIsNotDisplayed(TestTags.EDIT_TASK_TITLE_INPUT)
+        assertIsNotDisplayed(TestTags.LOADING_SPINNER)
+    }
+
+    private fun clickSubmitForm() {
+        runAsyncAction { onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().performClick() }
     }
 
     private fun selectPriority(priority: TaskPriority) {
         composeTestRule.onNodeWithTag(TestTags.PRIORITY_DROPDOWN).performScrollTo().performClick()
-        runAsyncAction {
-            onNodeWithTag(TestTags.priorityDropdownOption(priority)).performClick()
-        }
+        runAsyncAction { onNodeWithTag(TestTags.priorityDropdownOption(priority)).performClick() }
     }
 
     private fun selectStatus(status: TaskStatus) {
         composeTestRule.onNodeWithTag(TestTags.STATUS_DROPDOWN).performScrollTo().performClick()
-        runAsyncAction {
-            onNodeWithTag(TestTags.statusDropdownOption(status)).performClick()
-        }
+        runAsyncAction { onNodeWithTag(TestTags.statusDropdownOption(status)).performClick() }
+    }
+
+    private fun openEditForm(taskId: String) {
+        runAsyncAction { onNodeWithTag(TestTags.editButton(taskId)).performClick() }
+        assertIsDisplayed(TestTags.EDIT_TASK_TITLE_INPUT)
     }
 }

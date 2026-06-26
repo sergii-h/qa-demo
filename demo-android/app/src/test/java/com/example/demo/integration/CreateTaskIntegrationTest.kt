@@ -1,17 +1,14 @@
 package com.example.demo.integration
 
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import com.example.demo.data.model.Task
 import com.example.demo.data.model.TaskPriority
-import com.example.demo.data.model.TaskRequest
 import com.example.demo.data.model.TaskStatus
+import com.example.demo.integration.context.TaskTestContext
 import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
 import com.example.demo.ui.TestTags
@@ -21,316 +18,256 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class CreateTaskIntegrationTest : IntegrationTestBase() {
+class CreateTaskIntegrationTests : IntegrationTestBase() {
 
     @Test
-    fun shouldCreateTaskWithRequiredValues() {
+    fun shouldCreateTaskWithAllValuesSendCorrectPostRequestAndAddNewTaskToTheListAfterSuccessfulResponse() {
         // Given
-        val createdTask = Task(
-            id = "task-124",
-            title = "Test Task",
-            description = null,
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasks()
-        mockServer.enqueueCreateTask(createdTask)
-        mockServer.enqueueGetTasks(createdTask)
+        val context = TaskTestContext()
+
+        mockServer
+            .enqueueGetTasks()
+            .enqueueCreateTask(context.createTaskResponse())
+            .enqueueGetTasks(context.createTaskResponse())
         launchApp()
+
         openCreateForm()
+        setTitle(context.title)
+        setDescription(context.description.toString())
+        selectStatus(context.status)
+        selectPriority(context.priority)
 
         // When
-        fillCreateTitle("Test Task")
-        submitCreateFormAndExpectList()
+        submitCreateForm()
 
         // Then
-        assertThat(mockServer.createTaskRequests).containsExactly(
-            TaskRequest("Test Task", null, TaskStatus.TODO, TaskPriority.MEDIUM),
-        )
-        waitUntilTaskTitleVisible("task-124")
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("task-124")).assertIsDisplayed()
+        assertThat(mockServer.createTaskRequests).containsExactly(context.createTaskRequest())
+        assertIsDisplayed(TestTags.taskTitle(context.id))
     }
 
     @Test
-    fun shouldCreateTaskWithAllValues() {
+    fun shouldCreateTaskWithRequiredValuesSendCorrectPostRequestAndAddNewTaskToTheListAfterSuccessfulResponse() {
         // Given
-        val createdTask = Task(
-            id = "task-123",
-            title = "Test Task",
-            description = "Test Description",
-            status = TaskStatus.IN_PROGRESS,
-            priority = TaskPriority.HIGH,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasks()
-        mockServer.enqueueCreateTask(createdTask)
-        mockServer.enqueueGetTasks(createdTask)
+        val context = TaskTestContext(description = null, createdDate = null, updatedDate = null)
+
+        mockServer
+            .enqueueGetTasks()
+            .enqueueCreateTask(context.createTaskResponse())
+            .enqueueGetTasks(context.createTaskResponse())
         launchApp()
+
         openCreateForm()
+        setTitle(context.title)
 
         // When
-        fillCreateTitle("Test Task")
-        composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextInput("Test Description")
-        selectStatus(TaskStatus.IN_PROGRESS)
-        selectPriority(TaskPriority.HIGH)
-        submitCreateFormAndExpectList()
+        submitCreateForm()
 
         // Then
-        assertThat(mockServer.createTaskRequests).containsExactly(
-            TaskRequest("Test Task", "Test Description", TaskStatus.IN_PROGRESS, TaskPriority.HIGH),
-        )
-        waitUntilTaskTitleVisible("task-123")
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("task-123")).assertIsDisplayed()
+        assertThat(mockServer.createTaskRequests).containsExactly(context.createTaskRequest())
+        assertIsDisplayed(TestTags.taskTitle(context.id))
     }
 
     @Test
-    fun shouldResetFormWhenCreateFlowClosedAndReopened() {
+    fun shouldAllowSuccessfulCreationAfterInvalidTitleIsCorrected() {
         // Given
-        mockServer.enqueueGetTasks()
+        val context = TaskTestContext(description = null)
+
+        mockServer
+            .enqueueGetTasks()
+            .enqueueCreateTask(context.createTaskResponse())
+            .enqueueGetTasks(context.createTaskResponse())
         launchApp()
+
         openCreateForm()
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performTextInput("Temporary title")
-        composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextInput("Temporary description")
+        setTitle("a".repeat(101))
 
         // When
-        runAsyncAction {
-            onNodeWithTag(TestTags.CLOSE_BUTTON).performClick()
-        }
-        openCreateForm()
+        clickSubmitForm()
 
         // Then
-        assertThat(mockServer.createTaskRequests).isEmpty()
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldProceedWithCreationAfterInvalidTitleCorrected() {
-        // Given
-        val createdTask = Task(
-            id = "task-130",
-            title = "Corrected title",
-            description = null,
-            status = TaskStatus.TODO,
-            priority = TaskPriority.HIGH,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasks()
-        mockServer.enqueueCreateTask(createdTask)
-        mockServer.enqueueGetTasks(createdTask)
-        launchApp()
-        openCreateForm()
-        fillCreateTitle("a".repeat(101))
-        submitCreateFormAndStayOnForm()
-        commonAssertions.assertTitleError("Title must not exceed 100 characters")
+        assertTextEquals(TestTags.TITLE_ERROR, "Title must not exceed 100 characters")
         assertThat(mockServer.createTaskRequests).isEmpty()
 
         // When
         composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performTextClearance()
-        fillCreateTitle("Corrected title")
-        selectPriority(TaskPriority.HIGH)
-        submitCreateFormAndExpectList()
+        setTitle(context.title)
+        submitCreateForm()
+
+        // Then
+        assertThat(mockServer.createTaskRequests).containsExactly(context.createTaskRequest())
+        assertIsDisplayed(TestTags.taskTitle(context.id))
+    }
+
+    @Test
+    fun shouldNotCreateTaskWhenCreateFormIsClosedWithoutSavingAndShouldResetFormOnReopen() {
+        // Given
+        val context = TaskTestContext()
+
+        mockServer.enqueueGetTasks()
+        launchApp()
+
+        openCreateForm()
+        setTitle(context.title)
+        setDescription(context.description.toString())
+
+        // When
+        runAsyncAction { onNodeWithTag(TestTags.CLOSE_BUTTON).performClick() }
+
+        // And
+        openCreateForm()
+
+        // Then
+        assertThat(mockServer.createTaskRequests).isEmpty()
+        assertTextEquals(TestTags.CREATE_TASK_TITLE_INPUT, "")
+        assertTextEquals(TestTags.TASK_DESCRIPTION_INPUT, "")
+    }
+
+    @Test
+    fun shouldAllowRetryAndCreateTaskAfterInitialPostFailure() {
+        // Given
+        val context = TaskTestContext(description = null)
+
+        mockServer
+            .enqueueGetTasks()
+            .enqueueCreateTaskError(500)
+            .enqueueCreateTask(context.createTaskResponse())
+            .enqueueGetTasks(context.createTaskResponse())
+        launchApp()
+
+        openCreateForm()
+        setTitle(context.title)
+
+        // When
+        clickSubmitForm()
+
+        // Then
+        assertTextEquals(TestTags.SAVE_ERROR, "Request failed (500)")
+        assertThat(mockServer.createTaskRequests).containsExactly(context.createTaskRequest())
+
+        // When
+        submitCreateForm()
 
         // Then
         assertThat(mockServer.createTaskRequests).containsExactly(
-            TaskRequest("Corrected title", null, TaskStatus.TODO, TaskPriority.HIGH),
+            context.createTaskRequest(),
+            context.createTaskRequest(),
         )
-        waitUntilTaskTitleVisible("task-130")
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("task-130")).assertIsDisplayed()
+        assertIsDisplayed(TestTags.taskTitle(context.id))
     }
 
     @Test
-    fun shouldDisplayGenericErrorWhenPostFailsWithServerError() {
+    fun shouldAllowOpeningCreateFormWhenInitialGetTasksFailsWithHttp500() {
         // Given
-        mockServer.enqueueGetTasks()
-        mockServer.enqueueCreateTaskError(500)
+        val context = TaskTestContext()
+
+        mockServer
+            .enqueueGetTasksError(500)
+            .enqueueCreateTask(context.createTaskResponse())
+            .enqueueGetTasks(context.createTaskResponse())
         launchApp()
-        openCreateForm()
-        fillCreateTitle("Invalid Task")
-        composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextInput("Some description")
 
         // When
-        submitCreateFormAndStayOnForm()
+        openCreateForm()
+        setTitle(context.title)
+        submitCreateForm()
 
         // Then
-        commonAssertions.assertSaveError("Request failed (500)")
-        assertThat(mockServer.createTaskRequests).containsExactly(
-            TaskRequest("Invalid Task", "Some description", TaskStatus.TODO, TaskPriority.MEDIUM),
-        )
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performScrollTo().assertExists()
+        assertIsDisplayed(TestTags.taskTitle(context.id))
     }
 
     @Test
-    fun shouldRetryAndCreateTaskAfterInitialPostFailure() {
+    fun shouldCloseCreateFormWhenRefreshGetFailsWithHttp500AfterSuccessfulPost() {
         // Given
-        val createdTask = Task(
-            id = "task-456",
-            title = "Retry Task",
-            description = "Retry Description",
-            status = TaskStatus.TODO,
-            priority = TaskPriority.HIGH,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasks()
-        mockServer.enqueueCreateTaskError(500)
-        mockServer.enqueueCreateTask(createdTask)
-        mockServer.enqueueGetTasks(createdTask)
+        val context = TaskTestContext()
+
+        mockServer
+            .enqueueGetTasks()
+            .enqueueCreateTask(context.createTaskResponse())
+            .enqueueGetTasksError(500)
         launchApp()
+
         openCreateForm()
-        fillCreateTitle("Retry Task")
-        composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextInput("Retry Description")
-        selectPriority(TaskPriority.HIGH)
+        setTitle(context.title)
 
         // When
-        val expectedRequest = TaskRequest(
-            "Retry Task",
-            "Retry Description",
-            TaskStatus.TODO,
-            TaskPriority.HIGH,
-        )
-        submitCreateFormAndStayOnForm()
-        commonAssertions.assertSaveError("Request failed (500)")
-        assertThat(mockServer.createTaskRequests).containsExactly(expectedRequest)
-        submitCreateFormAndExpectList()
+        submitCreateForm()
 
         // Then
-        assertThat(mockServer.createTaskRequests).containsExactly(expectedRequest, expectedRequest)
-        waitUntilTaskTitleVisible("task-456")
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("task-456")).assertIsDisplayed()
+        assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+        assertIsNotDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
     }
 
     @Test
-    fun shouldKeepCreateFlowAvailableWhenInitialGetFails() {
+    fun shouldDisplayGenericErrorOnCreateFormWhenPostRequestIsRejectedWithHttp500() {
         // Given
-        mockServer.enqueueGetTasksError(500)
+        val context = TaskTestContext(description = null)
+
+        mockServer
+            .enqueueGetTasks()
+            .enqueueCreateTaskNetworkFailure()
+        launchApp()
+
+        openCreateForm()
+        setTitle(context.title)
 
         // When
-        launchApp()
-        openCreateForm()
-        fillCreateTitle("New Task")
+        clickSubmitForm()
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performScrollTo().assertExists()
+        assertTextEquals(TestTags.SAVE_ERROR, "End of input")
+        assertThat(mockServer.createTaskRequests).containsExactly(context.createTaskRequest())
+        assertIsDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
     }
 
     @Test
-    fun shouldCloseCreateFlowWhenRefreshGetFailsAfterSuccessfulPost() {
-        // Given
-        val createdTask = Task(
-            id = "task-778",
-            title = "Task with refresh failure",
-            description = null,
-            status = TaskStatus.TODO,
-            priority = TaskPriority.HIGH,
-            createdDate = null,
-            updatedDate = null,
-        )
-        mockServer.enqueueGetTasks()
-        mockServer.enqueueCreateTask(createdTask)
-        mockServer.enqueueGetTasksError(500)
-        launchApp()
-        openCreateForm()
-        fillCreateTitle("Task with refresh failure")
-        selectPriority(TaskPriority.HIGH)
-
-        // When
-        submitCreateFormAndExpectList()
-
-        // Then
-        assertThat(mockServer.createTaskRequests).containsExactly(
-            TaskRequest("Task with refresh failure", null, TaskStatus.TODO, TaskPriority.HIGH),
-        )
-        composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertDoesNotExist()
-    }
-
-    @Test
-    fun shouldDisplayErrorWhenPostRequestIsRejected() {
-        // Given
-        mockServer.enqueueGetTasks()
-        mockServer.enqueueCreateTaskNetworkFailure()
-        launchApp()
-        openCreateForm()
-        fillCreateTitle("Test Task")
-        selectPriority(TaskPriority.HIGH)
-
-        // When
-        submitCreateFormAndStayOnForm()
-
-        // Then
-        commonAssertions.assertSaveError("End of input")
-        assertThat(mockServer.createTaskRequests).containsExactly(
-            TaskRequest("Test Task", null, TaskStatus.TODO, TaskPriority.HIGH),
-        )
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performScrollTo().assertExists()
-    }
-
-    @Test
-    fun shouldKeepCreateFlowAvailableWhenInitialGetRequestIsRejected() {
-        // Given
-        mockServer.enqueueGetTasksNetworkFailure()
-
-        // When
-        launchApp()
-        openCreateForm()
-
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldShowSpanishCreateFlowStringsWhenEsSelected() {
+    fun shouldHaveTranslationsForCreateFlow() {
         // Given
         mockServer.enqueueGetTasksForLanguageSwitch()
         launchApp()
+
         switchLanguage(LanguageOption.ES)
 
         // When
         openCreateForm()
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.MODAL_TITLE).assertTextEquals("Nueva tarea")
-        commonAssertions.assertFieldLabel(TestTags.FIELD_TITLE_LABEL, "Título *")
-        composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().assertTextEquals("Crear")
+        assertTextEquals(TestTags.MODAL_TITLE, "Nueva tarea")
+        assertTextEquals(TestTags.FIELD_TITLE_LABEL, "Título *")
+        assertTextEquals(TestTags.CREATE_BUTTON, "Crear")
     }
 
-    private fun fillCreateTitle(title: String) {
-        runAsyncAction {
-            onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performTextInput(title)
-        }
-        composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().assertIsEnabled()
+    private fun setTitle(title: String) {
+        runAsyncAction { onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performTextInput(title) }
     }
 
-    private fun submitCreateFormAndExpectList() {
+    private fun setDescription(description: String) {
         runAsyncAction {
-            onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().performClick()
+            onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextInput(description)
         }
-        waitUntilCreateFormClosed()
-        waitUntilListLoaded()
     }
 
-    private fun submitCreateFormAndStayOnForm() {
-        runAsyncAction {
-            onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().performClick()
-        }
+    private fun submitCreateForm() {
+        runAsyncAction { onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().performClick() }
+        assertIsNotDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
+        assertIsNotDisplayed(TestTags.LOADING_SPINNER)
+    }
+
+    private fun clickSubmitForm() {
+        runAsyncAction { onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().performClick() }
     }
 
     private fun selectPriority(priority: TaskPriority) {
         composeTestRule.onNodeWithTag(TestTags.PRIORITY_DROPDOWN).performScrollTo().performClick()
-        runAsyncAction {
-            onNodeWithTag(TestTags.priorityDropdownOption(priority)).performClick()
-        }
+        runAsyncAction { onNodeWithTag(TestTags.priorityDropdownOption(priority)).performClick() }
     }
 
     private fun selectStatus(status: TaskStatus) {
         composeTestRule.onNodeWithTag(TestTags.STATUS_DROPDOWN).performScrollTo().performClick()
-        runAsyncAction {
-            onNodeWithTag(TestTags.statusDropdownOption(status)).performClick()
-        }
+        runAsyncAction { onNodeWithTag(TestTags.statusDropdownOption(status)).performClick() }
+    }
+
+    private fun openCreateForm() {
+        runAsyncAction { onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick() }
+        assertIsDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
     }
 }

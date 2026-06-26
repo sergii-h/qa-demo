@@ -110,19 +110,6 @@ fun TaskFormScreen(
                     CircularProgressIndicator(modifier = Modifier.testTag(TestTags.LOADING_SPINNER))
                 }
             }
-            uiState.loadError != null -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = uiState.loadError ?: stringResource(R.string.failed_load_task),
-                        modifier = Modifier.testTag(TestTags.LOAD_ERROR),
-                    )
-                }
-            }
             else -> {
                 Column(
                     modifier = Modifier
