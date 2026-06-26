@@ -15,11 +15,11 @@ As a user, I want a read-only detail view with full task details and validation 
 
 1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
 2. **IT**
-   - Should open detail view and display task details for all-values and required-values datasets
-   - Should show both validation outcomes (valid and not valid indicators)
-   - Should close detail view on close action
-   - Should keep detail flow available when task details request fails (HTTP 500 or network rejection)
-   - Should keep detail flow available when validation request fails (HTTP 500 or network rejection)
+   - Should open info form and display task details for all values dataset
+   - Should open info form and display task details for required only values dataset
+   - Should close info form on close action
+   - Should not open info form when task details request fails with HTTP 500 and display generic load task info error
+   - Should show invalid validation sign when validation request fails with HTTP 500 and display generic load task info error
    - Should have translations for detail view
 3. **Pact**
    - Should have GET `/v1/tasks/{id}` consumer test (HTTP 200)

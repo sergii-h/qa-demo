@@ -15,14 +15,14 @@ As a user, I want to edit a task in a pre-populated flow with the same validatio
 
 1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
 2. **IT**
-   - Should update task with modified values and refresh list
-   - Should update task with removed description and refresh list
-   - Should close edit flow without saving changes
+   - Should update task with modified values, send correct PUT request and show modified task title in the list after successful response
+   - Should update task with removed description
+   - Should not modify task when edit form is closed without saving
    - Should proceed with save after user corrects invalid title
-   - Should keep edit flow available when initial GET fails (HTTP 500 or network rejection)
-   - Should display generic error for PUT API failures (HTTP 400/500)
-   - Should allow retry and save after initial PUT failure
-   - Should display generic error when PUT request is rejected (network failure)
+   - Should allow opening edit form when initial GET tasks fails with HTTP 500
+   - Should close edit form when refresh GET fails with HTTP 500 after successful PUT
+   - Should allow retry and save task after initial PUT failure
+   - Should display generic error on edit form when PUT request is rejected with HTTP 500
    - Should have translations for edit flow
 3. **Pact**
    - Should have GET `/v1/tasks/{id}` consumer test (HTTP 200)
