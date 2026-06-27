@@ -55,7 +55,8 @@
     "priority": "Priority:",
     "created": "Created:",
     "lastUpdated": "Last Updated:",
-    "validated": "Validated:"
+    "validated": "Validated:",
+    "failedToLoad": "Failed to load task info. Please try again."
   },
   "languageSwitcher": {
     "label": "Language"

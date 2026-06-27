@@ -17,14 +17,17 @@ export const InfoTaskModal = (props: IProps) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [task, setTask] = useState<ITask | null>(null);
     const [valid, setValid] = useState<boolean>(false);
+    const [taskLoadError, setTaskLoadError] = useState<string | null>(null);
 
     useEffect(() => {
         getTask(props.taskId)
             .then((task: ITask) => {
                 setTask(task);
+                setTaskLoadError(null);
             })
-            .catch(() => {
+            .catch((error: Error) => {
                 setTask(null);
+                setTaskLoadError(error.message);
             })
             .finally(() => {
                 setIsLoading(false);
@@ -75,7 +78,9 @@ export const InfoTaskModal = (props: IProps) => {
 
     return (
         <Dialog id="info-task-modal" header={<span data-testid="modal-title">{task?.title || t('infoTaskModal.title')}</span>} visible={true} onHide={onHide} footer={renderFooter()} style={{ width: '95vw', maxWidth: '560px' }}>
-            {isLoading ? <ProgressSpinner data-testid="loading-spinner" /> : <>
+            {isLoading ? <ProgressSpinner data-testid="loading-spinner" /> : taskLoadError ? (
+                <p data-testid="load-error">{t('infoTaskModal.failedToLoad')}</p>
+            ) : <>
                 <label className="block">{t('infoTaskModal.description')}</label>
                 <p data-testid="description">{task?.description || t('infoTaskModal.noDescription')}</p>
 

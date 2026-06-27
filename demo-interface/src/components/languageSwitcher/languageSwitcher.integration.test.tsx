@@ -11,28 +11,36 @@ describe('LanguageSwitcher integration', () => {
     await i18n.changeLanguage('en');
   });
 
-  const selectLanguage = async (languageLabel: 'ES') => {
+  const selectLanguage = async (languageLabel: 'EN' | 'ES') => {
     await user.click(screen.getByTestId('language-switcher'));
     const options = await screen.findAllByRole('option', { name: languageLabel, hidden: true });
     await user.click(options[options.length - 1]);
   };
 
-  it('should render language switcher with EN and ES options', async () => {
-    // when
-    render(<LanguageSwitcher />);
-    await user.click(screen.getByTestId('language-switcher'));
+  describe('Language selection tests', () => {
+    it('should render language switcher with EN and ES options', async () => {
+      // when
+      render(<LanguageSwitcher />);
+      await user.click(screen.getByTestId('language-switcher'));
 
-    // then
-    expect((await screen.findAllByRole('option', { name: 'EN', hidden: true })).length).toBeGreaterThan(0);
-    expect((await screen.findAllByRole('option', { name: 'ES', hidden: true })).length).toBeGreaterThan(0);
-  });
+      // then
+      expect((await screen.findAllByRole('option', { name: 'EN', hidden: true })).length).toBeGreaterThan(0);
+      expect((await screen.findAllByRole('option', { name: 'ES', hidden: true })).length).toBeGreaterThan(0);
+    });
 
-  it('should change current language when user selects ES', async () => {
-    // when
-    render(<LanguageSwitcher />);
-    await selectLanguage('ES');
+    it('should change current language when user selects another language option', async () => {
+      // when
+      render(<LanguageSwitcher />);
+      await selectLanguage('ES');
 
-    // then
-    expect(i18n.resolvedLanguage).toBe('es');
+      // then
+      expect(i18n.resolvedLanguage).toBe('es');
+
+      // when
+      await selectLanguage('EN');
+
+      // then
+      expect(i18n.resolvedLanguage).toBe('en');
+    });
   });
 });

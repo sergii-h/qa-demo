@@ -37,7 +37,7 @@ describe('services', () => {
 
     describe('getTask', () => {
         it('should fetch a single task by id', async () => {
-            mockFetch.mockResolvedValue({ json: () => Promise.resolve(mockTask) });
+            mockFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve(mockTask) });
 
             const result = await services.getTask('1');
 
@@ -47,11 +47,31 @@ describe('services', () => {
             );
             expect(result).toEqual(mockTask);
         });
+
+        it('should throw error with message from response when not ok', async () => {
+            mockFetch.mockResolvedValue({
+                ok: false,
+                status: 500,
+                json: () => Promise.resolve({ message: 'Task not found' }),
+            });
+
+            await expect(services.getTask('1')).rejects.toThrow('Task not found');
+        });
+
+        it('should throw default error message when response has no message', async () => {
+            mockFetch.mockResolvedValue({
+                ok: false,
+                status: 500,
+                json: () => Promise.resolve({}),
+            });
+
+            await expect(services.getTask('1')).rejects.toThrow('Request failed (500)');
+        });
     });
 
     describe('getIsValid', () => {
         it('should return true when task is valid', async () => {
-            mockFetch.mockResolvedValue({ json: () => Promise.resolve(true) });
+            mockFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve(true) });
 
             const result = await services.getIsValid('1');
 
@@ -63,11 +83,31 @@ describe('services', () => {
         });
 
         it('should return false when task is not valid', async () => {
-            mockFetch.mockResolvedValue({ json: () => Promise.resolve(false) });
+            mockFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve(false) });
 
             const result = await services.getIsValid('1');
 
             expect(result).toBe(false);
+        });
+
+        it('should throw error with message from response when not ok', async () => {
+            mockFetch.mockResolvedValue({
+                ok: false,
+                status: 500,
+                json: () => Promise.resolve({ message: 'Validation failed' }),
+            });
+
+            await expect(services.getIsValid('1')).rejects.toThrow('Validation failed');
+        });
+
+        it('should throw default error message when response has no message', async () => {
+            mockFetch.mockResolvedValue({
+                ok: false,
+                status: 500,
+                json: () => Promise.resolve({}),
+            });
+
+            await expect(services.getIsValid('1')).rejects.toThrow('Request failed (500)');
         });
     });
 
