@@ -16,8 +16,8 @@ As a user, I want a validation indicator in the detail view so I know if externa
 2. **IT**
    - Should display validated state when external validation returns true
    - Should display not-validated state when external validation returns false
-   - Should not open info form when task details request fails with HTTP 500 and display generic load task info error
-   - Should show invalid validation sign when validation request fails with HTTP 500 and display generic load task info error
+   - Should not open info form when task details request fails with HTTP500/network-error and display generic load task info error
+   - Should show invalid validation sign when validation request fails with HTTP500/network-error and display generic load task info error
 3. **Pact**
    - Should have GET `/v1/tasks/isValid/{id}` consumer test (HTTP 200 with boolean)
 4. **E2E**

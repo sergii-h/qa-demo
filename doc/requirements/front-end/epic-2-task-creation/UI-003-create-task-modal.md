@@ -21,9 +21,9 @@ As a user, I want to create a task in a dedicated flow with validation and clear
    - Should allow successful creation after invalid title is corrected
    - Should not create a task when create form is closed without saving, and should reset form on reopen
    - Should allow retry and create task after initial POST failure
-   - Should allow opening create form when initial GET tasks fails with HTTP 500
-   - Should close create form when refresh GET fails with HTTP 500 after successful POST
-   - Should display generic error on create form when POST request is rejected with HTTP 500
+   - Should allow opening create form when initial GET tasks fails with HTTP500/network-error
+   - Should close create form when refresh GET fails with HTTP500/network-error after successful POST
+   - Should display generic error on create form when POST request is rejected with HTTP400/HTTP500/network-error
    - Should have translations for create flow
 3. **Pact**
    - Should have POST `/v1/tasks` consumer test (HTTP 201 with task response)

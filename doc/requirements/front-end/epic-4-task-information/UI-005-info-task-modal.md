@@ -18,8 +18,8 @@ As a user, I want a read-only detail view with full task details and validation 
    - Should open info form and display task details for all values dataset
    - Should open info form and display task details for required only values dataset
    - Should close info form on close action
-   - Should not open info form when task details request fails with HTTP 500 and display generic load task info error
-   - Should show invalid validation sign when validation request fails with HTTP 500 and display generic load task info error
+   - Should not open info form when task details request fails with HTTP500/network-error and display generic load task info error
+   - Should show invalid validation sign when validation request fails with HTTP500/network-error and display generic load task info error
    - Should have translations for detail view
 3. **Pact**
    - Should have GET `/v1/tasks/{id}` consumer test (HTTP 200)

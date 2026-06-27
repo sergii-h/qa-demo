@@ -19,10 +19,10 @@ As a user, I want to edit a task in a pre-populated flow with the same validatio
    - Should update task with removed description
    - Should not modify task when edit form is closed without saving
    - Should proceed with save after user corrects invalid title
-   - Should allow opening edit form when initial GET tasks fails with HTTP 500
-   - Should close edit form when refresh GET fails with HTTP 500 after successful PUT
+   - Should allow opening edit form when initial GET tasks fails with HTTP500/network-error
+   - Should close edit form when refresh GET fails with HTTP500/network-error after successful PUT
    - Should allow retry and save task after initial PUT failure
-   - Should display generic error on edit form when PUT request is rejected with HTTP 500
+   - Should display generic error on edit form when PUT request is rejected with HTTP400/HTTP500/network-error
    - Should have translations for edit flow
 3. **Pact**
    - Should have GET `/v1/tasks/{id}` consumer test (HTTP 200)
