@@ -8,6 +8,8 @@ import com.example.demo.data.model.TaskStatus
 import com.example.demo.integration.context.TaskTestContext
 import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
+import com.example.demo.integration.support.GetTaskFailure
+import com.example.demo.integration.support.IsValidFailure
 import com.example.demo.ui.TestTags
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -154,35 +156,53 @@ class TaskDetailIntegrationTest {
             assertIsDisplayed(TestTags.NOT_VALID)
             composeTestRule.onNodeWithTag(TestTags.VALID).assertDoesNotExist()
         }
+    }
+
+    @RunWith(org.robolectric.ParameterizedRobolectricTestRunner::class)
+    class TaskDetailLoadFailureIntegrationTests(
+        private val failureCase: GetTaskFailure,
+    ) : Base() {
 
         @Test
-        fun shouldNotOpenInfoFormWhenTaskDetailsRequestFailsWithHttp500AndDisplayGenericLoadTaskInfoError() {
+        fun shouldNotOpenInfoFormWhenTaskDetailsRequestFailsAndDisplayGenericLoadTaskInfoError() {
             // Given
             val context = TaskTestContext()
 
             mockServer
                 .enqueueGetTasks(context.createTaskResponse())
-                .enqueueGetTaskError(500)
-                .enqueueIsValid(false)
+            failureCase.enqueue(mockServer)
+            mockServer.enqueueIsValid(false)
             launchApp()
 
             // When
             runAsyncAction { onNodeWithTag(TestTags.infoButton(context.id)).performClick() }
 
             // Then
-            assertTextEquals(TestTags.LOAD_ERROR, "Request failed (500)")
+            assertTextEquals(TestTags.LOAD_ERROR, failureCase.expectedLoadError)
             assertIsNotDisplayed(TestTags.DESCRIPTION)
         }
 
+        companion object {
+            @JvmStatic
+            @org.robolectric.ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+            fun failureCases(): List<GetTaskFailure> = GetTaskFailure.entries
+        }
+    }
+
+    @RunWith(org.robolectric.ParameterizedRobolectricTestRunner::class)
+    class TaskDetailValidationFailureIntegrationTests(
+        private val failureCase: IsValidFailure,
+    ) : Base() {
+
         @Test
-        fun shouldShowInvalidValidationSignWhenValidationRequestFailsWithHttp500AndDisplayGenericLoadTaskInfoError() {
+        fun shouldShowInvalidValidationSignWhenValidationRequestFailsAndDisplayGenericLoadTaskInfoError() {
             // Given
             val context = TaskTestContext()
 
             mockServer
                 .enqueueGetTasks(context.createTaskResponse())
                 .enqueueGetTask(context.createTaskResponse())
-                .enqueueIsValidError(500, "Validation failed")
+            failureCase.enqueue(mockServer)
             launchApp()
 
             // When
@@ -194,6 +214,12 @@ class TaskDetailIntegrationTest {
             assertIsDisplayed(TestTags.priorityTag(context.priority))
             assertIsDisplayed(TestTags.NOT_VALID)
             composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertDoesNotExist()
+        }
+
+        companion object {
+            @JvmStatic
+            @org.robolectric.ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+            fun failureCases(): List<IsValidFailure> = IsValidFailure.entries
         }
     }
 }

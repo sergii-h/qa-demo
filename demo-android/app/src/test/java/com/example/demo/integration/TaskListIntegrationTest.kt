@@ -14,6 +14,8 @@ import com.example.demo.data.model.TaskStatus
 import com.example.demo.integration.context.TaskTestContext
 import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
+import com.example.demo.integration.support.DeleteFailure
+import com.example.demo.integration.support.GetTasksFailure
 import com.example.demo.ui.TestTags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -202,23 +204,6 @@ class TaskListIntegrationTest {
         }
 
         @Test
-        fun shouldKeepCreateFlowAvailableWhenInitialGetTasksRequestFails() {
-            // Given
-            mockServer.enqueueGetTasksError(500)
-            launchApp()
-
-            // Then
-            assertIsDisplayed(TestTags.EMPTY_TASKS)
-            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
-
-            // When
-            openCreateForm()
-
-            // Then
-            assertIsDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
-        }
-
-        @Test
         fun shouldHaveTranslationsForTaskList() {
             // Given
             val context = TaskTestContext(status = TaskStatus.TODO, priority = TaskPriority.LOW)
@@ -342,32 +327,6 @@ class TaskListIntegrationTest {
         }
 
         @Test
-        fun shouldKeepTaskInListWhenDeleteFailsWithHttp500() {
-            // Given
-            val deleteContext = TaskTestContext()
-            val keepContext = TaskTestContext()
-
-            mockServer
-                .enqueueGetTasks(
-                    deleteContext.createTaskResponse(),
-                    keepContext.createTaskResponse(),
-                )
-                .enqueueDeleteError(500, "Delete failed")
-            launchApp()
-
-            // When
-            clickDeleteItem(deleteContext.id)
-
-            // Then
-            waitUntilCondition { mockServer.deletedTaskIds.contains(deleteContext.id) }
-            assertThat(mockServer.deletedTaskIds).containsExactly(deleteContext.id)
-            assertTaskListHasSize(2)
-            assertIsDisplayed(TestTags.taskTitle(deleteContext.id))
-            assertIsDisplayed(TestTags.taskTitle(keepContext.id))
-            assertIsDisplayed(TestTags.ERROR_SNACKBAR)
-        }
-
-        @Test
         fun shouldAllowDeleteRetryAfterFailureAndRemoveTaskWhenRetrySucceeds() {
             // Given
             val deleteContext = TaskTestContext()
@@ -393,6 +352,72 @@ class TaskListIntegrationTest {
             // Then
             assertTaskListHasSize(1)
             assertIsDisplayed(TestTags.taskTitle(keepContext.id))
+        }
+    }
+
+    @RunWith(org.robolectric.ParameterizedRobolectricTestRunner::class)
+    class TaskListInitialGetFailureIntegrationTests(
+        private val failureCase: GetTasksFailure,
+    ) : Base() {
+
+        @Test
+        fun shouldKeepCreateFlowAvailableWhenInitialGetTasksRequestFails() {
+            // Given
+            failureCase.enqueue(mockServer)
+            launchApp()
+
+            // Then
+            assertIsDisplayed(TestTags.EMPTY_TASKS)
+            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+
+            // When
+            openCreateForm()
+
+            // Then
+            assertIsDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
+        }
+
+        companion object {
+            @JvmStatic
+            @org.robolectric.ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+            fun failureCases(): List<GetTasksFailure> = GetTasksFailure.entries
+        }
+    }
+
+    @RunWith(org.robolectric.ParameterizedRobolectricTestRunner::class)
+    class DeleteTaskFailureIntegrationTests(
+        private val failureCase: DeleteFailure,
+    ) : Base() {
+
+        @Test
+        fun shouldKeepTaskInListWhenDeleteFails() {
+            // Given
+            val deleteContext = TaskTestContext()
+            val keepContext = TaskTestContext()
+
+            mockServer.enqueueGetTasks(
+                deleteContext.createTaskResponse(),
+                keepContext.createTaskResponse(),
+            )
+            failureCase.enqueue(mockServer)
+            launchApp()
+
+            // When
+            clickDeleteItem(deleteContext.id)
+
+            // Then
+            waitUntilCondition { mockServer.deletedTaskIds.contains(deleteContext.id) }
+            assertThat(mockServer.deletedTaskIds).containsExactly(deleteContext.id)
+            assertTaskListHasSize(2)
+            assertIsDisplayed(TestTags.taskTitle(deleteContext.id))
+            assertIsDisplayed(TestTags.taskTitle(keepContext.id))
+            assertIsDisplayed(TestTags.ERROR_SNACKBAR)
+        }
+
+        companion object {
+            @JvmStatic
+            @org.robolectric.ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+            fun failureCases(): List<DeleteFailure> = DeleteFailure.entries
         }
     }
 }
