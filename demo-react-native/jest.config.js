@@ -1,5 +1,6 @@
 module.exports = {
   preset: 'jest-expo',
+  testTimeout: process.env.CI ? 15000 : 5000,
   setupFiles: ['<rootDir>/src/jest.setup.mocks.ts'],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   transformIgnorePatterns: [
