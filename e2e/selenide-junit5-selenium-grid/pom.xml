@@ -16,7 +16,7 @@
         <jupiter.version>5.11.0</jupiter.version>
         <selenium.version>4.44.0</selenium.version>
         <selenide.version>7.16.1</selenide.version>
-        <jackson.version>2.18.6</jackson.version>
+        <jackson.version>2.18.8</jackson.version>
         <properties.file.name>test.properties</properties.file.name>
         <test.tags></test.tags>
         <test.ignore.tags>uat</test.ignore.tags>
