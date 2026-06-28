@@ -20,7 +20,7 @@
         <spring-boot.version>3.5.15</spring-boot.version>
         <httpclient5.version>5.5.2</httpclient5.version>
         <httpcore5.version>5.3.6</httpcore5.version>
-        <jackson.version>2.18.6</jackson.version>
+        <jackson.version>2.18.8</jackson.version>
     </properties>
     <dependencyManagement>
         <dependencies>

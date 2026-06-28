@@ -1,0 +1,6 @@
+.expo/
+.expo-export-test/
+dist/
+web-build/
+.stryker-tmp/
+reports/

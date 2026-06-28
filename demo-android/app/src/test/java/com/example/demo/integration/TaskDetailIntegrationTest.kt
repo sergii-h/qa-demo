@@ -1,198 +1,225 @@
 package com.example.demo.integration
 
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.integration.support.IntegrationTasks
+import com.example.demo.integration.context.TaskTestContext
 import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
+import com.example.demo.integration.support.GetTaskFailure
+import com.example.demo.integration.support.IsValidFailure
 import com.example.demo.ui.TestTags
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.experimental.runners.Enclosed
 import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
-class TaskDetailIntegrationTest : IntegrationTestBase() {
+@RunWith(Enclosed::class)
+class TaskDetailIntegrationTest {
 
-    @Test
-    fun shouldDisplayTaskDetailsWithAllValuesWhenInfoOpened() {
-        // Given
-        val task = IntegrationTasks.task(
-            id = "task-301",
-            title = "Info task",
-            description = "Info description",
-            status = TaskStatus.IN_PROGRESS,
-            priority = TaskPriority.HIGH,
-        )
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValid(true)
-        launchApp()
-        openDetail("task-301")
+    abstract class Base : IntegrationTestBase() {
 
-        // Then
-        commonAssertions.assertDescriptionText("Info description")
-        composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.IN_PROGRESS)).assertExists()
-        composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskPriority.HIGH)).assertExists()
-        composeTestRule.onNodeWithTag(TestTags.VALID).assertExists()
+        protected fun openDetail(taskId: String) {
+            runAsyncAction { onNodeWithTag(TestTags.infoButton(taskId)).performClick() }
+            assertIsDisplayed(TestTags.DESCRIPTION)
+        }
     }
 
-    @Test
-    fun shouldDisplayTaskDetailsWithRequiredValuesWhenInfoOpened() {
-        // Given
-        val task = IntegrationTasks.task(
-            id = "task-305",
-            title = "Info required task",
-            description = null,
-            status = TaskStatus.TODO,
-            priority = TaskPriority.MEDIUM,
-        )
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValid(true)
-        launchApp()
-        openDetail("task-305")
+    @RunWith(RobolectricTestRunner::class)
+    class TaskDetailViewIntegrationTests : Base() {
 
-        // Then
-        commonAssertions.assertDescriptionText("No description")
-        composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.TODO)).assertExists()
-        composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskPriority.MEDIUM)).assertExists()
-        composeTestRule.onNodeWithTag(TestTags.VALID).assertExists()
-    }
+        @Test
+        fun shouldOpenInfoFormAndDisplayTaskDetailsForAllValuesDataset() {
+            // Given
+            val context = TaskTestContext()
 
-    @Test
-    fun shouldShowNotValidIndicatorWhenValidationReturnsFalse() {
-        // Given
-        val task = IntegrationTasks.task("task-2", "Invalid Task", description = "Details")
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValid(false)
-        launchApp()
-        openDetail("task-2")
+            mockServer
+                .enqueueGetTasks(context.createTaskResponse())
+                .enqueueGetTask(context.createTaskResponse())
+                .enqueueIsValid(true)
+            launchApp()
 
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.NOT_VALID).assertExists()
-        composeTestRule.onNodeWithTag(TestTags.VALID).assertDoesNotExist()
-    }
+            // When
+            openDetail(context.id)
 
-    @Test
-    fun shouldCloseDetailFlowWhenBackPressed() {
-        // Given
-        val task = IntegrationTasks.task("task-1", "Info Task", description = "Info description")
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValid(true)
-        launchApp()
-        openDetail("task-1")
-
-        // When
-        runAsyncAction {
-            onNodeWithTag(TestTags.CLOSE_BUTTON).performClick()
+            // Then
+            assertTextEquals(TestTags.DESCRIPTION, context.description.toString())
+            assertIsDisplayed(TestTags.statusTag(context.status))
+            assertIsDisplayed(TestTags.priorityTag(context.priority))
+            assertIsDisplayed(TestTags.VALID)
         }
 
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
-    }
+        @Test
+        fun shouldOpenInfoFormAndDisplayTaskDetailsForRequiredOnlyValuesDataset() {
+            // Given
+            val context = TaskTestContext(description = null)
 
-    @Test
-    fun shouldKeepDetailFlowAvailableWhenTaskLoadFails() {
-        // Given
-        val listTask = IntegrationTasks.task("task-1", "Info Task")
-        fakeApi.enqueueGetTasks(listTask)
-        fakeApi.enqueueGetTaskError(500)
-        fakeApi.enqueueIsValid(false)
-        launchApp()
-        openDetailExpectingLoadError("task-1")
+            mockServer
+                .enqueueGetTasks(context.createTaskResponse())
+                .enqueueGetTask(context.createTaskResponse())
+                .enqueueIsValid(true)
+            launchApp()
 
-        // Then
-        commonAssertions.assertLoadErrorDisplayed()
-    }
+            // When
+            openDetail(context.id)
 
-    @Test
-    fun shouldKeepDetailFlowAvailableWhenValidationRequestFails() {
-        // Given
-        val task = IntegrationTasks.task("task-3", "Validation Task", description = "Validation description")
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValidError(500, "Validation failed")
-        launchApp()
-        openDetail("task-3")
-
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.NOT_VALID).assertExists()
-        composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertDoesNotExist()
-    }
-
-    @Test
-    fun shouldKeepDetailFlowAvailableWhenTaskDetailsRequestIsRejected() {
-        // Given
-        val listTask = IntegrationTasks.task("task-308", "Task reject task", description = "Task reject description")
-        fakeApi.enqueueGetTasks(listTask)
-        fakeApi.enqueueGetTaskNetworkFailure()
-        fakeApi.enqueueIsValid(false)
-        launchApp()
-        openDetailExpectingLoadError("task-308")
-
-        // Then
-        commonAssertions.assertLoadErrorDisplayed()
-    }
-
-    @Test
-    fun shouldKeepDetailFlowAvailableWhenValidationRequestIsRejected() {
-        // Given
-        val task = IntegrationTasks.task(
-            id = "task-304",
-            title = "Validation reject task",
-            description = "Validation reject description",
-            status = TaskStatus.DONE,
-            priority = TaskPriority.HIGH,
-        )
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValidNetworkFailure()
-        launchApp()
-        openDetail("task-304")
-
-        // Then
-        commonAssertions.assertDescriptionText("Validation reject description")
-        composeTestRule.onNodeWithTag(TestTags.NOT_VALID).assertExists()
-        composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertDoesNotExist()
-    }
-
-    @Test
-    fun shouldShowSpanishDetailFlowStringsWhenEsSelected() {
-        // Given
-        val task = IntegrationTasks.task("task-1", "Info Task", description = "Info description")
-        fakeApi.enqueueGetTasksForLanguageSwitch(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValid(true)
-        launchApp()
-        switchLanguage(LanguageOption.ES)
-
-        // When
-        openDetail("task-1")
-
-        // Then
-        commonAssertions.assertFieldLabel(TestTags.DETAIL_DESCRIPTION_LABEL, "Descripción")
-        commonAssertions.assertFieldLabel(TestTags.DETAIL_VALIDATED_LABEL, "Validado")
-        composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.TODO)).assertTextEquals("Por hacer")
-    }
-
-    private fun openDetailExpectingLoadError(taskId: String) {
-        runAsyncAction {
-            onNodeWithTag(TestTags.infoButton(taskId)).performClick()
+            // Then
+            assertTextEquals(TestTags.DESCRIPTION, "No description")
+            assertIsDisplayed(TestTags.statusTag(context.status))
+            assertIsDisplayed(TestTags.priorityTag(context.priority))
+            assertIsDisplayed(TestTags.VALID)
         }
-        composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertIsDisplayed()
+
+        @Test
+        fun shouldCloseInfoFormOnCloseAction() {
+            // Given
+            val context = TaskTestContext()
+
+            mockServer
+                .enqueueGetTasks(context.createTaskResponse())
+                .enqueueGetTask(context.createTaskResponse())
+                .enqueueIsValid(true)
+            launchApp()
+
+            openDetail(context.id)
+
+            // When
+            runAsyncAction { onNodeWithTag(TestTags.CLOSE_BUTTON).performClick() }
+
+            // Then
+            assertIsDisplayed(TestTags.taskTitle(context.id))
+        }
+
+        @Test
+        fun shouldHaveTranslationsForDetailView() {
+            // Given
+            val context = TaskTestContext(status = TaskStatus.TODO, priority = TaskPriority.LOW)
+
+            mockServer
+                .enqueueGetTasksForLanguageSwitch(context.createTaskResponse())
+                .enqueueGetTask(context.createTaskResponse())
+                .enqueueIsValid(true)
+            launchApp()
+
+            switchLanguage(LanguageOption.ES)
+
+            // When
+            openDetail(context.id)
+
+            // Then
+            assertTextEquals(TestTags.DETAIL_DESCRIPTION_LABEL, "Descripción")
+            assertTextEquals(TestTags.DETAIL_VALIDATED_LABEL, "Validado")
+            assertTextEquals(TestTags.statusTag(context.status), "Por hacer")
+            assertTextEquals(TestTags.priorityTag(context.priority), "Baja")
+        }
     }
 
-    private fun openDetail(taskId: String) {
-        runAsyncAction {
-            onNodeWithTag(TestTags.infoButton(taskId)).performClick()
+    @RunWith(RobolectricTestRunner::class)
+    class ExternalValidationIntegrationTests : Base() {
+
+        @Test
+        fun shouldDisplayValidatedStateWhenExternalValidationReturnsTrue() {
+            // Given
+            val context = TaskTestContext()
+
+            mockServer
+                .enqueueGetTasks(context.createTaskResponse())
+                .enqueueGetTask(context.createTaskResponse())
+                .enqueueIsValid(true)
+            launchApp()
+
+            // When
+            openDetail(context.id)
+
+            // Then
+            assertIsDisplayed(TestTags.VALID)
+            composeTestRule.onNodeWithTag(TestTags.NOT_VALID).assertDoesNotExist()
         }
-        composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertIsDisplayed()
+
+        @Test
+        fun shouldDisplayNotValidatedStateWhenExternalValidationReturnsFalse() {
+            // Given
+            val context = TaskTestContext()
+
+            mockServer
+                .enqueueGetTasks(context.createTaskResponse())
+                .enqueueGetTask(context.createTaskResponse())
+                .enqueueIsValid(false)
+            launchApp()
+
+            // When
+            openDetail(context.id)
+
+            // Then
+            assertIsDisplayed(TestTags.NOT_VALID)
+            composeTestRule.onNodeWithTag(TestTags.VALID).assertDoesNotExist()
+        }
+    }
+
+    @RunWith(org.robolectric.ParameterizedRobolectricTestRunner::class)
+    class TaskDetailLoadFailureIntegrationTests(
+        private val failureCase: GetTaskFailure,
+    ) : Base() {
+
+        @Test
+        fun shouldNotOpenInfoFormWhenTaskDetailsRequestFailsAndDisplayGenericLoadTaskInfoError() {
+            // Given
+            val context = TaskTestContext()
+
+            mockServer
+                .enqueueGetTasks(context.createTaskResponse())
+            failureCase.enqueue(mockServer)
+            mockServer.enqueueIsValid(false)
+            launchApp()
+
+            // When
+            runAsyncAction { onNodeWithTag(TestTags.infoButton(context.id)).performClick() }
+
+            // Then
+            assertTextEquals(TestTags.LOAD_ERROR, failureCase.expectedLoadError)
+            assertIsNotDisplayed(TestTags.DESCRIPTION)
+        }
+
+        companion object {
+            @JvmStatic
+            @org.robolectric.ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+            fun failureCases(): List<GetTaskFailure> = GetTaskFailure.entries
+        }
+    }
+
+    @RunWith(org.robolectric.ParameterizedRobolectricTestRunner::class)
+    class TaskDetailValidationFailureIntegrationTests(
+        private val failureCase: IsValidFailure,
+    ) : Base() {
+
+        @Test
+        fun shouldShowInvalidValidationSignWhenValidationRequestFailsAndDisplayGenericLoadTaskInfoError() {
+            // Given
+            val context = TaskTestContext()
+
+            mockServer
+                .enqueueGetTasks(context.createTaskResponse())
+                .enqueueGetTask(context.createTaskResponse())
+            failureCase.enqueue(mockServer)
+            launchApp()
+
+            // When
+            openDetail(context.id)
+
+            // Then
+            assertTextEquals(TestTags.DESCRIPTION, context.description.toString())
+            assertIsDisplayed(TestTags.statusTag(context.status))
+            assertIsDisplayed(TestTags.priorityTag(context.priority))
+            assertIsDisplayed(TestTags.NOT_VALID)
+            composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertDoesNotExist()
+        }
+
+        companion object {
+            @JvmStatic
+            @org.robolectric.ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+            fun failureCases(): List<IsValidFailure> = IsValidFailure.entries
+        }
     }
 }

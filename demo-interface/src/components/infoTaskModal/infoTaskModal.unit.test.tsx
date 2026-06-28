@@ -164,6 +164,58 @@ describe('InfoTaskModal', () => {
         });
     });
 
+    describe('Error handling', () => {
+        it('should show load error when task fetch fails', async () => {
+            vi.spyOn(services, 'getTask').mockRejectedValue(new Error('Request failed (500)'));
+
+            render(<InfoTaskModal taskId={taskId} onClose={mockOnClose} />);
+
+            await waitFor(() => {
+                expect(screen.getByTestId('load-error')).toHaveTextContent('Failed to load task info. Please try again.');
+            });
+            expect(screen.queryByTestId('description')).not.toBeInTheDocument();
+        });
+
+        it('should show Info as title when task fetch fails', async () => {
+            vi.spyOn(services, 'getTask').mockRejectedValue(new Error('Request failed (500)'));
+
+            render(<InfoTaskModal taskId={taskId} onClose={mockOnClose} />);
+
+            await waitFor(() => {
+                expect(screen.getByTestId('load-error')).toBeInTheDocument();
+            });
+            expect(screen.getByTestId('modal-title')).toHaveTextContent('Info');
+        });
+
+        it('should show task details with not-valid indicator when validation fetch fails', async () => {
+            vi.spyOn(services, 'getIsValid').mockRejectedValue(new Error('Request failed (500)'));
+
+            render(<InfoTaskModal taskId={taskId} onClose={mockOnClose} />);
+
+            await waitFor(() => {
+                expect(screen.getByTestId('description')).toHaveTextContent(mockTask.description);
+            });
+            expect(screen.getByTestId('notValid')).toBeInTheDocument();
+            expect(screen.queryByTestId('valid')).not.toBeInTheDocument();
+            expect(screen.queryByTestId('load-error')).not.toBeInTheDocument();
+        });
+
+        it('should call onClose when close button is clicked after task fetch fails', async () => {
+            const user = userEvent.setup();
+            vi.spyOn(services, 'getTask').mockRejectedValue(new Error('Request failed (500)'));
+
+            render(<InfoTaskModal taskId={taskId} onClose={mockOnClose} />);
+
+            await waitFor(() => {
+                expect(screen.getByTestId('load-error')).toBeInTheDocument();
+            });
+
+            await user.click(screen.getByTestId('close-button'));
+
+            expect(mockOnClose).toHaveBeenCalledTimes(1);
+        });
+    });
+
     describe('Validation indicator', () => {
         it('should show valid icon when task is valid', async () => {
             vi.spyOn(services, 'getIsValid').mockResolvedValue(true);

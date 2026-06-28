@@ -29,7 +29,7 @@ class DeleteTaskTest : MockedBackendTestBase() {
     }
 
     @Test
-    fun shouldDeleteTask() {
+    fun shouldRemoveTaskFromListWhenDeleteSucceeds() {
         // Given
         steps.navigation.openMainPage()
         steps.navigation.refreshMainPage()

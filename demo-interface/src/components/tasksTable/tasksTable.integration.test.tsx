@@ -13,8 +13,38 @@ describe('TasksTable integration', () => {
     user = userEvent.setup();
   });
 
-  describe('Basic flow', () => {
-    it('should render tasks table with fetched tasks and action buttons', async () => {
+  describe('Task table tests', () => {
+    it('should render task list with fetched data when the list is first shown', async () => {
+      // given
+      const tasks = [
+        { id: '1', title: 'Task One', status: TaskStatus.TODO, priority: TaskPriority.LOW },
+        { id: '2', title: 'Task Two', status: TaskStatus.IN_PROGRESS, priority: TaskPriority.MEDIUM },
+      ];
+
+      mockFetchResponse({
+        [`/v1/tasks`]: {
+          GET: { body: tasks },
+        },
+      });
+
+      // when
+      const { container } = render(<TasksTable />);
+
+      // then
+      await waitFor(() => {
+        expect(globalThis.fetch).toHaveBeenCalledWith(
+          expect.stringContaining('/v1/tasks'),
+          expect.objectContaining({ method: 'GET' }),
+        );
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('task-title-1')).toHaveTextContent('Task One');
+        expect(screen.getByTestId('task-title-2')).toHaveTextContent('Task Two');
+      });
+      expect(container.querySelectorAll('[data-testid^="task-title-"]')).toHaveLength(2);
+    });
+
+    it('should display status/priority tags and action buttons for each task', async () => {
       // given
       const tasks = [
         { id: '1', title: 'Task One', status: TaskStatus.TODO, priority: TaskPriority.LOW },
@@ -29,7 +59,7 @@ describe('TasksTable integration', () => {
       });
 
       // when
-      const { container } = render(<TasksTable />);
+      render(<TasksTable />);
 
       // then
       await waitFor(() => {
@@ -37,8 +67,6 @@ describe('TasksTable integration', () => {
         expect(screen.getByTestId('task-title-2')).toHaveTextContent('Task Two');
         expect(screen.getByTestId('task-title-3')).toHaveTextContent('Task Three');
       });
-
-      expect(container.querySelectorAll('[data-testid^="task-title-"]')).toHaveLength(3);
 
       const firstRow = screen.getByTestId('task-title-1').closest('tr');
       expect(within(firstRow!).getByTestId(`status-tag-${TaskStatus.TODO}`)).toBeVisible();
@@ -50,13 +78,44 @@ describe('TasksTable integration', () => {
       const secondRow = screen.getByTestId('task-title-2').closest('tr');
       expect(within(secondRow!).getByTestId(`status-tag-${TaskStatus.IN_PROGRESS}`)).toBeVisible();
       expect(within(secondRow!).getByTestId(`priority-tag-${TaskPriority.MEDIUM}`)).toBeVisible();
+      expect(within(secondRow!).getByTestId('info-button-2')).toBeVisible();
+      expect(within(secondRow!).getByTestId('edit-button-2')).toBeVisible();
+      expect(within(secondRow!).getByTestId('delete-button-2')).toBeVisible();
 
       const thirdRow = screen.getByTestId('task-title-3').closest('tr');
       expect(within(thirdRow!).getByTestId(`status-tag-${TaskStatus.DONE}`)).toBeVisible();
       expect(within(thirdRow!).getByTestId(`priority-tag-${TaskPriority.HIGH}`)).toBeVisible();
+      expect(within(thirdRow!).getByTestId('info-button-3')).toBeVisible();
+      expect(within(thirdRow!).getByTestId('edit-button-3')).toBeVisible();
+      expect(within(thirdRow!).getByTestId('delete-button-3')).toBeVisible();
     });
 
-    it('should open create modal from create button', async () => {
+    it('should render empty list state when tasks response is empty', async () => {
+      // given
+      mockFetchResponse({
+        [`/v1/tasks`]: {
+          GET: { body: [] },
+        },
+      });
+
+      // when
+      const { container } = render(<TasksTable />);
+
+      // then
+      await waitFor(() => {
+        expect(globalThis.fetch).toHaveBeenCalledWith(
+          expect.stringContaining('/v1/tasks'),
+          expect.objectContaining({ method: 'GET' }),
+        );
+      });
+      expect(screen.getByTestId('add-task-button')).toBeVisible();
+      expect(container.querySelectorAll('[data-testid^="task-title-"]')).toHaveLength(0);
+      expect(container.querySelectorAll('[data-testid^="info-button-"]')).toHaveLength(0);
+      expect(container.querySelectorAll('[data-testid^="edit-button-"]')).toHaveLength(0);
+      expect(container.querySelectorAll('[data-testid^="delete-button-"]')).toHaveLength(0);
+    });
+
+    it('should open create task form from list actions', async () => {
       // given
       const task = {
         id: '10',
@@ -90,7 +149,7 @@ describe('TasksTable integration', () => {
       expect(screen.getByTestId('create-task-title-input')).toBeVisible();
     });
 
-    it('should open info modal from info button', async () => {
+    it('should open task info form from list actions', async () => {
       // given
       const task = {
         id: '10',
@@ -126,7 +185,7 @@ describe('TasksTable integration', () => {
       });
     });
 
-    it('should open edit modal from edit button', async () => {
+    it('should open task edit form from list actions', async () => {
       // given
       const task = {
         id: '10',
@@ -162,11 +221,11 @@ describe('TasksTable integration', () => {
       });
     });
 
-    it('should render empty table when tasks api returns empty list', async () => {
+    it('should keep create flow available when initial GET tasks request fails', async () => {
       // given
       mockFetchResponse({
         [`/v1/tasks`]: {
-          GET: { body: [] },
+          GET: { body: { message: 'Server error' }, status: 500 },
         },
       });
 
@@ -175,21 +234,14 @@ describe('TasksTable integration', () => {
 
       // then
       await waitFor(() => {
-        expect(globalThis.fetch).toHaveBeenCalledWith(
-          expect.stringContaining('/v1/tasks'),
-          expect.objectContaining({ method: 'GET' }),
-        );
+        expect(screen.getByTestId('add-task-button')).toBeVisible();
       });
-      expect(screen.getByTestId('add-task-button')).toBeVisible();
       expect(container.querySelectorAll('[data-testid^="task-title-"]')).toHaveLength(0);
-      expect(container.querySelectorAll('[data-testid^="info-button-"]')).toHaveLength(0);
-      expect(container.querySelectorAll('[data-testid^="edit-button-"]')).toHaveLength(0);
-      expect(container.querySelectorAll('[data-testid^="delete-button-"]')).toHaveLength(0);
     });
   });
 
-  describe('Delete flow', () => {
-    it('should delete task and remove row from table', async () => {
+  describe('Delete task tests', () => {
+    it('should send delete request with selected task ID when delete is triggered and remove task from list after successful delete response', async () => {
       // given
       const tasks = [
         { id: '1', title: 'Delete Me', status: TaskStatus.TODO, priority: TaskPriority.LOW },
@@ -226,15 +278,9 @@ describe('TasksTable integration', () => {
     });
 
     it.each([
-      {
-        testCase: 'api returns 500',
-        deleteResponse: { body: { message: 'Delete failed' }, status: 500 },
-      },
-      {
-        testCase: 'request fails due to network error',
-        deleteResponse: { body: null, reject: true },
-      },
-    ])('should keep task row when delete $testCase', async ({ deleteResponse }) => {
+      { testCase: 'HTTP 500', deleteResponse: { body: { message: 'Delete failed' }, status: 500 } },
+      { testCase: 'network error', deleteResponse: { body: null, reject: true } },
+    ])('should keep task in list when delete fails with $testCase', async ({ deleteResponse }) => {
       // given
       const tasks = [
         { id: '1', title: 'Delete Me', status: TaskStatus.TODO, priority: TaskPriority.LOW },
@@ -270,7 +316,7 @@ describe('TasksTable integration', () => {
       expect(container.querySelectorAll('[data-testid^="task-title-"]')).toHaveLength(2);
     });
 
-    it('should delete task successfully after retry', async () => {
+    it('should allow delete retry after failure and remove task when retry succeeds', async () => {
       // given
       const tasks = [
         { id: '1', title: 'Delete Me', status: TaskStatus.TODO, priority: TaskPriority.LOW },
@@ -316,26 +362,6 @@ describe('TasksTable integration', () => {
       });
       expect(screen.getByTestId('task-title-2')).toBeVisible();
       expect(container.querySelectorAll('[data-testid^="task-title-"]')).toHaveLength(1);
-    });
-  });
-
-  describe('GET Error handling', () => {
-    it('should keep create flow available when initial tasks request fails', async () => {
-      // given
-      mockFetchResponse({
-        [`/v1/tasks`]: {
-          GET: { body: { message: 'Server error' }, status: 500 },
-        },
-      });
-
-      // when
-      const { container } = render(<TasksTable />);
-
-      // then
-      await waitFor(() => {
-        expect(screen.getByTestId('add-task-button')).toBeVisible();
-      });
-      expect(container.querySelectorAll('[data-testid^="task-title-"]')).toHaveLength(0);
     });
   });
 });

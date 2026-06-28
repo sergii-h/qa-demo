@@ -17,7 +17,8 @@ selenide-selenoid-junit5-example/allure-results/
 /demo-interface/pacts/
 /demo-interface/reports/
 /demo-interface/.stryker-tmp/
-/cv/
+/coverage/
+/demo-react-native/coverage/
 /e2e/selenide-junit5-selenium-grid/build/
 /e2e/playwright-typescript/allure-results/
 /e2e/playwright-typescript/playwright-report/
@@ -31,3 +32,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.egg-info/
+/demo-android/.gradle-home/
+/cv/
+/e2e/playwright-python/test-results/
+/demo-android/.gradle-local/

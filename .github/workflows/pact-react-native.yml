@@ -1,0 +1,92 @@
+name: Run React Native pact tests
+
+on:
+  pull_request:
+    branches: [ "master" ]
+  push:
+    branches: [ "master" ]
+
+jobs:
+  changes:
+    runs-on: ubuntu-22.04
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - demo-react-native/**
+              - demo-service/**
+              - docker/**
+              - .github/scripts/pact-*.sh
+              - .github/workflows/pact-react-native.yml
+
+  pact-react-native:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Start Pact Broker
+        uses: ./.github/actions/start-pact-broker
+        with:
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: demo-react-native/package-lock.json
+
+      - name: Configure Pact Broker main branches
+        run: bash .github/scripts/pact-configure-broker.sh
+
+      - name: Bootstrap master branch React Native contracts in Pact Broker
+        if: github.ref_name != 'master'
+        env:
+          DOCKER_HOST: unix:///var/run/docker.sock
+        run: bash .github/scripts/pact-bootstrap-react-native-master.sh
+
+      - name: Install dependencies
+        working-directory: demo-react-native
+        run: npm ci
+
+      - name: Run demo-react-native consumer pact tests
+        working-directory: demo-react-native
+        run: npm run test:pact
+
+      - name: Publish demo-react-native pacts to broker
+        working-directory: demo-react-native
+        env:
+          PACT_BROKER_BASE_URL: http://localhost:9292
+          PACT_CONSUMER_VERSION: ${{ github.sha }}
+          PACT_BRANCH: ${{ github.ref_name }}
+        run: npm run pact:publish
+
+      - name: Run task API provider pact verification
+        uses: ./.github/actions/verify-task-api-pact-provider
+        with:
+          pact-provider-version: ${{ github.sha }}
+          pact-provider-branch: ${{ github.ref_name }}
+
+      - name: Can I merge to master
+        if: github.ref_name != 'master'
+        env:
+          PACT_VERSION: ${{ github.sha }}
+          PACT_MERGE_PROFILE: react-native
+        run: bash .github/scripts/pact-can-i-merge.sh

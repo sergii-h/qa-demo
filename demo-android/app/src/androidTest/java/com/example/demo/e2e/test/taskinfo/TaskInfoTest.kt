@@ -30,7 +30,7 @@ class TaskInfoTest : MockedBackendTestBase() {
     }
 
     @Test
-    fun shouldViewTaskInfo() {
+    fun shouldDisplayTaskDetailsWhenInfoOpened() {
         // Given
         steps.navigation.openMainPage()
         steps.navigation.refreshMainPage()

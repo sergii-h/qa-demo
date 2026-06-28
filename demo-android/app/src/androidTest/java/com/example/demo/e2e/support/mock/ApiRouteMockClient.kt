@@ -1,5 +1,7 @@
 package com.example.demo.e2e.support.mock
 
+import com.example.demo.e2e.support.mock.ApiRouteMock
+
 class ApiRouteMockClient(
     private val wiremockHost: String = WireMockClient.resolveWiremockHost(),
 ) : AutoCloseable {

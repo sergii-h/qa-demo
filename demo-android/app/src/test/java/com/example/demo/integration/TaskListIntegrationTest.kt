@@ -1,421 +1,443 @@
 package com.example.demo.integration
 
-import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.integration.support.IntegrationTasks
+import com.example.demo.integration.context.TaskTestContext
 import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
+import com.example.demo.integration.support.DeleteFailure
+import com.example.demo.integration.support.GetTasksFailure
 import com.example.demo.ui.TestTags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.experimental.runners.Enclosed
 import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
-class TaskListIntegrationTest : IntegrationTestBase() {
+@RunWith(Enclosed::class)
+class TaskListIntegrationTest {
 
-    @Test
-    fun shouldShowNewTaskWhenPullToRefreshReturnsUpdatedList() {
-        // Given
-        fakeApi.enqueueGetTasks(IntegrationTasks.task("1", "First Task"))
-        launchApp()
-        assertTaskListHasSize(1)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
-        fakeApi.enqueueGetTasks(
-            IntegrationTasks.task("1", "First Task"),
-            IntegrationTasks.task("2", "Second Task"),
-        )
+    abstract class Base : IntegrationTestBase() {
 
-        // When
-        pullToRefresh()
-
-        // Then
-        assertTaskListHasSize(2)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).performScrollTo().assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldKeepExistingTasksWhenPullToRefreshReturnsSameList() {
-        // Given
-        val task = IntegrationTasks.task("1", "Stable Task")
-        fakeApi.enqueueGetTasks(task)
-        launchApp()
-        assertTaskListHasSize(1)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
-        fakeApi.enqueueGetTasks(task)
-
-        // When
-        pullToRefresh()
-
-        // Then
-        assertTaskListHasSize(1)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldKeepExistingTasksWhenPullToRefreshFailsWithServerError() {
-        // Given
-        fakeApi.enqueueGetTasks(
-            IntegrationTasks.task("1", "Keep Me", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Also Keep", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
-        )
-        launchApp()
-        assertTaskListHasSize(2)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).assertIsDisplayed()
-        fakeApi.enqueueGetTasksError(500)
-
-        // When
-        pullToRefresh()
-
-        // Then
-        assertTaskListHasSize(2)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldRenderTaskListWithFetchedDataWhenListFirstShown() {
-        // Given
-        fakeApi.enqueueGetTasks(
-            IntegrationTasks.task("1", "Task One", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Task Two", status = TaskStatus.IN_PROGRESS, priority = TaskPriority.MEDIUM),
-            IntegrationTasks.task("3", "Task Three", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
-        )
-
-        // When
-        launchApp()
-
-        // Then
-        assertTaskListHasSize(3)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).performScrollTo().assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).performScrollTo().assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("3")).performScrollTo().assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldDisplayStatusAndPriorityTagsForAllTaskVariants() {
-        // Given
-        fakeApi.enqueueGetTasks(
-            IntegrationTasks.task("1", "Task One", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Task Two", status = TaskStatus.IN_PROGRESS, priority = TaskPriority.MEDIUM),
-            IntegrationTasks.task("3", "Task Three", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
-        )
-
-        // When
-        launchApp()
-
-        // Then
-        assertTaskListHasSize(3)
-        composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.TODO)).performScrollTo().assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskPriority.LOW)).performScrollTo().assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.IN_PROGRESS)).performScrollTo().assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskPriority.MEDIUM)).performScrollTo().assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.DONE)).performScrollTo().assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskPriority.HIGH)).performScrollTo().assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldRenderActionButtonsForEachTask() {
-        // Given
-        fakeApi.enqueueGetTasks(IntegrationTasks.task("10", "Modal Task", description = "Modal description"))
-
-        // When
-        launchApp()
-
-        // Then
-        assertTaskListHasSize(1)
-        composeTestRule.onNodeWithTag(TestTags.infoButton("10")).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.editButton("10")).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.deleteButton("10")).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldRenderEmptyListWhenTasksResponseIsEmpty() {
-        // Given
-        fakeApi.enqueueGetTasks()
-
-        // When
-        launchApp()
-
-        // Then
-        assertTaskListHasSize(0)
-        composeTestRule.onNodeWithTag(TestTags.EMPTY_TASKS).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.infoButton("1")).assertDoesNotExist()
-    }
-
-    @Test
-    fun shouldOpenCreateFlowFromAddTaskButton() {
-        // Given
-        fakeApi.enqueueGetTasks(IntegrationTasks.task("10", "Modal Task", description = "Modal description"))
-        launchApp()
-
-        // When
-        openCreateForm()
-
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldOpenDetailFlowFromInfoButton() {
-        // Given
-        val task = IntegrationTasks.task("10", "Modal Task", description = "Modal description")
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        fakeApi.enqueueIsValid(true)
-        launchApp()
-
-        // When
-        openDetail("10")
-
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldOpenEditFlowFromEditButton() {
-        // Given
-        val task = IntegrationTasks.task("10", "Modal Task", description = "Modal description")
-        fakeApi.enqueueGetTasks(task)
-        fakeApi.enqueueGetTask(task)
-        launchApp()
-
-        // When
-        openEditForm("10")
-
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldRemoveTaskFromListWhenDeleteSucceeds() {
-        // Given
-        fakeApi.enqueueGetTasks(
-            IntegrationTasks.task("1", "Delete Me", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Keep Me", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
-        )
-        fakeApi.enqueueDeleteSuccess()
-        launchApp()
-
-        // When
-        runAsyncAction {
-            onNodeWithTag(TestTags.deleteButton("1")).performClick()
+        protected fun pullToRefresh() {
+            runAsyncAction {
+                onNodeWithTag(TestTags.TASK_LIST).performTouchInput {
+                    swipeDown(
+                        startY = top + height * 0.05f,
+                        endY = top + height * 0.95f,
+                        durationMillis = 400,
+                    )
+                }
+            }
+            assertIsNotDisplayed(TestTags.REFRESHING)
         }
 
-        // Then
-        waitUntilTaskListHasSize(1)
-        assertTaskListHasSize(1)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).assertIsDisplayed()
-        assertThat(fakeApi.deletedTaskIds).containsExactly("1")
-    }
-
-    @Test
-    fun shouldUpdateListWithoutFullClientReloadWhenDeleteSucceeds() {
-        // Given
-        fakeApi.enqueueGetTasks(
-            IntegrationTasks.task("1", "Delete Me", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Keep Me", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
-        )
-        fakeApi.enqueueDeleteSuccess()
-        launchApp()
-
-        // When
-        runAsyncAction {
-            onNodeWithTag(TestTags.deleteButton("1")).performClick()
-        }
-
-        // Then
-        waitUntilTaskListHasSize(1)
-        assertTaskListHasSize(1)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldKeepTaskInListWhenDeleteFailsWithServerError() {
-        // Given
-        fakeApi.enqueueGetTasks(
-            IntegrationTasks.task("1", "Delete Me", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Keep Me", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
-        )
-        fakeApi.enqueueDeleteError(500, "Delete failed")
-        launchApp()
-
-        // When
-        runAsyncAction {
-            onNodeWithTag(TestTags.deleteButton("1")).performClick()
-        }
-
-        // Then
-        assertTaskListHasSize(2)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).assertIsDisplayed()
-        assertThat(fakeApi.deletedTaskIds).containsExactly("1")
-    }
-
-    @Test
-    fun shouldKeepTaskInListWhenDeleteFailsDueToNetworkError() {
-        // Given
-        fakeApi.enqueueGetTasks(
-            IntegrationTasks.task("1", "Delete Me", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Keep Me", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
-        )
-        fakeApi.enqueueDeleteNetworkFailure()
-        launchApp()
-
-        // When
-        runAsyncAction {
-            onNodeWithTag(TestTags.deleteButton("1")).performClick()
-        }
-
-        // Then
-        assertTaskListHasSize(2)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("1")).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).assertIsDisplayed()
-        assertThat(fakeApi.deletedTaskIds).containsExactly("1")
-    }
-
-    @Test
-    fun shouldRemoveTaskWhenDeleteRetrySucceeds() {
-        // Given
-        fakeApi.enqueueGetTasks(
-            IntegrationTasks.task("1", "Delete Me", status = TaskStatus.TODO, priority = TaskPriority.LOW),
-            IntegrationTasks.task("2", "Keep Me", status = TaskStatus.DONE, priority = TaskPriority.HIGH),
-        )
-        fakeApi.enqueueDeleteError(500, "Delete failed")
-        fakeApi.enqueueDeleteSuccess()
-        launchApp()
-
-        // When
-        runAsyncAction {
-            onNodeWithTag(TestTags.deleteButton("1")).performClick()
-            onNodeWithTag(TestTags.deleteButton("1")).performClick()
-        }
-
-        // Then
-        waitUntilTaskListHasSize(1)
-        assertTaskListHasSize(1)
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("2")).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldKeepCreateFlowAvailableWhenInitialGetFails() {
-        // Given
-        fakeApi.enqueueGetTasksError(500)
-
-        // When
-        launchApp()
-        openCreateForm()
-
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldKeepCreateFlowAvailableWhenInitialGetRequestIsRejected() {
-        // Given
-        fakeApi.enqueueGetTasksNetworkFailure()
-
-        // When
-        launchApp()
-
-        // Then
-        composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldShowSpanishTaskListStringsWhenEsSelected() {
-        // Given
-        val task = IntegrationTasks.task("1", "Task One", status = TaskStatus.TODO, priority = TaskPriority.LOW)
-        fakeApi.enqueueGetTasksForLanguageSwitch(task)
-        launchApp()
-
-        // When
-        switchLanguage(LanguageOption.ES)
-
-        // Then
-        assertTaskListHasSize(1)
-        composeTestRule.onNodeWithTag(TestTags.PAGE_TITLE).assertTextEquals("Tareas")
-        composeTestRule.onNodeWithTag(TestTags.statusTag(TaskStatus.TODO))
-            .performScrollTo()
-            .assertTextEquals("Por hacer")
-        composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskPriority.LOW))
-            .performScrollTo()
-            .assertTextEquals("Baja")
-    }
-
-    private fun pullToRefresh() {
-        runAsyncAction {
-            onNodeWithTag(TestTags.TASK_LIST).performTouchInput {
-                swipeDown(
-                    startY = top + height * 0.05f,
-                    endY = top + height * 0.95f,
-                    durationMillis = 400,
-                )
+        protected fun assertTaskListHasSize(expectedSize: Int) {
+            waitUntilCondition(5_000) {
+                taskTitleNodeCount() == expectedSize
             }
         }
-        flushAsyncWork()
+
+        protected fun clickDeleteItem(id: String) {
+            runAsyncAction { onNodeWithTag(TestTags.deleteButton(id)).performClick() }
+        }
+
+        protected fun openCreateForm() {
+            runAsyncAction { onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick() }
+            assertIsDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
+        }
+
+        protected fun openDetailForm(taskId: String) {
+            runAsyncAction { onNodeWithTag(TestTags.infoButton(taskId)).performClick() }
+            assertIsDisplayed(TestTags.DESCRIPTION)
+        }
+
+        protected fun openEditForm(taskId: String) {
+            runAsyncAction { onNodeWithTag(TestTags.editButton(taskId)).performClick() }
+            assertIsDisplayed(TestTags.EDIT_TASK_TITLE_INPUT)
+        }
+
+        private val taskTitleMatcher = SemanticsMatcher("task-title prefix") { node ->
+            val config = node.config
+            config.contains(SemanticsProperties.TestTag) &&
+                config[SemanticsProperties.TestTag].startsWith("task-title-")
+        }
+
+        private fun taskTitleNodeCount(): Int =
+            composeTestRule.onAllNodes(taskTitleMatcher, useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .size
     }
 
-    private fun assertTaskListHasSize(expectedSize: Int) {
-        assertThat(taskTitleNodeCount()).isEqualTo(expectedSize)
-    }
+    @RunWith(RobolectricTestRunner::class)
+    class TaskListDisplayIntegrationTests : Base() {
 
-    private fun waitUntilTaskListHasSize(expectedSize: Int, timeoutMillis: Long = 5_000) {
-        composeTestRule.waitUntil(timeoutMillis = timeoutMillis) {
-            taskTitleNodeCount() == expectedSize
+        @Test
+        fun shouldRenderTaskListWithFetchedDataWhenTheListIsFirstShown() {
+            // Given
+            val firstContext = TaskTestContext(status = TaskStatus.TODO, priority = TaskPriority.LOW)
+            val secondContext = TaskTestContext(status = TaskStatus.DONE, priority = TaskPriority.HIGH)
+
+            mockServer.enqueueGetTasks(
+                firstContext.createTaskResponse(),
+                secondContext.createTaskResponse(),
+            )
+
+            // When
+            launchApp()
+
+            // Then
+            assertThat(mockServer.getTasksRequestCount).isEqualTo(1)
+            assertTaskListHasSize(2)
+            assertIsDisplayed(TestTags.taskTitle(firstContext.id))
+            assertIsDisplayed(TestTags.taskTitle(secondContext.id))
+            assertTextEquals(TestTags.taskTitle(firstContext.id), firstContext.title)
+            assertTextEquals(TestTags.taskTitle(secondContext.id), secondContext.title)
+        }
+
+        @Test
+        fun shouldDisplayStatusPriorityTagsAndActionButtonsForEachTask() {
+            // Given
+            val firstContext = TaskTestContext(status = TaskStatus.TODO, priority = TaskPriority.LOW)
+            val secondContext = TaskTestContext(status = TaskStatus.IN_PROGRESS, priority = TaskPriority.MEDIUM)
+            val thirdContext = TaskTestContext(status = TaskStatus.DONE, priority = TaskPriority.HIGH)
+
+            mockServer.enqueueGetTasks(
+                firstContext.createTaskResponse(),
+                secondContext.createTaskResponse(),
+                thirdContext.createTaskResponse(),
+            )
+
+            // When
+            launchApp()
+
+            // Then
+            assertTaskListHasSize(3)
+            assertIsDisplayed(TestTags.statusTag(firstContext.status))
+            assertIsDisplayed(TestTags.priorityTag(firstContext.priority))
+            assertIsDisplayed(TestTags.statusTag(secondContext.status))
+            assertIsDisplayed(TestTags.priorityTag(secondContext.priority))
+            assertIsDisplayed(TestTags.statusTag(thirdContext.status))
+            assertIsDisplayed(TestTags.priorityTag(thirdContext.priority))
+            composeTestRule.onNodeWithTag(TestTags.infoButton(firstContext.id)).assertIsDisplayed()
+            composeTestRule.onNodeWithTag(TestTags.editButton(firstContext.id)).assertIsDisplayed()
+            composeTestRule.onNodeWithTag(TestTags.deleteButton(firstContext.id)).assertIsDisplayed()
+            assertIsDisplayed(TestTags.infoButton(secondContext.id))
+            assertIsDisplayed(TestTags.editButton(secondContext.id))
+            assertIsDisplayed(TestTags.deleteButton(secondContext.id))
+            assertIsDisplayed(TestTags.infoButton(thirdContext.id))
+            assertIsDisplayed(TestTags.editButton(thirdContext.id))
+            assertIsDisplayed(TestTags.deleteButton(thirdContext.id))
+        }
+
+        @Test
+        fun shouldRenderEmptyListStateWhenTasksResponseIsEmpty() {
+            // Given
+            mockServer.enqueueGetTasks()
+
+            // When
+            launchApp()
+
+            // Then
+            assertTaskListHasSize(0)
+            assertIsDisplayed(TestTags.EMPTY_TASKS)
+            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+        }
+
+        @Test
+        fun shouldOpenCreateTaskFormFromListActions() {
+            // Given
+            val context = TaskTestContext()
+
+            mockServer.enqueueGetTasks(context.createTaskResponse())
+            launchApp()
+
+            // When
+            openCreateForm()
+
+            // Then
+            assertIsDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
+        }
+
+        @Test
+        fun shouldOpenTaskInfoFormFromListActions() {
+            // Given
+            val context = TaskTestContext()
+
+            mockServer
+                .enqueueGetTasks(context.createTaskResponse())
+                .enqueueGetTask(context.createTaskResponse())
+                .enqueueIsValid(true)
+            launchApp()
+
+            // When
+            openDetailForm(context.id)
+
+            // Then
+            assertIsDisplayed(TestTags.DESCRIPTION)
+        }
+
+        @Test
+        fun shouldOpenTaskEditFormFromListActions() {
+            // Given
+            val context = TaskTestContext()
+
+            mockServer
+                .enqueueGetTasks(context.createTaskResponse())
+                .enqueueGetTask(context.createTaskResponse())
+            launchApp()
+
+            // When
+            openEditForm(context.id)
+
+            // Then
+            assertIsDisplayed(TestTags.EDIT_TASK_TITLE_INPUT)
+        }
+
+        @Test
+        fun shouldHaveTranslationsForTaskList() {
+            // Given
+            val context = TaskTestContext(status = TaskStatus.TODO, priority = TaskPriority.LOW)
+
+            mockServer.enqueueGetTasksForLanguageSwitch(context.createTaskResponse())
+            launchApp()
+
+            // When
+            switchLanguage(LanguageOption.ES)
+
+            // Then
+            assertTaskListHasSize(1)
+            assertTextEquals(TestTags.PAGE_TITLE, "Tareas")
+            assertTextEquals(TestTags.statusTag(context.status), "Por hacer")
+            assertTextEquals(TestTags.priorityTag(context.priority), "Baja")
         }
     }
 
-    private fun taskTitleNodeCount(): Int =
-        composeTestRule.onRoot(useUnmergedTree = true)
-            .fetchSemanticsNode()
-            .let(::countTaskTitleNodes)
+    @RunWith(RobolectricTestRunner::class)
+    class PullToRefreshIntegrationTests : Base() {
 
-    private fun countTaskTitleNodes(node: SemanticsNode): Int {
-        val selfCount = if (semanticsTestTag(node)?.startsWith("task-title-") == true) 1 else 0
-        return selfCount + node.children.sumOf(::countTaskTitleNodes)
-    }
+        @Test
+        fun shouldShowNewTaskWhenPullToRefreshReturnsUpdatedList() {
+            // Given
+            val firstContext = TaskTestContext()
+            val secondContext = TaskTestContext()
 
-    private fun semanticsTestTag(node: SemanticsNode): String? {
-        val config = node.config
-        return if (config.contains(SemanticsProperties.TestTag)) {
-            config[SemanticsProperties.TestTag]
-        } else {
-            null
+            mockServer.enqueueGetTasks(firstContext.createTaskResponse())
+            launchApp()
+
+            assertTaskListHasSize(1)
+            assertIsDisplayed(TestTags.taskTitle(firstContext.id))
+            mockServer.enqueueGetTasks(
+                firstContext.createTaskResponse(),
+                secondContext.createTaskResponse(),
+            )
+
+            // When
+            pullToRefresh()
+
+            // Then
+            assertTaskListHasSize(2)
+            assertIsDisplayed(TestTags.taskTitle(firstContext.id))
+            assertIsDisplayed(TestTags.taskTitle(secondContext.id))
+        }
+
+        @Test
+        fun shouldKeepExistingTasksWhenPullToRefreshReturnsSameList() {
+            // Given
+            val context = TaskTestContext()
+
+            mockServer.enqueueGetTasks(context.createTaskResponse())
+            launchApp()
+
+            assertTaskListHasSize(1)
+            assertIsDisplayed(TestTags.taskTitle(context.id))
+            mockServer.enqueueGetTasks(context.createTaskResponse())
+
+            // When
+            pullToRefresh()
+
+            // Then
+            assertTaskListHasSize(1)
+            assertIsDisplayed(TestTags.taskTitle(context.id))
+        }
+
+        @Test
+        fun shouldKeepEmptyListWhenPullToRefreshReturnsEmptyList() {
+            // Given
+            mockServer.enqueueGetTasks()
+            launchApp()
+
+            assertTaskListHasSize(0)
+            assertIsDisplayed(TestTags.EMPTY_TASKS)
+            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+            mockServer.enqueueGetTasks()
+
+            // When
+            pullToRefresh()
+
+            // Then
+            assertTaskListHasSize(0)
+            assertIsDisplayed(TestTags.EMPTY_TASKS)
+            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+        }
+
+        @Test
+        fun shouldKeepExistingTasksWhenPullToRefreshFailsWithServerError() {
+            // Given
+            val firstContext = TaskTestContext()
+            val secondContext = TaskTestContext()
+
+            mockServer.enqueueGetTasks(
+                firstContext.createTaskResponse(),
+                secondContext.createTaskResponse(),
+            )
+            launchApp()
+
+            assertTaskListHasSize(2)
+            assertIsDisplayed(TestTags.taskTitle(firstContext.id))
+            assertIsDisplayed(TestTags.taskTitle(secondContext.id))
+            mockServer.enqueueGetTasksError(500)
+
+            // When
+            pullToRefresh()
+
+            // Then
+            assertTaskListHasSize(2)
+            assertIsDisplayed(TestTags.taskTitle(firstContext.id))
+            assertIsDisplayed(TestTags.taskTitle(secondContext.id))
+            assertIsDisplayed(TestTags.ERROR_SNACKBAR)
         }
     }
 
-    private fun openCreateForm() {
-        runAsyncAction {
-            onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick()
+    @RunWith(RobolectricTestRunner::class)
+    class DeleteTaskIntegrationTests : Base() {
+
+        @Test
+        fun shouldSendDeleteRequestWithSelectedTaskIdWhenDeleteIsTriggeredAndRemoveTaskFromListAfterSuccessfulDeleteResponse() {
+            // Given
+            val deleteContext = TaskTestContext()
+            val keepContext = TaskTestContext()
+
+            mockServer
+                .enqueueGetTasks(
+                    deleteContext.createTaskResponse(),
+                    keepContext.createTaskResponse(),
+                )
+                .enqueueDeleteSuccess()
+            launchApp()
+
+            // When
+            clickDeleteItem(deleteContext.id)
+
+            // Then
+            waitUntilCondition { mockServer.deletedTaskIds.contains(deleteContext.id) }
+            assertThat(mockServer.deletedTaskIds).containsExactly(deleteContext.id)
+            assertTaskListHasSize(1)
+            assertIsDisplayed(TestTags.taskTitle(keepContext.id))
+            assertThat(mockServer.getTasksRequestCount).isEqualTo(1)
         }
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
+
+        @Test
+        fun shouldAllowDeleteRetryAfterFailureAndRemoveTaskWhenRetrySucceeds() {
+            // Given
+            val deleteContext = TaskTestContext()
+            val keepContext = TaskTestContext()
+
+            mockServer
+                .enqueueGetTasks(
+                    deleteContext.createTaskResponse(),
+                    keepContext.createTaskResponse(),
+                )
+                .enqueueDeleteError(500, "Delete failed")
+                .enqueueDeleteSuccess()
+            launchApp()
+
+            // When
+            clickDeleteItem(deleteContext.id)
+            waitUntilCondition { mockServer.deletedTaskIds.contains(deleteContext.id) }
+            assertIsDisplayed(TestTags.ERROR_SNACKBAR)
+
+            // And
+            clickDeleteItem(deleteContext.id)
+
+            // Then
+            assertTaskListHasSize(1)
+            assertIsDisplayed(TestTags.taskTitle(keepContext.id))
+        }
     }
 
-    private fun openEditForm(taskId: String) {
-        runAsyncAction {
-            onNodeWithTag(TestTags.editButton(taskId)).performClick()
+    @RunWith(org.robolectric.ParameterizedRobolectricTestRunner::class)
+    class TaskListInitialGetFailureIntegrationTests(
+        private val failureCase: GetTasksFailure,
+    ) : Base() {
+
+        @Test
+        fun shouldKeepCreateFlowAvailableWhenInitialGetTasksRequestFails() {
+            // Given
+            failureCase.enqueue(mockServer)
+            launchApp()
+
+            // Then
+            assertIsDisplayed(TestTags.EMPTY_TASKS)
+            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+
+            // When
+            openCreateForm()
+
+            // Then
+            assertIsDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
         }
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
+
+        companion object {
+            @JvmStatic
+            @org.robolectric.ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+            fun failureCases(): List<GetTasksFailure> = GetTasksFailure.entries
+        }
     }
 
-    private fun openDetail(taskId: String) {
-        runAsyncAction {
-            onNodeWithTag(TestTags.infoButton(taskId)).performClick()
+    @RunWith(org.robolectric.ParameterizedRobolectricTestRunner::class)
+    class DeleteTaskFailureIntegrationTests(
+        private val failureCase: DeleteFailure,
+    ) : Base() {
+
+        @Test
+        fun shouldKeepTaskInListWhenDeleteFails() {
+            // Given
+            val deleteContext = TaskTestContext()
+            val keepContext = TaskTestContext()
+
+            mockServer.enqueueGetTasks(
+                deleteContext.createTaskResponse(),
+                keepContext.createTaskResponse(),
+            )
+            failureCase.enqueue(mockServer)
+            launchApp()
+
+            // When
+            clickDeleteItem(deleteContext.id)
+
+            // Then
+            waitUntilCondition { mockServer.deletedTaskIds.contains(deleteContext.id) }
+            assertThat(mockServer.deletedTaskIds).containsExactly(deleteContext.id)
+            assertTaskListHasSize(2)
+            assertIsDisplayed(TestTags.taskTitle(deleteContext.id))
+            assertIsDisplayed(TestTags.taskTitle(keepContext.id))
+            assertIsDisplayed(TestTags.ERROR_SNACKBAR)
         }
-        composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertIsDisplayed()
+
+        companion object {
+            @JvmStatic
+            @org.robolectric.ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+            fun failureCases(): List<DeleteFailure> = DeleteFailure.entries
+        }
     }
 }

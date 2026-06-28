@@ -3,15 +3,14 @@ package com.example.demo.ui.taskdetail
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import com.example.demo.repository.TaskRepository
 import com.example.demo.testing.DemoComposeTestTheme
 import com.example.demo.testing.HttpExceptionFactory
 import com.example.demo.testing.MainDispatcherRule
 import com.example.demo.testing.TaskFixtures
 import com.example.demo.testing.runAsyncAction
-import com.example.demo.testing.waitUntilTextExists
 import com.example.demo.ui.TestTags
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -179,8 +178,13 @@ class TaskDetailScreenTest {
         }
 
         // Then
-        composeTestRule.waitUntilTextExists("Validated")
-        composeTestRule.onNodeWithText("Validated").assertExists()
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule.onAllNodesWithTag(TestTags.DETAIL_VALIDATED_LABEL, useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag(TestTags.DETAIL_VALIDATED_LABEL, useUnmergedTree = true)
+            .assertTextEquals("Validated")
     }
 
     @Test

@@ -14,11 +14,9 @@ As a user, I want to delete a task from the list without a confirmation dialog.
 
 1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
 2. **IT**
-   - Should send DELETE request with selected task ID when delete is activated
-   - Should remove task from list after successful delete response
-   - Should keep task in list when delete fails (HTTP 500 or network error)
-   - Should allow retry and remove task after subsequent successful delete
-   - Should update list display without full client reload
+   - Should send delete request with selected task ID when delete is triggered and remove task from list after successful delete response
+   - Should keep task in list when delete fails with HTTP500/network-error
+   - Should allow delete retry after failure and remove task when retry succeeds
 3. **Pact**
    - Should have DELETE `/v1/tasks/{id}` consumer test (HTTP 204)
 4. **E2E**

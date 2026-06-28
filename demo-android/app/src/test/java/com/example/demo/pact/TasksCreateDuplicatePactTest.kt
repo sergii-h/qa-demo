@@ -42,13 +42,11 @@ class TasksCreateDuplicatePactTest {
             val api = PactFixtures.createTaskApi(mockServer)
 
             // When
-            try {
-                api.createTask(PactFixtures.createTaskRequest())
-                error("Expected HttpException")
-            } catch (e: HttpException) {
-                // Then
-                assertThat(e.code()).isEqualTo(409)
-            }
+            val thrown = runCatching { api.createTask(PactFixtures.createTaskRequest()) }.exceptionOrNull()
+
+            // Then
+            assertThat(thrown).isInstanceOf(HttpException::class.java)
+            assertThat((thrown as HttpException).code()).isEqualTo(409)
         }
     }
 }

@@ -1,0 +1,34 @@
+name: Start Pact Broker
+description: Log in to Docker Hub, start the Pact Broker container, and wait for it to be ready
+
+inputs:
+  docker-hub-username:
+    description: Docker Hub username
+    required: true
+  docker-hub-token:
+    description: Docker Hub token
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ inputs.docker-hub-username }}
+        password: ${{ inputs.docker-hub-token }}
+
+    - name: Start Pact Broker
+      shell: bash
+      run: docker compose -f docker/docker-compose/run-pact-broker.yml up -d
+
+    - name: Wait for Pact Broker to be ready
+      shell: bash
+      run: |
+        for i in {1..30}; do
+          curl -sf http://localhost:9292 && exit 0
+          echo "Waiting for Pact Broker... ($i/30)"
+          sleep 2
+        done
+        echo "Pact Broker did not become ready in time"
+        exit 1

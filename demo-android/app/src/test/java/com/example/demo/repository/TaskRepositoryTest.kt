@@ -1,9 +1,8 @@
 package com.example.demo.repository
 
 import com.example.demo.data.remote.TaskApi
+import com.example.demo.testing.HttpExceptionFactory
 import com.example.demo.testing.TaskFixtures
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.ResponseBody.Companion.toResponseBody
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -11,7 +10,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import retrofit2.HttpException
-import retrofit2.Response
 
 class TaskRepositoryTest {
 
@@ -82,7 +80,7 @@ class TaskRepositoryTest {
     @Test
     fun shouldCompleteWhenDeleteTaskSucceeds() = runTest {
         // Given
-        coEvery { api.deleteTask("task-1") } returns Response.success(Unit)
+        coEvery { api.deleteTask("task-1") } returns Unit
 
         // When
         repository.deleteTask("task-1")
@@ -94,11 +92,7 @@ class TaskRepositoryTest {
     @Test
     fun shouldThrowHttpExceptionWhenDeleteTaskFails() = runTest {
         // Given
-        val errorResponse = Response.error<Unit>(
-            500,
-            "".toResponseBody("application/json".toMediaType())
-        )
-        coEvery { api.deleteTask("task-1") } returns errorResponse
+        coEvery { api.deleteTask("task-1") } throws HttpExceptionFactory.create(500)
 
         // When
         val thrown = runCatching { repository.deleteTask("task-1") }.exceptionOrNull()

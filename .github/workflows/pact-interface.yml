@@ -35,22 +35,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
       - name: Start Pact Broker
-        run: docker compose -f docker/docker-compose/run-pact-broker.yml up -d
-
-      - name: Wait for Pact Broker to be ready
-        run: |
-          for i in {1..30}; do
-            curl -sf http://localhost:9292 && break
-            echo "Waiting for broker... ($i)"
-            sleep 2
-          done
+        uses: ./.github/actions/start-pact-broker
+        with:
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - uses: actions/setup-java@v4
         with:
@@ -90,18 +79,10 @@ jobs:
         run: npm run pact:publish
 
       - name: Run task API provider pact verification
-        working-directory: demo-service
-        env:
-          DOCKER_HOST: unix:///var/run/docker.sock
-          PACT_BROKER_BASE_URL: http://localhost:9292
-        run: >-
-          mvn verify -Pintegration-tests
-          -Dit.test="CreateTaskPactProviderTest,DeleteTaskPactProviderTest,GetAllTasksPactProviderTest,GetTaskByIdPactProviderTest,GetIsValidPactProviderTest,UpdateTaskPactProviderTest"
-          -Djacoco.skip=true
-          -Dpact.verifier.publishResults=true
-          -Dpact.provider.version=${{ github.sha }}
-          -Dpact.provider.branch=${{ github.ref_name }}
-          -Djunit.parallel.enabled=false
+        uses: ./.github/actions/verify-task-api-pact-provider
+        with:
+          pact-provider-version: ${{ github.sha }}
+          pact-provider-branch: ${{ github.ref_name }}
 
       - name: Can I merge to master
         if: github.ref_name != 'master'

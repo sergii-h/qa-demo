@@ -16,15 +16,14 @@ As a user, I want to create a task in a dedicated flow with validation and clear
 
 1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
 2. **IT**
-   - Should create task with all values and refresh list
-   - Should create task with required values and refresh list
+   - Should create task with all values, send correct POST request and add new task to the list after successful response
+   - Should create task with required values, send correct POST request and add new task to the list after successful response
    - Should allow successful creation after invalid title is corrected
-   - Should not create a task when create flow is closed without saving, and should reset form on reopen
-   - Should display generic error for POST API failures (HTTP 400/500)
+   - Should not create a task when create form is closed without saving, and should reset form on reopen
    - Should allow retry and create task after initial POST failure
-   - Should keep create flow available when initial GET fails (HTTP 500 or network rejection)
-   - Should close create flow when refresh GET fails after successful POST (HTTP 500 or network rejection)
-   - Should display generic error when POST request is rejected (network failure)
+   - Should allow opening create form when initial GET tasks fails with HTTP500/network-error
+   - Should close create form when refresh GET fails with HTTP500/network-error after successful POST
+   - Should display generic error on create form when POST request is rejected with HTTP400/HTTP500/network-error
    - Should have translations for create flow
 3. **Pact**
    - Should have POST `/v1/tasks` consumer test (HTTP 201 with task response)

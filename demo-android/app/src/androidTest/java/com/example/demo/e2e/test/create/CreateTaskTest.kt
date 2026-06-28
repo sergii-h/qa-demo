@@ -31,7 +31,7 @@ class CreateTaskTest : MockedBackendTestBase() {
     }
 
     @Test
-    fun shouldCreateTask() {
+    fun shouldCreateTaskWhenFormSubmittedWithValidData() {
         // Given
         steps.navigation.openMainPage()
 

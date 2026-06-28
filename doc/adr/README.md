@@ -32,6 +32,7 @@ Each ADR follows this structure:
 | [003](003-test-plan-integration-in-user-stories.md) | Test Plan Integration in User Stories | Accepted | 2026-02-17 | Integrate explicit test plans into user stories specifying UT/IT/Pact/E2E/Accessibility/UAT levels. Follows testing pyramid and shift-left principles with clear test ownership per story |
 | [004](004-api-level-integration-tests-as-sole-integration-layer.md) | Public-Facing Integration Tests as Sole Integration Layer | Accepted | 2026-03-17 | Integration tests only through public HTTP API (BE) and full component tree (FE); no intermediate integration layers unless explicitly justified |
 | [005](005-domain-grouped-step-and-validation-providers-for-e2e.md) | Domain-Grouped Step and Validation Providers for E2E | Accepted | 2026-06-09 | StepProvider and ValidationProvider as domain-grouped composition roots; consistent E2E vocabulary across Playwright, Selenide, and Android |
+| [006](006-90-percent-coverage-as-code-smell-detector.md) | 90% Coverage Threshold as a Code-Smell Detector | Accepted | 2026-06-24 | 90%+ line coverage enforced as a build gate not for quality metrics, but as a forcing function to surface inline logic, hidden dependencies, and mixed responsibilities that need refactoring |
 
 ---
 

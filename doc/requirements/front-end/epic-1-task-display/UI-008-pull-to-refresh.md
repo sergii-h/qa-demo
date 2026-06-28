@@ -19,6 +19,7 @@ As a user on a native client, I want to pull down on the task list to reload tas
 2. **IT**
    - Should show new task when pull-to-refresh returns updated list
    - Should keep existing tasks when pull-to-refresh returns same list
+   - Should keep empty list when pull-to-refresh returns empty list
    - Should keep existing tasks when pull-to-refresh fails with server error
 3. **Pact**
    - N/A (GET `/v1/tasks` covered by [UI-001](UI-001-tasks-table.md))

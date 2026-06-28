@@ -1,8 +1,6 @@
 package com.example.demo.integration
 
 import android.content.Context
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.example.demo.integration.support.IntegrationTestBase
@@ -16,60 +14,52 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
-class LanguageIntegrationTest : IntegrationTestBase() {
+class LanguageSelectionIntegrationTests : IntegrationTestBase() {
 
-    private val context = RuntimeEnvironment.getApplication()
+    private val appContext = RuntimeEnvironment.getApplication()
 
     @Before
     fun setUpLocale() {
-        context.getSharedPreferences("demo_locale", Context.MODE_PRIVATE)
+        appContext.getSharedPreferences("demo_locale", Context.MODE_PRIVATE)
             .edit()
             .clear()
             .apply()
-        AppLocale.setLanguage(context, AppLocale.ENGLISH)
+        AppLocale.setLanguage(appContext, AppLocale.ENGLISH)
     }
 
     @Test
-    fun shouldRenderLanguageSwitcherWhenListShown() {
+    fun shouldRenderLanguageSwitcherWithEnAndEsOptions() {
         // Given
-        fakeApi.enqueueGetTasks()
-
-        // When
+        mockServer.enqueueGetTasks()
         launchApp()
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).performClick()
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_OPTION_EN).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_OPTION_ES).assertIsDisplayed()
-    }
-
-    @Test
-    fun shouldShowSpanishListTitleWhenEsSelected() {
-        // Given
-        fakeApi.enqueueGetTasksForLanguageSwitch()
-        launchApp()
+        assertIsDisplayed(TestTags.LANGUAGE_SWITCHER)
 
         // When
-        switchLanguage(LanguageOption.ES)
+        runAsyncAction {
+            onNodeWithTag(TestTags.LANGUAGE_SWITCHER).performClick()
+        }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.PAGE_TITLE).assertTextEquals("Tareas")
+        assertIsDisplayed(TestTags.LANGUAGE_OPTION_EN)
+        assertIsDisplayed(TestTags.LANGUAGE_OPTION_ES)
     }
 
     @Test
-    fun shouldChangeLanguageWhenUserSelectsAnotherLanguageOption() {
+    fun shouldChangeCurrentLanguageWhenUserSelectsAnotherLanguageOption() {
         // Given
-        fakeApi.enqueueGetTasksForLanguageSwitch()
+        mockServer.enqueueGetTasksForLanguageSwitch()
         launchApp()
+
         switchLanguage(LanguageOption.ES)
-        composeTestRule.onNodeWithTag(TestTags.PAGE_TITLE).assertTextEquals("Tareas")
+        assertTextEquals(TestTags.PAGE_TITLE, "Tareas")
 
         // When
-        fakeApi.enqueueGetTasks()
+        mockServer.enqueueGetTasks()
         switchLanguage(LanguageOption.EN)
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.PAGE_TITLE).assertTextEquals("Tasks")
+        assertTextEquals(TestTags.PAGE_TITLE, "Tasks")
     }
 }

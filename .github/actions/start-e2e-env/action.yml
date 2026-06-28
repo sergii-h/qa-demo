@@ -3,23 +3,26 @@ description: Docker login, network, application stack, and optional Selenium Gri
 
 inputs:
   app-mode:
-    description: frontend (FE only) or full (full stack)
+    description: wiremock (WireMock only), frontend (FE only), or full (full stack)
     required: true
   start-selenium-grid:
     description: Start Selenium Grid after the application is ready
     required: false
     default: 'false'
   docker-hub-username:
-    description: Docker Hub username
-    required: true
+    description: Docker Hub username (required for frontend and full modes)
+    required: false
+    default: ''
   docker-hub-token:
-    description: Docker Hub token
-    required: true
+    description: Docker Hub token (required for frontend and full modes)
+    required: false
+    default: ''
 
 runs:
   using: composite
   steps:
     - name: Log in to Docker Hub
+      if: inputs.docker-hub-username != ''
       uses: docker/login-action@v3
       with:
         username: ${{ inputs.docker-hub-username }}
@@ -28,6 +31,23 @@ runs:
     - name: Create shared Docker network
       shell: bash
       run: docker network create qa-demo-e2e
+
+    - name: Start WireMock
+      if: inputs.app-mode == 'wiremock'
+      shell: bash
+      run: docker compose -f docker/docker-compose/run-application.yml up -d qa-demo-wiremock
+
+    - name: Wait for WireMock to be ready
+      if: inputs.app-mode == 'wiremock'
+      shell: bash
+      run: |
+        for i in {1..30}; do
+          curl -sf http://localhost:8085/__admin/mappings && exit 0
+          echo "Waiting for WireMock... ($i/30)"
+          sleep 2
+        done
+        echo "WireMock did not become ready in time"
+        exit 1
 
     - name: Start frontend
       if: inputs.app-mode == 'frontend'

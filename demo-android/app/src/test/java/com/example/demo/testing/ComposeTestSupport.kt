@@ -10,7 +10,6 @@ import com.example.demo.locale.AppLocale
 import com.example.demo.locale.LocalizedContent
 import com.example.demo.ui.theme.DemoTheme
 import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 
 @Composable
 fun DemoComposeTestTheme(content: @Composable () -> Unit) {

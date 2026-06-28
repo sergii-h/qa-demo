@@ -9,11 +9,23 @@ const getTasks = async (baseUrl: string = BE_API): Promise<ITask[]> => {
 
 const getTask = async (taskId: string, baseUrl: string = BE_API): Promise<ITask> => {
     const response = await fetch(baseUrl + `/tasks/${taskId}`, { method: 'GET', headers: { 'Content-Type': 'application/json'} });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error((error as { message?: string }).message || `Request failed (${response.status})`);
+    }
+
     return await response.json();
 }
 
 const getIsValid = async (taskId: string, baseUrl: string = BE_API): Promise<boolean> => {
     const response = await fetch(baseUrl + `/tasks/isValid/${taskId}`, { method: 'GET', headers: { 'Content-Type': 'application/json'} });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error((error as { message?: string }).message || `Request failed (${response.status})`);
+    }
+
     return await response.json();
 }
 
