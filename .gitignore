@@ -35,3 +35,4 @@ __pycache__/
 /demo-android/.gradle-home/
 /cv/
 /e2e/playwright-python/test-results/
+/demo-android/.gradle-local/

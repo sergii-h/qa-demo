@@ -20,6 +20,9 @@ case "${PACT_MERGE_PROFILE:-all}" in
   android)
     MERGE_PARTICIPANTS=("${PACT_ANDROID_MERGE_PARTICIPANTS[@]}")
     ;;
+  react-native)
+    MERGE_PARTICIPANTS=("${PACT_REACT_NATIVE_MERGE_PARTICIPANTS[@]}")
+    ;;
   all)
     MERGE_PARTICIPANTS=("${PACT_PARTICIPANTS[@]}")
     ;;

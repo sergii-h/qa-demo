@@ -61,14 +61,15 @@ A full-stack Task Management app used as a testing pyramid demo. The domain is i
 | Backend | Java 21 · SpringBoot 3.5.12 · MongoDB 4.4 · Kafka 3.3.2 · WireMock 3.9.2 |
 | Frontend | TypeScript 5 · React 18 · PrimeReact 10 · Vite 8 · Node 22 |
 | Android | Kotlin · Jetpack Compose · Material 3 · Retrofit + Moshi · ViewModel + StateFlow · Min SDK 26 · Target SDK 35 |
-| Unit | JUnit5 + Mockito (BE) · Vitest 4 (FE) · JUnit4 + MockK + Robolectric (Android) |
+| React Native | Expo 53 · TypeScript · React Navigation · React Native Paper |
+| Unit | JUnit5 + Mockito (BE) · Vitest 4 (FE) · JUnit4 + MockK + Robolectric (Android) · Jest (React Native) |
 | Integration | JUnit5 + TestContainers (BE) · Vitest 4 (FE) |
-| Contract | Pact — HTTP (FE↔BE + Android↔BE) + Kafka message (notification-service↔BE) |
+| Contract | Pact — HTTP (FE↔BE + Android↔BE + React Native↔BE) + Kafka message (notification-service↔BE) |
 | E2E | Selenide + JUnit5 + Selenium Grid (Java) · Playwright + TypeScript · Playwright + Python · Compose UI Test (Android) |
 | Mutation | PiTest (BE) · Stryker (FE, on-demand) |
 | Performance | k6 |
 | Security | CodeQL (SAST) · Dependabot alerts (SCA) · GitHub secret scanning & push protection (platform) |
-| Coverage | JaCoCo ≥90% (BE) · Istanbul ≥90% (FE) · Kover ≥90% (Android) |
+| Coverage | JaCoCo ≥90% (BE) · Istanbul ≥90% (FE) · Kover ≥90% (Android) · Jest ≥90% (React Native) |
 
 ---
 
@@ -123,9 +124,11 @@ GitHub Actions validates every change — see [Actions](https://github.com/sergi
 | `demo-service` | Backend unit, PiTest mutation, integration — push / PR to `master`, path-filtered |
 | `demo-interface` | Frontend unit + integration — push / PR to `master`, path-filtered |
 | `demo-android` | Android unit + integration tests — push / PR to `master`, path-filtered |
+| `demo-react-native` | React Native unit + integration tests — push / PR to `master`, path-filtered |
 | `pact-interface` | `demo-interface` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
 | `pact-notification` | `notification-service` consumer contracts, events provider verify, can-i-merge — push / PR to `master` |
 | `pact-android` | `demo-android` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
+| `pact-react-native` | `demo-react-native` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
 | `e2e` | Web E2E — Playwright (TypeScript + Python), Selenide — mocked BE, accessibility, and UAT suites — push / PR to `master`, path-filtered |
 | `e2e-reports` | Publish Allure and Playwright reports to GitHub Pages after all web and Android E2E workflows finish |
 | `allure-pages` | Allure reports landing page (`master`) |
@@ -190,13 +193,16 @@ VITE_BE_API=http://localhost:8080/v1 npm start
 
 **Frontend** — unit, integration, coverage, Stryker mutation: see [demo-interface README](demo-interface/README.md).
 
+**React Native** — unit, integration, coverage: see [demo-react-native README](demo-react-native/README.md).
+
 ### Pact (Consumer-Driven Contract Tests)
 
-Ephemeral broker per CI run; three consumers (`demo-interface`, `notification-service`, `demo-android`) verified against `demo-service`.
+Ephemeral broker per CI run; four consumers (`demo-interface`, `notification-service`, `demo-android`, `demo-react-native`) verified against `demo-service`.
 
 ```bash
-bash .github/scripts/pact-run-local.sh          # full pipeline (all consumers)
-bash .github/scripts/pact-run-local-android.sh  # Android-only pipeline
+bash .github/scripts/pact-run-local.sh                  # full pipeline (all consumers)
+bash .github/scripts/pact-run-local-android.sh          # Android-only pipeline
+bash .github/scripts/pact-run-local-react-native.sh     # React Native-only pipeline
 ```
 
 See [doc/pact.md](doc/pact.md) for the step-by-step manual run and broker notes.
@@ -266,6 +272,16 @@ qa-demo/
 │           ├── support/       # WireMock client · UAT API client
 │           └── test/          # Suites + bases (@Uat · @Accessibility)
 │
+├── demo-react-native/         # React Native app (Expo 53 · TypeScript)
+│   └── src/
+│       ├── data/              # Models + fetch API client
+│       ├── repository/        # TaskRepository
+│       ├── hooks/             # useTaskList · useTaskForm · useTaskDetail
+│       ├── screens/           # Task list · form · detail screens
+│       ├── components/        # LanguageSwitcher · EnumPicker · TaskChips
+│       ├── locales/           # i18n translations (en · es)
+│       └── test/pact/         # Pact consumer contract tests
+│
 ├── e2e/
 │   ├── playwright-typescript/          # Playwright + TypeScript
 │   │   ├── tests/                      # Domain suites: create-task · edit-task · delete-task · task-info · task-table · translation
@@ -306,6 +322,7 @@ qa-demo/
 | [Pact Guide](doc/pact.md) | Full Pact pipeline, step-by-step manual run, broker notes |
 | [Backend README](demo-service/README.md) | Running backend unit, integration, and mutation tests |
 | [Frontend README](demo-interface/README.md) | Running frontend unit, integration, and mutation tests |
+| [React Native README](demo-react-native/README.md) | Running React Native unit, integration, and Pact tests |
 | [Playwright TypeScript E2E README](e2e/playwright-typescript/README.md) | Playwright + TypeScript test suites, configuration, and run commands |
 | [Playwright Python E2E README](e2e/playwright-python/README.md) | Playwright + Python test suites, viewports, Allure and trace reports |
 | [Selenide E2E README](e2e/selenide-junit5-selenium-grid/README.md) | Selenide test suites, Selenium Grid Docker setup |

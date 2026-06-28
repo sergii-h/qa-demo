@@ -1,0 +1,39 @@
+name: Run React Native tests
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'demo-react-native/**'
+      - '.github/workflows/demo-react-native.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'demo-react-native/**'
+      - '.github/workflows/demo-react-native.yml'
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: demo-react-native/package-lock.json
+
+      - name: Install dependencies
+        working-directory: demo-react-native
+        run: npm ci
+
+      - name: Audit dependencies
+        uses: ./.github/actions/audit-npm
+        with:
+          working-directory: demo-react-native
+
+      - name: Run unit and integration tests
+        working-directory: demo-react-native
+        run: npm test
