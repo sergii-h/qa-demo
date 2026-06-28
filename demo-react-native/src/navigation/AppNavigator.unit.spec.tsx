@@ -1,20 +1,30 @@
 import {act, render, waitFor} from '@testing-library/react-native';
 
-import {TaskDetailScreen} from '@/screens/TaskDetailScreen';
-import {TaskFormScreen} from '@/screens/TaskFormScreen';
-import {TaskListScreen} from '@/screens/TaskListScreen';
 import {AppNavigator} from './AppNavigator';
 
+const mockTaskListScreen = jest.fn();
+const mockTaskFormScreen = jest.fn();
+const mockTaskDetailScreen = jest.fn();
+
 jest.mock('../screens/TaskListScreen', () => ({
-  TaskListScreen: jest.fn(() => null),
+  TaskListScreen: function TaskListScreen(props: unknown) {
+    mockTaskListScreen(props);
+    return null;
+  },
 }));
 
 jest.mock('../screens/TaskFormScreen', () => ({
-  TaskFormScreen: jest.fn(() => null),
+  TaskFormScreen: function TaskFormScreen(props: unknown) {
+    mockTaskFormScreen(props);
+    return null;
+  },
 }));
 
 jest.mock('../screens/TaskDetailScreen', () => ({
-  TaskDetailScreen: jest.fn(() => null),
+  TaskDetailScreen: function TaskDetailScreen(props: unknown) {
+    mockTaskDetailScreen(props);
+    return null;
+  },
 }));
 
 describe('AppNavigator', () => {
@@ -28,14 +38,14 @@ describe('AppNavigator', () => {
 
     // Then
     await waitFor(() => {
-      expect(TaskListScreen).toHaveBeenCalled();
+      expect(mockTaskListScreen).toHaveBeenCalled();
     });
   });
 
   it('should navigate to create task screen', async () => {
     // Given
     render(<AppNavigator />);
-    const { navigation } = jest.mocked(TaskListScreen).mock.calls[0][0];
+    const { navigation } = mockTaskListScreen.mock.calls[0][0];
 
     // When
     act(() => {
@@ -44,9 +54,9 @@ describe('AppNavigator', () => {
 
     // Then
     await waitFor(() => {
-      expect(TaskFormScreen).toHaveBeenCalled();
+      expect(mockTaskFormScreen).toHaveBeenCalled();
     });
-    const { route } = jest.mocked(TaskFormScreen).mock.calls.at(-1)![0];
+    const { route } = mockTaskFormScreen.mock.calls.at(-1)![0];
     expect(route.name).toBe('CreateTask');
     expect(route.params).toBeUndefined();
   });
@@ -54,7 +64,7 @@ describe('AppNavigator', () => {
   it('should navigate to edit task screen', async () => {
     // Given
     render(<AppNavigator />);
-    const { navigation } = jest.mocked(TaskListScreen).mock.calls[0][0];
+    const { navigation } = mockTaskListScreen.mock.calls[0][0];
     const taskId = 'task-1';
 
     // When
@@ -64,9 +74,9 @@ describe('AppNavigator', () => {
 
     // Then
     await waitFor(() => {
-      expect(TaskFormScreen).toHaveBeenCalled();
+      expect(mockTaskFormScreen).toHaveBeenCalled();
     });
-    const { route } = jest.mocked(TaskFormScreen).mock.calls.at(-1)![0];
+    const { route } = mockTaskFormScreen.mock.calls.at(-1)![0];
     expect(route.name).toBe('EditTask');
     expect(route.params).toEqual({ taskId });
   });
@@ -74,7 +84,7 @@ describe('AppNavigator', () => {
   it('should navigate to task detail screen', async () => {
     // Given
     render(<AppNavigator />);
-    const { navigation } = jest.mocked(TaskListScreen).mock.calls[0][0];
+    const { navigation } = mockTaskListScreen.mock.calls[0][0];
     const taskId = 'task-1';
 
     // When
@@ -84,9 +94,9 @@ describe('AppNavigator', () => {
 
     // Then
     await waitFor(() => {
-      expect(TaskDetailScreen).toHaveBeenCalled();
+      expect(mockTaskDetailScreen).toHaveBeenCalled();
     });
-    const { route } = jest.mocked(TaskDetailScreen).mock.calls.at(-1)![0];
+    const { route } = mockTaskDetailScreen.mock.calls.at(-1)![0];
     expect(route.name).toBe('TaskDetail');
     expect(route.params).toEqual({ taskId });
   });

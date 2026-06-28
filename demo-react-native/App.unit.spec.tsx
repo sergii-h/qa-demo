@@ -2,7 +2,6 @@ import { render, waitFor } from '@testing-library/react-native';
 import { PaperProvider } from 'react-native-paper';
 
 import App from './App';
-import { AppNavigator } from '@/navigation/AppNavigator';
 import { initI18n } from '@/i18n';
 import { themeColors } from '@/theme/colors';
 
@@ -10,8 +9,13 @@ jest.mock('./src/i18n', () => ({
   initI18n: jest.fn(),
 }));
 
+const mockAppNavigator = jest.fn();
+
 jest.mock('./src/navigation/AppNavigator', () => ({
-  AppNavigator: jest.fn(() => null),
+  AppNavigator: function AppNavigator() {
+    mockAppNavigator();
+    return null;
+  },
 }));
 
 jest.mock('react-native-paper', () => {
@@ -36,7 +40,7 @@ describe('App', () => {
 
     // Then
     expect(initI18n).toHaveBeenCalledTimes(1);
-    expect(AppNavigator).not.toHaveBeenCalled();
+    expect(mockAppNavigator).not.toHaveBeenCalled();
   });
 
   it('should render app navigator when i18n is ready', async () => {
@@ -49,7 +53,7 @@ describe('App', () => {
     // Then
     await waitFor(() => {
       expect(initI18n).toHaveBeenCalledTimes(1);
-      expect(AppNavigator).toHaveBeenCalledTimes(1);
+      expect(mockAppNavigator).toHaveBeenCalledTimes(1);
       expect(PaperProvider).toHaveBeenCalled();
     });
 

@@ -1,4 +1,4 @@
-import {fireEvent, waitFor} from '@testing-library/react-native';
+import {act, fireEvent, waitFor} from '@testing-library/react-native';
 
 import {TaskListScreen} from './TaskListScreen';
 import {taskRepository} from '@/repository/taskRepository';
@@ -148,10 +148,12 @@ describe('TaskListScreen', () => {
 
     // Then
     await waitFor(() => {
-      expect(getByTestId(TestTags.REFRESHING)).toBeVisible();
+      expect(getByTestId(TestTags.REFRESHING)).toBeOnTheScreen();
     });
 
-    resolveRefresh([mockTask]);
+    await act(async () => {
+      resolveRefresh([mockTask]);
+    });
 
     await waitFor(() => {
       expect(queryByTestId(TestTags.REFRESHING)).toBeNull();
