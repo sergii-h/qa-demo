@@ -193,7 +193,7 @@ VITE_BE_API=http://localhost:8080/v1 npm start
 
 **Frontend** — unit, integration, coverage, Stryker mutation: see [demo-interface README](demo-interface/README.md).
 
-**React Native** — unit, integration, coverage: see [demo-react-native README](demo-react-native/README.md).
+**React Native** — unit, integration, coverage, Stryker mutation: see [demo-react-native README](demo-react-native/README.md).
 
 ### Pact (Consumer-Driven Contract Tests)
 
@@ -238,78 +238,18 @@ See [Performance README](performance/README.md) for all scenarios, thresholds, a
 
 ## 📁 Project Structure
 
-```
-qa-demo/
-├── demo-service/              # SpringBoot Backend (Java 21)
-│   ├── src/main/java/com/example/demo/
-│   │   ├── data/              # Domain models (Task, TaskRequest, TaskEvent)
-│   │   ├── TaskController.java
-│   │   ├── TaskRepository.java
-│   │   ├── TaskEventProducer.java
-│   │   └── TaskExternalClient.java
-│   └── src/test/java/         # Unit, integration & Pact provider tests
-│
-├── notification-service/      # Kafka Consumer (Java 21) — Pact message consumer
-│
-├── demo-interface/            # React Frontend (Vite 8 + Node 22)
-│   └── src/
-│       ├── components/        # tasksTable · createTaskModal · editTaskModal · infoTaskModal · languageSwitcher
-│       ├── locales/           # i18n translations (en · es)
-│       ├── interfaces/
-│       └── services/          # API service layer
-│
-├── demo-android/              # Native Android app (Kotlin · Jetpack Compose · Min SDK 26)
-│   └── app/src/
-│       ├── main/java/com/example/demo/
-│       │   ├── data/          # Models + Retrofit API
-│       │   ├── repository/    # TaskRepository
-│       │   └── ui/            # Compose screens + navigation
-│       ├── test/              # JVM unit tests (JUnit4 · MockK · Robolectric) + Pact consumer
-│       └── androidTest/java/com/example/demo/e2e/
-│           ├── context/       # TaskContext
-│           ├── interaction/   # Page objects, steps, validations
-│           ├── provider/      # StepProvider · ValidationProvider · SupportProvider
-│           ├── support/       # WireMock client · UAT API client
-│           └── test/          # Suites + bases (@Uat · @Accessibility)
-│
-├── demo-react-native/         # React Native app (Expo 53 · TypeScript)
-│   └── src/
-│       ├── data/              # Models + fetch API client
-│       ├── repository/        # TaskRepository
-│       ├── hooks/             # useTaskList · useTaskForm · useTaskDetail
-│       ├── screens/           # Task list · form · detail screens
-│       ├── components/        # LanguageSwitcher · EnumPicker · TaskChips
-│       ├── locales/           # i18n translations (en · es)
-│       └── test/pact/         # Pact consumer contract tests
-│
-├── e2e/
-│   ├── playwright-typescript/          # Playwright + TypeScript
-│   │   ├── tests/                      # Domain suites: create-task · edit-task · delete-task · task-info · task-table · translation
-│   │   ├── interactions/               # pages · steps · validators
-│   │   ├── providers/                  # StepProvider · ValidationProvider · SupportProvider
-│   │   ├── support/                    # api · mocks
-│   │   ├── context/ · data/ · fixtures/ · decorators/
-│   ├── playwright-python/              # Playwright + Python (pytest · pytest-playwright · pytest-xdist)
-│   │   ├── tests/                      # Same domain suites as TypeScript
-│   │   ├── interactions/               # pages · steps · validators
-│   │   ├── providers/                  # StepProvider · ValidationProvider · SupportProvider
-│   │   ├── support/                    # api · mocks
-│   │   └── context/ · data/ · decorators/
-│   └── selenide-junit5-selenium-grid/  # Selenide + JUnit5 (Java)
-│       └── src/test/java/
-│           ├── test/                   # spec/ · desktop/ · mobile/ — same domain subdirs per suite
-│           ├── interaction/            # page · step · validation
-│           ├── provider/
-│           └── support/ · context/ · data/ · config/ · extension/ · util/
-│
-├── performance/               # k6 load & spike scripts
-│
-├── .github/                   # GitHub Actions workflows · reusable CI actions · Pact scripts
-│
-├── docker/                    # Docker Compose + Dockerfiles
-│
-└── doc/                       # Testing guide · ADRs · Requirements
-```
+| Directory | Contents |
+|---|---|
+| [`demo-service/`](demo-service/README.md) | SpringBoot backend (Java 21 · MongoDB · Kafka) |
+| [`demo-interface/`](demo-interface/README.md) | React frontend (Vite · TypeScript) |
+| [`demo-android/`](demo-android/README.md) | Android app (Kotlin · Jetpack Compose) |
+| [`demo-react-native/`](demo-react-native/README.md) | React Native app (Expo · TypeScript) |
+| `notification-service/` | Kafka consumer (Java 21) — Pact message consumer |
+| `e2e/` | Web E2E suites — [Playwright TypeScript](e2e/playwright-typescript/README.md) · [Playwright Python](e2e/playwright-python/README.md) · [Selenide](e2e/selenide-junit5-selenium-grid/README.md) |
+| `performance/` | k6 load & spike scripts |
+| `docker/` | Docker Compose configs and Dockerfiles |
+| `.github/` | CI workflows · reusable actions · Pact scripts |
+| `doc/` | Testing guide · ADRs · Requirements |
 
 ---
 
