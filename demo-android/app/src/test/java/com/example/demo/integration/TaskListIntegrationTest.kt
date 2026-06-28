@@ -271,6 +271,26 @@ class TaskListIntegrationTest {
         }
 
         @Test
+        fun shouldKeepEmptyListWhenPullToRefreshReturnsEmptyList() {
+            // Given
+            mockServer.enqueueGetTasks()
+            launchApp()
+
+            assertTaskListHasSize(0)
+            assertIsDisplayed(TestTags.EMPTY_TASKS)
+            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+            mockServer.enqueueGetTasks()
+
+            // When
+            pullToRefresh()
+
+            // Then
+            assertTaskListHasSize(0)
+            assertIsDisplayed(TestTags.EMPTY_TASKS)
+            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+        }
+
+        @Test
         fun shouldKeepExistingTasksWhenPullToRefreshFailsWithServerError() {
             // Given
             val firstContext = TaskTestContext()
