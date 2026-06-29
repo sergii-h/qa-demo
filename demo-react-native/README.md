@@ -4,6 +4,10 @@ React Native · Expo 53 · TypeScript · React Navigation · React Native Paper
 
 Mobile client for the Task Management app. Mirrors `demo-android` functionality against the same `demo-service` REST API.
 
+<p style="text-align: center;">
+  <img src="../doc/assets/qa-demo-react-native.gif" alt="QA Demo React Native App" width="540"/>
+</p>
+
 **Requirements:** [Frontend requirements](../doc/requirements/front-end/README.md)
 
 ## Stack
@@ -50,8 +54,10 @@ cd demo-service && mvn spring-boot:run
 ## Running
 
 ```bash
+cd demo-react-native
 npm install
 npx expo start --android
+npx expo start --ios
 ```
 
 For the **Android emulator**, run port forwarding once per emulator session so Metro and the API are reachable on `localhost`:
