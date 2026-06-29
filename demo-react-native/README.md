@@ -54,8 +54,10 @@ cd demo-service && mvn spring-boot:run
 ## Running
 
 ```bash
+cd demo-react-native
 npm install
 npx expo start --android
+npx expo start --ios
 ```
 
 For the **Android emulator**, run port forwarding once per emulator session so Metro and the API are reachable on `localhost`:

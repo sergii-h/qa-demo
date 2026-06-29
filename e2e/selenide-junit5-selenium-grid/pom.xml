@@ -16,11 +16,23 @@
         <jupiter.version>5.11.0</jupiter.version>
         <selenium.version>4.44.0</selenium.version>
         <selenide.version>7.16.1</selenide.version>
-        <jackson.version>2.18.8</jackson.version>
+        <jackson.version>2.22.0</jackson.version>
         <properties.file.name>test.properties</properties.file.name>
         <test.tags></test.tags>
         <test.ignore.tags>uat</test.ignore.tags>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -100,7 +112,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
