@@ -6,7 +6,9 @@ on:
     paths:
       - 'demo-interface/**'
       - 'demo-service/**'
-      - 'e2e/**'
+      - 'e2e/playwright-typescript/**'
+      - 'e2e/playwright-python/**'
+      - 'e2e/selenide-junit5-selenium-grid/**'
       - 'docker/**'
       - '.github/workflows/e2e.yml'
       - '.github/workflows/playwright-typescript-e2e.yml'
@@ -18,13 +20,21 @@ on:
       - '.github/workflows/selenide-junit5-grid-e2e.yml'
       - '.github/workflows/selenide-junit5-grid-uat.yml'
       - '.github/workflows/selenide-junit5-grid-accessibility.yml'
-      - '.github/actions/**'
+      - '.github/actions/audit-npm/**'
+      - '.github/actions/audit-pip/**'
+      - '.github/actions/audit-osv/**'
+      - '.github/actions/start-e2e-env/**'
+      - '.github/actions/playwright-typescript-test/**'
+      - '.github/actions/playwright-python-test/**'
+      - '.github/actions/selenide-test/**'
   push:
     branches: [ "master" ]
     paths:
       - 'demo-interface/**'
       - 'demo-service/**'
-      - 'e2e/**'
+      - 'e2e/playwright-typescript/**'
+      - 'e2e/playwright-python/**'
+      - 'e2e/selenide-junit5-selenium-grid/**'
       - 'docker/**'
       - '.github/workflows/e2e.yml'
       - '.github/workflows/playwright-typescript-e2e.yml'
@@ -36,7 +46,13 @@ on:
       - '.github/workflows/selenide-junit5-grid-e2e.yml'
       - '.github/workflows/selenide-junit5-grid-uat.yml'
       - '.github/workflows/selenide-junit5-grid-accessibility.yml'
-      - '.github/actions/**'
+      - '.github/actions/audit-npm/**'
+      - '.github/actions/audit-pip/**'
+      - '.github/actions/audit-osv/**'
+      - '.github/actions/start-e2e-env/**'
+      - '.github/actions/playwright-typescript-test/**'
+      - '.github/actions/playwright-python-test/**'
+      - '.github/actions/selenide-test/**'
 
 permissions:
   contents: read

@@ -15,7 +15,10 @@ on:
       - '.github/workflows/maestro-react-native-ios-e2e.yml'
       - '.github/workflows/maestro-react-native-ios-uat.yml'
       - '.github/workflows/maestro-react-native-ios-accessibility.yml'
-      - '.github/actions/**'
+      - '.github/actions/audit-npm/**'
+      - '.github/actions/start-e2e-env/**'
+      - '.github/actions/run-maestro-tests/**'
+      - '.github/actions/run-maestro-ios-tests/**'
   push:
     branches: [master]
     paths:
@@ -23,14 +26,17 @@ on:
       - 'demo-service/**'
       - 'docker/**'
       - 'e2e/maestro/**'
-      - '.github/workflows/react-native-e2e.yml'
+      - '.github/workflows/react-native-e2e.y ml'
       - '.github/workflows/maestro-react-native-android-e2e.yml'
       - '.github/workflows/maestro-react-native-android-uat.yml'
       - '.github/workflows/maestro-react-native-android-accessibility.yml'
       - '.github/workflows/maestro-react-native-ios-e2e.yml'
       - '.github/workflows/maestro-react-native-ios-uat.yml'
       - '.github/workflows/maestro-react-native-ios-accessibility.yml'
-      - '.github/actions/**'
+      - '.github/actions/audit-npm/**'
+      - '.github/actions/start-e2e-env/**'
+      - '.github/actions/run-maestro-tests/**'
+      - '.github/actions/run-maestro-ios-tests/**'
 
 permissions:
   contents: read

@@ -21,6 +21,13 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Set up Docker on macOS
+      if: runner.os == 'macOS'
+      uses: douglascamata/setup-docker-macos-action@v1.1.0
+      with:
+        lima: v1.2.1
+        colima: v0.9.1
+
     - name: Log in to Docker Hub
       if: inputs.docker-hub-username != ''
       uses: docker/login-action@v3
