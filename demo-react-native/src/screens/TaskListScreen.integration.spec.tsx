@@ -5,11 +5,10 @@ import {TaskPriority, TaskStatus} from '@/data/models/task';
 import {taskRepository} from '@/repository/taskRepository';
 import {TaskListScreen} from './TaskListScreen';
 import {mockFetchResponse} from '@/test-utils/mockFetch';
-import {TestTags} from '@/testTags';
 import {renderWithProviders} from '@/test-utils/renderWithProviders';
 
 async function pullToRefresh(screen: RenderAPI) {
-  const list = screen.getByTestId(TestTags.TASK_LIST);
+  const list = screen.getByTestId('task-list');
   const onRefresh = list.props.refreshControl?.props?.onRefresh;
 
   if (onRefresh) {
@@ -23,7 +22,7 @@ async function pullToRefresh(screen: RenderAPI) {
 }
 
 function isDeleteButtonEnabled(screen: RenderAPI, taskId: string) {
-  const deleteButton = screen.getByTestId(TestTags.deleteButton(taskId));
+  const deleteButton = screen.getByTestId(`delete-button-${taskId}`);
   return (
     deleteButton.props.disabled !== true &&
     deleteButton.props.accessibilityState?.disabled !== true
@@ -34,18 +33,18 @@ async function pressDeleteWhenEnabled(screen: RenderAPI, taskId: string) {
   await waitFor(() => {
     expect(isDeleteButtonEnabled(screen, taskId)).toBe(true);
   });
-  fireEvent.press(screen.getByTestId(TestTags.deleteButton(taskId)));
+  fireEvent.press(screen.getByTestId(`delete-button-${taskId}`));
 }
 
 async function retryDeleteUntilTaskRemoved(screen: RenderAPI, taskId: string) {
   await waitFor(
     () => {
-      if (screen.queryByTestId(TestTags.taskTitle(taskId))) {
+      if (screen.queryByTestId(`task-title-${taskId}`)) {
         if (isDeleteButtonEnabled(screen, taskId)) {
-          fireEvent.press(screen.getByTestId(TestTags.deleteButton(taskId)));
+          fireEvent.press(screen.getByTestId(`delete-button-${taskId}`));
         }
       }
-      expect(screen.queryByTestId(TestTags.taskTitle(taskId))).toBeNull();
+      expect(screen.queryByTestId(`task-title-${taskId}`)).toBeNull();
     },
     { timeout: 5000 },
   );
@@ -89,8 +88,8 @@ describe('TaskListScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle('1'))).toBeVisible();
-        expect(screen.getByTestId(TestTags.taskTitle('2'))).toBeVisible();
+        expect(screen.getByTestId(`task-title-${'1'}`)).toBeVisible();
+        expect(screen.getByTestId(`task-title-${'2'}`)).toBeVisible();
       });
     });
 
@@ -109,25 +108,25 @@ describe('TaskListScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle('1'))).toBeVisible();
-        expect(screen.getByTestId(TestTags.taskTitle('2'))).toBeVisible();
-        expect(screen.getByTestId(TestTags.taskTitle('3'))).toBeVisible();
+        expect(screen.getByTestId(`task-title-${'1'}`)).toBeVisible();
+        expect(screen.getByTestId(`task-title-${'2'}`)).toBeVisible();
+        expect(screen.getByTestId(`task-title-${'3'}`)).toBeVisible();
       });
-      expect(screen.getByTestId(TestTags.statusTag(TaskStatus.TODO))).toBeVisible();
-      expect(screen.getByTestId(TestTags.priorityTag(TaskPriority.LOW))).toBeVisible();
-      expect(screen.getByTestId(TestTags.statusTag(TaskStatus.IN_PROGRESS))).toBeVisible();
-      expect(screen.getByTestId(TestTags.priorityTag(TaskPriority.MEDIUM))).toBeVisible();
-      expect(screen.getByTestId(TestTags.statusTag(TaskStatus.DONE))).toBeVisible();
-      expect(screen.getByTestId(TestTags.priorityTag(TaskPriority.HIGH))).toBeVisible();
-      expect(screen.getByTestId(TestTags.infoButton('1'))).toBeVisible();
-      expect(screen.getByTestId(TestTags.editButton('1'))).toBeVisible();
-      expect(screen.getByTestId(TestTags.deleteButton('1'))).toBeVisible();
-      expect(screen.getByTestId(TestTags.infoButton('2'))).toBeVisible();
-      expect(screen.getByTestId(TestTags.editButton('2'))).toBeVisible();
-      expect(screen.getByTestId(TestTags.deleteButton('2'))).toBeVisible();
-      expect(screen.getByTestId(TestTags.infoButton('3'))).toBeVisible();
-      expect(screen.getByTestId(TestTags.editButton('3'))).toBeVisible();
-      expect(screen.getByTestId(TestTags.deleteButton('3'))).toBeVisible();
+      expect(screen.getByTestId(`status-tag-${TaskStatus.TODO}`)).toBeVisible();
+      expect(screen.getByTestId(`priority-tag-${TaskPriority.LOW}`)).toBeVisible();
+      expect(screen.getByTestId(`status-tag-${TaskStatus.IN_PROGRESS}`)).toBeVisible();
+      expect(screen.getByTestId(`priority-tag-${TaskPriority.MEDIUM}`)).toBeVisible();
+      expect(screen.getByTestId(`status-tag-${TaskStatus.DONE}`)).toBeVisible();
+      expect(screen.getByTestId(`priority-tag-${TaskPriority.HIGH}`)).toBeVisible();
+      expect(screen.getByTestId(`info-button-${'1'}`)).toBeVisible();
+      expect(screen.getByTestId(`edit-button-${'1'}`)).toBeVisible();
+      expect(screen.getByTestId(`delete-button-${'1'}`)).toBeVisible();
+      expect(screen.getByTestId(`info-button-${'2'}`)).toBeVisible();
+      expect(screen.getByTestId(`edit-button-${'2'}`)).toBeVisible();
+      expect(screen.getByTestId(`delete-button-${'2'}`)).toBeVisible();
+      expect(screen.getByTestId(`info-button-${'3'}`)).toBeVisible();
+      expect(screen.getByTestId(`edit-button-${'3'}`)).toBeVisible();
+      expect(screen.getByTestId(`delete-button-${'3'}`)).toBeVisible();
     });
 
     it('should render empty list state when tasks response is empty', async () => {
@@ -145,8 +144,8 @@ describe('TaskListScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.EMPTY_TASKS)).toBeVisible();
-        expect(screen.getByTestId(TestTags.ADD_TASK_BUTTON)).toBeVisible();
+        expect(screen.getByTestId('empty-tasks')).toBeVisible();
+        expect(screen.getByTestId('add-task-button')).toBeVisible();
       });
     });
 
@@ -167,11 +166,11 @@ describe('TaskListScreen integration', () => {
         <TaskListScreen navigation={navigation as never} route={route as never} />,
       );
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle(task.id))).toBeVisible();
+        expect(screen.getByTestId(`task-title-${task.id}`)).toBeVisible();
       });
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.ADD_TASK_BUTTON));
+      fireEvent.press(screen.getByTestId('add-task-button'));
 
       // Then
       expect(navigation.navigate).toHaveBeenCalledWith('CreateTask');
@@ -194,11 +193,11 @@ describe('TaskListScreen integration', () => {
         <TaskListScreen navigation={navigation as never} route={route as never} />,
       );
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle(task.id))).toBeVisible();
+        expect(screen.getByTestId(`task-title-${task.id}`)).toBeVisible();
       });
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.infoButton(task.id)));
+      fireEvent.press(screen.getByTestId(`info-button-${task.id}`));
 
       // Then
       expect(navigation.navigate).toHaveBeenCalledWith('TaskDetail', { taskId: task.id });
@@ -221,11 +220,11 @@ describe('TaskListScreen integration', () => {
         <TaskListScreen navigation={navigation as never} route={route as never} />,
       );
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle(task.id))).toBeVisible();
+        expect(screen.getByTestId(`task-title-${task.id}`)).toBeVisible();
       });
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.editButton(task.id)));
+      fireEvent.press(screen.getByTestId(`edit-button-${task.id}`));
 
       // Then
       expect(navigation.navigate).toHaveBeenCalledWith('EditTask', { taskId: task.id });
@@ -246,9 +245,9 @@ describe('TaskListScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.ADD_TASK_BUTTON)).toBeVisible();
+        expect(screen.getByTestId('add-task-button')).toBeVisible();
       });
-      expect(screen.queryByTestId(TestTags.taskTitle('1'))).toBeNull();
+      expect(screen.queryByTestId(`task-title-${'1'}`)).toBeNull();
     });
 
   });
@@ -280,11 +279,11 @@ describe('TaskListScreen integration', () => {
         <TaskListScreen navigation={navigation as never} route={route as never} />,
       );
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle(deleteTask.id))).toBeVisible();
+        expect(screen.getByTestId(`task-title-${deleteTask.id}`)).toBeVisible();
       });
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.deleteButton(deleteTask.id)));
+      fireEvent.press(screen.getByTestId(`delete-button-${deleteTask.id}`));
 
       // Then
       await waitFor(() => {
@@ -294,10 +293,10 @@ describe('TaskListScreen integration', () => {
         );
       });
       await waitFor(() => {
-        expect(screen.queryByTestId(TestTags.taskTitle(deleteTask.id))).toBeNull();
+        expect(screen.queryByTestId(`task-title-${deleteTask.id}`)).toBeNull();
       });
-      expect(screen.getByTestId(TestTags.taskTitle(keepTask.id))).toBeVisible();
-      expect(screen.getByTestId(TestTags.TASK_LIST)).toBeVisible();
+      expect(screen.getByTestId(`task-title-${keepTask.id}`)).toBeVisible();
+      expect(screen.getByTestId('task-list')).toBeVisible();
     });
 
     it.each([
@@ -333,11 +332,11 @@ describe('TaskListScreen integration', () => {
         <TaskListScreen navigation={navigation as never} route={route as never} />,
       );
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle(deleteTask.id))).toBeVisible();
+        expect(screen.getByTestId(`task-title-${deleteTask.id}`)).toBeVisible();
       });
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.deleteButton(deleteTask.id)));
+      fireEvent.press(screen.getByTestId(`delete-button-${deleteTask.id}`));
 
       // Then
       await waitFor(() => {
@@ -346,9 +345,9 @@ describe('TaskListScreen integration', () => {
           expect.objectContaining({ method: 'DELETE' }),
         );
       });
-      expect(screen.getByTestId(TestTags.taskTitle(deleteTask.id))).toBeVisible();
-      expect(screen.getByTestId(TestTags.taskTitle(keepTask.id))).toBeVisible();
-      expect(screen.getByTestId(TestTags.ERROR_SNACKBAR)).toHaveTextContent(expectedError);
+      expect(screen.getByTestId(`task-title-${deleteTask.id}`)).toBeVisible();
+      expect(screen.getByTestId(`task-title-${keepTask.id}`)).toBeVisible();
+      expect(screen.getByTestId('error-snackbar')).toHaveTextContent(expectedError);
     });
 
     it('should allow delete retry after failure and remove task when retry succeeds', async () => {
@@ -378,7 +377,7 @@ describe('TaskListScreen integration', () => {
         <TaskListScreen navigation={navigation as never} route={route as never} />,
       );
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle(deleteTask.id))).toBeVisible();
+        expect(screen.getByTestId(`task-title-${deleteTask.id}`)).toBeVisible();
       });
 
       // When
@@ -387,16 +386,16 @@ describe('TaskListScreen integration', () => {
       // Then
       await waitFor(() => {
         expect(deleteSpy).toHaveBeenCalledWith(deleteTask.id);
-        expect(screen.getByTestId(TestTags.ERROR_SNACKBAR)).toHaveTextContent('Delete failed');
+        expect(screen.getByTestId('error-snackbar')).toHaveTextContent('Delete failed');
       });
-      expect(screen.getByTestId(TestTags.taskTitle(deleteTask.id))).toBeVisible();
+      expect(screen.getByTestId(`task-title-${deleteTask.id}`)).toBeVisible();
 
       // When
       await retryDeleteUntilTaskRemoved(screen, deleteTask.id);
 
       // Then
       expect(deleteSpy).toHaveBeenCalledTimes(2);
-      expect(screen.getByTestId(TestTags.taskTitle(keepTask.id))).toBeVisible();
+      expect(screen.getByTestId(`task-title-${keepTask.id}`)).toBeVisible();
     });
   });
 
@@ -424,7 +423,7 @@ describe('TaskListScreen integration', () => {
         <TaskListScreen navigation={navigation as never} route={route as never} />,
       );
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle(firstTask.id))).toBeVisible();
+        expect(screen.getByTestId(`task-title-${firstTask.id}`)).toBeVisible();
       });
 
       // When
@@ -432,7 +431,7 @@ describe('TaskListScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle(secondTask.id))).toBeVisible();
+        expect(screen.getByTestId(`task-title-${secondTask.id}`)).toBeVisible();
       });
     });
 
@@ -447,7 +446,7 @@ describe('TaskListScreen integration', () => {
         <TaskListScreen navigation={navigation as never} route={route as never} />,
       );
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.EMPTY_TASKS)).toBeVisible();
+        expect(screen.getByTestId('empty-tasks')).toBeVisible();
       });
 
       // When
@@ -455,8 +454,8 @@ describe('TaskListScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.EMPTY_TASKS)).toBeVisible();
-        expect(screen.getByTestId(TestTags.ADD_TASK_BUTTON)).toBeVisible();
+        expect(screen.getByTestId('empty-tasks')).toBeVisible();
+        expect(screen.getByTestId('add-task-button')).toBeVisible();
       });
     });
 
@@ -477,7 +476,7 @@ describe('TaskListScreen integration', () => {
         <TaskListScreen navigation={navigation as never} route={route as never} />,
       );
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle(task.id))).toBeVisible();
+        expect(screen.getByTestId(`task-title-${task.id}`)).toBeVisible();
       });
 
       // When
@@ -485,8 +484,8 @@ describe('TaskListScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle(task.id))).toBeVisible();
-        expect(screen.queryByTestId(TestTags.taskTitle('2'))).toBeNull();
+        expect(screen.getByTestId(`task-title-${task.id}`)).toBeVisible();
+        expect(screen.queryByTestId(`task-title-${'2'}`)).toBeNull();
       });
     });
 
@@ -516,7 +515,7 @@ describe('TaskListScreen integration', () => {
         <TaskListScreen navigation={navigation as never} route={route as never} />,
       );
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle(firstTask.id))).toBeVisible();
+        expect(screen.getByTestId(`task-title-${firstTask.id}`)).toBeVisible();
       });
 
       // When
@@ -524,9 +523,9 @@ describe('TaskListScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.taskTitle(firstTask.id))).toBeVisible();
-        expect(screen.getByTestId(TestTags.taskTitle(secondTask.id))).toBeVisible();
-        expect(screen.getByTestId(TestTags.ERROR_SNACKBAR)).toHaveTextContent('Refresh failed');
+        expect(screen.getByTestId(`task-title-${firstTask.id}`)).toBeVisible();
+        expect(screen.getByTestId(`task-title-${secondTask.id}`)).toBeVisible();
+        expect(screen.getByTestId('error-snackbar')).toHaveTextContent('Refresh failed');
       });
     });
   });
@@ -548,11 +547,11 @@ describe('TaskListScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.ADD_TASK_BUTTON)).toBeVisible();
+        expect(screen.getByTestId('add-task-button')).toBeVisible();
       });
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.ADD_TASK_BUTTON));
+      fireEvent.press(screen.getByTestId('add-task-button'));
 
       // Then
       expect(navigation.navigate).toHaveBeenCalledWith('CreateTask');

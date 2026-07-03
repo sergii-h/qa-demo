@@ -4,7 +4,6 @@ import {TaskDetailScreen} from './TaskDetailScreen';
 import {TaskPriority, TaskStatus} from '@/data/models/task';
 import {useTaskDetail} from '@/hooks/useTaskDetail';
 import {mockTask} from '@/test-utils/taskFixtures';
-import {TestTags} from '@/testTags';
 import {renderWithProviders} from '@/test-utils/renderWithProviders';
 
 jest.mock('../hooks/useTaskDetail');
@@ -51,7 +50,7 @@ describe('TaskDetailScreen', () => {
     const { getByTestId } = renderTaskDetailScreen();
 
     // Then
-    expect(getByTestId(TestTags.LOADING_SPINNER)).toBeVisible();
+    expect(getByTestId('loading-spinner')).toBeVisible();
   });
 
   it('should render empty content when task is missing without error', () => {
@@ -67,8 +66,8 @@ describe('TaskDetailScreen', () => {
     const { queryByTestId } = renderTaskDetailScreen();
 
     // Then
-    expect(queryByTestId(TestTags.LOAD_ERROR)).toBeNull();
-    expect(queryByTestId(TestTags.DESCRIPTION)).toBeNull();
+    expect(queryByTestId('load-error')).toBeNull();
+    expect(queryByTestId('description')).toBeNull();
   });
 
   it('should show load error when task load fails', () => {
@@ -84,7 +83,7 @@ describe('TaskDetailScreen', () => {
     const { getByTestId } = renderTaskDetailScreen();
 
     // Then
-    expect(getByTestId(TestTags.LOAD_ERROR)).toHaveTextContent('Task not found');
+    expect(getByTestId('load-error')).toHaveTextContent('Task not found');
   });
 
   it('should render task details with valid status', () => {
@@ -105,14 +104,14 @@ describe('TaskDetailScreen', () => {
     const { getByTestId } = renderTaskDetailScreen();
 
     // Then
-    expect(getByTestId(TestTags.MODAL_TITLE)).toHaveTextContent(mockTask.title);
-    expect(getByTestId(TestTags.DESCRIPTION)).toHaveTextContent('No description');
-    expect(getByTestId(TestTags.CREATED_DATE)).toHaveTextContent('N/A');
-    expect(getByTestId(TestTags.UPDATED_DATE)).toHaveTextContent('invalid-date');
-    expect(getByTestId(TestTags.VALID)).toHaveTextContent('✓');
-    expect(getByTestId(TestTags.DETAIL_VALIDATED_LABEL)).toHaveTextContent('Validated');
-    expect(getByTestId(TestTags.statusTag(TaskStatus.TODO))).toHaveTextContent('To Do');
-    expect(getByTestId(TestTags.priorityTag(TaskPriority.MEDIUM))).toHaveTextContent('Medium');
+    expect(getByTestId('modal-title')).toHaveTextContent(mockTask.title);
+    expect(getByTestId('description')).toHaveTextContent('No description');
+    expect(getByTestId('created-date')).toHaveTextContent('N/A');
+    expect(getByTestId('updated-date')).toHaveTextContent('invalid-date');
+    expect(getByTestId('valid')).toHaveTextContent('✓');
+    expect(getByTestId('detail-validated-label')).toHaveTextContent('Validated');
+    expect(getByTestId(`status-tag-${TaskStatus.TODO}`)).toHaveTextContent('To Do');
+    expect(getByTestId(`priority-tag-${TaskPriority.MEDIUM}`)).toHaveTextContent('Medium');
   });
 
   it('should render not valid status when validation fails', () => {
@@ -133,9 +132,9 @@ describe('TaskDetailScreen', () => {
     const { getByTestId } = renderTaskDetailScreen();
 
     // Then
-    expect(getByTestId(TestTags.NOT_VALID)).toHaveTextContent('✕');
-    expect(getByTestId(TestTags.statusTag(TaskStatus.DONE))).toHaveTextContent('Done');
-    expect(getByTestId(TestTags.priorityTag(TaskPriority.HIGH))).toHaveTextContent('High');
+    expect(getByTestId('notValid')).toHaveTextContent('✕');
+    expect(getByTestId(`status-tag-${TaskStatus.DONE}`)).toHaveTextContent('Done');
+    expect(getByTestId(`priority-tag-${TaskPriority.HIGH}`)).toHaveTextContent('High');
   });
 
   it('should navigate back when back button pressed', () => {
@@ -143,7 +142,7 @@ describe('TaskDetailScreen', () => {
     const { getByTestId } = renderTaskDetailScreen();
 
     // When
-    fireEvent.press(getByTestId(TestTags.CLOSE_BUTTON));
+    fireEvent.press(getByTestId('close-button'));
 
     // Then
     expect(navigation.goBack).toHaveBeenCalled();

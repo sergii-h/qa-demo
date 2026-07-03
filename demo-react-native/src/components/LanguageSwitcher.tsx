@@ -3,7 +3,6 @@ import {useTranslation} from 'react-i18next';
 import {Menu, Text, TouchableRipple} from 'react-native-paper';
 
 import {ENGLISH, setLanguage, SPANISH} from '@/i18n';
-import {TestTags} from '@/testTags';
 
 interface LanguageSwitcherProps {
   style?: object;
@@ -24,7 +23,7 @@ export function LanguageSwitcher({ style }: LanguageSwitcherProps) {
         <TouchableRipple
           onPress={() => setVisible(true)}
           accessibilityLabel={t('languageLabel')}
-          testID={TestTags.LANGUAGE_SWITCHER}
+          testID='language-switcher'
           style={style}
         >
           <Text variant="titleMedium" style={{ fontWeight: '600', padding: 8 }}>
@@ -39,7 +38,7 @@ export function LanguageSwitcher({ style }: LanguageSwitcherProps) {
           void setLanguage(ENGLISH);
         }}
         title={t('languageEn')}
-        testID={TestTags.LANGUAGE_OPTION_EN}
+        testID='language-option-en'
       />
       <Menu.Item
         onPress={() => {
@@ -47,7 +46,7 @@ export function LanguageSwitcher({ style }: LanguageSwitcherProps) {
           void setLanguage(SPANISH);
         }}
         title={t('languageEs')}
-        testID={TestTags.LANGUAGE_OPTION_ES}
+        testID='language-option-es'
       />
     </Menu>
   );

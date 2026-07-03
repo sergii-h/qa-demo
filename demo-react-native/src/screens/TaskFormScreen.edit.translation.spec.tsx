@@ -6,7 +6,6 @@ import {TaskFormScreen} from './TaskFormScreen';
 import enMessages from '../locales/en/translation.json';
 import esMessages from '../locales/es/translation.json';
 import {mockFetchResponse} from '@/test-utils/mockFetch';
-import {TestTags} from '@/testTags';
 import {renderWithProviders} from '@/test-utils/renderWithProviders';
 import {trackTranslationCalls} from '@/test-utils/trackTranslationCalls';
 
@@ -46,7 +45,7 @@ describe('TaskFormScreen edit translation', () => {
       <TaskFormScreen navigation={navigation as never} route={editRoute(task.id) as never} />,
     );
     await waitFor(() => {
-      expect(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT)).toBeTruthy();
+      expect(screen.getByTestId('edit-task-title-input')).toBeTruthy();
     });
 
     // Then

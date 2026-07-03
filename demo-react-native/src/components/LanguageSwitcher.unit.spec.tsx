@@ -3,7 +3,6 @@ import i18n from 'i18next';
 
 import {LanguageSwitcher} from './LanguageSwitcher';
 import * as appI18n from '../i18n';
-import {TestTags} from '@/testTags';
 import {dismissPaperMenu, paperMenuMock} from '@/test-utils/paperMenuSpy';
 import {renderWithProviders} from '@/test-utils/renderWithProviders';
 
@@ -21,7 +20,7 @@ describe('LanguageSwitcher', () => {
     const { getByTestId } = renderWithProviders(<LanguageSwitcher />);
 
     // Then
-    expect(getByTestId(TestTags.LANGUAGE_SWITCHER)).toHaveTextContent('EN');
+    expect(getByTestId('language-switcher')).toHaveTextContent('EN');
   });
 
   it('should call setLanguage with english when EN selected', async () => {
@@ -30,11 +29,11 @@ describe('LanguageSwitcher', () => {
     const { getByTestId } = renderWithProviders(<LanguageSwitcher />);
 
     // When
-    fireEvent.press(getByTestId(TestTags.LANGUAGE_SWITCHER));
+    fireEvent.press(getByTestId('language-switcher'));
     await waitFor(() => {
-      expect(getByTestId(TestTags.LANGUAGE_OPTION_EN)).toBeOnTheScreen();
+      expect(getByTestId('language-option-en')).toBeOnTheScreen();
     });
-    fireEvent.press(getByTestId(TestTags.LANGUAGE_OPTION_EN));
+    fireEvent.press(getByTestId('language-option-en'));
 
     // Then
     expect(setLanguageSpy).toHaveBeenCalledWith(appI18n.ENGLISH);
@@ -46,11 +45,11 @@ describe('LanguageSwitcher', () => {
     const { getByTestId } = renderWithProviders(<LanguageSwitcher />);
 
     // When
-    fireEvent.press(getByTestId(TestTags.LANGUAGE_SWITCHER));
+    fireEvent.press(getByTestId('language-switcher'));
     await waitFor(() => {
-      expect(getByTestId(TestTags.LANGUAGE_OPTION_ES)).toBeOnTheScreen();
+      expect(getByTestId('language-option-es')).toBeOnTheScreen();
     });
-    fireEvent.press(getByTestId(TestTags.LANGUAGE_OPTION_ES));
+    fireEvent.press(getByTestId('language-option-es'));
 
     // Then
     expect(setLanguageSpy).toHaveBeenCalledWith(appI18n.SPANISH);
@@ -64,13 +63,13 @@ describe('LanguageSwitcher', () => {
     const { getByTestId } = renderWithProviders(<LanguageSwitcher />);
 
     // Then
-    expect(getByTestId(TestTags.LANGUAGE_SWITCHER)).toHaveTextContent('ES');
+    expect(getByTestId('language-switcher')).toHaveTextContent('ES');
   });
 
   it('should close menu when dismissed', async () => {
     // Given
     const { getByTestId } = renderWithProviders(<LanguageSwitcher />);
-    fireEvent.press(getByTestId(TestTags.LANGUAGE_SWITCHER));
+    fireEvent.press(getByTestId('language-switcher'));
     expect(paperMenuMock.mock.calls.at(-1)?.[0].visible).toBe(true);
 
     // When

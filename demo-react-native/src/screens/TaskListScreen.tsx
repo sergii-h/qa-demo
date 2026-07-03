@@ -8,7 +8,6 @@ import {LanguageSwitcher} from '@/components/LanguageSwitcher';
 import {PriorityChip, StatusChip} from '@/components/TaskChips';
 import {useTaskList} from '@/hooks/useTaskList';
 import {RootStackParamList} from '@/navigation/types';
-import {TestTags} from '@/testTags';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TaskList'>;
 
@@ -32,20 +31,20 @@ export function TaskListScreen({ navigation, route }: Props) {
         <Appbar.Content
           title={t('tasksTitle')}
           titleStyle={styles.title}
-          testID={TestTags.PAGE_TITLE}
+          testID='page-title'
         />
         <LanguageSwitcher />
       </Appbar.Header>
 
-      {isRefreshing && <View testID={TestTags.REFRESHING} style={styles.hidden} />}
+      {isRefreshing && <View testID='refreshing' style={styles.hidden} />}
 
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator testID={TestTags.LOADING_SPINNER} size="large" />
+          <ActivityIndicator testID='loading-spinner' size="large" />
         </View>
       ) : (
         <FlatList
-          testID={TestTags.TASK_LIST}
+          testID='task-list'
           data={tasks}
           keyExtractor={(item) => item.id}
           contentContainerStyle={
@@ -55,7 +54,7 @@ export function TaskListScreen({ navigation, route }: Props) {
             <RefreshControl refreshing={isRefreshing} onRefresh={refreshTasks} />
           }
           ListEmptyComponent={
-            <View style={styles.centered} testID={TestTags.EMPTY_TASKS}>
+            <View style={styles.centered} testID='empty-tasks'>
               <Text variant="bodyLarge">{t('emptyTasks')}</Text>
             </View>
           }
@@ -76,14 +75,14 @@ export function TaskListScreen({ navigation, route }: Props) {
         style={styles.fab}
         onPress={() => navigation.navigate('CreateTask')}
         accessibilityLabel={t('createTask')}
-        testID={TestTags.ADD_TASK_BUTTON}
+        testID='add-task-button'
       />
 
       <Snackbar
         visible={Boolean(errorMessage)}
         onDismiss={clearError}
         duration={4000}
-        testID={TestTags.ERROR_SNACKBAR}
+        testID='error-snackbar'
       >
         {errorMessage}
       </Snackbar>
@@ -108,7 +107,7 @@ function TaskRow({ task, isDeleting, onInfo, onEdit, onDelete }: TaskRowProps) {
         <Text
           variant="titleMedium"
           style={styles.taskTitle}
-          testID={TestTags.taskTitle(task.id)}
+          testID={`task-title-${task.id}`}
         >
           {task.title}
         </Text>
@@ -121,20 +120,20 @@ function TaskRow({ task, isDeleting, onInfo, onEdit, onDelete }: TaskRowProps) {
             icon="information"
             onPress={onInfo}
             accessibilityLabel={t('actionInfo')}
-            testID={TestTags.infoButton(task.id)}
+            testID={`info-button-${task.id}`}
           />
           <IconButton
             icon="pencil"
             onPress={onEdit}
             accessibilityLabel={t('actionEdit')}
-            testID={TestTags.editButton(task.id)}
+            testID={`edit-button-${task.id}`}
           />
           <IconButton
             icon="delete"
             onPress={onDelete}
             disabled={isDeleting}
             accessibilityLabel={t('actionDelete')}
-            testID={TestTags.deleteButton(task.id)}
+            testID={`delete-button-${task.id}`}
           />
         </View>
       </Card.Content>

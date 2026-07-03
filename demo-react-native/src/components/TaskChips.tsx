@@ -5,7 +5,6 @@ import {Chip} from 'react-native-paper';
 import {TaskPriority, TaskStatus} from '@/data/models/task';
 import {taskPriorityLabel, taskStatusLabel} from '@/i18n/taskLabels';
 import {chipColors} from '@/theme/colors';
-import {TestTags} from '@/testTags';
 
 interface StatusChipProps {
   status: TaskStatus;
@@ -23,7 +22,7 @@ export function StatusChip({ status }: StatusChipProps) {
     <Chip
       compact
       disabled
-      testID={TestTags.statusTag(status)}
+      testID={`status-tag-${status}`}
       style={[styles.chip, { backgroundColor: `${color}26` }]}
       textStyle={{ color }}
     >
@@ -48,7 +47,7 @@ export function PriorityChip({ priority }: PriorityChipProps) {
     <Chip
       compact
       disabled
-      testID={TestTags.priorityTag(priority)}
+      testID={`priority-tag-${priority}`}
       style={[styles.chip, { backgroundColor: `${color}26` }]}
       textStyle={{ color }}
     >
