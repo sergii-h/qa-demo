@@ -45,6 +45,10 @@ cd android
 ./gradlew assembleRelease "-PreactNativeArchitectures=$REACT_NATIVE_ARCHITECTURES" --no-daemon
 
 APK_PATH="$ANDROID_APP/build/outputs/apk/release/app-release.apk"
+if [[ ! -f "$APK_PATH" ]]; then
+  echo "APK not found after build: $APK_PATH" >&2
+  exit 1
+fi
 echo "$APK_PATH"
-echo "Install on a running emulator/device:"
-echo "  npm run install:android"
+echo "Install on a running emulator/device:" >&2
+echo "  npm run install:android" >&2

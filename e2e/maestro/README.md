@@ -192,4 +192,6 @@ Android and iOS Maestro jobs run from `.github/workflows/react-native-e2e.yml`.
 
 iOS jobs use `run-maestro-ios-tests` (`build-ios-app.sh` → `install-ios-app.sh` → npm test). API URLs use `http://localhost:…` on the simulator. CocoaPods runs inside `build-ios-app.sh` via `npx pod-install` — no separate pipeline step.
 
+Android CI invokes `run-android-maestro-ci.sh` as a single command inside `android-emulator-runner` (that action runs each line of a multiline `script:` in a separate shell, so shell variables do not persist across lines).
+
 GitHub-hosted macOS runners do not include Docker. iOS jobs use `macos-15-intel` so Colima can start a Linux VM (`start-e2e-env` runs `douglascamata/setup-docker-macos-action` on macOS). ARM runners (`macos-latest`) lack nested virtualization, so Colima cannot start there.

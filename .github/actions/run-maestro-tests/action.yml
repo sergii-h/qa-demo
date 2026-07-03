@@ -62,15 +62,7 @@ runs:
         arch: x86_64
         disable-animations: true
         emulator-boot-timeout: 900
-        script: |
-          set -eu
-          export REACT_NATIVE_ARCHITECTURES=x86_64
-          APK_PATH=$(bash e2e/maestro/scripts/build-android-app.sh "${{ inputs.api-base-url }}")
-          adb install -r "$APK_PATH"
-          cd e2e/maestro
-          export MAESTRO_CLI_NO_ANALYTICS=true
-          export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
-          ALLURE_RESULTS_DIR="$GITHUB_WORKSPACE/e2e/maestro/allure-results" npm run "${{ inputs.npm-script }}"
+        script: bash e2e/maestro/scripts/run-android-maestro-ci.sh "${{ inputs.api-base-url }}" "${{ inputs.npm-script }}"
 
     - name: Upload allure results
       if: ${{ !cancelled() }}
