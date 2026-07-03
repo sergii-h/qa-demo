@@ -1,2 +1,2 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","8486","Should create task","","Fri Jul 03 16:56:35 UTC 2026","passed","Fri Jul 03 16:56:43 UTC 2026","","test.desktop.createTask.CreateTaskUatTest","test.desktop.createTask.CreateTaskUatTest","shouldCreateTask"
+"","8368","Should create task","","Fri Jul 03 17:55:46 UTC 2026","passed","Fri Jul 03 17:55:54 UTC 2026","","test.desktop.createTask.CreateTaskUatTest","test.desktop.createTask.CreateTaskUatTest","shouldCreateTask"
