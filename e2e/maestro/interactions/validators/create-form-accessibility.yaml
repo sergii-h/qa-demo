@@ -1,0 +1,18 @@
+appId: ${MAESTRO_APP_ID}
+---
+- assertVisible:
+    id: create-task-title-input
+- assertVisible:
+    id: task-description-input
+- scrollUntilVisible:
+    element:
+      id: status-dropdown-open
+    direction: DOWN
+    timeout: 5000
+    speed: 80
+- assertVisible:
+    id: status-dropdown-open
+- assertVisible:
+    id: priority-dropdown-open
+- assertVisible:
+    id: create-button

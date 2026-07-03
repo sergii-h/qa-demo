@@ -1,0 +1,10 @@
+appId: ${MAESTRO_APP_ID}
+---
+- extendedWaitUntil:
+    notVisible:
+      id: refreshing
+    timeout: 15000
+- runFlow:
+    file: ../pages/scroll-until-title-in-task-list.yaml
+    env:
+      TASK_TITLE: ${TASK_TITLE}

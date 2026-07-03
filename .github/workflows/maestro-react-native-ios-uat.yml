@@ -1,0 +1,26 @@
+name: Run UAT tests (Maestro React Native iOS — full app)
+
+on:
+  workflow_call:
+
+jobs:
+  run-tests:
+    runs-on: macos-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: full
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Run Maestro React Native UAT smoke test on iOS
+        uses: ./.github/actions/run-maestro-ios-tests
+        with:
+          npm-script: test:uat
+          api-base-url: http://localhost:8080/v1/
+          artifact-name: allure-results-maestro-ios-uat

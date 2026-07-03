@@ -1,0 +1,13 @@
+appId: ${MAESTRO_APP_ID}
+---
+# given
+- runFlow:
+    file: ../../interactions/steps/open-main-page.yaml
+
+# when
+- runFlow:
+    file: ../../interactions/steps/open-create-task-form.yaml
+
+# then
+- runFlow:
+    file: ../../interactions/validators/create-form-accessibility.yaml

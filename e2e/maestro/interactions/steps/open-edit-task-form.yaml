@@ -1,0 +1,13 @@
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ../pages/scroll-until-visible-in-task-list.yaml
+    env:
+      SCROLL_TARGET_ID: edit-button-.*
+      TASK_TITLE: ${TASK_TITLE}
+- tapOn:
+    id: edit-button-.*
+    below:
+      text: ${TASK_TITLE}
+- runFlow:
+    file: ../pages/wait-for-edit-task-form.yaml

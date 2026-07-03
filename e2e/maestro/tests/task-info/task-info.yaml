@@ -1,0 +1,24 @@
+appId: ${MAESTRO_APP_ID}
+---
+# given
+- runFlow:
+    file: ../../interactions/steps/open-main-page.yaml
+- runFlow:
+    file: ../../interactions/steps/refresh-main-page.yaml
+
+# when
+- runFlow:
+    file: ../../interactions/steps/open-task-info-form.yaml
+    env:
+      TASK_TITLE: ${TASK_TITLE}
+
+# then
+- runFlow:
+    file: ../../interactions/validators/task-info-data.yaml
+    env:
+      TASK_TITLE: ${TASK_TITLE}
+      TASK_DESCRIPTION: ${TASK_DESCRIPTION}
+      TASK_STATUS: ${TASK_STATUS}
+      TASK_PRIORITY: ${TASK_PRIORITY}
+- runFlow:
+    file: ../../interactions/validators/task-is-valid.yaml

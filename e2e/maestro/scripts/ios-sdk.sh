@@ -1,0 +1,210 @@
+#!/usr/bin/env bash
+
+require_xcode() {
+  if ! command -v xcodebuild >/dev/null 2>&1; then
+    cat >&2 <<'EOF'
+Xcode command-line tools not found.
+
+Install Xcode from the App Store, then run:
+
+  xcode-select --install
+EOF
+    exit 1
+  fi
+
+  if ! command -v xcrun >/dev/null 2>&1; then
+    echo "xcrun not found; install Xcode command-line tools." >&2
+    exit 1
+  fi
+}
+
+require_simulator() {
+  if ! xcrun simctl list devices booted 2>/dev/null | grep -q Booted; then
+    cat >&2 <<'EOF'
+No booted iOS Simulator found.
+
+Start one with:
+
+  open -a Simulator
+
+Or boot a specific device:
+
+  xcrun simctl boot "iPhone 16"
+EOF
+    exit 1
+  fi
+}
+
+resolve_ios_workspace() {
+  local ios_dir="$1"
+  find "$ios_dir" -maxdepth 1 -name '*.xcworkspace' -print -quit
+}
+
+resolve_ios_project() {
+  local ios_dir="$1"
+  find "$ios_dir" -maxdepth 1 -name '*.xcodeproj' -print -quit
+}
+
+resolve_ios_app_scheme() {
+  local ios_dir="$1"
+  local xcode_arg_name="$2"
+  local xcode_path="$3"
+
+  local project
+  project="$(resolve_ios_project "$ios_dir")"
+  if [[ -z "$project" ]]; then
+    return 1
+  fi
+
+  local app_scheme
+  app_scheme="$(basename "$project" .xcodeproj)"
+
+  if xcodebuild -list "-${xcode_arg_name}" "$xcode_path" 2>/dev/null \
+    | awk -v scheme="$app_scheme" '/^ *Schemes:$/{flag=1; next} flag && $1==scheme {found=1} END{exit !found}'; then
+    echo "$app_scheme"
+    return 0
+  fi
+
+  echo "App scheme '${app_scheme}' not found in ${xcode_path}." >&2
+  return 1
+}
+
+is_valid_ios_app_bundle() {
+  local app_path="$1"
+  local info_plist="$app_path/Info.plist"
+  [[ -f "$info_plist" ]] || return 1
+  /usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$info_plist" >/dev/null 2>&1
+}
+
+resolve_ios_app_path() {
+  local derived_data="$1"
+  local scheme="$2"
+  local candidate
+
+  while IFS= read -r candidate; do
+    if is_valid_ios_app_bundle "$candidate"; then
+      echo "$candidate"
+      return 0
+    fi
+  done < <(find "$derived_data/Build/Products" -type d -name "${scheme}.app" 2>/dev/null)
+
+  return 1
+}
+
+patch_fmt_for_xcode26() {
+  local ios_dir="$1"
+  local fmt_base="$ios_dir/Pods/fmt/include/fmt/base.h"
+
+  if [[ ! -f "$fmt_base" ]]; then
+    return 0
+  fi
+
+  if grep -q 'Xcode 26 workaround' "$fmt_base"; then
+    return 0
+  fi
+
+  perl -0777 -i -pe \
+    's/(#elif defined\(__cpp_consteval\)\n#  define FMT_USE_CONSTEVAL) 1/$1 0  \/\/ Xcode 26 workaround/s' \
+    "$fmt_base"
+  echo "Patched fmt for Xcode 26 (disabled FMT_USE_CONSTEVAL)"
+}
+
+resolve_ios_xcode_target() {
+  local ios_dir="$1"
+  local workspace
+  workspace="$(resolve_ios_workspace "$ios_dir")"
+  if [[ -n "$workspace" ]]; then
+    echo "workspace|$workspace"
+    return 0
+  fi
+
+  local project
+  project="$(resolve_ios_project "$ios_dir")"
+  if [[ -n "$project" ]]; then
+    echo "project|$project"
+    return 0
+  fi
+
+  return 1
+}
+
+resolve_booted_simulator_udid() {
+  xcrun simctl list devices booted \
+    | awk -F '[()]' '/Booted/ { print $2; exit }'
+}
+
+extract_simulator_udid() {
+  sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/'
+}
+
+resolve_simulator_udid_by_name() {
+  local name="$1"
+  xcrun simctl list devices available \
+    | grep -F "$name" \
+    | head -1 \
+    | extract_simulator_udid
+}
+
+resolve_default_iphone_simulator_udid() {
+  xcrun simctl list devices available \
+    | grep -E '^\s+iPhone' \
+    | head -1 \
+    | extract_simulator_udid
+}
+
+resolve_ios_simulator_udid() {
+  if [[ -n "${MAESTRO_DEVICE:-}" ]]; then
+    echo "$MAESTRO_DEVICE"
+    return 0
+  fi
+
+  local booted_udid
+  booted_udid="$(resolve_booted_simulator_udid 2>/dev/null || true)"
+  if [[ -n "$booted_udid" ]]; then
+    echo "$booted_udid"
+    return 0
+  fi
+
+  if [[ -n "${MAESTRO_IOS_SIMULATOR:-}" ]]; then
+    local named_udid
+    named_udid="$(resolve_simulator_udid_by_name "$MAESTRO_IOS_SIMULATOR")"
+    if [[ -n "$named_udid" ]]; then
+      echo "$named_udid"
+      return 0
+    fi
+    echo "Simulator not found: ${MAESTRO_IOS_SIMULATOR}" >&2
+    return 1
+  fi
+
+  local default_udid
+  default_udid="$(resolve_default_iphone_simulator_udid)"
+  if [[ -n "$default_udid" ]]; then
+    echo "$default_udid"
+    return 0
+  fi
+
+  echo "No available iPhone simulators found." >&2
+  return 1
+}
+
+ensure_simulator_booted() {
+  local udid="$1"
+  if xcrun simctl list devices booted | grep -q "$udid"; then
+    return 0
+  fi
+
+  echo "Booting simulator ${udid}..."
+  xcrun simctl boot "$udid" 2>/dev/null || true
+  open -a Simulator
+}
+
+resolve_ios_simulator_destination() {
+  local udid
+  udid="$(resolve_ios_simulator_udid)" || return 1
+  ensure_simulator_booted "$udid"
+  echo "platform=iOS Simulator,id=${udid}"
+}
+
+resolve_simulator_udid() {
+  resolve_ios_simulator_udid
+}

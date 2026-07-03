@@ -1,0 +1,14 @@
+appId: ${MAESTRO_APP_ID}
+---
+- assertVisible:
+    id: modal-title
+- assertVisible:
+    text: ${TASK_TITLE}
+- assertVisible:
+    id: description
+- assertVisible:
+    text: ${TASK_DESCRIPTION}
+- assertVisible:
+    id: status-tag-${TASK_STATUS}
+- assertVisible:
+    id: priority-tag-${TASK_PRIORITY}

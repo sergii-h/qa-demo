@@ -1,0 +1,27 @@
+appId: ${MAESTRO_APP_ID}
+---
+- tapOn:
+    id: edit-task-title-input
+- eraseText
+- inputText: ${UPDATED_TASK_TITLE}
+- tapOn:
+    id: task-description-input
+- eraseText
+- inputText: ${UPDATED_TASK_DESCRIPTION}
+- hideKeyboard
+- tapOn:
+    id: status-dropdown-open
+- extendedWaitUntil:
+    visible:
+      id: status-dropdown-option-${UPDATED_TASK_STATUS}
+    timeout: 5000
+- tapOn:
+    id: status-dropdown-option-${UPDATED_TASK_STATUS}
+- tapOn:
+    id: priority-dropdown-open
+- extendedWaitUntil:
+    visible:
+      id: priority-dropdown-option-${UPDATED_TASK_PRIORITY}
+    timeout: 5000
+- tapOn:
+    id: priority-dropdown-option-${UPDATED_TASK_PRIORITY}

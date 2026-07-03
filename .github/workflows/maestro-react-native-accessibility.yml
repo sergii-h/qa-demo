@@ -1,0 +1,25 @@
+name: Run accessibility tests (Maestro React Native — mocked BE)
+
+on:
+  workflow_call:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: wiremock
+
+      - name: Run Maestro React Native accessibility tests
+        uses: ./.github/actions/run-maestro-tests
+        with:
+          npm-script: test:accessibility
+          api-base-url: http://10.0.2.2:8085/v1/
+          test-label: Run Maestro React Native accessibility tests
+          artifact-name: allure-results-maestro-accessibility

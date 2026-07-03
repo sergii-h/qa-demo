@@ -1,0 +1,24 @@
+name: Run e2e tests (Maestro React Native iOS — mocked BE)
+
+on:
+  workflow_call:
+
+jobs:
+  run-tests:
+    runs-on: macos-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: wiremock
+
+      - name: Run Maestro React Native E2E tests on iOS (mocked BE)
+        uses: ./.github/actions/run-maestro-ios-tests
+        with:
+          npm-script: test:e2e
+          api-base-url: http://localhost:8085/v1/
+          artifact-name: allure-results-maestro-ios-e2e

@@ -1,0 +1,23 @@
+appId: ${MAESTRO_APP_ID}
+env:
+  TASK_TITLE: ${TASK_TITLE}
+---
+# given
+- runFlow:
+    label: Open main page
+    file: ../../interactions/steps/open-main-page.yaml
+- runFlow:
+    label: Refresh task list
+    file: ../../interactions/steps/refresh-main-page.yaml
+
+# when
+- runFlow:
+    label: Open task info form
+    file: ../../interactions/steps/open-task-info-form.yaml
+    env:
+      TASK_TITLE: ${TASK_TITLE}
+
+# then
+- runFlow:
+    label: Validate task info accessibility
+    file: ../../interactions/validators/task-info-accessibility.yaml

@@ -1,0 +1,24 @@
+appId: ${MAESTRO_APP_ID}
+env:
+  TASK_TITLE: ${TASK_TITLE}
+---
+- runFlow:
+    file: ../pages/scroll-until-title-in-task-list.yaml
+    env:
+      TASK_TITLE: ${TASK_TITLE}
+- assertVisible:
+    id: status-tag-TODO
+    below:
+      text: ${TASK_TITLE}
+- assertVisible:
+    text: Por hacer
+    below:
+      text: ${TASK_TITLE}
+- assertVisible:
+    id: priority-tag-LOW
+    below:
+      text: ${TASK_TITLE}
+- assertVisible:
+    text: Baja
+    below:
+      text: ${TASK_TITLE}

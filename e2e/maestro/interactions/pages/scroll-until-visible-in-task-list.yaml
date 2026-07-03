@@ -1,0 +1,25 @@
+appId: ${MAESTRO_APP_ID}
+env:
+  SCROLL_TARGET_ID: ${SCROLL_TARGET_ID}
+  TASK_TITLE: ${TASK_TITLE}
+---
+- scrollUntilVisible:
+    element:
+      id: ${SCROLL_TARGET_ID}
+      below:
+        text: ${TASK_TITLE}
+    direction: DOWN
+    timeout: 10000
+    speed: 80
+- scrollUntilVisible:
+    element:
+      id: ${SCROLL_TARGET_ID}
+      below:
+        text: ${TASK_TITLE}
+    direction: UP
+    timeout: 5000
+    speed: 80
+- assertVisible:
+    id: ${SCROLL_TARGET_ID}
+    below:
+      text: ${TASK_TITLE}

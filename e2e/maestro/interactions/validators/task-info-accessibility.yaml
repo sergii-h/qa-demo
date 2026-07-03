@@ -1,0 +1,10 @@
+appId: ${MAESTRO_APP_ID}
+---
+- assertVisible:
+    id: description
+- assertVisible:
+    id: detail-description-label
+- assertVisible:
+    id: detail-validated-label
+- assertVisible:
+    id: valid

@@ -1,0 +1,61 @@
+name: Run Maestro React Native E2E tests on iOS Simulator
+description: Build the Expo app for iOS, install on a simulator, and run Maestro suites
+
+inputs:
+  npm-script:
+    description: npm script to run in e2e/maestro (test:e2e, test:uat, or test:accessibility)
+    required: true
+  api-base-url:
+    description: API base URL baked into the iOS build (use http://localhost:8085/v1/ or :8080 for UAT)
+    required: true
+  artifact-name:
+    description: Allure artifact name
+    required: true
+  ios-simulator-name:
+    description: Optional iOS Simulator name (defaults to first available iPhone on the runner)
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: npm
+        cache-dependency-path: |
+          demo-react-native/package-lock.json
+          e2e/maestro/package-lock.json
+
+    - name: Install Maestro runner dependencies
+      shell: bash
+      working-directory: e2e/maestro
+      run: npm ci
+
+    - name: Install Maestro CLI
+      shell: bash
+      run: |
+        curl -Ls "https://get.maestro.mobile.dev" | bash
+        echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+    - name: Build iOS app, install on simulator, and run Maestro tests
+      shell: bash
+      env:
+        MAESTRO_IOS_SIMULATOR: ${{ inputs.ios-simulator-name }}
+        MAESTRO_CLI_NO_ANALYTICS: 'true'
+        MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: 'true'
+      run: |
+        set -euo pipefail
+        bash e2e/maestro/scripts/build-ios-app.sh "${{ inputs.api-base-url }}"
+        bash e2e/maestro/scripts/install-ios-app.sh
+        cd e2e/maestro
+        ALLURE_RESULTS_DIR="$GITHUB_WORKSPACE/e2e/maestro/allure-results" npm run "${{ inputs.npm-script }}"
+
+    - name: Upload allure results
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: e2e/maestro/allure-results
+        retention-days: 7
+        if-no-files-found: warn

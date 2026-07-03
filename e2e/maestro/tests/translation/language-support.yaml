@@ -1,0 +1,19 @@
+appId: ${MAESTRO_APP_ID}
+env:
+  TASK_TITLE: ${TASK_TITLE}
+---
+# given
+- runFlow:
+    file: ../../interactions/steps/open-main-page.yaml
+
+# when
+- runFlow:
+    file: ../../interactions/steps/select-spanish-language.yaml
+
+# then
+- runFlow:
+    file: ../../interactions/validators/ui-is-in-spanish.yaml
+- runFlow:
+    file: ../../interactions/validators/spanish-task-labels.yaml
+    env:
+      TASK_TITLE: ${TASK_TITLE}

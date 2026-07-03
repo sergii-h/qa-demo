@@ -1,0 +1,99 @@
+name: React Native E2E tests
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'demo-react-native/**'
+      - 'demo-service/**'
+      - 'docker/**'
+      - 'e2e/maestro/**'
+      - '.github/workflows/react-native-e2e.yml'
+      - '.github/workflows/maestro-react-native-e2e.yml'
+      - '.github/workflows/maestro-react-native-uat.yml'
+      - '.github/workflows/maestro-react-native-accessibility.yml'
+      - '.github/workflows/maestro-react-native-ios-e2e.yml'
+      - '.github/workflows/maestro-react-native-ios-uat.yml'
+      - '.github/workflows/maestro-react-native-ios-accessibility.yml'
+      - '.github/actions/**'
+  push:
+    branches: [master]
+    paths:
+      - 'demo-react-native/**'
+      - 'demo-service/**'
+      - 'docker/**'
+      - 'e2e/maestro/**'
+      - '.github/workflows/react-native-e2e.yml'
+      - '.github/workflows/maestro-react-native-e2e.yml'
+      - '.github/workflows/maestro-react-native-uat.yml'
+      - '.github/workflows/maestro-react-native-accessibility.yml'
+      - '.github/workflows/maestro-react-native-ios-e2e.yml'
+      - '.github/workflows/maestro-react-native-ios-uat.yml'
+      - '.github/workflows/maestro-react-native-ios-accessibility.yml'
+      - '.github/actions/**'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit-react-native-e2e-dependencies:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            demo-react-native/package-lock.json
+            e2e/maestro/package-lock.json
+
+      - name: Install demo-react-native dependencies
+        working-directory: demo-react-native
+        run: npm ci
+
+      - name: Audit demo-react-native dependencies
+        uses: ./.github/actions/audit-npm
+        with:
+          working-directory: demo-react-native
+
+      - name: Install Maestro runner dependencies
+        working-directory: e2e/maestro
+        run: npm ci
+
+      - name: Audit Maestro runner dependencies
+        uses: ./.github/actions/audit-npm
+        with:
+          working-directory: e2e/maestro
+
+  maestro-react-native-e2e:
+    needs: audit-react-native-e2e-dependencies
+    uses: ./.github/workflows/maestro-react-native-e2e.yml
+    secrets: inherit
+
+  maestro-react-native-uat:
+    needs: audit-react-native-e2e-dependencies
+    uses: ./.github/workflows/maestro-react-native-uat.yml
+    secrets: inherit
+
+  maestro-react-native-accessibility:
+    needs: audit-react-native-e2e-dependencies
+    uses: ./.github/workflows/maestro-react-native-accessibility.yml
+    secrets: inherit
+
+  maestro-react-native-ios-e2e:
+    needs: audit-react-native-e2e-dependencies
+    uses: ./.github/workflows/maestro-react-native-ios-e2e.yml
+    secrets: inherit
+
+  maestro-react-native-ios-uat:
+    needs: audit-react-native-e2e-dependencies
+    uses: ./.github/workflows/maestro-react-native-ios-uat.yml
+    secrets: inherit
+
+  maestro-react-native-ios-accessibility:
+    needs: audit-react-native-e2e-dependencies
+    uses: ./.github/workflows/maestro-react-native-ios-accessibility.yml
+    secrets: inherit

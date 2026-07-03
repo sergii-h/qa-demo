@@ -1,0 +1,44 @@
+appId: ${MAESTRO_APP_ID}
+env:
+  TASK_TITLE: ${TASK_TITLE}
+  TASK_DESCRIPTION: ${TASK_DESCRIPTION}
+  TASK_STATUS: ${TASK_STATUS}
+  TASK_PRIORITY: ${TASK_PRIORITY}
+---
+# given
+- runFlow:
+    file: ../../interactions/steps/open-main-page.yaml
+
+# when
+- runFlow:
+    file: ../../interactions/steps/open-create-task-form.yaml
+- runFlow:
+    file: ../../interactions/steps/fill-create-task-form.yaml
+    env:
+      TASK_TITLE: ${TASK_TITLE}
+      TASK_DESCRIPTION: ${TASK_DESCRIPTION}
+      TASK_STATUS: ${TASK_STATUS}
+      TASK_PRIORITY: ${TASK_PRIORITY}
+- runFlow:
+    file: ../../interactions/steps/submit-create-task-form.yaml
+
+# then
+- runFlow:
+    file: ../../interactions/validators/task-list-has-task.yaml
+    env:
+      TASK_TITLE: ${TASK_TITLE}
+
+# when
+- runFlow:
+    file: ../../interactions/steps/open-task-info-form.yaml
+    env:
+      TASK_TITLE: ${TASK_TITLE}
+
+# then
+- runFlow:
+    file: ../../interactions/validators/task-info-data.yaml
+    env:
+      TASK_TITLE: ${TASK_TITLE}
+      TASK_DESCRIPTION: ${TASK_DESCRIPTION}
+      TASK_STATUS: ${TASK_STATUS}
+      TASK_PRIORITY: ${TASK_PRIORITY}
