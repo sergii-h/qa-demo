@@ -15,7 +15,6 @@ import com.example.demo.integration.support.LanguageOption
 import com.example.demo.integration.support.GetTasksFailure
 import com.example.demo.integration.support.GetTaskFailure
 import com.example.demo.integration.support.UpdatePutFailure
-import com.example.demo.ui.TestTags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.experimental.runners.Enclosed
@@ -28,44 +27,44 @@ class EditTaskIntegrationTest {
     abstract class Base : IntegrationTestBase() {
 
         protected fun openEditForm(taskId: String) {
-            runAsyncAction { onNodeWithTag(TestTags.editButton(taskId)).performClick() }
-            assertIsDisplayed(TestTags.EDIT_TASK_TITLE_INPUT)
+            runAsyncAction { onNodeWithTag("edit-button-${taskId}").performClick() }
+            assertIsDisplayed("edit-task-title-input")
         }
 
         protected fun setTitle(title: String) {
-            runAsyncAction { onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextInput(title) }
+            runAsyncAction { onNodeWithTag("edit-task-title-input").performTextInput(title) }
         }
 
         protected fun clearTitle() {
-            composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).performTextClearance()
+            composeTestRule.onNodeWithTag("edit-task-title-input").performTextClearance()
         }
 
         protected fun setDescription(description: String) {
-            runAsyncAction { onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextInput(description) }
+            runAsyncAction { onNodeWithTag("task-description-input").performTextInput(description) }
         }
 
         protected fun clearDescription() {
-            composeTestRule.onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextClearance()
+            composeTestRule.onNodeWithTag("task-description-input").performTextClearance()
         }
 
         protected fun selectStatus(status: TaskStatus) {
-            composeTestRule.onNodeWithTag(TestTags.STATUS_DROPDOWN).performScrollTo().performClick()
-            runAsyncAction { onNodeWithTag(TestTags.statusDropdownOption(status)).performClick() }
+            composeTestRule.onNodeWithTag("status-dropdown").performScrollTo().performClick()
+            runAsyncAction { onNodeWithTag("status-dropdown-option-${status.name}").performClick() }
         }
 
         protected fun selectPriority(priority: TaskPriority) {
-            composeTestRule.onNodeWithTag(TestTags.PRIORITY_DROPDOWN).performScrollTo().performClick()
-            runAsyncAction { onNodeWithTag(TestTags.priorityDropdownOption(priority)).performClick() }
+            composeTestRule.onNodeWithTag("priority-dropdown").performScrollTo().performClick()
+            runAsyncAction { onNodeWithTag("priority-dropdown-option-${priority.name}").performClick() }
         }
 
         protected fun submitForm() {
-            runAsyncAction { onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().performClick() }
-            assertIsNotDisplayed(TestTags.EDIT_TASK_TITLE_INPUT)
-            assertIsNotDisplayed(TestTags.LOADING_SPINNER)
+            runAsyncAction { onNodeWithTag("save-button").performScrollTo().performClick() }
+            assertIsNotDisplayed("edit-task-title-input")
+            assertIsNotDisplayed("loading-spinner")
         }
 
         protected fun clickSubmitForm() {
-            runAsyncAction { onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().performClick() }
+            runAsyncAction { onNodeWithTag("save-button").performScrollTo().performClick() }
         }
     }
 
@@ -104,7 +103,7 @@ class EditTaskIntegrationTest {
             // Then
             assertThat(mockServer.updateTaskRequests)
                 .containsExactly(updatedContext.createTaskUpdateRequest())
-            assertTextEquals(TestTags.taskTitle(context.id), updatedContext.title)
+            assertTextEquals("task-title-${context.id}", updatedContext.title)
         }
 
         @Test
@@ -134,7 +133,7 @@ class EditTaskIntegrationTest {
             // Then
             assertThat(mockServer.updateTaskRequests)
                 .containsExactly(updatedContext.createTaskUpdateRequest())
-            assertTextEquals(TestTags.taskTitle(context.id), updatedContext.title)
+            assertTextEquals("task-title-${context.id}", updatedContext.title)
         }
 
         @Test
@@ -153,14 +152,14 @@ class EditTaskIntegrationTest {
             setTitle("Unsaved title")
 
             // When
-            runAsyncAction { onNodeWithTag(TestTags.CLOSE_BUTTON).performClick() }
+            runAsyncAction { onNodeWithTag("close-button").performClick() }
 
             // And
             openEditForm(context.id)
 
             // Then
             assertThat(mockServer.updateTaskRequests).isEmpty()
-            assertTextEquals(TestTags.EDIT_TASK_TITLE_INPUT, context.title)
+            assertTextEquals("edit-task-title-input", context.title)
         }
 
         @Test
@@ -183,7 +182,7 @@ class EditTaskIntegrationTest {
             clickSubmitForm()
 
             // Then
-            assertTextEquals(TestTags.TITLE_ERROR, "Title must not exceed 100 characters")
+            assertTextEquals("title-error", "Title must not exceed 100 characters")
             assertThat(mockServer.updateTaskRequests).isEmpty()
 
             // When
@@ -193,7 +192,7 @@ class EditTaskIntegrationTest {
 
             // Then
             assertThat(mockServer.updateTaskRequests).containsExactly(context.createTaskUpdateRequest())
-            assertIsDisplayed(TestTags.taskTitle(context.id))
+            assertIsDisplayed("task-title-${context.id}")
         }
 
         @Test
@@ -218,7 +217,7 @@ class EditTaskIntegrationTest {
             clickSubmitForm()
 
             // Then
-            assertTextEquals(TestTags.SAVE_ERROR, "Request failed (500)")
+            assertTextEquals("save-error", "Request failed (500)")
             assertThat(mockServer.updateTaskRequests)
                 .containsExactly(updatedContext.createTaskUpdateRequest())
 
@@ -230,7 +229,7 @@ class EditTaskIntegrationTest {
                 updatedContext.createTaskUpdateRequest(),
                 updatedContext.createTaskUpdateRequest(),
             )
-            assertTextEquals(TestTags.taskTitle(context.id), updatedContext.title)
+            assertTextEquals("task-title-${context.id}", updatedContext.title)
         }
 
         @Test
@@ -249,9 +248,9 @@ class EditTaskIntegrationTest {
             openEditForm(context.id)
 
             // Then
-            assertTextEquals(TestTags.MODAL_TITLE, "Editar tarea")
-            assertTextEquals(TestTags.FIELD_TITLE_LABEL, "Título *")
-            assertTextEquals(TestTags.SAVE_BUTTON, "Guardar")
+            assertTextEquals("modal-title", "Editar tarea")
+            assertTextEquals("field-title-label", "Título *")
+            assertTextEquals("save-button", "Guardar")
         }
     }
 
@@ -269,13 +268,13 @@ class EditTaskIntegrationTest {
             failureCase.enqueue(mockServer)
             launchApp()
 
-            assertIsDisplayed(TestTags.taskTitle(context.id))
+            assertIsDisplayed("task-title-${context.id}")
 
             // When
             openEditForm(context.id)
 
             // Then
-            composeTestRule.onNodeWithTag(TestTags.SAVE_BUTTON).assertIsNotEnabled()
+            composeTestRule.onNodeWithTag("save-button").assertIsNotEnabled()
         }
 
         companion object {
@@ -311,7 +310,7 @@ class EditTaskIntegrationTest {
             submitForm()
 
             // Then
-            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+            assertIsDisplayed("add-task-button")
         }
 
         companion object {
@@ -346,10 +345,10 @@ class EditTaskIntegrationTest {
             clickSubmitForm()
 
             // Then
-            assertTextEquals(TestTags.SAVE_ERROR, failureCase.expectedSaveError)
+            assertTextEquals("save-error", failureCase.expectedSaveError)
             assertThat(mockServer.updateTaskRequests)
                 .containsExactly(updatedContext.createTaskUpdateRequest())
-            assertIsDisplayed(TestTags.EDIT_TASK_TITLE_INPUT)
+            assertIsDisplayed("edit-task-title-input")
         }
 
         companion object {

@@ -10,7 +10,6 @@ import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
 import com.example.demo.integration.support.GetTaskFailure
 import com.example.demo.integration.support.IsValidFailure
-import com.example.demo.ui.TestTags
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.experimental.runners.Enclosed
@@ -22,8 +21,8 @@ class TaskDetailIntegrationTest {
     abstract class Base : IntegrationTestBase() {
 
         protected fun openDetail(taskId: String) {
-            runAsyncAction { onNodeWithTag(TestTags.infoButton(taskId)).performClick() }
-            assertIsDisplayed(TestTags.DESCRIPTION)
+            runAsyncAction { onNodeWithTag("info-button-${taskId}").performClick() }
+            assertIsDisplayed("description")
         }
     }
 
@@ -45,10 +44,10 @@ class TaskDetailIntegrationTest {
             openDetail(context.id)
 
             // Then
-            assertTextEquals(TestTags.DESCRIPTION, context.description.toString())
-            assertIsDisplayed(TestTags.statusTag(context.status))
-            assertIsDisplayed(TestTags.priorityTag(context.priority))
-            assertIsDisplayed(TestTags.VALID)
+            assertTextEquals("description", context.description.toString())
+            assertIsDisplayed("status-tag-${context.status.name}")
+            assertIsDisplayed("priority-tag-${context.priority.name}")
+            assertIsDisplayed("valid")
         }
 
         @Test
@@ -66,10 +65,10 @@ class TaskDetailIntegrationTest {
             openDetail(context.id)
 
             // Then
-            assertTextEquals(TestTags.DESCRIPTION, "No description")
-            assertIsDisplayed(TestTags.statusTag(context.status))
-            assertIsDisplayed(TestTags.priorityTag(context.priority))
-            assertIsDisplayed(TestTags.VALID)
+            assertTextEquals("description", "No description")
+            assertIsDisplayed("status-tag-${context.status.name}")
+            assertIsDisplayed("priority-tag-${context.priority.name}")
+            assertIsDisplayed("valid")
         }
 
         @Test
@@ -86,10 +85,10 @@ class TaskDetailIntegrationTest {
             openDetail(context.id)
 
             // When
-            runAsyncAction { onNodeWithTag(TestTags.CLOSE_BUTTON).performClick() }
+            runAsyncAction { onNodeWithTag("close-button").performClick() }
 
             // Then
-            assertIsDisplayed(TestTags.taskTitle(context.id))
+            assertIsDisplayed("task-title-${context.id}")
         }
 
         @Test
@@ -109,10 +108,10 @@ class TaskDetailIntegrationTest {
             openDetail(context.id)
 
             // Then
-            assertTextEquals(TestTags.DETAIL_DESCRIPTION_LABEL, "Descripción")
-            assertTextEquals(TestTags.DETAIL_VALIDATED_LABEL, "Validado")
-            assertTextEquals(TestTags.statusTag(context.status), "Por hacer")
-            assertTextEquals(TestTags.priorityTag(context.priority), "Baja")
+            assertTextEquals("detail-description-label", "Descripción")
+            assertTextEquals("detail-validated-label", "Validado")
+            assertTextEquals("status-tag-${context.status.name}", "Por hacer")
+            assertTextEquals("priority-tag-${context.priority.name}", "Baja")
         }
     }
 
@@ -134,8 +133,8 @@ class TaskDetailIntegrationTest {
             openDetail(context.id)
 
             // Then
-            assertIsDisplayed(TestTags.VALID)
-            composeTestRule.onNodeWithTag(TestTags.NOT_VALID).assertDoesNotExist()
+            assertIsDisplayed("valid")
+            composeTestRule.onNodeWithTag("notValid").assertDoesNotExist()
         }
 
         @Test
@@ -153,8 +152,8 @@ class TaskDetailIntegrationTest {
             openDetail(context.id)
 
             // Then
-            assertIsDisplayed(TestTags.NOT_VALID)
-            composeTestRule.onNodeWithTag(TestTags.VALID).assertDoesNotExist()
+            assertIsDisplayed("notValid")
+            composeTestRule.onNodeWithTag("valid").assertDoesNotExist()
         }
     }
 
@@ -175,11 +174,11 @@ class TaskDetailIntegrationTest {
             launchApp()
 
             // When
-            runAsyncAction { onNodeWithTag(TestTags.infoButton(context.id)).performClick() }
+            runAsyncAction { onNodeWithTag("info-button-${context.id}").performClick() }
 
             // Then
-            assertTextEquals(TestTags.LOAD_ERROR, failureCase.expectedLoadError)
-            assertIsNotDisplayed(TestTags.DESCRIPTION)
+            assertTextEquals("load-error", failureCase.expectedLoadError)
+            assertIsNotDisplayed("description")
         }
 
         companion object {
@@ -209,11 +208,11 @@ class TaskDetailIntegrationTest {
             openDetail(context.id)
 
             // Then
-            assertTextEquals(TestTags.DESCRIPTION, context.description.toString())
-            assertIsDisplayed(TestTags.statusTag(context.status))
-            assertIsDisplayed(TestTags.priorityTag(context.priority))
-            assertIsDisplayed(TestTags.NOT_VALID)
-            composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertDoesNotExist()
+            assertTextEquals("description", context.description.toString())
+            assertIsDisplayed("status-tag-${context.status.name}")
+            assertIsDisplayed("priority-tag-${context.priority.name}")
+            assertIsDisplayed("notValid")
+            composeTestRule.onNodeWithTag("load-error").assertDoesNotExist()
         }
 
         companion object {

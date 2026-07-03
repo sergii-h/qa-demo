@@ -10,7 +10,6 @@ import com.example.demo.testing.RecordingLocalizedContent
 import com.example.demo.testing.TaskFixtures
 import com.example.demo.testing.assertHasTranslations
 import com.example.demo.testing.runAsyncAction
-import com.example.demo.ui.TestTags
 import com.example.demo.ui.theme.DemoTheme
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -75,7 +74,7 @@ class TaskFormScreenEditTranslationTest(
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("edit-task-title-input").assertIsDisplayed()
         assertHasTranslations(recorded, languageTag, context)
     }
 

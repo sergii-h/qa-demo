@@ -6,7 +6,6 @@ import androidx.compose.ui.test.performClick
 import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
 import com.example.demo.locale.AppLocale
-import com.example.demo.ui.TestTags
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,16 +33,16 @@ class LanguageSelectionIntegrationTests : IntegrationTestBase() {
         launchApp()
 
         // Then
-        assertIsDisplayed(TestTags.LANGUAGE_SWITCHER)
+        assertIsDisplayed("language-switcher")
 
         // When
         runAsyncAction {
-            onNodeWithTag(TestTags.LANGUAGE_SWITCHER).performClick()
+            onNodeWithTag("language-switcher").performClick()
         }
 
         // Then
-        assertIsDisplayed(TestTags.LANGUAGE_OPTION_EN)
-        assertIsDisplayed(TestTags.LANGUAGE_OPTION_ES)
+        assertIsDisplayed("language-option-en")
+        assertIsDisplayed("language-option-es")
     }
 
     @Test
@@ -53,13 +52,13 @@ class LanguageSelectionIntegrationTests : IntegrationTestBase() {
         launchApp()
 
         switchLanguage(LanguageOption.ES)
-        assertTextEquals(TestTags.PAGE_TITLE, "Tareas")
+        assertTextEquals("page-title", "Tareas")
 
         // When
         mockServer.enqueueGetTasks()
         switchLanguage(LanguageOption.EN)
 
         // Then
-        assertTextEquals(TestTags.PAGE_TITLE, "Tasks")
+        assertTextEquals("page-title", "Tasks")
     }
 }

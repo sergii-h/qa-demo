@@ -16,7 +16,6 @@ import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
 import com.example.demo.integration.support.DeleteFailure
 import com.example.demo.integration.support.GetTasksFailure
-import com.example.demo.ui.TestTags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,7 +29,7 @@ class TaskListIntegrationTest {
 
         protected fun pullToRefresh() {
             runAsyncAction {
-                onNodeWithTag(TestTags.TASK_LIST).performTouchInput {
+                onNodeWithTag("task-list").performTouchInput {
                     swipeDown(
                         startY = top + height * 0.05f,
                         endY = top + height * 0.95f,
@@ -38,7 +37,7 @@ class TaskListIntegrationTest {
                     )
                 }
             }
-            assertIsNotDisplayed(TestTags.REFRESHING)
+            assertIsNotDisplayed("refreshing")
         }
 
         protected fun assertTaskListHasSize(expectedSize: Int) {
@@ -48,22 +47,22 @@ class TaskListIntegrationTest {
         }
 
         protected fun clickDeleteItem(id: String) {
-            runAsyncAction { onNodeWithTag(TestTags.deleteButton(id)).performClick() }
+            runAsyncAction { onNodeWithTag("delete-button-${id}").performClick() }
         }
 
         protected fun openCreateForm() {
-            runAsyncAction { onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick() }
-            assertIsDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
+            runAsyncAction { onNodeWithTag("add-task-button").performClick() }
+            assertIsDisplayed("create-task-title-input")
         }
 
         protected fun openDetailForm(taskId: String) {
-            runAsyncAction { onNodeWithTag(TestTags.infoButton(taskId)).performClick() }
-            assertIsDisplayed(TestTags.DESCRIPTION)
+            runAsyncAction { onNodeWithTag("info-button-${taskId}").performClick() }
+            assertIsDisplayed("description")
         }
 
         protected fun openEditForm(taskId: String) {
-            runAsyncAction { onNodeWithTag(TestTags.editButton(taskId)).performClick() }
-            assertIsDisplayed(TestTags.EDIT_TASK_TITLE_INPUT)
+            runAsyncAction { onNodeWithTag("edit-button-${taskId}").performClick() }
+            assertIsDisplayed("edit-task-title-input")
         }
 
         private val taskTitleMatcher = SemanticsMatcher("task-title prefix") { node ->
@@ -98,10 +97,10 @@ class TaskListIntegrationTest {
             // Then
             assertThat(mockServer.getTasksRequestCount).isEqualTo(1)
             assertTaskListHasSize(2)
-            assertIsDisplayed(TestTags.taskTitle(firstContext.id))
-            assertIsDisplayed(TestTags.taskTitle(secondContext.id))
-            assertTextEquals(TestTags.taskTitle(firstContext.id), firstContext.title)
-            assertTextEquals(TestTags.taskTitle(secondContext.id), secondContext.title)
+            assertIsDisplayed("task-title-${firstContext.id}")
+            assertIsDisplayed("task-title-${secondContext.id}")
+            assertTextEquals("task-title-${firstContext.id}", firstContext.title)
+            assertTextEquals("task-title-${secondContext.id}", secondContext.title)
         }
 
         @Test
@@ -122,21 +121,21 @@ class TaskListIntegrationTest {
 
             // Then
             assertTaskListHasSize(3)
-            assertIsDisplayed(TestTags.statusTag(firstContext.status))
-            assertIsDisplayed(TestTags.priorityTag(firstContext.priority))
-            assertIsDisplayed(TestTags.statusTag(secondContext.status))
-            assertIsDisplayed(TestTags.priorityTag(secondContext.priority))
-            assertIsDisplayed(TestTags.statusTag(thirdContext.status))
-            assertIsDisplayed(TestTags.priorityTag(thirdContext.priority))
-            composeTestRule.onNodeWithTag(TestTags.infoButton(firstContext.id)).assertIsDisplayed()
-            composeTestRule.onNodeWithTag(TestTags.editButton(firstContext.id)).assertIsDisplayed()
-            composeTestRule.onNodeWithTag(TestTags.deleteButton(firstContext.id)).assertIsDisplayed()
-            assertIsDisplayed(TestTags.infoButton(secondContext.id))
-            assertIsDisplayed(TestTags.editButton(secondContext.id))
-            assertIsDisplayed(TestTags.deleteButton(secondContext.id))
-            assertIsDisplayed(TestTags.infoButton(thirdContext.id))
-            assertIsDisplayed(TestTags.editButton(thirdContext.id))
-            assertIsDisplayed(TestTags.deleteButton(thirdContext.id))
+            assertIsDisplayed("status-tag-${firstContext.status.name}")
+            assertIsDisplayed("priority-tag-${firstContext.priority.name}")
+            assertIsDisplayed("status-tag-${secondContext.status.name}")
+            assertIsDisplayed("priority-tag-${secondContext.priority.name}")
+            assertIsDisplayed("status-tag-${thirdContext.status.name}")
+            assertIsDisplayed("priority-tag-${thirdContext.priority.name}")
+            composeTestRule.onNodeWithTag("info-button-${firstContext.id}").assertIsDisplayed()
+            composeTestRule.onNodeWithTag("edit-button-${firstContext.id}").assertIsDisplayed()
+            composeTestRule.onNodeWithTag("delete-button-${firstContext.id}").assertIsDisplayed()
+            assertIsDisplayed("info-button-${secondContext.id}")
+            assertIsDisplayed("edit-button-${secondContext.id}")
+            assertIsDisplayed("delete-button-${secondContext.id}")
+            assertIsDisplayed("info-button-${thirdContext.id}")
+            assertIsDisplayed("edit-button-${thirdContext.id}")
+            assertIsDisplayed("delete-button-${thirdContext.id}")
         }
 
         @Test
@@ -149,8 +148,8 @@ class TaskListIntegrationTest {
 
             // Then
             assertTaskListHasSize(0)
-            assertIsDisplayed(TestTags.EMPTY_TASKS)
-            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+            assertIsDisplayed("empty-tasks")
+            assertIsDisplayed("add-task-button")
         }
 
         @Test
@@ -165,7 +164,7 @@ class TaskListIntegrationTest {
             openCreateForm()
 
             // Then
-            assertIsDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
+            assertIsDisplayed("create-task-title-input")
         }
 
         @Test
@@ -183,7 +182,7 @@ class TaskListIntegrationTest {
             openDetailForm(context.id)
 
             // Then
-            assertIsDisplayed(TestTags.DESCRIPTION)
+            assertIsDisplayed("description")
         }
 
         @Test
@@ -200,7 +199,7 @@ class TaskListIntegrationTest {
             openEditForm(context.id)
 
             // Then
-            assertIsDisplayed(TestTags.EDIT_TASK_TITLE_INPUT)
+            assertIsDisplayed("edit-task-title-input")
         }
 
         @Test
@@ -216,9 +215,9 @@ class TaskListIntegrationTest {
 
             // Then
             assertTaskListHasSize(1)
-            assertTextEquals(TestTags.PAGE_TITLE, "Tareas")
-            assertTextEquals(TestTags.statusTag(context.status), "Por hacer")
-            assertTextEquals(TestTags.priorityTag(context.priority), "Baja")
+            assertTextEquals("page-title", "Tareas")
+            assertTextEquals("status-tag-${context.status.name}", "Por hacer")
+            assertTextEquals("priority-tag-${context.priority.name}", "Baja")
         }
     }
 
@@ -235,7 +234,7 @@ class TaskListIntegrationTest {
             launchApp()
 
             assertTaskListHasSize(1)
-            assertIsDisplayed(TestTags.taskTitle(firstContext.id))
+            assertIsDisplayed("task-title-${firstContext.id}")
             mockServer.enqueueGetTasks(
                 firstContext.createTaskResponse(),
                 secondContext.createTaskResponse(),
@@ -246,8 +245,8 @@ class TaskListIntegrationTest {
 
             // Then
             assertTaskListHasSize(2)
-            assertIsDisplayed(TestTags.taskTitle(firstContext.id))
-            assertIsDisplayed(TestTags.taskTitle(secondContext.id))
+            assertIsDisplayed("task-title-${firstContext.id}")
+            assertIsDisplayed("task-title-${secondContext.id}")
         }
 
         @Test
@@ -259,7 +258,7 @@ class TaskListIntegrationTest {
             launchApp()
 
             assertTaskListHasSize(1)
-            assertIsDisplayed(TestTags.taskTitle(context.id))
+            assertIsDisplayed("task-title-${context.id}")
             mockServer.enqueueGetTasks(context.createTaskResponse())
 
             // When
@@ -267,7 +266,7 @@ class TaskListIntegrationTest {
 
             // Then
             assertTaskListHasSize(1)
-            assertIsDisplayed(TestTags.taskTitle(context.id))
+            assertIsDisplayed("task-title-${context.id}")
         }
 
         @Test
@@ -277,8 +276,8 @@ class TaskListIntegrationTest {
             launchApp()
 
             assertTaskListHasSize(0)
-            assertIsDisplayed(TestTags.EMPTY_TASKS)
-            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+            assertIsDisplayed("empty-tasks")
+            assertIsDisplayed("add-task-button")
             mockServer.enqueueGetTasks()
 
             // When
@@ -286,8 +285,8 @@ class TaskListIntegrationTest {
 
             // Then
             assertTaskListHasSize(0)
-            assertIsDisplayed(TestTags.EMPTY_TASKS)
-            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+            assertIsDisplayed("empty-tasks")
+            assertIsDisplayed("add-task-button")
         }
 
         @Test
@@ -303,8 +302,8 @@ class TaskListIntegrationTest {
             launchApp()
 
             assertTaskListHasSize(2)
-            assertIsDisplayed(TestTags.taskTitle(firstContext.id))
-            assertIsDisplayed(TestTags.taskTitle(secondContext.id))
+            assertIsDisplayed("task-title-${firstContext.id}")
+            assertIsDisplayed("task-title-${secondContext.id}")
             mockServer.enqueueGetTasksError(500)
 
             // When
@@ -312,9 +311,9 @@ class TaskListIntegrationTest {
 
             // Then
             assertTaskListHasSize(2)
-            assertIsDisplayed(TestTags.taskTitle(firstContext.id))
-            assertIsDisplayed(TestTags.taskTitle(secondContext.id))
-            assertIsDisplayed(TestTags.ERROR_SNACKBAR)
+            assertIsDisplayed("task-title-${firstContext.id}")
+            assertIsDisplayed("task-title-${secondContext.id}")
+            assertIsDisplayed("error-snackbar")
         }
     }
 
@@ -342,7 +341,7 @@ class TaskListIntegrationTest {
             waitUntilCondition { mockServer.deletedTaskIds.contains(deleteContext.id) }
             assertThat(mockServer.deletedTaskIds).containsExactly(deleteContext.id)
             assertTaskListHasSize(1)
-            assertIsDisplayed(TestTags.taskTitle(keepContext.id))
+            assertIsDisplayed("task-title-${keepContext.id}")
             assertThat(mockServer.getTasksRequestCount).isEqualTo(1)
         }
 
@@ -364,14 +363,14 @@ class TaskListIntegrationTest {
             // When
             clickDeleteItem(deleteContext.id)
             waitUntilCondition { mockServer.deletedTaskIds.contains(deleteContext.id) }
-            assertIsDisplayed(TestTags.ERROR_SNACKBAR)
+            assertIsDisplayed("error-snackbar")
 
             // And
             clickDeleteItem(deleteContext.id)
 
             // Then
             assertTaskListHasSize(1)
-            assertIsDisplayed(TestTags.taskTitle(keepContext.id))
+            assertIsDisplayed("task-title-${keepContext.id}")
         }
     }
 
@@ -387,14 +386,14 @@ class TaskListIntegrationTest {
             launchApp()
 
             // Then
-            assertIsDisplayed(TestTags.EMPTY_TASKS)
-            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+            assertIsDisplayed("empty-tasks")
+            assertIsDisplayed("add-task-button")
 
             // When
             openCreateForm()
 
             // Then
-            assertIsDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
+            assertIsDisplayed("create-task-title-input")
         }
 
         companion object {
@@ -429,9 +428,9 @@ class TaskListIntegrationTest {
             waitUntilCondition { mockServer.deletedTaskIds.contains(deleteContext.id) }
             assertThat(mockServer.deletedTaskIds).containsExactly(deleteContext.id)
             assertTaskListHasSize(2)
-            assertIsDisplayed(TestTags.taskTitle(deleteContext.id))
-            assertIsDisplayed(TestTags.taskTitle(keepContext.id))
-            assertIsDisplayed(TestTags.ERROR_SNACKBAR)
+            assertIsDisplayed("task-title-${deleteContext.id}")
+            assertIsDisplayed("task-title-${keepContext.id}")
+            assertIsDisplayed("error-snackbar")
         }
 
         companion object {

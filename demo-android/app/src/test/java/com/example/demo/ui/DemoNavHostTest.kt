@@ -44,16 +44,16 @@ class DemoNavHostTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("language-switcher").assertIsDisplayed()
 
         // When
         composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
-            onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick()
+            onNodeWithTag("add-task-button").performClick()
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.MODAL_TITLE).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("modal-title").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("create-task-title-input").assertIsDisplayed()
     }
 
     @Test
@@ -72,13 +72,13 @@ class DemoNavHostTest {
 
         // When
         composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
-            onNodeWithTag(TestTags.editButton("task-1")).performClick()
+            onNodeWithTag("edit-button-${"task-1"}").performClick()
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.MODAL_TITLE).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("edit-task-title-input").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("modal-title").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("save-button").performScrollTo().assertIsDisplayed()
     }
 
     @Test
@@ -98,11 +98,11 @@ class DemoNavHostTest {
 
         // When
         composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
-            onNodeWithTag(TestTags.infoButton("task-1")).performClick()
+            onNodeWithTag("info-button-${"task-1"}").performClick()
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskFixtures.sampleTask.priority)).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("description").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("priority-tag-${TaskFixtures.sampleTask.priority.name}").assertIsDisplayed()
     }
 }

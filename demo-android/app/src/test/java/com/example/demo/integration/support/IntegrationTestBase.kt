@@ -15,7 +15,6 @@ import com.example.demo.testing.DemoComposeTestTheme
 import com.example.demo.testing.MainDispatcherRule
 import com.example.demo.testing.runAsyncAction
 import com.example.demo.ui.DemoNavHost
-import com.example.demo.ui.TestTags
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Before
@@ -66,15 +65,15 @@ abstract class IntegrationTestBase {
                 }
             }
         }
-        assertIsNotDisplayed(TestTags.LOADING_SPINNER)
+        assertIsNotDisplayed("loading-spinner")
     }
 
     protected fun switchLanguage(languageOption: LanguageOption) {
         runAsyncAction {
-            onNodeWithTag(TestTags.LANGUAGE_SWITCHER).performClick()
+            onNodeWithTag("language-switcher").performClick()
             onNodeWithTag(languageOption.testTag).performClick()
         }
-        assertIsNotDisplayed(TestTags.LOADING_SPINNER)
+        assertIsNotDisplayed("loading-spinner")
     }
 
     fun assertTextEquals(testTag: String, expectedText: String) {

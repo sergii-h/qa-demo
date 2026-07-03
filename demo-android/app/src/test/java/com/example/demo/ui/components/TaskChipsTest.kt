@@ -6,7 +6,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
 import com.example.demo.testing.DemoComposeTestTheme
-import com.example.demo.ui.TestTags
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,7 +29,7 @@ class StatusChipDisplayTest(
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.statusTag(status)).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("status-tag-${status.name}").assertIsDisplayed()
     }
 
     companion object {
@@ -58,7 +57,7 @@ class PriorityChipDisplayTest(
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.priorityTag(priority)).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("priority-tag-${priority.name}").assertIsDisplayed()
     }
 
     companion object {

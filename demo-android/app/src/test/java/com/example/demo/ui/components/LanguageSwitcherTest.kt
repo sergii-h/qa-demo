@@ -7,7 +7,6 @@ import androidx.compose.ui.test.performClick
 import com.example.demo.locale.AppLocale
 import com.example.demo.testing.AppLocaleRule
 import com.example.demo.testing.DemoComposeTestTheme
-import com.example.demo.ui.TestTags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -46,7 +45,7 @@ class LanguageSwitcherDisplayTest(
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("language-switcher").assertIsDisplayed()
     }
 
     companion object {
@@ -80,11 +79,11 @@ class LanguageSwitcherTest {
         }
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).performClick()
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_OPTION_ES).performClick()
+        composeTestRule.onNodeWithTag("language-switcher").performClick()
+        composeTestRule.onNodeWithTag("language-option-es").performClick()
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("language-switcher").assertIsDisplayed()
         assertThat(AppLocale.languageTag.value).isEqualTo(AppLocale.SPANISH)
     }
 
@@ -99,8 +98,8 @@ class LanguageSwitcherTest {
         }
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).performClick()
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_OPTION_EN).performClick()
+        composeTestRule.onNodeWithTag("language-switcher").performClick()
+        composeTestRule.onNodeWithTag("language-option-en").performClick()
 
         // Then
         assertThat(AppLocale.languageTag.value).isEqualTo(AppLocale.ENGLISH)

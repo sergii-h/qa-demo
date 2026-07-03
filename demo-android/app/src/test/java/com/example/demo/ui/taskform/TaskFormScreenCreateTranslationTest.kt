@@ -9,7 +9,6 @@ import com.example.demo.testing.MainDispatcherRule
 import com.example.demo.testing.RecordingLocalizedContent
 import com.example.demo.testing.assertHasTranslations
 import com.example.demo.testing.runAsyncAction
-import com.example.demo.ui.TestTags
 import com.example.demo.ui.theme.DemoTheme
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -68,7 +67,7 @@ class TaskFormScreenCreateTranslationTest(
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("create-task-title-input").assertIsDisplayed()
         assertHasTranslations(recorded, languageTag, context)
     }
 

@@ -11,7 +11,6 @@ import com.example.demo.testing.HttpExceptionFactory
 import com.example.demo.testing.MainDispatcherRule
 import com.example.demo.testing.TaskFixtures
 import com.example.demo.testing.runAsyncAction
-import com.example.demo.ui.TestTags
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,10 +51,10 @@ class TaskDetailScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.MODAL_TITLE).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.statusTag(TaskFixtures.sampleTask.status)).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.priorityTag(TaskFixtures.sampleTask.priority)).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.VALID).assertExists()
+        composeTestRule.onNodeWithTag("modal-title").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("status-tag-${TaskFixtures.sampleTask.status.name}").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("priority-tag-${TaskFixtures.sampleTask.priority.name}").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("valid").assertExists()
     }
 
     @Test
@@ -81,8 +80,8 @@ class TaskDetailScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.CREATED_DATE).assertTextEquals("N/A")
-        composeTestRule.onNodeWithTag(TestTags.UPDATED_DATE).assertTextEquals("N/A")
+        composeTestRule.onNodeWithTag("created-date").assertTextEquals("N/A")
+        composeTestRule.onNodeWithTag("updated-date").assertTextEquals("N/A")
     }
 
     @Test
@@ -108,7 +107,7 @@ class TaskDetailScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.CREATED_DATE).assertTextEquals(invalidDate)
+        composeTestRule.onNodeWithTag("created-date").assertTextEquals(invalidDate)
     }
 
     @Test
@@ -131,7 +130,7 @@ class TaskDetailScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("load-error").assertIsDisplayed()
     }
 
     @Test
@@ -154,8 +153,8 @@ class TaskDetailScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.NOT_VALID).assertExists()
-        composeTestRule.onNodeWithTag(TestTags.VALID).assertDoesNotExist()
+        composeTestRule.onNodeWithTag("notValid").assertExists()
+        composeTestRule.onNodeWithTag("valid").assertDoesNotExist()
     }
 
     @Test
@@ -179,11 +178,11 @@ class TaskDetailScreenTest {
 
         // Then
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule.onAllNodesWithTag(TestTags.DETAIL_VALIDATED_LABEL, useUnmergedTree = true)
+            composeTestRule.onAllNodesWithTag("detail-validated-label", useUnmergedTree = true)
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
-        composeTestRule.onNodeWithTag(TestTags.DETAIL_VALIDATED_LABEL, useUnmergedTree = true)
+        composeTestRule.onNodeWithTag("detail-validated-label", useUnmergedTree = true)
             .assertTextEquals("Validated")
     }
 
@@ -207,7 +206,7 @@ class TaskDetailScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertTextEquals("No description")
+        composeTestRule.onNodeWithTag("description").assertTextEquals("No description")
     }
 
     @Test
@@ -230,8 +229,8 @@ class TaskDetailScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.DESCRIPTION).assertTextEquals(TaskFixtures.sampleTask.description!!)
-        composeTestRule.onNodeWithTag(TestTags.NOT_VALID).assertExists()
-        composeTestRule.onNodeWithTag(TestTags.LOAD_ERROR).assertDoesNotExist()
+        composeTestRule.onNodeWithTag("description").assertTextEquals(TaskFixtures.sampleTask.description!!)
+        composeTestRule.onNodeWithTag("notValid").assertExists()
+        composeTestRule.onNodeWithTag("load-error").assertDoesNotExist()
     }
 }
