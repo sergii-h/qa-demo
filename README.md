@@ -12,10 +12,11 @@
 [![JUnit5](https://img.shields.io/badge/Unit-JUnit5-green?logo=junit5)](https://junit.org/junit5/)
 [![Selenide](https://img.shields.io/badge/E2E-Selenide-blue)](https://selenide.org/)
 [![Playwright](https://img.shields.io/badge/E2E-Playwright-green?logo=playwright)](https://playwright.dev/)
+[![Maestro](https://img.shields.io/badge/E2E-Maestro-purple)](https://maestro.mobile.dev/)
 [![Python](https://img.shields.io/badge/E2E-Python%203.12-blue?logo=python)](https://www.python.org/)
 [![Coverage](https://img.shields.io/badge/Coverage-90%25-brightgreen)](doc/testing-guide.md)
-<!-- When adding a new E2E framework: add a badge here, a sub-bullet in Tech Stack > Testing Frameworks,
-     a new #### section under Running Tests > E2E Tests, and replace the matching placeholder in Project Structure -->
+<!-- When adding a new E2E framework: add a badge, list it under Web E2E or Mobile E2E in Tech Stack and CI/CD,
+     link it from Running Tests > E2E Tests, and add it to Project Structure -->
 
 [![Testing Pyramid](https://img.shields.io/badge/Strategy-Testing%20Pyramid-blue)](doc/testing-guide.md)
 [![Shift-Left](https://img.shields.io/badge/Methodology-Shift--Left-blue)](doc/testing-guide.md)
@@ -65,7 +66,8 @@ A full-stack Task Management app used as a testing pyramid demo. The domain is i
 | Unit | JUnit5 + Mockito (BE) · Vitest 4 (FE) · JUnit4 + MockK + Robolectric (Android) · Jest (React Native) |
 | Integration | JUnit5 + TestContainers (BE) · Vitest 4 (FE) |
 | Contract | Pact — HTTP (FE↔BE + Android↔BE + React Native↔BE) + Kafka message (notification-service↔BE) |
-| E2E | Selenide + JUnit5 + Selenium Grid (Java) · Playwright + TypeScript · Playwright + Python · Compose UI Test (Android) |
+| Web E2E | Playwright + TypeScript · Playwright + Python · Selenide + JUnit5 + Selenium Grid |
+| Mobile E2E | Compose UI Test (Android) · Maestro + TypeScript (React Native — Android & iOS) |
 | Mutation | PiTest (BE) · Stryker (FE, on-demand) |
 | Performance | k6 |
 | Security | CodeQL (SAST) · Dependabot alerts (SCA) · GitHub secret scanning & push protection (platform) |
@@ -101,13 +103,16 @@ A full-stack Task Management app used as a testing pyramid demo. The domain is i
 
 ### E2E Test Suites
 
-Each E2E framework under `e2e/` follows the same three-suite split regardless of language or tool:
+Each E2E stack follows the same three-suite split regardless of language or tool:
 
 | Suite | Tag | Purpose | When to run |
 |---|---|---|---|
-| Mocked BE | *(no tag)* | Browser-level user flows with mocked backend | Every CI run |
-| Accessibility | `@accessibility` | axe-core scans for WCAG violations on key UI states | Every CI run |
+| Mocked BE | *(no tag)* | User flows with mocked backend (WireMock) | Every CI run |
+| Accessibility | `@accessibility` | axe-core (web), Compose UI accessibility checks (Android), or Maestro assertions (React Native) on key UI states | Every CI run |
 | UAT | `@uat` | Single smoke test against the real running app | Every CI run |
+
+**Web** (`e2e/`): Playwright TypeScript · Playwright Python · Selenide  
+**Mobile**: Compose UI Test in [`demo-android/app/src/androidTest/`](demo-android/README.md#e2e-tests-instrumented-compose-ui-test) · Maestro in [`e2e/maestro/`](e2e/maestro/README.md)
 
 The UAT suite is intentionally one test (the most critical happy path). Business logic is already covered by the layers below; UAT exists only to confirm all services are wired together correctly in a real environment.
 
@@ -129,8 +134,9 @@ GitHub Actions validates every change — see [Actions](https://github.com/sergi
 | `pact-notification` | `notification-service` consumer contracts, events provider verify, can-i-merge — push / PR to `master` |
 | `pact-android` | `demo-android` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
 | `pact-react-native` | `demo-react-native` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
-| `e2e` | Web E2E — Playwright (TypeScript + Python), Selenide — mocked BE, accessibility, and UAT suites — push / PR to `master`, path-filtered |
-| `e2e-reports` | Publish Allure and Playwright reports to GitHub Pages after all web and Android E2E workflows finish |
+| `e2e` | **Web E2E** — Playwright (TypeScript), Playwright (Python), Selenide (JUnit5 + Selenium Grid) — mocked BE, accessibility, and UAT suites — push / PR to `master`, path-filtered |
+| `android-e2e`, `react-native-e2e` | **Mobile E2E** — Compose UI (Android), Maestro (React Native — Android + iOS) — mocked BE, accessibility, and UAT suites — push / PR to `master`, path-filtered |
+| `e2e-reports` | Publish Allure and Playwright reports to GitHub Pages after web (`e2e`) and Android Compose (`android-e2e`) workflows finish |
 | `allure-pages` | Allure reports landing page (`master`) |
 | `allure-pages-cleanup` | Remove PR report folder (Allure + Playwright HTML) from GitHub Pages when a PR closes |
 | `codeql` | SAST — CodeQL analysis for Java and TypeScript (`master`); SARIF artifacts in workflow runs |
@@ -150,7 +156,11 @@ Raw Allure results, Playwright HTML reports (TypeScript), and Playwright trace a
 
 ## 🚀 Getting Started
 
-**Prerequisites:** JDK 21 · Maven 3.9+ · Node 22 (≥22.12.0) · Python 3.12+ (Playwright Python E2E) · Docker · k6 (performance tests only)
+**Prerequisites:** JDK 21 · Maven 3.9+ · Node 22 (≥22.12.0) · Docker · k6 (performance tests only)
+
+**Web E2E:** Python 3.12+ (Playwright Python)
+
+**Mobile E2E:** Android SDK (Compose UI + Maestro on Android) · [Maestro CLI](https://maestro.mobile.dev/docs/getting-started/installing-maestro) · Xcode (Maestro on iOS)
 
 One-time setup:
 
@@ -209,9 +219,11 @@ See [doc/pact.md](doc/pact.md) for the step-by-step manual run and broker notes.
 
 ### E2E Tests
 
-Each E2E framework has three suites: **Mocked BE** (user flows), **Accessibility** (axe-core), **UAT** (smoke against the real app).
+Each stack has three suites: **Mocked BE** (user flows), **Accessibility**, **UAT** (smoke against the real app).
 
-See [Playwright TypeScript E2E README](e2e/playwright-typescript/README.md) · [Playwright Python E2E README](e2e/playwright-python/README.md) · [Selenide E2E README](e2e/selenide-junit5-selenium-grid/README.md) for setup and run commands.
+**Web E2E** — [Playwright TypeScript](e2e/playwright-typescript/README.md) · [Playwright Python](e2e/playwright-python/README.md) · [Selenide](e2e/selenide-junit5-selenium-grid/README.md)
+
+**Mobile E2E** — [Compose UI (Android)](demo-android/README.md#e2e-tests-instrumented-compose-ui-test) · [Maestro React Native](e2e/maestro/README.md) (Android & iOS)
 
 ### Performance Tests (k6)
 
@@ -242,10 +254,10 @@ See [Performance README](performance/README.md) for all scenarios, thresholds, a
 |---|---|
 | [`demo-service/`](demo-service/README.md) | SpringBoot backend (Java 21 · MongoDB · Kafka) |
 | [`demo-interface/`](demo-interface/README.md) | React frontend (Vite · TypeScript) |
-| [`demo-android/`](demo-android/README.md) | Android app (Kotlin · Jetpack Compose) |
+| [`demo-android/`](demo-android/README.md) | Android app (Kotlin · Jetpack Compose) — includes **Compose UI E2E** in `app/src/androidTest/` |
 | [`demo-react-native/`](demo-react-native/README.md) | React Native app (Expo · TypeScript) |
 | `notification-service/` | Kafka consumer (Java 21) — Pact message consumer |
-| `e2e/` | Web E2E suites — [Playwright TypeScript](e2e/playwright-typescript/README.md) · [Playwright Python](e2e/playwright-python/README.md) · [Selenide](e2e/selenide-junit5-selenium-grid/README.md) |
+| `e2e/` | **Web E2E** — [Playwright TypeScript](e2e/playwright-typescript/README.md) · [Playwright Python](e2e/playwright-python/README.md) · [Selenide](e2e/selenide-junit5-selenium-grid/README.md) · **Mobile E2E** — [Maestro React Native](e2e/maestro/README.md) |
 | `performance/` | k6 load & spike scripts |
 | `docker/` | Docker Compose configs and Dockerfiles |
 | `.github/` | CI workflows · reusable actions · Pact scripts |
@@ -262,10 +274,12 @@ See [Performance README](performance/README.md) for all scenarios, thresholds, a
 | [Pact Guide](doc/pact.md) | Full Pact pipeline, step-by-step manual run, broker notes |
 | [Backend README](demo-service/README.md) | Running backend unit, integration, and mutation tests |
 | [Frontend README](demo-interface/README.md) | Running frontend unit, integration, and mutation tests |
+| [Android README](demo-android/README.md) | Android unit, integration, Kover coverage, and Compose UI E2E tests |
 | [React Native README](demo-react-native/README.md) | Running React Native unit, integration, and Pact tests |
-| [Playwright TypeScript E2E README](e2e/playwright-typescript/README.md) | Playwright + TypeScript test suites, configuration, and run commands |
-| [Playwright Python E2E README](e2e/playwright-python/README.md) | Playwright + Python test suites, viewports, Allure and trace reports |
-| [Selenide E2E README](e2e/selenide-junit5-selenium-grid/README.md) | Selenide test suites, Selenium Grid Docker setup |
+| [Playwright TypeScript E2E README](e2e/playwright-typescript/README.md) | **Web E2E** — Playwright + TypeScript suites, configuration, and run commands |
+| [Playwright Python E2E README](e2e/playwright-python/README.md) | **Web E2E** — Playwright + Python suites, viewports, Allure and trace reports |
+| [Selenide E2E README](e2e/selenide-junit5-selenium-grid/README.md) | **Web E2E** — Selenide suites and Selenium Grid Docker setup |
+| [Maestro React Native E2E README](e2e/maestro/README.md) | **Mobile E2E** — Maestro suites, Android/iOS build & install, WireMock/UAT setup, Allure reports |
 | [Performance README](performance/README.md) | k6 scenarios and thresholds |
 | [ADR Index](doc/adr/README.md) | Architectural decisions with context and rationale |
 | [Backend Requirements](doc/requirements/back-end/README.md) | Epics and user stories |
