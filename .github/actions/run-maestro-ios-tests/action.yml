@@ -44,12 +44,7 @@ runs:
         MAESTRO_IOS_SIMULATOR: ${{ inputs.ios-simulator-name }}
         MAESTRO_CLI_NO_ANALYTICS: 'true'
         MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: 'true'
-      run: |
-        set -euo pipefail
-        bash e2e/maestro/scripts/build-ios-app.sh "${{ inputs.api-base-url }}"
-        bash e2e/maestro/scripts/install-ios-app.sh
-        cd e2e/maestro
-        ALLURE_RESULTS_DIR="$GITHUB_WORKSPACE/e2e/maestro/allure-results" npm run "${{ inputs.npm-script }}"
+      run: bash e2e/maestro/scripts/run-ios-maestro-ci.sh "${{ inputs.api-base-url }}" "${{ inputs.npm-script }}"
 
     - name: Upload allure results
       if: ${{ !cancelled() }}

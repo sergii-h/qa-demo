@@ -165,14 +165,28 @@ resolve_ios_simulator_udid() {
     return 0
   fi
 
-  if [[ -n "${MAESTRO_IOS_SIMULATOR:-}" ]]; then
+  local simulator_name="${MAESTRO_IOS_SIMULATOR:-}"
+  if [[ -z "$simulator_name" && -n "${GITHUB_ACTIONS:-}" ]]; then
+    simulator_name="iPhone 16"
+  fi
+
+  if [[ -n "$simulator_name" ]]; then
     local named_udid
-    named_udid="$(resolve_simulator_udid_by_name "$MAESTRO_IOS_SIMULATOR")"
+    named_udid="$(resolve_simulator_udid_by_name "$simulator_name")"
     if [[ -n "$named_udid" ]]; then
       echo "$named_udid"
       return 0
     fi
-    echo "Simulator not found: ${MAESTRO_IOS_SIMULATOR}" >&2
+    if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+      local fallback_udid
+      fallback_udid="$(resolve_default_iphone_simulator_udid)"
+      if [[ -n "$fallback_udid" ]]; then
+        echo "Preferred simulator '${simulator_name}' not found; using ${fallback_udid}." >&2
+        echo "$fallback_udid"
+        return 0
+      fi
+    fi
+    echo "Simulator not found: ${simulator_name}" >&2
     return 1
   fi
 
@@ -193,9 +207,18 @@ ensure_simulator_booted() {
     return 0
   fi
 
-  echo "Booting simulator ${udid}..."
+  echo "Booting simulator ${udid}..." >&2
   xcrun simctl boot "$udid" 2>/dev/null || true
-  open -a Simulator
+
+  if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+    xcrun simctl bootstatus "$udid" -b
+  else
+    open -a Simulator
+  fi
+}
+
+resolve_ios_simulator_destination_for_build() {
+  echo "generic/platform=iOS Simulator"
 }
 
 resolve_ios_simulator_destination() {

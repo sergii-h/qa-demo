@@ -63,14 +63,10 @@ fi
 echo "Building Release simulator app: scheme=${SCHEME}"
 echo "API_BASE_URL baked into bundle: $API_BASE_URL"
 
-SIMULATOR_DESTINATION="$(resolve_ios_simulator_destination)" || {
-  echo "Could not resolve an iOS Simulator destination." >&2
-  echo "Install Xcode simulators or set MAESTRO_IOS_SIMULATOR / MAESTRO_DEVICE." >&2
-  exit 1
-}
+SIMULATOR_DESTINATION="$(resolve_ios_simulator_destination_for_build)"
 echo "Xcode destination: ${SIMULATOR_DESTINATION}"
 
-xcodebuild \
+if ! xcodebuild \
   "-${XCODE_ARG_NAME}" "$XCODE_PATH" \
   -scheme "$SCHEME" \
   -configuration Release \
@@ -80,7 +76,11 @@ xcodebuild \
   ONLY_ACTIVE_ARCH=YES \
   CODE_SIGNING_ALLOWED=NO \
   COMPILER_INDEX_STORE_ENABLE=NO \
-  build
+  build; then
+  echo "xcodebuild failed (exit $?); scheme=${SCHEME} destination=${SIMULATOR_DESTINATION}" >&2
+  xcodebuild -showdestinations "-${XCODE_ARG_NAME}" "$XCODE_PATH" -scheme "$SCHEME" >&2 || true
+  exit 1
+fi
 
 APP_PATH="$(resolve_ios_app_path "$DERIVED_DATA" "$SCHEME")"
 if [[ -z "$APP_PATH" || ! -d "$APP_PATH" ]]; then
@@ -89,5 +89,5 @@ if [[ -z "$APP_PATH" || ! -d "$APP_PATH" ]]; then
 fi
 
 echo "$APP_PATH"
-echo "Install on a booted iOS Simulator:"
-echo "  npm run install:ios"
+echo "Install on a booted iOS Simulator:" >&2
+echo "  npm run install:ios" >&2

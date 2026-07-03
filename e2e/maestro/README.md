@@ -194,4 +194,6 @@ iOS jobs use `run-maestro-ios-tests` (`build-ios-app.sh` → `install-ios-app.sh
 
 Android CI invokes `run-android-maestro-ci.sh` as a single command inside `android-emulator-runner` (that action runs each line of a multiline `script:` in a separate shell, so shell variables do not persist across lines).
 
+iOS CI uses `run-ios-maestro-ci.sh` (build → install → npm test). The Xcode build uses `generic/platform=iOS Simulator` so it does not require a booted device; install boots an iPhone simulator (defaults to `iPhone 16` on GitHub Actions).
+
 GitHub-hosted macOS runners do not include Docker. iOS jobs use `macos-15-intel` so Colima can start a Linux VM (`start-e2e-env` runs `douglascamata/setup-docker-macos-action` on macOS). ARM runners (`macos-latest`) lack nested virtualization, so Colima cannot start there.
