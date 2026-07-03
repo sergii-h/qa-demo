@@ -1,7 +1,15 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
+import { AndroidConfig, ConfigPlugin, withAndroidManifest } from 'expo/config-plugins';
 
 const materialCommunityIconsFont =
   'node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf';
+
+const withCleartextTraffic: ConfigPlugin = (config) =>
+  withAndroidManifest(config, (config) => {
+    const application = AndroidConfig.Manifest.getMainApplicationOrThrow(config.modResults);
+    application.$['android:usesCleartextTraffic'] = 'true';
+    return config;
+  });
 
 export default ({ config }: ConfigContext): ExpoConfig => {
   const plugins = (config.plugins ?? []).filter((plugin) => plugin !== 'expo-font');
@@ -12,6 +20,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       fonts: [materialCommunityIconsFont],
     },
   ]);
+  plugins.push(withCleartextTraffic as unknown as (typeof plugins)[number]);
 
   return {
     ...config,
@@ -28,7 +37,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     android: {
       ...config.android,
-      usesCleartextTraffic: true,
     },
     plugins,
     extra: {

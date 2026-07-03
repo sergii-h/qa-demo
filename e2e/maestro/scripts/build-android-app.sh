@@ -17,7 +17,7 @@ verify_cleartext_manifest() {
     cat >&2 <<EOF
 AndroidManifest missing usesCleartextTraffic after expo prebuild.
 
-Expected android.usesCleartextTraffic in demo-react-native/app.config.ts.
+Expected withCleartextTraffic config plugin in demo-react-native/app.config.ts.
 EOF
     exit 1
   fi
