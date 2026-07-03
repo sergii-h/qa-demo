@@ -329,14 +329,14 @@ describe('TaskFormScreen', () => {
 
   it('should save task with selected status on create form', async () => {
     // Given
-    const { getByTestId, findByTestId, getAllByTestId } = renderWithProviders(
+    const { getByTestId, findByTestId } = renderWithProviders(
       <TaskFormScreen
         navigation={navigation as never}
         route={{ key: 'CreateTask', name: 'CreateTask', params: undefined } as never}
       />,
     );
 
-    fireEvent.press(getAllByTestId('right-icon-adornment')[0]);
+    fireEvent.press(getByTestId(`${TestTags.STATUS_DROPDOWN}-open`));
     fireEvent.press(await findByTestId(TestTags.statusDropdownOption(TaskStatus.IN_PROGRESS)));
     await waitFor(() => {
       expect(getByTestId(TestTags.STATUS_DROPDOWN)).toHaveDisplayValue('In Progress');
@@ -360,14 +360,14 @@ describe('TaskFormScreen', () => {
 
   it('should save task with selected priority on create form', async () => {
     // Given
-    const { getByTestId, findByTestId, getAllByTestId } = renderWithProviders(
+    const { getByTestId, findByTestId } = renderWithProviders(
       <TaskFormScreen
         navigation={navigation as never}
         route={{ key: 'CreateTask', name: 'CreateTask', params: undefined } as never}
       />,
     );
 
-    fireEvent.press(getAllByTestId('right-icon-adornment')[1]);
+    fireEvent.press(getByTestId(`${TestTags.PRIORITY_DROPDOWN}-open`));
     fireEvent.press(await findByTestId(TestTags.priorityDropdownOption(TaskPriority.HIGH)));
     await waitFor(() => {
       expect(getByTestId(TestTags.PRIORITY_DROPDOWN)).toHaveDisplayValue('High');

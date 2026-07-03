@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {View} from 'react-native';
+import {Pressable, View} from 'react-native';
 import {Menu, TextInput} from 'react-native-paper';
 
 interface EnumPickerProps<T extends string> {
@@ -30,20 +30,18 @@ export function EnumPicker<T extends string>({
         visible={visible}
         onDismiss={() => setVisible(false)}
         anchor={
-          <TextInput
-            label={label}
-            value={optionLabel(value)}
-            mode="outlined"
-            editable={false}
-            testID={testID}
-            right={
-              <TextInput.Icon
-                icon="menu-down"
-                onPress={openMenu}
+          <Pressable onPress={openMenu} testID={`${testID}-open`}>
+            <View pointerEvents="none">
+              <TextInput
+                label={label}
+                value={optionLabel(value)}
+                mode="outlined"
+                editable={false}
+                testID={testID}
+                right={<TextInput.Icon icon="menu-down" />}
               />
-            }
-            onPressIn={openMenu}
-          />
+            </View>
+          </Pressable>
         }
       >
         {options.map((option) => (

@@ -11,9 +11,7 @@ async function selectEnumOption(
   dropdownTestId: string,
   optionTestId: string,
 ) {
-  const adornmentIndex = dropdownTestId === TestTags.STATUS_DROPDOWN ? 0 : 1;
-  const adornments = screen.getAllByTestId('right-icon-adornment');
-  fireEvent.press(adornments[adornmentIndex]);
+  fireEvent.press(screen.getByTestId(`${dropdownTestId}-open`));
   fireEvent.press(await screen.findByTestId(optionTestId));
 }
 

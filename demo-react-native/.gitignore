@@ -1,5 +1,7 @@
 .expo/
 .expo-export-test/
+android/
+ios/
 dist/
 web-build/
 .stryker-tmp/

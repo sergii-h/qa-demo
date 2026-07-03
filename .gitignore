@@ -36,3 +36,5 @@ __pycache__/
 /cv/
 /e2e/playwright-python/test-results/
 /demo-android/.gradle-local/
+/e2e/maestro/allure-results/
+/e2e/maestro/.maestro-output/
