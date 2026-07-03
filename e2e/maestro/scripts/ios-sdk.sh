@@ -218,7 +218,13 @@ ensure_simulator_booted() {
 }
 
 resolve_ios_simulator_destination_for_build() {
-  echo "generic/platform=iOS Simulator"
+  local arch
+  case "$(uname -m)" in
+    arm64 | aarch64) arch="arm64" ;;
+    x86_64) arch="x86_64" ;;
+    *) arch="arm64" ;;
+  esac
+  echo "generic/platform=iOS Simulator,arch=${arch}"
 }
 
 resolve_ios_simulator_destination() {

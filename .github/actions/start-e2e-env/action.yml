@@ -17,12 +17,23 @@ inputs:
     description: Docker Hub token (required for frontend and full modes)
     required: false
     default: ''
+  wiremock-backend:
+    description: docker (default) or standalone (Java JAR — use for macOS ARM WireMock-only jobs without Docker)
+    required: false
+    default: 'docker'
 
 runs:
   using: composite
   steps:
+    - name: Set up Java for WireMock standalone
+      if: inputs.app-mode == 'wiremock' && inputs.wiremock-backend == 'standalone'
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '17'
+
     - name: Set up Docker on macOS
-      if: runner.os == 'macOS'
+      if: runner.os == 'macOS' && inputs.wiremock-backend != 'standalone'
       uses: douglascamata/setup-docker-macos-action@v1.1.0
       with:
         lima: v1.2.1
@@ -36,13 +47,19 @@ runs:
         password: ${{ inputs.docker-hub-token }}
 
     - name: Create shared Docker network
+      if: inputs.wiremock-backend != 'standalone'
       shell: bash
       run: docker network create qa-demo-e2e
 
-    - name: Start WireMock
-      if: inputs.app-mode == 'wiremock'
+    - name: Start WireMock (Docker)
+      if: inputs.app-mode == 'wiremock' && inputs.wiremock-backend == 'docker'
       shell: bash
       run: docker compose -f docker/docker-compose/run-application.yml up -d qa-demo-wiremock
+
+    - name: Start WireMock (standalone JAR)
+      if: inputs.app-mode == 'wiremock' && inputs.wiremock-backend == 'standalone'
+      shell: bash
+      run: bash docker/scripts/start-wiremock-standalone.sh
 
     - name: Wait for WireMock to be ready
       if: inputs.app-mode == 'wiremock'

@@ -5,7 +5,7 @@ on:
 
 jobs:
   run-tests:
-    runs-on: macos-15-intel
+    runs-on: macos-15
     timeout-minutes: 90
 
     steps:
@@ -15,6 +15,7 @@ jobs:
         uses: ./.github/actions/start-e2e-env
         with:
           app-mode: wiremock
+          wiremock-backend: standalone
 
       - name: Run Maestro React Native accessibility tests on iOS
         uses: ./.github/actions/run-maestro-ios-tests

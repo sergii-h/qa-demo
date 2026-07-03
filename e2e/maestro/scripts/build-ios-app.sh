@@ -29,6 +29,11 @@ cd "$APP_DIR"
 npm ci
 
 export API_BASE_URL
+export NODE_ENV=production
+
+if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+  unset CPLUS_INCLUDE_PATH C_INCLUDE_PATH CPPFLAGS || true
+fi
 
 echo "Running expo prebuild to sync native iOS project..."
 npx expo prebuild --platform ios --no-install
@@ -76,8 +81,10 @@ if ! xcodebuild \
   ONLY_ACTIVE_ARCH=YES \
   CODE_SIGNING_ALLOWED=NO \
   COMPILER_INDEX_STORE_ENABLE=NO \
-  build; then
-  echo "xcodebuild failed (exit $?); scheme=${SCHEME} destination=${SIMULATOR_DESTINATION}" >&2
+  build > /tmp/xcodebuild-maestro.log 2>&1; then
+  echo "xcodebuild failed; scheme=${SCHEME} destination=${SIMULATOR_DESTINATION}" >&2
+  tail -80 /tmp/xcodebuild-maestro.log >&2 || true
+  grep -E 'error:|fatal error:' /tmp/xcodebuild-maestro.log | tail -30 >&2 || true
   xcodebuild -showdestinations "-${XCODE_ARG_NAME}" "$XCODE_PATH" -scheme "$SCHEME" >&2 || true
   exit 1
 fi
