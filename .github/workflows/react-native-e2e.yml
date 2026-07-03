@@ -9,9 +9,9 @@ on:
       - 'docker/**'
       - 'e2e/maestro/**'
       - '.github/workflows/react-native-e2e.yml'
-      - '.github/workflows/maestro-react-native-e2e.yml'
-      - '.github/workflows/maestro-react-native-uat.yml'
-      - '.github/workflows/maestro-react-native-accessibility.yml'
+      - '.github/workflows/maestro-react-native-android-e2e.yml'
+      - '.github/workflows/maestro-react-native-android-uat.yml'
+      - '.github/workflows/maestro-react-native-android-accessibility.yml'
       - '.github/workflows/maestro-react-native-ios-e2e.yml'
       - '.github/workflows/maestro-react-native-ios-uat.yml'
       - '.github/workflows/maestro-react-native-ios-accessibility.yml'
@@ -24,9 +24,9 @@ on:
       - 'docker/**'
       - 'e2e/maestro/**'
       - '.github/workflows/react-native-e2e.yml'
-      - '.github/workflows/maestro-react-native-e2e.yml'
-      - '.github/workflows/maestro-react-native-uat.yml'
-      - '.github/workflows/maestro-react-native-accessibility.yml'
+      - '.github/workflows/maestro-react-native-android-e2e.yml'
+      - '.github/workflows/maestro-react-native-android-uat.yml'
+      - '.github/workflows/maestro-react-native-android-accessibility.yml'
       - '.github/workflows/maestro-react-native-ios-e2e.yml'
       - '.github/workflows/maestro-react-native-ios-uat.yml'
       - '.github/workflows/maestro-react-native-ios-accessibility.yml'
@@ -68,19 +68,19 @@ jobs:
         with:
           working-directory: e2e/maestro
 
-  maestro-react-native-e2e:
+  maestro-react-native-android-e2e:
     needs: audit-react-native-e2e-dependencies
-    uses: ./.github/workflows/maestro-react-native-e2e.yml
+    uses: ./.github/workflows/maestro-react-native-android-e2e.yml
     secrets: inherit
 
-  maestro-react-native-uat:
+  maestro-react-native-android-uat:
     needs: audit-react-native-e2e-dependencies
-    uses: ./.github/workflows/maestro-react-native-uat.yml
+    uses: ./.github/workflows/maestro-react-native-android-uat.yml
     secrets: inherit
 
-  maestro-react-native-accessibility:
+  maestro-react-native-android-accessibility:
     needs: audit-react-native-e2e-dependencies
-    uses: ./.github/workflows/maestro-react-native-accessibility.yml
+    uses: ./.github/workflows/maestro-react-native-android-accessibility.yml
     secrets: inherit
 
   maestro-react-native-ios-e2e:

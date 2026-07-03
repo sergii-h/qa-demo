@@ -187,7 +187,7 @@ Android and iOS Maestro jobs run from `.github/workflows/react-native-e2e.yml`.
 
 | Platform | Runner | Workflows |
 |----------|--------|-----------|
-| Android | `ubuntu-22.04` | `maestro-react-native-e2e.yml`, `maestro-react-native-uat.yml`, `maestro-react-native-accessibility.yml` |
+| Android | `ubuntu-22.04` | `maestro-react-native-android-e2e.yml`, `maestro-react-native-android-uat.yml`, `maestro-react-native-android-accessibility.yml` |
 | iOS | `macos-latest` | `maestro-react-native-ios-e2e.yml`, `maestro-react-native-ios-uat.yml`, `maestro-react-native-ios-accessibility.yml` |
 
 iOS jobs use `run-maestro-ios-tests` (`build-ios-app.sh` → `install-ios-app.sh` → npm test). API URLs use `http://localhost:…` on the simulator. CocoaPods runs inside `build-ios-app.sh` via `npx pod-install` — no separate pipeline step.

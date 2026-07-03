@@ -63,7 +63,7 @@ runs:
         disable-animations: true
         emulator-boot-timeout: 900
         script: |
-          set -euo pipefail
+          set -eu
           export REACT_NATIVE_ARCHITECTURES=x86_64
           APK_PATH=$(bash e2e/maestro/scripts/build-android-app.sh "${{ inputs.api-base-url }}")
           adb install -r "$APK_PATH"

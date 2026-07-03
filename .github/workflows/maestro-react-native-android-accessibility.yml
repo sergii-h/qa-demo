@@ -1,4 +1,4 @@
-name: Run accessibility tests (Maestro React Native — mocked BE)
+name: Run accessibility tests (Maestro React Native Android — mocked BE)
 
 on:
   workflow_call:
@@ -16,10 +16,10 @@ jobs:
         with:
           app-mode: wiremock
 
-      - name: Run Maestro React Native accessibility tests
+      - name: Run Maestro React Native accessibility tests on Android
         uses: ./.github/actions/run-maestro-tests
         with:
           npm-script: test:accessibility
           api-base-url: http://10.0.2.2:8085/v1/
-          test-label: Run Maestro React Native accessibility tests
-          artifact-name: allure-results-maestro-accessibility
+          test-label: Run Maestro React Native accessibility tests on Android
+          artifact-name: allure-results-maestro-android-accessibility
