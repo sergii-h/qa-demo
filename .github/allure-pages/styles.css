@@ -109,10 +109,6 @@ main {
   border-radius: 6px;
 }
 
-.test-run-logos img.logo-static--expo {
-  height: 22px;
-}
-
 .test-run-logos img.logo-static--ios {
   height: 22px;
 }

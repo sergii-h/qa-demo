@@ -15,13 +15,11 @@ const SELENIDE_LOGO = './assets/selenide-logo.png';
 const ALLURE_LOGO = './assets/allure-logo.png';
 const MAESTRO_LOGO = './assets/maestro-logo.png';
 const REACT_NATIVE_LOGO = './assets/react-native-logo.png';
-const EXPO_LOGO = './assets/expo-logo.png';
 const IOS_LOGO = './assets/ios-logo.png';
 
 const LOCAL_LOGO_ASSETS = {
   'maestro-logo': { className: 'logo-static--maestro', alt: 'Maestro' },
   'react-native-logo': { className: 'logo-static--react-native', alt: 'React Native' },
-  'expo-logo': { className: 'logo-static--expo', alt: 'Expo' },
   'ios-logo': { className: 'logo-static--ios', alt: 'iOS' },
 };
 
@@ -138,7 +136,6 @@ const TEST_RUNS = [
     subtitle: 'React Native app · release APK · Android emulator',
     headerLogos: [
       REACT_NATIVE_LOGO,
-      EXPO_LOGO,
       MAESTRO_LOGO,
       BADGES.android,
     ],
@@ -154,7 +151,6 @@ const TEST_RUNS = [
     subtitle: 'React Native app · release simulator build · iOS Simulator',
     headerLogos: [
       REACT_NATIVE_LOGO,
-      EXPO_LOGO,
       MAESTRO_LOGO,
       IOS_LOGO,
     ],
