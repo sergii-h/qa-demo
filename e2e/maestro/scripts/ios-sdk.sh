@@ -139,6 +139,26 @@ extract_simulator_udid() {
 
 resolve_simulator_udid_by_name() {
   local name="$1"
+  local line udid current_section=""
+
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^--\ iOS\ 18\. ]]; then
+      current_section="18"
+      continue
+    fi
+    if [[ "$line" =~ ^--\ iOS\ ]]; then
+      current_section=""
+      continue
+    fi
+    if [[ "$current_section" == "18" && "$line" == *"$name"* ]]; then
+      udid="$(echo "$line" | extract_simulator_udid)"
+      if [[ -n "$udid" ]]; then
+        echo "$udid"
+        return 0
+      fi
+    fi
+  done < <(xcrun simctl list devices available)
+
   xcrun simctl list devices available \
     | grep -F "$name" \
     | head -1 \
@@ -218,13 +238,12 @@ ensure_simulator_booted() {
 }
 
 resolve_ios_simulator_destination_for_build() {
-  local arch
-  case "$(uname -m)" in
-    arm64 | aarch64) arch="arm64" ;;
-    x86_64) arch="x86_64" ;;
-    *) arch="arm64" ;;
-  esac
-  echo "generic/platform=iOS Simulator,arch=${arch}"
+  local udid
+  udid="$(resolve_ios_simulator_udid)" || return 1
+  ensure_simulator_booted "$udid"
+  export MAESTRO_DEVICE="$udid"
+  echo "Using simulator ${udid} for Xcode build." >&2
+  echo "platform=iOS Simulator,id=${udid}"
 }
 
 resolve_ios_simulator_destination() {

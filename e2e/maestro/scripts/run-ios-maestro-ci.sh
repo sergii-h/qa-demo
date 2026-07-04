@@ -10,6 +10,10 @@ DERIVED_DATA="$IOS_DIR/build/maestro"
 # shellcheck source=e2e/maestro/scripts/ios-sdk.sh
 source "$REPO_ROOT/e2e/maestro/scripts/ios-sdk.sh"
 
+SIMULATOR_UDID="$(resolve_ios_simulator_udid)" || exit 1
+ensure_simulator_booted "$SIMULATOR_UDID"
+export MAESTRO_DEVICE="$SIMULATOR_UDID"
+
 bash "$REPO_ROOT/e2e/maestro/scripts/build-ios-app.sh" "$API_BASE_URL"
 
 SCHEME="$(basename "$(resolve_ios_project "$IOS_DIR")" .xcodeproj)"
