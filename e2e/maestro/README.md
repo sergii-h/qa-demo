@@ -181,6 +181,8 @@ The **Environment** section in Allure shows framework, suite, backend URL, app i
 npm run allure:serve
 ```
 
+On **push to `master`** and **pull requests**, Maestro Allure reports (including failure screenshots) are published to [GitHub Pages](https://sergii-h.github.io/qa-demo/) alongside web and Android Compose suites — see `maestro-android-*` and `maestro-ios-*` on the landing page.
+
 ## CI
 
 Android and iOS Maestro jobs run from `.github/workflows/react-native-e2e.yml`.

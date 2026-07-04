@@ -136,7 +136,7 @@ GitHub Actions validates every change — see [Actions](https://github.com/sergi
 | `pact-react-native` | `demo-react-native` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
 | `e2e` | **Web E2E** — Playwright (TypeScript), Playwright (Python), Selenide (JUnit5 + Selenium Grid) — mocked BE, accessibility, and UAT suites — push / PR to `master`, path-filtered |
 | `android-e2e`, `react-native-e2e` | **Mobile E2E** — Compose UI (Android), Maestro (React Native — Android + iOS) — mocked BE, accessibility, and UAT suites — push / PR to `master`, path-filtered |
-| `e2e-reports` | Publish Allure and Playwright reports to GitHub Pages after web (`e2e`) and Android Compose (`android-e2e`) workflows finish |
+| `e2e-reports` | Publish Allure and Playwright reports to GitHub Pages after web (`e2e`), Android Compose (`android-e2e`), and Maestro React Native (`react-native-e2e`) workflows finish |
 | `allure-pages` | Allure reports landing page (`master`) |
 | `allure-pages-cleanup` | Remove PR report folder (Allure + Playwright HTML) from GitHub Pages when a PR closes |
 | `codeql` | SAST — CodeQL analysis for Java and TypeScript (`master`); SARIF artifacts in workflow runs |
@@ -148,7 +148,7 @@ Allure and Playwright HTML reports from E2E runs are published to [GitHub Pages]
 | Trigger | Location | How to find |
 |---|---|---|
 | Push to `master` | `https://sergii-h.github.io/qa-demo/` | Landing page links to Allure (`{suite}/`) and Playwright HTML (`playwright-html-{suite}/`, TypeScript only) |
-| Pull request to `master` | `https://sergii-h.github.io/qa-demo/pr/{number}/` | Single PR comment with link after all E2E workflows finish; removed when the PR closes |
+| Pull request to `master` | `https://sergii-h.github.io/qa-demo/pr/{number}/` | Single PR comment with link after all E2E workflows finish (web, Android Compose, Maestro); removed when the PR closes |
 
 Raw Allure results, Playwright HTML reports (TypeScript), and Playwright trace artifacts (Python) are also kept as workflow artifacts for 7 days.
 

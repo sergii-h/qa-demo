@@ -100,6 +100,23 @@ main {
   border-radius: 4px;
 }
 
+.test-run-logos img.logo-static--maestro {
+  height: 22px;
+}
+
+.test-run-logos img.logo-static--react-native {
+  height: 24px;
+  border-radius: 6px;
+}
+
+.test-run-logos img.logo-static--expo {
+  height: 22px;
+}
+
+.test-run-logos img.logo-static--ios {
+  height: 22px;
+}
+
 .brand-chip {
   display: inline-flex;
   align-items: center;
