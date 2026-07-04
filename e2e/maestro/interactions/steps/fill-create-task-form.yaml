@@ -2,13 +2,10 @@ appId: ${MAESTRO_APP_ID}
 ---
 - tapOn:
     id: create-task-title-input
-- eraseText
 - inputText: ${TASK_TITLE}
 - tapOn:
     id: task-description-input
-- eraseText
 - inputText: ${TASK_DESCRIPTION}
-- hideKeyboard
 - tapOn:
     id: status-dropdown-open
 - extendedWaitUntil:

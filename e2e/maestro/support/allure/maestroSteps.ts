@@ -91,14 +91,12 @@ export function buildMaestroAllureSteps(
       continue;
     }
 
-    const built = buildStepFromEvaluatedCommand(
-      evaluatedCommand,
+    const built = buildStepFromEntry(
+      entry,
       mapMaestroStatus(entry.metadata.status),
-      entry.metadata.duration,
-      entry.metadata.error?.message,
       env,
       outputDir,
-      entry.metadata.timestamp,
+      entries,
       { includeParameters: true },
     );
 
@@ -110,6 +108,58 @@ export function buildMaestroAllureSteps(
   return steps;
 }
 
+function buildStepFromEntry(
+  entry: MaestroCommandEntry,
+  status: Status,
+  env: Record<string, string>,
+  outputDir: string,
+  allEntries: MaestroCommandEntry[],
+  options: { includeParameters: boolean },
+  parentStatus?: Status,
+): MaestroAllureStep | null {
+  const evaluatedCommand = entry.metadata.evaluatedCommand ?? entry.command;
+  const commandType = Object.keys(evaluatedCommand)[0];
+
+  mergeEnvFromCommand(evaluatedCommand, env);
+
+  if (commandType === 'defineVariablesCommand' || commandType === 'applyConfigurationCommand') {
+    return null;
+  }
+
+  const effectiveStatus =
+    parentStatus && !isFailureStatus(status) ? parentStatus : status;
+
+  return buildStepFromEvaluatedCommand(
+    evaluatedCommand,
+    effectiveStatus,
+    entry.metadata.duration,
+    entry.metadata.error?.message,
+    env,
+    outputDir,
+    entry.metadata.timestamp,
+    options,
+    collectChildEntries(entry, allEntries),
+    allEntries,
+  );
+}
+
+function collectChildEntries(
+  parent: MaestroCommandEntry,
+  entries: MaestroCommandEntry[],
+): MaestroCommandEntry[] {
+  const windowStart = parent.metadata.timestamp;
+  const windowEnd = windowStart + parent.metadata.duration;
+
+  return entries.filter((entry) => {
+    if (entry.metadata.sequenceNumber === parent.metadata.sequenceNumber) {
+      return false;
+    }
+
+    const entryEnd = entry.metadata.timestamp + entry.metadata.duration;
+    return entry.metadata.timestamp >= windowStart && entryEnd <= windowEnd;
+  });
+}
+
 function buildStepFromEvaluatedCommand(
   evaluatedCommand: Record<string, unknown>,
   status: Status,
@@ -119,6 +169,8 @@ function buildStepFromEvaluatedCommand(
   outputDir: string,
   timestamp: number,
   options: { includeParameters: boolean },
+  childEntries: MaestroCommandEntry[] = [],
+  allEntries: MaestroCommandEntry[] = [],
 ): MaestroAllureStep | null {
   const [commandType, payload] = Object.entries(evaluatedCommand)[0] ?? [];
 
@@ -153,7 +205,13 @@ function buildStepFromEvaluatedCommand(
       status,
       duration,
       statusDetails: errorMessage ? { message: errorMessage } : undefined,
-      children: buildNestedCommandSteps(runFlow.commands ?? [], status, mergedEnv, outputDir),
+      children: buildChildStepsFromEntries(
+        childEntries,
+        status,
+        mergedEnv,
+        outputDir,
+        allEntries,
+      ),
       attachments: findFailureAttachments(outputDir, timestamp, status),
       timestamp,
       runOutputDir: outputDir,
@@ -168,7 +226,13 @@ function buildStepFromEvaluatedCommand(
       status,
       duration,
       statusDetails: errorMessage ? { message: errorMessage } : undefined,
-      children: buildNestedCommandSteps(repeat.commands ?? [], status, env, outputDir),
+      children: buildChildStepsFromEntries(
+        childEntries,
+        status,
+        env,
+        outputDir,
+        allEntries,
+      ),
       attachments: findFailureAttachments(outputDir, timestamp, status),
       timestamp,
       runOutputDir: outputDir,
@@ -193,31 +257,28 @@ function buildStepFromEvaluatedCommand(
   };
 }
 
-function buildNestedCommandSteps(
-  commands: Array<Record<string, unknown>>,
+function buildChildStepsFromEntries(
+  childEntries: MaestroCommandEntry[],
   parentStatus: Status,
   env: Record<string, string>,
   outputDir: string,
+  allEntries: MaestroCommandEntry[],
 ): MaestroAllureStep[] {
   const steps: MaestroAllureStep[] = [];
 
-  for (const command of commands) {
-    mergeEnvFromCommand(command, env);
-    const built = buildStepFromEvaluatedCommand(
-      command,
-      parentStatus,
-      undefined,
-      undefined,
+  for (const childEntry of childEntries) {
+    const built = buildStepFromEntry(
+      childEntry,
+      mapMaestroStatus(childEntry.metadata.status),
       env,
       outputDir,
-      0,
+      allEntries,
       { includeParameters: false },
+      parentStatus,
     );
+
     if (built) {
-      steps.push({
-        ...built,
-        status: isFailureStatus(built.status) ? built.status : parentStatus,
-      });
+      steps.push(built);
     }
   }
 

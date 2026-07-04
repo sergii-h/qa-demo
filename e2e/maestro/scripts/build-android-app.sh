@@ -37,6 +37,8 @@ printf 'sdk.dir=%s\n' "$ANDROID_SDK" > "$LOCAL_PROPERTIES"
 
 verify_cleartext_manifest "$ANDROID_APP/src/main/AndroidManifest.xml"
 
+bash "$REPO_ROOT/e2e/maestro/scripts/patch-android-icon-font.sh" "$ANDROID_APP"
+
 REACT_NATIVE_ARCHITECTURES="$(resolve_react_native_architectures)"
 echo "Building release APK for CPU architecture: $REACT_NATIVE_ARCHITECTURES"
 echo "API_BASE_URL baked into bundle: $API_BASE_URL"

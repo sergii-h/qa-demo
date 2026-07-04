@@ -139,25 +139,21 @@ extract_simulator_udid() {
 
 resolve_simulator_udid_by_name() {
   local name="$1"
-  local line udid current_section=""
+  local udid
 
-  while IFS= read -r line; do
-    if [[ "$line" =~ ^--\ iOS\ 18\. ]]; then
-      current_section="18"
-      continue
-    fi
-    if [[ "$line" =~ ^--\ iOS\ ]]; then
-      current_section=""
-      continue
-    fi
-    if [[ "$current_section" == "18" && "$line" == *"$name"* ]]; then
-      udid="$(echo "$line" | extract_simulator_udid)"
-      if [[ -n "$udid" ]]; then
-        echo "$udid"
-        return 0
-      fi
-    fi
-  done < <(xcrun simctl list devices available)
+  udid="$(
+    xcrun simctl list devices available \
+      | awk -v name="$name" '
+          /^-- iOS 18\./ { in_ios_18 = 1; next }
+          /^-- iOS / { in_ios_18 = 0; next }
+          in_ios_18 && index($0, name) { print; exit }
+        ' \
+      | extract_simulator_udid
+  )"
+  if [[ -n "$udid" ]]; then
+    echo "$udid"
+    return 0
+  fi
 
   xcrun simctl list devices available \
     | grep -F "$name" \

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MD3LightTheme, PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
 import { AppNavigator } from '@/navigation/AppNavigator';
+import { MaterialCommunityIcons } from '@/icons/MaterialCommunityIcons';
 import { initI18n } from '@/i18n';
 import { themeColors } from '@/theme/colors';
 

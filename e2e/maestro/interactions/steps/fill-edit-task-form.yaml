@@ -8,7 +8,6 @@ appId: ${MAESTRO_APP_ID}
     id: task-description-input
 - eraseText
 - inputText: ${UPDATED_TASK_DESCRIPTION}
-- hideKeyboard
 - tapOn:
     id: status-dropdown-open
 - extendedWaitUntil:

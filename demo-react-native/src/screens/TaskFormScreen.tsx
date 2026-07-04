@@ -67,7 +67,10 @@ export function TaskFormScreen({ navigation, route }: Props) {
           <Text testID='load-error'>{loadError}</Text>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.form}>
+        <ScrollView
+          contentContainerStyle={styles.form}
+          keyboardShouldPersistTaps="handled"
+        >
           <TextInput
             label={t('fieldTitle')}
             value={title}

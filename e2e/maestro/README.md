@@ -160,7 +160,7 @@ The TypeScript runner writes Allure results to `allure-results/`. Each test incl
 - **Setup WireMock stubs** — when the test uses mocked API responses
 - **Maestro steps** — imported from Maestro `commands-*.json` after each flow run
   - Step names use `runFlow` **labels** when set, otherwise the sub-flow file name
-  - **Parameters** on top-level Maestro steps show resolved test data (`TASK_TITLE`, `SCROLL_TARGET_ID`, etc.); nested steps omit them but still resolve env in step names
+  - **Parameters** on top-level Maestro steps show resolved test data (`TASK_TITLE`, `SCROLL_TARGET_ID`, etc.); nested steps omit them but still resolve env in step names and show per-command durations from Maestro's command log
   - Failed steps attach the closest Maestro screenshot when available; failed/broken tests also attach a screenshot at test level
 
 Use `label` on `runFlow` in YAML for readable step names in Allure:
