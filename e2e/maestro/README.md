@@ -190,12 +190,12 @@ Android and iOS Maestro jobs run from `.github/workflows/react-native-e2e.yml`.
 | Platform | Runner | Workflows |
 |----------|--------|-----------|
 | Android | `ubuntu-22.04` | `maestro-react-native-android-e2e.yml`, `maestro-react-native-android-uat.yml`, `maestro-react-native-android-accessibility.yml` |
-| iOS | `macos-15` (mocked / a11y), `macos-15-intel` (UAT) | `maestro-react-native-ios-e2e.yml`, `maestro-react-native-ios-uat.yml`, `maestro-react-native-ios-accessibility.yml` |
+| iOS | `macos-15` | `maestro-react-native-ios-e2e.yml`, `maestro-react-native-ios-uat.yml`, `maestro-react-native-ios-accessibility.yml` |
 
 iOS jobs use `run-maestro-ios-tests` (`build-ios-app.sh` → `install-ios-app.sh` → npm test). API URLs use `http://localhost:…` on the simulator. CocoaPods runs inside `build-ios-app.sh` via `npx pod-install` — no separate pipeline step.
 
-Mocked iOS jobs run on **`macos-15` (Apple Silicon)** and start WireMock via a **standalone Java JAR** (`wiremock-backend: standalone`) — no Docker. React Native builds for `arm64` simulator there. **UAT** stays on **`macos-15-intel` + Colima** for the full Docker stack.
+All iOS jobs run on **`macos-15` (Apple Silicon)**. Mocked / accessibility jobs start WireMock via a **standalone Java JAR** (`wiremock-backend: standalone`) — no Docker. **UAT** uses the full Docker stack via **Colima** (`start-e2e-env` sets up Docker on macOS). React Native builds target the `arm64` simulator on these runners.
 
 Android CI invokes `run-android-maestro-ci.sh` as a single command inside `android-emulator-runner` (that action runs each line of a multiline `script:` in a separate shell, so shell variables do not persist across lines).
 
-iOS CI uses `run-ios-maestro-ci.sh` (build → install → npm test). The Xcode build uses `generic/platform=iOS Simulator,arch=…` so it does not require a booted device; install boots an iPhone simulator (defaults to `iPhone 16` on GitHub Actions).
+iOS CI uses `run-ios-maestro-ci.sh` (build → install → npm test). The build boots an **iPhone 16 on iOS 18.x** simulator and passes `platform=iOS Simulator,id=…` to `xcodebuild` (generic `arch=` destinations fail when multiple simulator runtimes are installed). `MAESTRO_DEVICE` is set from the same UDID for install and Maestro.
