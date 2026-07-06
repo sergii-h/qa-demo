@@ -28,4 +28,7 @@ bash "$REPO_ROOT/e2e/maestro/scripts/install-ios-app.sh" "$APP_PATH"
 cd "$REPO_ROOT/e2e/maestro"
 export MAESTRO_CLI_NO_ANALYTICS=true
 export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
+if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+  export MAESTRO_DRIVER_STARTUP_TIMEOUT="${MAESTRO_DRIVER_STARTUP_TIMEOUT:-120000}"
+fi
 ALLURE_RESULTS_DIR="$REPO_ROOT/e2e/maestro/allure-results" npm run "$NPM_SCRIPT"
