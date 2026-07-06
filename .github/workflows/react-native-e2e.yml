@@ -26,7 +26,7 @@ on:
       - 'demo-service/**'
       - 'docker/**'
       - 'e2e/maestro/**'
-      - '.github/workflows/react-native-e2e.y ml'
+      - '.github/workflows/react-native-e2e.yml'
       - '.github/workflows/maestro-react-native-android-e2e.yml'
       - '.github/workflows/maestro-react-native-android-uat.yml'
       - '.github/workflows/maestro-react-native-android-accessibility.yml'

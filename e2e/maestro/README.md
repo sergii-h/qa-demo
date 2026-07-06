@@ -194,7 +194,7 @@ Android and iOS Maestro jobs run from `.github/workflows/react-native-e2e.yml`.
 
 iOS jobs use `run-maestro-ios-tests` (`build-ios-app.sh` → `install-ios-app.sh` → npm test). API URLs use `http://localhost:…` on the simulator. CocoaPods runs inside `build-ios-app.sh` via `npx pod-install` — no separate pipeline step.
 
-All iOS jobs run on **`macos-15` (Apple Silicon)**. Mocked / accessibility jobs start WireMock via a **standalone Java JAR** (`wiremock-backend: standalone`) — no Docker. **UAT** uses the full Docker stack via **Colima** (`start-e2e-env` sets up Docker on macOS). React Native builds target the `arm64` simulator on these runners.
+All iOS jobs run on **`macos-15` (Apple Silicon)**. Mocked / accessibility jobs start WireMock via a **standalone Java JAR** (`wiremock-backend: standalone`) — no Docker. **UAT** uses the full Docker stack via **Colima** with native `aarch64` VMs (`docker/scripts/setup-docker-macos-ci.sh`); the third-party `setup-docker-macos-action` is not used because it rejects all ARM runners. React Native builds target the `arm64` simulator on these runners.
 
 Android CI invokes `run-android-maestro-ci.sh` as a single command inside `android-emulator-runner` (that action runs each line of a multiline `script:` in a separate shell, so shell variables do not persist across lines).
 

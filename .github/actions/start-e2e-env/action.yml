@@ -34,10 +34,8 @@ runs:
 
     - name: Set up Docker on macOS
       if: runner.os == 'macOS' && inputs.wiremock-backend != 'standalone'
-      uses: douglascamata/setup-docker-macos-action@v1.1.0
-      with:
-        lima: v1.2.1
-        colima: v0.9.1
+      shell: bash
+      run: bash docker/scripts/setup-docker-macos-ci.sh
 
     - name: Log in to Docker Hub
       if: inputs.docker-hub-username != ''
