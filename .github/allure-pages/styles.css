@@ -262,6 +262,12 @@ main {
   opacity: 0.9;
 }
 
+.report-action--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .report-action img {
   height: 22px;
   display: block;
