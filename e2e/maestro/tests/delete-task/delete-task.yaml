@@ -1,0 +1,21 @@
+appId: ${MAESTRO_APP_ID}
+env:
+  TASK_TITLE: ${TASK_TITLE}
+---
+# given
+- runFlow:
+    file: ../../interactions/steps/open-main-page.yaml
+- runFlow:
+    file: ../../interactions/steps/refresh-main-page.yaml
+
+# when
+- runFlow:
+    file: ../../interactions/steps/delete-task.yaml
+    env:
+      TASK_TITLE: ${TASK_TITLE}
+
+# then
+- runFlow:
+    file: ../../interactions/validators/task-list-has-no-task.yaml
+    env:
+      TASK_TITLE: ${TASK_TITLE}

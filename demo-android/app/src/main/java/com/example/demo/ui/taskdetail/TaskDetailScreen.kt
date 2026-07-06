@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.demo.R
 import com.example.demo.repository.TaskRepository
-import com.example.demo.ui.TestTags
 import com.example.demo.ui.components.PriorityChip
 import com.example.demo.ui.components.StatusChip
 import java.time.Instant
@@ -70,13 +69,13 @@ fun TaskDetailScreen(
                 title = {
                     Text(
                         text = uiState.task?.title ?: stringResource(R.string.task_info),
-                        modifier = Modifier.testTag(TestTags.MODAL_TITLE),
+                        modifier = Modifier.testTag("modal-title"),
                     )
                 },
                 navigationIcon = {
                     IconButton(
                         onClick = onBack,
-                        modifier = Modifier.testTag(TestTags.CLOSE_BUTTON),
+                        modifier = Modifier.testTag("close-button"),
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
@@ -97,7 +96,7 @@ fun TaskDetailScreen(
                     CircularProgressIndicator(
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .testTag(TestTags.LOADING_SPINNER),
+                            .testTag("loading-spinner"),
                     )
                 }
                 uiState.errorMessage != null -> {
@@ -105,7 +104,7 @@ fun TaskDetailScreen(
                         text = uiState.errorMessage ?: stringResource(R.string.failed_load_task),
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .testTag(TestTags.LOAD_ERROR),
+                            .testTag("load-error"),
                     )
                 }
                 uiState.task != null -> {
@@ -121,8 +120,8 @@ fun TaskDetailScreen(
                             label = stringResource(R.string.detail_description),
                             value = task.description?.takeIf { it.isNotBlank() }
                                 ?: stringResource(R.string.no_description),
-                            labelTestTag = TestTags.DETAIL_DESCRIPTION_LABEL,
-                            valueTestTag = TestTags.DESCRIPTION,
+                            labelTestTag = "detail-description-label",
+                            valueTestTag = "description",
                         )
                         DetailField(label = stringResource(R.string.detail_status)) {
                             StatusChip(status = task.status)
@@ -133,22 +132,22 @@ fun TaskDetailScreen(
                         DetailField(
                             label = stringResource(R.string.detail_created),
                             value = formatDate(task.createdDate, dateFormatter, notAvailable),
-                            valueTestTag = TestTags.CREATED_DATE,
+                            valueTestTag = "created-date",
                         )
                         DetailField(
                             label = stringResource(R.string.detail_last_updated),
                             value = formatDate(task.updatedDate, dateFormatter, notAvailable),
-                            valueTestTag = TestTags.UPDATED_DATE,
+                            valueTestTag = "updated-date",
                         )
                         DetailField(
                             label = stringResource(R.string.detail_validated),
-                            labelTestTag = TestTags.DETAIL_VALIDATED_LABEL,
+                            labelTestTag = "detail-validated-label",
                         ) {
                             if (uiState.isValid) {
                                 Box(
                                     modifier = Modifier
                                         .size(24.dp)
-                                        .testTag(TestTags.VALID),
+                                        .testTag("valid"),
                                 ) {
                                     Icon(
                                         Icons.Default.Check,
@@ -160,7 +159,7 @@ fun TaskDetailScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(24.dp)
-                                        .testTag(TestTags.NOT_VALID),
+                                        .testTag("notValid"),
                                 ) {
                                     Icon(
                                         Icons.Default.Close,

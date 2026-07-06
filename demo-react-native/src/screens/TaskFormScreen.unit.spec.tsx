@@ -5,7 +5,6 @@ import {ApiError} from '@/data/remote/apiClient';
 import {TaskPriority, TaskStatus} from '@/data/models/task';
 import {taskRepository} from '@/repository/taskRepository';
 import {mockTask} from '@/test-utils/taskFixtures';
-import {TestTags} from '@/testTags';
 import {renderWithProviders} from '@/test-utils/renderWithProviders';
 
 jest.mock('../repository/taskRepository', () => ({
@@ -38,7 +37,7 @@ describe('TaskFormScreen', () => {
     );
 
     // Then
-    expect(getByTestId(TestTags.CREATE_BUTTON).props.accessibilityState?.disabled).toBe(
+    expect(getByTestId('create-button').props.accessibilityState?.disabled).toBe(
       true,
     );
   });
@@ -59,13 +58,13 @@ describe('TaskFormScreen', () => {
     );
 
     await waitFor(() => {
-      expect(getByTestId(TestTags.EDIT_TASK_TITLE_INPUT)).toHaveDisplayValue(mockTask.title);
+      expect(getByTestId('edit-task-title-input')).toHaveDisplayValue(mockTask.title);
     });
 
-    fireEvent.changeText(getByTestId(TestTags.EDIT_TASK_TITLE_INPUT), '');
+    fireEvent.changeText(getByTestId('edit-task-title-input'), '');
 
     // Then
-    expect(getByTestId(TestTags.SAVE_BUTTON).props.accessibilityState?.disabled).toBe(
+    expect(getByTestId('save-button').props.accessibilityState?.disabled).toBe(
       true,
     );
   });
@@ -87,14 +86,14 @@ describe('TaskFormScreen', () => {
       />,
     );
 
-    fireEvent.changeText(getByTestId(TestTags.CREATE_TASK_TITLE_INPUT), 'New task');
+    fireEvent.changeText(getByTestId('create-task-title-input'), 'New task');
 
     // When
-    fireEvent.press(getByTestId(TestTags.CREATE_BUTTON));
+    fireEvent.press(getByTestId('create-button'));
 
     // Then
     await waitFor(() => {
-      expect(getByTestId(TestTags.LOADING_SPINNER)).toBeVisible();
+      expect(getByTestId('loading-spinner')).toBeVisible();
     });
 
     resolveCreate(mockTask);
@@ -120,14 +119,14 @@ describe('TaskFormScreen', () => {
       />,
     );
 
-    fireEvent.changeText(getByTestId(TestTags.CREATE_TASK_TITLE_INPUT), 'New task');
+    fireEvent.changeText(getByTestId('create-task-title-input'), 'New task');
 
     // When
-    fireEvent.press(getByTestId(TestTags.CREATE_BUTTON));
+    fireEvent.press(getByTestId('create-button'));
 
     // Then
     await waitFor(() => {
-      expect(getByTestId(TestTags.SAVE_ERROR)).toHaveTextContent('Request failed (500)');
+      expect(getByTestId('save-error')).toHaveTextContent('Request failed (500)');
     });
   });
 
@@ -140,21 +139,21 @@ describe('TaskFormScreen', () => {
       />,
     );
 
-    fireEvent.changeText(getByTestId(TestTags.CREATE_TASK_TITLE_INPUT), 'a'.repeat(101));
-    fireEvent.press(getByTestId(TestTags.CREATE_BUTTON));
+    fireEvent.changeText(getByTestId('create-task-title-input'), 'a'.repeat(101));
+    fireEvent.press(getByTestId('create-button'));
 
     await waitFor(() => {
-      expect(getByTestId(TestTags.TITLE_ERROR)).toHaveTextContent(
+      expect(getByTestId('title-error')).toHaveTextContent(
         'Title must not exceed 100 characters',
       );
     });
 
     // When
-    fireEvent.changeText(getByTestId(TestTags.CREATE_TASK_TITLE_INPUT), 'Valid title');
+    fireEvent.changeText(getByTestId('create-task-title-input'), 'Valid title');
 
     // Then
     await waitFor(() => {
-      expect(queryByTestId(TestTags.TITLE_ERROR)).toBeNull();
+      expect(queryByTestId('title-error')).toBeNull();
     });
   });
 
@@ -168,9 +167,9 @@ describe('TaskFormScreen', () => {
     );
 
     // Then
-    expect(getByTestId(TestTags.MODAL_TITLE)).toHaveTextContent('New task');
-    expect(getByTestId(TestTags.CREATE_TASK_TITLE_INPUT)).toHaveDisplayValue('');
-    expect(getByTestId(TestTags.CREATE_BUTTON)).toHaveTextContent('Create');
+    expect(getByTestId('modal-title')).toHaveTextContent('New task');
+    expect(getByTestId('create-task-title-input')).toHaveDisplayValue('');
+    expect(getByTestId('create-button')).toHaveTextContent('Create');
   });
 
   it('should render edit form when editing', async () => {
@@ -191,9 +190,9 @@ describe('TaskFormScreen', () => {
 
     // Then
     await waitFor(() => {
-      expect(getByTestId(TestTags.MODAL_TITLE)).toHaveTextContent('Edit task');
-      expect(getByTestId(TestTags.EDIT_TASK_TITLE_INPUT)).toHaveDisplayValue(mockTask.title);
-      expect(getByTestId(TestTags.SAVE_BUTTON)).toHaveTextContent('Save');
+      expect(getByTestId('modal-title')).toHaveTextContent('Edit task');
+      expect(getByTestId('edit-task-title-input')).toHaveDisplayValue(mockTask.title);
+      expect(getByTestId('save-button')).toHaveTextContent('Save');
     });
   });
 
@@ -211,7 +210,7 @@ describe('TaskFormScreen', () => {
       />,
     );
 
-    expect(getByTestId(TestTags.LOADING_SPINNER)).toBeVisible();
+    expect(getByTestId('loading-spinner')).toBeVisible();
 
     // When
     rerender(
@@ -223,7 +222,7 @@ describe('TaskFormScreen', () => {
 
     // Then
     await waitFor(() => {
-      expect(getByTestId(TestTags.LOAD_ERROR)).toHaveTextContent('Failed to load');
+      expect(getByTestId('load-error')).toHaveTextContent('Failed to load');
     });
   });
 
@@ -236,10 +235,10 @@ describe('TaskFormScreen', () => {
       />,
     );
 
-    fireEvent.changeText(getByTestId(TestTags.CREATE_TASK_TITLE_INPUT), 'New task');
+    fireEvent.changeText(getByTestId('create-task-title-input'), 'New task');
 
     // When
-    fireEvent.press(getByTestId(TestTags.CREATE_BUTTON));
+    fireEvent.press(getByTestId('create-button'));
 
     // Then
     await waitFor(() => {
@@ -268,14 +267,14 @@ describe('TaskFormScreen', () => {
       />,
     );
 
-    fireEvent.changeText(getByTestId(TestTags.CREATE_TASK_TITLE_INPUT), 'Duplicate task');
+    fireEvent.changeText(getByTestId('create-task-title-input'), 'Duplicate task');
 
     // When
-    fireEvent.press(getByTestId(TestTags.CREATE_BUTTON));
+    fireEvent.press(getByTestId('create-button'));
 
     // Then
     await waitFor(() => {
-      expect(getByTestId(TestTags.TITLE_ERROR)).toHaveTextContent(
+      expect(getByTestId('title-error')).toHaveTextContent(
         'Task with this title already exists',
       );
     });
@@ -299,15 +298,15 @@ describe('TaskFormScreen', () => {
     );
 
     await waitFor(() => {
-      expect(getByTestId(TestTags.EDIT_TASK_TITLE_INPUT)).toHaveDisplayValue(mockTask.title);
+      expect(getByTestId('edit-task-title-input')).toHaveDisplayValue(mockTask.title);
     });
 
     // When
-    fireEvent.press(getByTestId(TestTags.SAVE_BUTTON));
+    fireEvent.press(getByTestId('save-button'));
 
     // Then
     await waitFor(() => {
-      expect(getByTestId(TestTags.TITLE_ERROR)).toHaveTextContent(
+      expect(getByTestId('title-error')).toHaveTextContent(
         'Task with this title already exists',
       );
     });
@@ -323,29 +322,29 @@ describe('TaskFormScreen', () => {
     );
 
     // Then
-    expect(getByTestId(TestTags.STATUS_DROPDOWN)).toHaveDisplayValue('To Do');
-    expect(getByTestId(TestTags.PRIORITY_DROPDOWN)).toHaveDisplayValue('Medium');
+    expect(getByTestId('status-dropdown')).toHaveDisplayValue('To Do');
+    expect(getByTestId('priority-dropdown')).toHaveDisplayValue('Medium');
   });
 
   it('should save task with selected status on create form', async () => {
     // Given
-    const { getByTestId, findByTestId, getAllByTestId } = renderWithProviders(
+    const { getByTestId, findByTestId } = renderWithProviders(
       <TaskFormScreen
         navigation={navigation as never}
         route={{ key: 'CreateTask', name: 'CreateTask', params: undefined } as never}
       />,
     );
 
-    fireEvent.press(getAllByTestId('right-icon-adornment')[0]);
-    fireEvent.press(await findByTestId(TestTags.statusDropdownOption(TaskStatus.IN_PROGRESS)));
+    fireEvent.press(getByTestId('status-dropdown-open'));
+    fireEvent.press(await findByTestId(`status-dropdown-option-${TaskStatus.IN_PROGRESS}`));
     await waitFor(() => {
-      expect(getByTestId(TestTags.STATUS_DROPDOWN)).toHaveDisplayValue('In Progress');
+      expect(getByTestId('status-dropdown')).toHaveDisplayValue('In Progress');
     });
 
-    fireEvent.changeText(getByTestId(TestTags.CREATE_TASK_TITLE_INPUT), 'New task');
+    fireEvent.changeText(getByTestId('create-task-title-input'), 'New task');
 
     // When
-    fireEvent.press(getByTestId(TestTags.CREATE_BUTTON));
+    fireEvent.press(getByTestId('create-button'));
 
     // Then
     await waitFor(() => {
@@ -360,23 +359,23 @@ describe('TaskFormScreen', () => {
 
   it('should save task with selected priority on create form', async () => {
     // Given
-    const { getByTestId, findByTestId, getAllByTestId } = renderWithProviders(
+    const { getByTestId, findByTestId } = renderWithProviders(
       <TaskFormScreen
         navigation={navigation as never}
         route={{ key: 'CreateTask', name: 'CreateTask', params: undefined } as never}
       />,
     );
 
-    fireEvent.press(getAllByTestId('right-icon-adornment')[1]);
-    fireEvent.press(await findByTestId(TestTags.priorityDropdownOption(TaskPriority.HIGH)));
+    fireEvent.press(getByTestId('priority-dropdown-open'));
+    fireEvent.press(await findByTestId(`priority-dropdown-option-${TaskPriority.HIGH}`));
     await waitFor(() => {
-      expect(getByTestId(TestTags.PRIORITY_DROPDOWN)).toHaveDisplayValue('High');
+      expect(getByTestId('priority-dropdown')).toHaveDisplayValue('High');
     });
 
-    fireEvent.changeText(getByTestId(TestTags.CREATE_TASK_TITLE_INPUT), 'New task');
+    fireEvent.changeText(getByTestId('create-task-title-input'), 'New task');
 
     // When
-    fireEvent.press(getByTestId(TestTags.CREATE_BUTTON));
+    fireEvent.press(getByTestId('create-button'));
 
     // Then
     await waitFor(() => {
@@ -411,8 +410,8 @@ describe('TaskFormScreen', () => {
 
     // Then
     await waitFor(() => {
-      expect(getByTestId(TestTags.STATUS_DROPDOWN)).toHaveDisplayValue('Done');
-      expect(getByTestId(TestTags.PRIORITY_DROPDOWN)).toHaveDisplayValue('High');
+      expect(getByTestId('status-dropdown')).toHaveDisplayValue('Done');
+      expect(getByTestId('priority-dropdown')).toHaveDisplayValue('High');
     });
   });
 
@@ -426,7 +425,7 @@ describe('TaskFormScreen', () => {
     );
 
     // When
-    fireEvent.press(getByTestId(TestTags.CLOSE_BUTTON));
+    fireEvent.press(getByTestId('close-button'));
 
     // Then
     expect(navigation.goBack).toHaveBeenCalled();

@@ -1,0 +1,27 @@
+name: Run UAT tests (Maestro React Native Android — full app)
+
+on:
+  workflow_call:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: full
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Run Maestro React Native UAT smoke test on Android
+        uses: ./.github/actions/run-maestro-tests
+        with:
+          npm-script: test:uat
+          api-base-url: http://10.0.2.2:8080/v1/
+          test-label: Run Maestro React Native UAT smoke test on Android
+          artifact-name: allure-results-maestro-android-uat

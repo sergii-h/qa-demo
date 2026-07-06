@@ -12,7 +12,6 @@ import com.example.demo.testing.MainDispatcherRule
 import com.example.demo.testing.TaskFixtures
 import com.example.demo.testing.runAsyncAction
 import com.example.demo.testing.waitUntilTagExists
-import com.example.demo.ui.TestTags
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -55,9 +54,9 @@ class TaskListScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.TASK_LIST).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.EMPTY_TASKS).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.LANGUAGE_SWITCHER).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("task-list").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("empty-tasks").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("language-switcher").assertIsDisplayed()
     }
 
     @Test
@@ -80,7 +79,7 @@ class TaskListScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("task-title-${"task-1"}").assertIsDisplayed()
     }
 
     @Test
@@ -105,15 +104,15 @@ class TaskListScreenTest {
                 }
             }
         }
-        composeTestRule.onNodeWithTag(TestTags.EMPTY_TASKS).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("empty-tasks").assertIsDisplayed()
 
         // When
         refreshTrigger.value = 1
         composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) { }
 
         // Then
-        composeTestRule.waitUntilTagExists(TestTags.taskTitle("task-1"))
-        composeTestRule.onNodeWithTag(TestTags.taskTitle("task-1")).assertIsDisplayed()
+        composeTestRule.waitUntilTagExists("task-title-${"task-1"}")
+        composeTestRule.onNodeWithTag("task-title-${"task-1"}").assertIsDisplayed()
         coVerify(exactly = 2) { repository.getTasks() }
     }
 
@@ -137,7 +136,7 @@ class TaskListScreenTest {
         }
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick()
+        composeTestRule.onNodeWithTag("add-task-button").performClick()
 
         // Then
         assertThat(createClicked).isTrue()
@@ -164,12 +163,12 @@ class TaskListScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.taskTitle(task.id)).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.statusTag(task.status)).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.priorityTag(task.priority)).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.infoButton(task.id)).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.editButton(task.id)).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.deleteButton(task.id)).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("task-title-${task.id}").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("status-tag-${task.status.name}").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("priority-tag-${task.priority.name}").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("info-button-${task.id}").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("edit-button-${task.id}").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("delete-button-${task.id}").assertIsDisplayed()
     }
 
     @Test
@@ -194,7 +193,7 @@ class TaskListScreenTest {
 
         // When
         composeTestRule.runAsyncAction(mainDispatcherRule.dispatcher) {
-            onNodeWithTag(TestTags.deleteButton(task.id)).performClick()
+            onNodeWithTag("delete-button-${task.id}").performClick()
         }
 
         // Then
@@ -221,7 +220,7 @@ class TaskListScreenTest {
         }
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick()
+        composeTestRule.onNodeWithTag("add-task-button").performClick()
 
         // Then
         assertThat(createClicked).isTrue()

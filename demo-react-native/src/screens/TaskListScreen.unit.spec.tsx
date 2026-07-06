@@ -3,7 +3,6 @@ import {act, fireEvent, waitFor} from '@testing-library/react-native';
 import {TaskListScreen} from './TaskListScreen';
 import {taskRepository} from '@/repository/taskRepository';
 import {mockTask} from '@/test-utils/taskFixtures';
-import {TestTags} from '@/testTags';
 import {renderWithProviders} from '@/test-utils/renderWithProviders';
 
 jest.mock('../repository/taskRepository', () => ({
@@ -37,11 +36,11 @@ describe('TaskListScreen', () => {
 
     // Then
     await waitFor(() => {
-      expect(getByTestId(TestTags.PAGE_TITLE)).toHaveTextContent('Tasks');
-      expect(getByTestId(TestTags.TASK_LIST)).toBeVisible();
-      expect(getByTestId(TestTags.taskTitle(mockTask.id))).toHaveTextContent(mockTask.title);
-      expect(getByTestId(TestTags.statusTag(mockTask.status))).toHaveTextContent('To Do');
-      expect(getByTestId(TestTags.priorityTag(mockTask.priority))).toHaveTextContent('Medium');
+      expect(getByTestId('page-title')).toHaveTextContent('Tasks');
+      expect(getByTestId('task-list')).toBeVisible();
+      expect(getByTestId(`task-title-${mockTask.id}`)).toHaveTextContent(mockTask.title);
+      expect(getByTestId(`status-tag-${mockTask.status}`)).toHaveTextContent('To Do');
+      expect(getByTestId(`priority-tag-${mockTask.priority}`)).toHaveTextContent('Medium');
     });
   });
 
@@ -57,7 +56,7 @@ describe('TaskListScreen', () => {
     );
 
     // Then
-    expect(getByTestId(TestTags.LOADING_SPINNER)).toBeVisible();
+    expect(getByTestId('loading-spinner')).toBeVisible();
   });
 
   it('should show empty state when there are no tasks', async () => {
@@ -71,7 +70,7 @@ describe('TaskListScreen', () => {
 
     // Then
     await waitFor(() => {
-      expect(getByTestId(TestTags.EMPTY_TASKS)).toHaveTextContent(
+      expect(getByTestId('empty-tasks')).toHaveTextContent(
         'No tasks yet. Tap + to create one.',
       );
     });
@@ -84,14 +83,14 @@ describe('TaskListScreen', () => {
     );
 
     await waitFor(() => {
-      expect(getByTestId(TestTags.taskTitle(mockTask.id))).toHaveTextContent(mockTask.title);
+      expect(getByTestId(`task-title-${mockTask.id}`)).toHaveTextContent(mockTask.title);
     });
 
     // When
-    fireEvent.press(getByTestId(TestTags.infoButton(mockTask.id)));
-    fireEvent.press(getByTestId(TestTags.editButton(mockTask.id)));
-    fireEvent.press(getByTestId(TestTags.ADD_TASK_BUTTON));
-    fireEvent.press(getByTestId(TestTags.deleteButton(mockTask.id)));
+    fireEvent.press(getByTestId(`info-button-${mockTask.id}`));
+    fireEvent.press(getByTestId(`edit-button-${mockTask.id}`));
+    fireEvent.press(getByTestId('add-task-button'));
+    fireEvent.press(getByTestId(`delete-button-${mockTask.id}`));
 
     // Then
     expect(navigation.navigate).toHaveBeenCalledWith('TaskDetail', { taskId: mockTask.id });
@@ -113,7 +112,7 @@ describe('TaskListScreen', () => {
 
     // Then
     await waitFor(() => {
-      expect(getByTestId(TestTags.ERROR_SNACKBAR)).toHaveTextContent('Something went wrong');
+      expect(getByTestId('error-snackbar')).toHaveTextContent('Something went wrong');
     });
   });
 
@@ -135,7 +134,7 @@ describe('TaskListScreen', () => {
     );
 
     await waitFor(() => {
-      expect(getByTestId(TestTags.taskTitle(mockTask.id))).toHaveTextContent(mockTask.title);
+      expect(getByTestId(`task-title-${mockTask.id}`)).toHaveTextContent(mockTask.title);
     });
 
     // When
@@ -148,7 +147,7 @@ describe('TaskListScreen', () => {
 
     // Then
     await waitFor(() => {
-      expect(getByTestId(TestTags.REFRESHING)).toBeOnTheScreen();
+      expect(getByTestId('refreshing')).toBeOnTheScreen();
     });
 
     await act(async () => {
@@ -156,7 +155,7 @@ describe('TaskListScreen', () => {
     });
 
     await waitFor(() => {
-      expect(queryByTestId(TestTags.REFRESHING)).toBeNull();
+      expect(queryByTestId('refreshing')).toBeNull();
     });
   });
 
@@ -170,8 +169,8 @@ describe('TaskListScreen', () => {
 
     // Then
     await waitFor(() => {
-      expect(getByTestId(TestTags.ERROR_SNACKBAR)).toHaveTextContent('Load failed');
-      expect(getByTestId(TestTags.ADD_TASK_BUTTON)).toBeVisible();
+      expect(getByTestId('error-snackbar')).toHaveTextContent('Load failed');
+      expect(getByTestId('add-task-button')).toBeVisible();
     });
   });
 });

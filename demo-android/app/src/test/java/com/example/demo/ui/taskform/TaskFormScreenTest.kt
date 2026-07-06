@@ -13,7 +13,6 @@ import com.example.demo.testing.DemoComposeTestTheme
 import com.example.demo.testing.MainDispatcherRule
 import com.example.demo.testing.TaskFixtures
 import com.example.demo.testing.runAsyncAction
-import com.example.demo.ui.TestTags
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -53,8 +52,8 @@ class TaskFormScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("create-task-title-input").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("create-button").performScrollTo().assertIsDisplayed()
     }
 
     @Test
@@ -78,9 +77,9 @@ class TaskFormScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.EDIT_TASK_TITLE_INPUT).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.MODAL_TITLE).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("edit-task-title-input").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("modal-title").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("save-button").performScrollTo().assertIsDisplayed()
     }
 
     @Test
@@ -101,7 +100,7 @@ class TaskFormScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().assertIsNotEnabled()
+        composeTestRule.onNodeWithTag("create-button").performScrollTo().assertIsNotEnabled()
     }
 
     @Test
@@ -125,7 +124,7 @@ class TaskFormScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.SAVE_BUTTON).performScrollTo().assertIsNotEnabled()
+        composeTestRule.onNodeWithTag("save-button").performScrollTo().assertIsNotEnabled()
     }
 
     @Test
@@ -146,10 +145,10 @@ class TaskFormScreenTest {
         }
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.STATUS_DROPDOWN).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.STATUS_DROPDOWN).assertTextContains("To Do")
-        composeTestRule.onNodeWithTag(TestTags.PRIORITY_DROPDOWN).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TestTags.PRIORITY_DROPDOWN).assertTextContains("Medium")
+        composeTestRule.onNodeWithTag("status-dropdown").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("status-dropdown").assertTextContains("To Do")
+        composeTestRule.onNodeWithTag("priority-dropdown").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("priority-dropdown").assertTextContains("Medium")
     }
 
     @Test
@@ -175,12 +174,12 @@ class TaskFormScreenTest {
         }
 
         // When
-        composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performTextInput("New task")
-        composeTestRule.onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("create-task-title-input").performTextInput("New task")
+        composeTestRule.onNodeWithTag("create-button").performScrollTo().performClick()
         mainDispatcherRule.dispatcher.scheduler.runCurrent()
         composeTestRule.waitForIdle()
 
         // Then
-        composeTestRule.onNodeWithTag(TestTags.LOADING_SPINNER).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("loading-spinner").assertIsDisplayed()
     }
 }

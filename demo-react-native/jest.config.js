@@ -18,7 +18,6 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/**/index.ts',
     '!src/navigation/types.ts',
-    '!src/testTags.ts',
     '!src/theme/**',
     '!src/locales/**',
     '!src/test/pact/**',

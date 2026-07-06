@@ -1,0 +1,10 @@
+appId: ${MAESTRO_APP_ID}
+---
+- extendedWaitUntil:
+    notVisible:
+      id: loading-spinner
+    timeout: 15000
+- extendedWaitUntil:
+    visible:
+      id: edit-task-title-input
+    timeout: 15000

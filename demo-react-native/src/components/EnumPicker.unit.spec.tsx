@@ -43,7 +43,7 @@ describe('EnumPicker', () => {
     );
 
     // When
-    fireEvent.press(getByTestId('right-icon-adornment'));
+    fireEvent.press(getByTestId('status-dropdown-open'));
 
     // Then
     await waitFor(() => {
@@ -59,7 +59,7 @@ describe('EnumPicker', () => {
     );
 
     // When
-    fireEvent.press(getByTestId('right-icon-adornment'));
+    fireEvent.press(getByTestId('status-dropdown-open'));
     await waitFor(() => {
       expect(getByTestId('status-option-DONE')).toBeOnTheScreen();
     });
@@ -75,7 +75,7 @@ describe('EnumPicker', () => {
     const { getByTestId } = renderWithProviders(
       <EnumPicker {...enumPickerProps} onSelected={onSelected} />,
     );
-    fireEvent.press(getByTestId('right-icon-adornment'));
+    fireEvent.press(getByTestId('status-dropdown-open'));
     expect(paperMenuMock.mock.calls.at(-1)?.[0].visible).toBe(true);
 
     // When

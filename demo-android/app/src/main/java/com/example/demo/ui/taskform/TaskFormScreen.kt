@@ -45,7 +45,6 @@ import com.example.demo.R
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
 import com.example.demo.repository.TaskRepository
-import com.example.demo.ui.TestTags
 import com.example.demo.ui.i18n.taskPriorityLabel
 import com.example.demo.ui.i18n.taskStatusLabel
 
@@ -82,13 +81,13 @@ fun TaskFormScreen(
                                 TaskFormMode.EDIT -> R.string.edit_task
                             }
                         ),
-                        modifier = Modifier.testTag(TestTags.MODAL_TITLE),
+                        modifier = Modifier.testTag("modal-title"),
                     )
                 },
                 navigationIcon = {
                     IconButton(
                         onClick = onBack,
-                        modifier = Modifier.testTag(TestTags.CLOSE_BUTTON),
+                        modifier = Modifier.testTag("close-button"),
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
@@ -107,7 +106,7 @@ fun TaskFormScreen(
                         .padding(padding),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(modifier = Modifier.testTag(TestTags.LOADING_SPINNER))
+                    CircularProgressIndicator(modifier = Modifier.testTag("loading-spinner"))
                 }
             }
             else -> {
@@ -125,7 +124,7 @@ fun TaskFormScreen(
                         label = {
                             Text(
                                 text = stringResource(R.string.field_title),
-                                modifier = Modifier.testTag(TestTags.FIELD_TITLE_LABEL),
+                                modifier = Modifier.testTag("field-title-label"),
                             )
                         },
                         isError = uiState.titleError != null,
@@ -133,7 +132,7 @@ fun TaskFormScreen(
                             {
                                 Text(
                                     text = error,
-                                    modifier = Modifier.testTag(TestTags.TITLE_ERROR),
+                                    modifier = Modifier.testTag("title-error"),
                                 )
                             }
                         },
@@ -141,8 +140,8 @@ fun TaskFormScreen(
                             .fillMaxWidth()
                             .testTag(
                                 when (mode) {
-                                    TaskFormMode.CREATE -> TestTags.CREATE_TASK_TITLE_INPUT
-                                    TaskFormMode.EDIT -> TestTags.EDIT_TASK_TITLE_INPUT
+                                    TaskFormMode.CREATE -> "create-task-title-input"
+                                    TaskFormMode.EDIT -> "edit-task-title-input"
                                 }
                             ),
                         singleLine = true
@@ -154,7 +153,7 @@ fun TaskFormScreen(
                         label = { Text(stringResource(R.string.field_description)) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .testTag(TestTags.TASK_DESCRIPTION_INPUT),
+                            .testTag("task-description-input"),
                         minLines = 4
                     )
 
@@ -164,8 +163,8 @@ fun TaskFormScreen(
                         options = TaskStatus.entries,
                         optionLabel = { taskStatusLabel(it) },
                         onSelected = viewModel::onStatusChange,
-                        testTag = TestTags.STATUS_DROPDOWN,
-                        optionTestTag = TestTags::statusDropdownOption,
+                        testTag = "status-dropdown",
+                        optionTestTag = { status -> "status-dropdown-option-${status.name}" },
                     )
 
                     EnumDropdown(
@@ -174,8 +173,8 @@ fun TaskFormScreen(
                         options = TaskPriority.entries,
                         optionLabel = { taskPriorityLabel(it) },
                         onSelected = viewModel::onPriorityChange,
-                        testTag = TestTags.PRIORITY_DROPDOWN,
-                        optionTestTag = TestTags::priorityDropdownOption,
+                        testTag = "priority-dropdown",
+                        optionTestTag = { priority -> "priority-dropdown-option-${priority.name}" },
                     )
 
                     uiState.saveError?.let { error ->
@@ -183,7 +182,7 @@ fun TaskFormScreen(
                             text = error,
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.testTag(TestTags.SAVE_ERROR),
+                            modifier = Modifier.testTag("save-error"),
                         )
                     }
 
@@ -196,8 +195,8 @@ fun TaskFormScreen(
                             .fillMaxWidth()
                             .testTag(
                                 when (mode) {
-                                    TaskFormMode.CREATE -> TestTags.CREATE_BUTTON
-                                    TaskFormMode.EDIT -> TestTags.SAVE_BUTTON
+                                    TaskFormMode.CREATE -> "create-button"
+                                    TaskFormMode.EDIT -> "save-button"
                                 }
                             ),
                     ) {
@@ -205,7 +204,7 @@ fun TaskFormScreen(
                             CircularProgressIndicator(
                                 modifier = Modifier
                                     .height(20.dp)
-                                    .testTag(TestTags.LOADING_SPINNER),
+                                    .testTag("loading-spinner"),
                                 strokeWidth = 2.dp
                             )
                         } else {

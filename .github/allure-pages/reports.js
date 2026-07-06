@@ -13,6 +13,15 @@ function greenBadge(label, logo, logoColor) {
 const PLAYWRIGHT_LOGO = './assets/playwright-logo.png';
 const SELENIDE_LOGO = './assets/selenide-logo.png';
 const ALLURE_LOGO = './assets/allure-logo.png';
+const MAESTRO_LOGO = './assets/maestro-logo.png';
+const REACT_NATIVE_LOGO = './assets/react-native-logo.png';
+const IOS_LOGO = './assets/ios-logo.png';
+
+const LOCAL_LOGO_ASSETS = {
+  'maestro-logo': { className: 'logo-static--maestro', alt: 'Maestro' },
+  'react-native-logo': { className: 'logo-static--react-native', alt: 'React Native' },
+  'ios-logo': { className: 'logo-static--ios', alt: 'iOS' },
+};
 
 const BRAND_CONFIG = {
   playwright: { logo: PLAYWRIGHT_LOGO, className: 'brand-chip--playwright' },
@@ -121,6 +130,35 @@ const TEST_RUNS = [
       { suite: 'UAT', meta: 'full stack', allure: './android-compose-uat/index.html' },
     ],
   },
+  {
+    titleEmphasis: 'Maestro React Native',
+    titleSuffix: 'test-run (Android)',
+    subtitle: 'React Native app · release APK · Android emulator',
+    headerLogos: [
+      REACT_NATIVE_LOGO,
+      MAESTRO_LOGO,
+      BADGES.android,
+    ],
+    suites: [
+      { suite: 'E2E', meta: 'mocked backend', allure: './maestro-android-e2e/index.html' },
+      { suite: 'Accessibility', meta: 'mocked backend', allure: './maestro-android-accessibility/index.html' },
+      { suite: 'UAT', meta: 'full stack', allure: './maestro-android-uat/index.html' },
+    ],
+  },
+  {
+    titleEmphasis: 'Maestro React Native',
+    titleSuffix: 'test-run (iOS)',
+    subtitle: 'React Native app · release simulator build · iOS Simulator',
+    headerLogos: [
+      REACT_NATIVE_LOGO,
+      MAESTRO_LOGO,
+      IOS_LOGO,
+    ],
+    suites: [
+      { suite: 'E2E', meta: 'mocked backend', allure: './maestro-ios-e2e/index.html' },
+      { suite: 'Accessibility', meta: 'mocked backend', allure: './maestro-ios-accessibility/index.html' },
+    ],
+  },
 ];
 
 function isPullRequestPage() {
@@ -142,12 +180,20 @@ function renderBrandChip(item, compact = false) {
   `;
 }
 
+function localAssetMeta(src) {
+  const entry = Object.entries(LOCAL_LOGO_ASSETS).find(([name]) => src.includes(name));
+  return entry ? entry[1] : null;
+}
+
 function renderLogo(item, alt = '') {
   if (isBrandChip(item)) {
     return renderBrandChip(item);
   }
   if (typeof item === 'string' && item.startsWith('./assets/')) {
-    return `<img class="logo-static" src="${item}" alt="${alt}">`;
+    const meta = localAssetMeta(item);
+    const assetClass = meta ? ` ${meta.className}` : '';
+    const altText = alt || meta?.alt || '';
+    return `<img class="logo-static${assetClass}" src="${item}" alt="${altText}">`;
   }
   return `<img src="${item}" alt="${alt}">`;
 }
@@ -220,7 +266,7 @@ function renderPage() {
 
     ${TEST_RUNS.map(renderTestRun).join('')}
 
-    <footer>Reports are published together after all E2E suites finish in CI.</footer>
+    <footer>Reports are published together after web, Android Compose, and Maestro React Native E2E suites finish in CI.</footer>
   `;
 }
 

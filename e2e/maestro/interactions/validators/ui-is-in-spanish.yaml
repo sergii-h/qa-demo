@@ -1,0 +1,6 @@
+appId: ${MAESTRO_APP_ID}
+---
+- assertVisible:
+    text: Tareas
+- assertVisible:
+    id: add-task-button

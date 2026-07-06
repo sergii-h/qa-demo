@@ -13,7 +13,6 @@ import com.example.demo.integration.support.IntegrationTestBase
 import com.example.demo.integration.support.LanguageOption
 import com.example.demo.integration.support.CreatePostFailure
 import com.example.demo.integration.support.GetTasksFailure
-import com.example.demo.ui.TestTags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.experimental.runners.Enclosed
@@ -26,36 +25,36 @@ class CreateTaskIntegrationTest {
     abstract class Base : IntegrationTestBase() {
 
         protected fun openCreateForm() {
-            runAsyncAction { onNodeWithTag(TestTags.ADD_TASK_BUTTON).performClick() }
-            assertIsDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
+            runAsyncAction { onNodeWithTag("add-task-button").performClick() }
+            assertIsDisplayed("create-task-title-input")
         }
 
         protected fun setTitle(title: String) {
-            runAsyncAction { onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performTextInput(title) }
+            runAsyncAction { onNodeWithTag("create-task-title-input").performTextInput(title) }
         }
 
         protected fun setDescription(description: String) {
-            runAsyncAction { onNodeWithTag(TestTags.TASK_DESCRIPTION_INPUT).performTextInput(description) }
+            runAsyncAction { onNodeWithTag("task-description-input").performTextInput(description) }
         }
 
         protected fun selectStatus(status: TaskStatus) {
-            composeTestRule.onNodeWithTag(TestTags.STATUS_DROPDOWN).performScrollTo().performClick()
-            runAsyncAction { onNodeWithTag(TestTags.statusDropdownOption(status)).performClick() }
+            composeTestRule.onNodeWithTag("status-dropdown").performScrollTo().performClick()
+            runAsyncAction { onNodeWithTag("status-dropdown-option-${status.name}").performClick() }
         }
 
         protected fun selectPriority(priority: TaskPriority) {
-            composeTestRule.onNodeWithTag(TestTags.PRIORITY_DROPDOWN).performScrollTo().performClick()
-            runAsyncAction { onNodeWithTag(TestTags.priorityDropdownOption(priority)).performClick() }
+            composeTestRule.onNodeWithTag("priority-dropdown").performScrollTo().performClick()
+            runAsyncAction { onNodeWithTag("priority-dropdown-option-${priority.name}").performClick() }
         }
 
         protected fun submitCreateForm() {
-            runAsyncAction { onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().performClick() }
-            assertIsNotDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
-            assertIsNotDisplayed(TestTags.LOADING_SPINNER)
+            runAsyncAction { onNodeWithTag("create-button").performScrollTo().performClick() }
+            assertIsNotDisplayed("create-task-title-input")
+            assertIsNotDisplayed("loading-spinner")
         }
 
         protected fun clickSubmitForm() {
-            runAsyncAction { onNodeWithTag(TestTags.CREATE_BUTTON).performScrollTo().performClick() }
+            runAsyncAction { onNodeWithTag("create-button").performScrollTo().performClick() }
         }
     }
 
@@ -84,7 +83,7 @@ class CreateTaskIntegrationTest {
 
             // Then
             assertThat(mockServer.createTaskRequests).containsExactly(context.createTaskRequest())
-            assertIsDisplayed(TestTags.taskTitle(context.id))
+            assertIsDisplayed("task-title-${context.id}")
         }
 
         @Test
@@ -106,7 +105,7 @@ class CreateTaskIntegrationTest {
 
             // Then
             assertThat(mockServer.createTaskRequests).containsExactly(context.createTaskRequest())
-            assertIsDisplayed(TestTags.taskTitle(context.id))
+            assertIsDisplayed("task-title-${context.id}")
         }
 
         @Test
@@ -127,17 +126,17 @@ class CreateTaskIntegrationTest {
             clickSubmitForm()
 
             // Then
-            assertTextEquals(TestTags.TITLE_ERROR, "Title must not exceed 100 characters")
+            assertTextEquals("title-error", "Title must not exceed 100 characters")
             assertThat(mockServer.createTaskRequests).isEmpty()
 
             // When
-            composeTestRule.onNodeWithTag(TestTags.CREATE_TASK_TITLE_INPUT).performTextClearance()
+            composeTestRule.onNodeWithTag("create-task-title-input").performTextClearance()
             setTitle(context.title)
             submitCreateForm()
 
             // Then
             assertThat(mockServer.createTaskRequests).containsExactly(context.createTaskRequest())
-            assertIsDisplayed(TestTags.taskTitle(context.id))
+            assertIsDisplayed("task-title-${context.id}")
         }
 
         @Test
@@ -153,15 +152,15 @@ class CreateTaskIntegrationTest {
             setDescription(context.description.toString())
 
             // When
-            runAsyncAction { onNodeWithTag(TestTags.CLOSE_BUTTON).performClick() }
+            runAsyncAction { onNodeWithTag("close-button").performClick() }
 
             // And
             openCreateForm()
 
             // Then
             assertThat(mockServer.createTaskRequests).isEmpty()
-            assertTextEquals(TestTags.CREATE_TASK_TITLE_INPUT, "")
-            assertTextEquals(TestTags.TASK_DESCRIPTION_INPUT, "")
+            assertTextEquals("create-task-title-input", "")
+            assertTextEquals("task-description-input", "")
         }
 
         @Test
@@ -183,7 +182,7 @@ class CreateTaskIntegrationTest {
             clickSubmitForm()
 
             // Then
-            assertTextEquals(TestTags.SAVE_ERROR, "Request failed (500)")
+            assertTextEquals("save-error", "Request failed (500)")
             assertThat(mockServer.createTaskRequests).containsExactly(context.createTaskRequest())
 
             // When
@@ -194,7 +193,7 @@ class CreateTaskIntegrationTest {
                 context.createTaskRequest(),
                 context.createTaskRequest(),
             )
-            assertIsDisplayed(TestTags.taskTitle(context.id))
+            assertIsDisplayed("task-title-${context.id}")
         }
 
         @Test
@@ -209,9 +208,9 @@ class CreateTaskIntegrationTest {
             openCreateForm()
 
             // Then
-            assertTextEquals(TestTags.MODAL_TITLE, "Nueva tarea")
-            assertTextEquals(TestTags.FIELD_TITLE_LABEL, "Título *")
-            assertTextEquals(TestTags.CREATE_BUTTON, "Crear")
+            assertTextEquals("modal-title", "Nueva tarea")
+            assertTextEquals("field-title-label", "Título *")
+            assertTextEquals("create-button", "Crear")
         }
     }
 
@@ -237,7 +236,7 @@ class CreateTaskIntegrationTest {
             submitCreateForm()
 
             // Then
-            assertIsDisplayed(TestTags.taskTitle(context.id))
+            assertIsDisplayed("task-title-${context.id}")
         }
 
         companion object {
@@ -270,7 +269,7 @@ class CreateTaskIntegrationTest {
             submitCreateForm()
 
             // Then
-            assertIsDisplayed(TestTags.ADD_TASK_BUTTON)
+            assertIsDisplayed("add-task-button")
         }
 
         companion object {
@@ -301,9 +300,9 @@ class CreateTaskIntegrationTest {
             clickSubmitForm()
 
             // Then
-            assertTextEquals(TestTags.SAVE_ERROR, failureCase.expectedSaveError)
+            assertTextEquals("save-error", failureCase.expectedSaveError)
             assertThat(mockServer.createTaskRequests).containsExactly(context.createTaskRequest())
-            assertIsDisplayed(TestTags.CREATE_TASK_TITLE_INPUT)
+            assertIsDisplayed("create-task-title-input")
         }
 
         companion object {

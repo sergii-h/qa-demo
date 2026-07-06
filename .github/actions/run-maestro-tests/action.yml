@@ -1,0 +1,74 @@
+name: Run Maestro React Native E2E tests
+description: Build the Expo app, install it on an emulator, and run Maestro suites
+
+inputs:
+  npm-script:
+    description: npm script to run in e2e/maestro (e2e, uat, or accessibility)
+    required: true
+  api-base-url:
+    description: API base URL baked into the Android build
+    required: true
+  test-label:
+    description: Label for the test run step
+    required: true
+  artifact-name:
+    description: Allure artifact name
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Enable KVM
+      shell: bash
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: npm
+        cache-dependency-path: |
+          demo-react-native/package-lock.json
+          e2e/maestro/package-lock.json
+
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '17'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        packages: platform-tools platforms;android-35 build-tools;35.0.0
+
+    - name: Install Maestro runner dependencies
+      shell: bash
+      working-directory: e2e/maestro
+      run: npm ci
+
+    - name: Install Maestro CLI
+      shell: bash
+      run: |
+        curl -Ls "https://get.maestro.mobile.dev" | bash
+        echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+    - name: Run Maestro tests on emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 34
+        target: google_apis
+        arch: x86_64
+        disable-animations: true
+        emulator-boot-timeout: 900
+        script: bash e2e/maestro/scripts/run-android-maestro-ci.sh "${{ inputs.api-base-url }}" "${{ inputs.npm-script }}"
+
+    - name: Upload allure results
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: e2e/maestro/allure-results
+        retention-days: 7
+        if-no-files-found: warn

@@ -1,0 +1,26 @@
+appId: ${MAESTRO_APP_ID}
+env:
+  TASK_TITLE: ${TASK_TITLE}
+---
+- extendedWaitUntil:
+    notVisible:
+      id: loading-spinner
+    timeout: 5000
+- extendedWaitUntil:
+    notVisible:
+      id: empty-tasks
+    timeout: 2000
+- scrollUntilVisible:
+    element:
+      text: ${TASK_TITLE}
+    direction: DOWN
+    timeout: 10000
+    speed: 80
+- scrollUntilVisible:
+    element:
+      text: ${TASK_TITLE}
+    direction: UP
+    timeout: 5000
+    speed: 80
+- assertVisible:
+    text: ${TASK_TITLE}

@@ -1,0 +1,24 @@
+name: Run UAT tests (Maestro React Native iOS — full app)
+
+# Not invoked from react-native-e2e.yml: GitHub-hosted macOS ARM runners cannot run
+# Docker/Colima (Apple virtualization is unavailable). Run iOS UAT locally instead.
+on:
+  workflow_dispatch:
+
+jobs:
+  run-tests:
+    runs-on: macos-15
+    timeout-minutes: 5
+
+    steps:
+      - name: iOS UAT requires a local Mac with Docker
+        shell: bash
+        run: |
+          echo "::error::iOS UAT is not supported on GitHub-hosted macOS runners. Docker/Colima cannot start because hardware virtualization is unavailable on these machines."
+          echo ""
+          echo "Run locally from e2e/maestro (with the full stack on localhost:8080):"
+          echo "  docker compose -f ../../docker/docker-compose/run-application.yml up -d --build"
+          echo "  npm run build:ios:uat"
+          echo "  npm run install:ios"
+          echo "  npm run test:uat"
+          exit 1

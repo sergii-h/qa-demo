@@ -49,7 +49,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.demo.R
 import com.example.demo.data.model.Task
 import com.example.demo.repository.TaskRepository
-import com.example.demo.ui.TestTags
 import com.example.demo.ui.components.LanguageSwitcher
 import com.example.demo.ui.components.PriorityChip
 import com.example.demo.ui.components.StatusChip
@@ -96,7 +95,7 @@ fun TaskListScreen(
                 title = {
                     Text(
                         text = stringResource(R.string.tasks_title),
-                        modifier = Modifier.testTag(TestTags.PAGE_TITLE),
+                        modifier = Modifier.testTag("page-title"),
                     )
                 },
                 actions = {
@@ -107,7 +106,7 @@ fun TaskListScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onCreateTask,
-                modifier = Modifier.testTag(TestTags.ADD_TASK_BUTTON),
+                modifier = Modifier.testTag("add-task-button"),
             ) {
                 Icon(
                     Icons.Default.Add,
@@ -115,7 +114,7 @@ fun TaskListScreen(
                 )
             }
         },
-        snackbarHost = { SnackbarHost(snackbarHostState, modifier = Modifier.testTag(TestTags.ERROR_SNACKBAR)) }
+        snackbarHost = { SnackbarHost(snackbarHostState, modifier = Modifier.testTag("error-snackbar")) }
     ) { padding ->
         PullToRefreshBox(
             state = pullToRefreshState,
@@ -137,13 +136,13 @@ fun TaskListScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .testTag(TestTags.REFRESHING),
+                        .testTag("refreshing"),
                 )
             }
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .testTag(TestTags.TASK_LIST),
+                    .testTag("task-list"),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
@@ -157,7 +156,7 @@ fun TaskListScreen(
                                 contentAlignment = Alignment.Center,
                             ) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier.testTag(TestTags.LOADING_SPINNER),
+                                    modifier = Modifier.testTag("loading-spinner"),
                                 )
                             }
                         }
@@ -167,7 +166,7 @@ fun TaskListScreen(
                             Box(
                                 modifier = Modifier
                                     .fillParentMaxSize()
-                                    .testTag(TestTags.EMPTY_TASKS),
+                                    .testTag("empty-tasks"),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(
@@ -206,7 +205,7 @@ private fun TaskRow(
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = task.title,
-                modifier = Modifier.testTag(TestTags.taskTitle(task.id)),
+                modifier = Modifier.testTag("task-title-${task.id}"),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -222,7 +221,7 @@ private fun TaskRow(
             ) {
                 IconButton(
                     onClick = onInfo,
-                    modifier = Modifier.testTag(TestTags.infoButton(task.id)),
+                    modifier = Modifier.testTag("info-button-${task.id}"),
                 ) {
                     Icon(
                         Icons.Default.Info,
@@ -231,7 +230,7 @@ private fun TaskRow(
                 }
                 IconButton(
                     onClick = onEdit,
-                    modifier = Modifier.testTag(TestTags.editButton(task.id)),
+                    modifier = Modifier.testTag("edit-button-${task.id}"),
                 ) {
                     Icon(
                         Icons.Default.Edit,
@@ -241,7 +240,7 @@ private fun TaskRow(
                 IconButton(
                     onClick = onDelete,
                     enabled = !isDeleting,
-                    modifier = Modifier.testTag(TestTags.deleteButton(task.id)),
+                    modifier = Modifier.testTag("delete-button-${task.id}"),
                 ) {
                     Icon(
                         Icons.Default.Delete,

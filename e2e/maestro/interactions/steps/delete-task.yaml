@@ -1,0 +1,15 @@
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    file: ../pages/scroll-until-visible-in-task-list.yaml
+    env:
+      SCROLL_TARGET_ID: delete-button-.*
+      TASK_TITLE: ${TASK_TITLE}
+- tapOn:
+    id: delete-button-.*
+    below:
+      text: ${TASK_TITLE}
+- extendedWaitUntil:
+    notVisible:
+      text: ${TASK_TITLE}
+    timeout: 15000

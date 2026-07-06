@@ -20,7 +20,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import com.example.demo.R
 import com.example.demo.locale.AppLocale
-import com.example.demo.ui.TestTags
 
 @Composable
 fun LanguageSwitcher(modifier: Modifier = Modifier) {
@@ -37,7 +36,7 @@ fun LanguageSwitcher(modifier: Modifier = Modifier) {
     TextButton(
         onClick = { expanded = true },
         modifier = modifier
-            .testTag(TestTags.LANGUAGE_SWITCHER)
+            .testTag("language-switcher")
             .semantics { contentDescription = accessibilityLabel },
     ) {
         Text(
@@ -56,7 +55,7 @@ fun LanguageSwitcher(modifier: Modifier = Modifier) {
                 expanded = false
                 AppLocale.setLanguage(context, AppLocale.ENGLISH)
             },
-            modifier = Modifier.testTag(TestTags.LANGUAGE_OPTION_EN),
+            modifier = Modifier.testTag("language-option-en"),
         )
         DropdownMenuItem(
             text = { Text(stringResource(R.string.language_es)) },
@@ -64,7 +63,7 @@ fun LanguageSwitcher(modifier: Modifier = Modifier) {
                 expanded = false
                 AppLocale.setLanguage(context, AppLocale.SPANISH)
             },
-            modifier = Modifier.testTag(TestTags.LANGUAGE_OPTION_ES),
+            modifier = Modifier.testTag("language-option-es"),
         )
     }
 }

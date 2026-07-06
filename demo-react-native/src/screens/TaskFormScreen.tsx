@@ -9,7 +9,6 @@ import {TaskFormMode, useTaskForm} from '@/hooks/useTaskForm';
 import {taskPriorityLabel, taskStatusLabel} from '@/i18n/taskLabels';
 import {RootStackParamList} from '@/navigation/types';
 import {TaskPriority, TaskStatus} from '@/data/models/task';
-import {TestTags} from '@/testTags';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateTask' | 'EditTask'>;
 
@@ -51,24 +50,27 @@ export function TaskFormScreen({ navigation, route }: Props) {
         <Appbar.BackAction
           onPress={() => navigation.goBack()}
           accessibilityLabel={t('back')}
-          testID={TestTags.CLOSE_BUTTON}
+          testID='close-button'
         />
         <Appbar.Content
           title={t(isEdit ? 'editTask' : 'newTask')}
-          testID={TestTags.MODAL_TITLE}
+          testID='modal-title'
         />
       </Appbar.Header>
 
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator testID={TestTags.LOADING_SPINNER} size="large" />
+          <ActivityIndicator testID='loading-spinner' size="large" />
         </View>
       ) : loadError ? (
         <View style={styles.centered}>
-          <Text testID={TestTags.LOAD_ERROR}>{loadError}</Text>
+          <Text testID='load-error'>{loadError}</Text>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.form}>
+        <ScrollView
+          contentContainerStyle={styles.form}
+          keyboardShouldPersistTaps="handled"
+        >
           <TextInput
             label={t('fieldTitle')}
             value={title}
@@ -77,15 +79,15 @@ export function TaskFormScreen({ navigation, route }: Props) {
             error={Boolean(titleError)}
             testID={
               isEdit
-                ? TestTags.EDIT_TASK_TITLE_INPUT
-                : TestTags.CREATE_TASK_TITLE_INPUT
+                ? 'edit-task-title-input'
+                : 'create-task-title-input'
             }
           />
           {titleError ? (
             <Text
               variant="bodySmall"
               style={styles.error}
-              testID={TestTags.TITLE_ERROR}
+              testID='title-error'
             >
               {titleError}
             </Text>
@@ -98,7 +100,7 @@ export function TaskFormScreen({ navigation, route }: Props) {
             mode="outlined"
             multiline
             numberOfLines={4}
-            testID={TestTags.TASK_DESCRIPTION_INPUT}
+            testID='task-description-input'
           />
 
           <EnumPicker
@@ -107,8 +109,8 @@ export function TaskFormScreen({ navigation, route }: Props) {
             options={Object.values(TaskStatus)}
             optionLabel={(value) => taskStatusLabel(t, value)}
             onSelected={onStatusChange}
-            testID={TestTags.STATUS_DROPDOWN}
-            optionTestID={TestTags.statusDropdownOption}
+            testID='status-dropdown'
+            optionTestID={(status) => `status-dropdown-option-${status}`}
           />
 
           <EnumPicker
@@ -117,15 +119,15 @@ export function TaskFormScreen({ navigation, route }: Props) {
             options={Object.values(TaskPriority)}
             optionLabel={(value) => taskPriorityLabel(t, value)}
             onSelected={onPriorityChange}
-            testID={TestTags.PRIORITY_DROPDOWN}
-            optionTestID={TestTags.priorityDropdownOption}
+            testID='priority-dropdown'
+            optionTestID={(priority) => `priority-dropdown-option-${priority}`}
           />
 
           {saveError ? (
             <Text
               variant="bodySmall"
               style={styles.error}
-              testID={TestTags.SAVE_ERROR}
+              testID='save-error'
             >
               {saveError}
             </Text>
@@ -135,12 +137,12 @@ export function TaskFormScreen({ navigation, route }: Props) {
             mode="contained"
             onPress={() => void save()}
             disabled={!title.trim() || isSaving}
-            testID={isEdit ? TestTags.SAVE_BUTTON : TestTags.CREATE_BUTTON}
+            testID={isEdit ? 'save-button' : 'create-button'}
             style={styles.submitButton}
           >
             {isSaving ? (
               <ActivityIndicator
-                testID={TestTags.LOADING_SPINNER}
+                testID='loading-spinner'
                 size="small"
                 color="#FFFFFF"
               />

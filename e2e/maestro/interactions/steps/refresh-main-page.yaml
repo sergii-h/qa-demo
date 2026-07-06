@@ -1,0 +1,13 @@
+appId: ${MAESTRO_APP_ID}
+---
+- swipe:
+    start: 50%, 30%
+    end: 50%, 80%
+    duration: 400
+- extendedWaitUntil:
+    notVisible:
+      id: refreshing
+    timeout: 15000
+- runFlow:
+    label: Wait for main page
+    file: ../pages/wait-for-main-page.yaml

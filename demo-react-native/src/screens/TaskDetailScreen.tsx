@@ -6,7 +6,6 @@ import {useTranslation} from 'react-i18next';
 import {PriorityChip, StatusChip} from '@/components/TaskChips';
 import {useTaskDetail} from '@/hooks/useTaskDetail';
 import {RootStackParamList} from '@/navigation/types';
-import {TestTags} from '@/testTags';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TaskDetail'>;
 
@@ -46,29 +45,29 @@ export function TaskDetailScreen({ navigation, route }: Props) {
         <Appbar.BackAction
           onPress={() => navigation.goBack()}
           accessibilityLabel={t('back')}
-          testID={TestTags.CLOSE_BUTTON}
+          testID='close-button'
         />
         <Appbar.Content
           title={task?.title ?? t('taskInfo')}
-          testID={TestTags.MODAL_TITLE}
+          testID='modal-title'
         />
       </Appbar.Header>
 
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator testID={TestTags.LOADING_SPINNER} size="large" />
+          <ActivityIndicator testID='loading-spinner' size="large" />
         </View>
       ) : errorMessage ? (
         <View style={styles.centered}>
-          <Text testID={TestTags.LOAD_ERROR}>{errorMessage}</Text>
+          <Text testID='load-error'>{errorMessage}</Text>
         </View>
       ) : task ? (
         <View style={styles.content}>
           <DetailField
             label={t('detailDescription')}
-            labelTestID={TestTags.DETAIL_DESCRIPTION_LABEL}
+            labelTestID={'detail-description-label'}
           >
-            <Text variant="bodyLarge" testID={TestTags.DESCRIPTION}>
+            <Text variant="bodyLarge" testID='description'>
               {task.description?.trim() || t('noDescription')}
             </Text>
           </DetailField>
@@ -82,7 +81,7 @@ export function TaskDetailScreen({ navigation, route }: Props) {
           </DetailField>
 
           <DetailField label={t('detailCreated')}>
-            <Text variant="bodyLarge" testID={TestTags.CREATED_DATE}>
+            <Text variant="bodyLarge" testID='created-date'>
               {formatDate(
                 task.createdDate,
                 i18n.language,
@@ -93,7 +92,7 @@ export function TaskDetailScreen({ navigation, route }: Props) {
           </DetailField>
 
           <DetailField label={t('detailLastUpdated')}>
-            <Text variant="bodyLarge" testID={TestTags.UPDATED_DATE}>
+            <Text variant="bodyLarge" testID='updated-date'>
               {formatDate(
                 task.updatedDate,
                 i18n.language,
@@ -105,12 +104,12 @@ export function TaskDetailScreen({ navigation, route }: Props) {
 
           <DetailField
             label={t('detailValidated')}
-            labelTestID={TestTags.DETAIL_VALIDATED_LABEL}
+            labelTestID={'detail-validated-label'}
           >
             <Text
               variant="headlineSmall"
               style={{ color: isValid ? theme.colors.primary : theme.colors.error }}
-              testID={isValid ? TestTags.VALID : TestTags.NOT_VALID}
+              testID={isValid ? 'valid' : 'notValid'}
               accessibilityLabel={t(isValid ? 'valid' : 'notValid')}
             >
               {isValid ? '✓' : '✕'}

@@ -1,0 +1,6 @@
+appId: ${MAESTRO_APP_ID}
+---
+- tapOn:
+    id: save-button
+- runFlow:
+    file: ../pages/wait-for-main-page.yaml

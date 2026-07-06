@@ -1,0 +1,27 @@
+{
+  "name": "maestro-react-native-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:e2e && npm run test:accessibility && npm run test:uat",
+    "test:e2e": "tsx runSuite.ts mocked",
+    "test:mock": "npm run test:e2e",
+    "test:accessibility": "tsx runSuite.ts accessibility",
+    "test:uat": "tsx runSuite.ts uat",
+    "build:android:wiremock": "bash scripts/build-android-app.sh http://10.0.2.2:8085/v1/",
+    "build:android:uat": "bash scripts/build-android-app.sh http://10.0.2.2:8080/v1/",
+    "install:android": "bash scripts/install-android-app.sh",
+    "build:ios:wiremock": "bash scripts/build-ios-app.sh http://localhost:8085/v1/",
+    "build:ios:uat": "bash scripts/build-ios-app.sh http://localhost:8080/v1/",
+    "install:ios": "bash scripts/install-ios-app.sh",
+    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:serve": "allure serve allure-results"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "allure-js-commons": "^3.0.0",
+    "dotenv": "^16.4.5",
+    "tsx": "^4.19.4",
+    "typescript": "^5.4.5"
+  }
+}

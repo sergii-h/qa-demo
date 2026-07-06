@@ -4,22 +4,21 @@ import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import com.example.demo.MainActivity
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.ui.TestTags
 
 class CreateTaskForm(
     rule: AndroidComposeTestRule<*, MainActivity>,
 ) : ComposePage(rule) {
-    fun createButton() = node(TestTags.CREATE_BUTTON)
+    fun createButton() = node("create-button")
 
-    fun titleField() = node(TestTags.CREATE_TASK_TITLE_INPUT)
+    fun titleField() = node("create-task-title-input")
 
-    fun descriptionField() = node(TestTags.TASK_DESCRIPTION_INPUT)
+    fun descriptionField() = node("task-description-input")
 
-    fun statusDropdown() = node(TestTags.STATUS_DROPDOWN)
+    fun statusDropdown() = node("status-dropdown")
 
-    fun priorityDropdown() = node(TestTags.PRIORITY_DROPDOWN)
+    fun priorityDropdown() = node("priority-dropdown")
 
-    fun statusOption(status: TaskStatus) = node(TestTags.statusDropdownOption(status))
+    fun statusOption(status: TaskStatus) = node("status-dropdown-option-${status.name}")
 
-    fun priorityOption(priority: TaskPriority) = node(TestTags.priorityDropdownOption(priority))
+    fun priorityOption(priority: TaskPriority) = node("priority-dropdown-option-${priority.name}")
 }

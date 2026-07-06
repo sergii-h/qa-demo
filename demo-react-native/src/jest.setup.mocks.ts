@@ -3,6 +3,12 @@ jest.mock('react-native-safe-area-context', () => {
   return mock.default ?? mock;
 });
 
+jest.mock('expo-font', () => ({
+  loadAsync: jest.fn().mockResolvedValue(undefined),
+  isLoaded: jest.fn().mockReturnValue(true),
+  useFonts: () => [true],
+}));
+
 jest.mock('@expo/vector-icons', () => {
   const React = require('react');
   const { Text } = require('react-native');

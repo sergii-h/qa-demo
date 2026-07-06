@@ -11,38 +11,37 @@ import androidx.compose.ui.test.swipeDown
 import com.example.demo.MainActivity
 import com.example.demo.data.model.TaskPriority
 import com.example.demo.data.model.TaskStatus
-import com.example.demo.ui.TestTags
 
 class MainPage(
     rule: AndroidComposeTestRule<*, MainActivity>,
 ) : ComposePage(rule) {
-    fun createTaskButton() = node(TestTags.ADD_TASK_BUTTON)
+    fun createTaskButton() = node("add-task-button")
 
-    fun pageTitle() = node(TestTags.PAGE_TITLE)
+    fun pageTitle() = node("page-title")
 
-    fun taskTitle(taskId: String) = node(TestTags.taskTitle(taskId))
+    fun taskTitle(taskId: String) = node("task-title-${taskId}")
 
     fun taskTitleByTitle(title: String) = rule.onNode(
         hasText(title.trim()) and PageSemantics.hasTestTagPrefix("task-title-"),
     )
 
-    fun infoButton(taskId: String) = node(TestTags.infoButton(taskId))
+    fun infoButton(taskId: String) = node("info-button-${taskId}")
 
-    fun editButton(taskId: String) = node(TestTags.editButton(taskId))
+    fun editButton(taskId: String) = node("edit-button-${taskId}")
 
-    fun deleteButton(taskId: String) = node(TestTags.deleteButton(taskId))
+    fun deleteButton(taskId: String) = node("delete-button-${taskId}")
 
-    fun statusTag(status: TaskStatus) = node(TestTags.statusTag(status))
+    fun statusTag(status: TaskStatus) = node("status-tag-${status.name}")
 
-    fun priorityTag(priority: TaskPriority) = node(TestTags.priorityTag(priority))
+    fun priorityTag(priority: TaskPriority) = node("priority-tag-${priority.name}")
 
     fun waitUntilReady() {
         rule.waitUntil(timeoutMillis = 10_000) {
-            rule.onAllNodesWithTag(TestTags.LOADING_SPINNER).fetchSemanticsNodes().isEmpty() &&
+            rule.onAllNodesWithTag("loading-spinner").fetchSemanticsNodes().isEmpty() &&
                 (
-                    rule.onAllNodesWithTag(TestTags.ADD_TASK_BUTTON).fetchSemanticsNodes().isNotEmpty() ||
-                        rule.onAllNodesWithTag(TestTags.EMPTY_TASKS).fetchSemanticsNodes().isNotEmpty() ||
-                        rule.onAllNodesWithTag(TestTags.LOAD_ERROR).fetchSemanticsNodes().isNotEmpty()
+                    rule.onAllNodesWithTag("add-task-button").fetchSemanticsNodes().isNotEmpty() ||
+                        rule.onAllNodesWithTag("empty-tasks").fetchSemanticsNodes().isNotEmpty() ||
+                        rule.onAllNodesWithTag("load-error").fetchSemanticsNodes().isNotEmpty()
                     )
         }
     }
@@ -64,13 +63,13 @@ class MainPage(
     }
 
     fun waitUntilCreateTaskButtonPresent() =
-        waitUntilPresent(TestTags.ADD_TASK_BUTTON)
+        waitUntilPresent("add-task-button")
 
-    fun waitUntilLoadingSpinnerAbsent() = waitUntilAbsent(TestTags.LOADING_SPINNER)
+    fun waitUntilLoadingSpinnerAbsent() = waitUntilAbsent("loading-spinner")
 
     fun pullToRefresh() {
-        waitUntilPresent(TestTags.TASK_LIST)
-        node(TestTags.TASK_LIST).performTouchInput {
+        waitUntilPresent("task-list")
+        node("task-list").performTouchInput {
             swipeDown(
                 startY = top + height * 0.05f,
                 endY = top + height * 0.95f,
@@ -85,7 +84,7 @@ class MainPage(
         }.isSuccess
         if (refreshStarted) {
             rule.waitUntil(timeoutMillis = timeoutMillis) {
-                rule.onAllNodesWithTag(TestTags.REFRESHING).fetchSemanticsNodes().isEmpty()
+                rule.onAllNodesWithTag("refreshing").fetchSemanticsNodes().isEmpty()
             }
         }
         rule.waitForIdle()
@@ -94,7 +93,7 @@ class MainPage(
 
     private fun waitUntilRefreshing(timeoutMillis: Long = 5_000) {
         rule.waitUntil(timeoutMillis = timeoutMillis) {
-            rule.onAllNodesWithTag(TestTags.REFRESHING).fetchSemanticsNodes().isNotEmpty()
+            rule.onAllNodesWithTag("refreshing").fetchSemanticsNodes().isNotEmpty()
         }
     }
 }

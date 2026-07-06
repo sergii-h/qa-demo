@@ -3,7 +3,6 @@ import {fireEvent, RenderAPI, waitFor} from '@testing-library/react-native';
 import {TaskFormScreen} from './TaskFormScreen';
 import {TaskPriority, TaskStatus} from '@/data/models/task';
 import {mockFetchResponse} from '@/test-utils/mockFetch';
-import {TestTags} from '@/testTags';
 import {renderWithProviders} from '@/test-utils/renderWithProviders';
 
 async function selectEnumOption(
@@ -11,25 +10,23 @@ async function selectEnumOption(
   dropdownTestId: string,
   optionTestId: string,
 ) {
-  const adornmentIndex = dropdownTestId === TestTags.STATUS_DROPDOWN ? 0 : 1;
-  const adornments = screen.getAllByTestId('right-icon-adornment');
-  fireEvent.press(adornments[adornmentIndex]);
+  fireEvent.press(screen.getByTestId(`${dropdownTestId}-open`));
   fireEvent.press(await screen.findByTestId(optionTestId));
 }
 
 async function selectStatus(screen: RenderAPI, status: TaskStatus) {
   await selectEnumOption(
     screen,
-    TestTags.STATUS_DROPDOWN,
-    TestTags.statusDropdownOption(status),
+    'status-dropdown',
+    `status-dropdown-option-${status}`,
   );
 }
 
 async function selectPriority(screen: RenderAPI, priority: TaskPriority) {
   await selectEnumOption(
     screen,
-    TestTags.PRIORITY_DROPDOWN,
-    TestTags.priorityDropdownOption(priority),
+    'priority-dropdown',
+    `priority-dropdown-option-${priority}`,
   );
 }
 
@@ -77,19 +74,19 @@ describe('TaskFormScreen integration', () => {
         <TaskFormScreen navigation={navigation as never} route={createRoute as never} />,
       );
 
-      fireEvent.changeText(screen.getByTestId(TestTags.CREATE_TASK_TITLE_INPUT), 'Test Task');
+      fireEvent.changeText(screen.getByTestId('create-task-title-input'), 'Test Task');
       fireEvent.changeText(
-        screen.getByTestId(TestTags.TASK_DESCRIPTION_INPUT),
+        screen.getByTestId('task-description-input'),
         'Test Description',
       );
       await selectStatus(screen, TaskStatus.IN_PROGRESS);
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.STATUS_DROPDOWN)).toHaveDisplayValue('In Progress');
+        expect(screen.getByTestId('status-dropdown')).toHaveDisplayValue('In Progress');
       });
       await selectPriority(screen, TaskPriority.HIGH);
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.CREATE_BUTTON));
+      fireEvent.press(screen.getByTestId('create-button'));
 
       // Then
       await waitFor(() => {
@@ -130,10 +127,10 @@ describe('TaskFormScreen integration', () => {
         <TaskFormScreen navigation={navigation as never} route={createRoute as never} />,
       );
 
-      fireEvent.changeText(screen.getByTestId(TestTags.CREATE_TASK_TITLE_INPUT), 'Test Task');
+      fireEvent.changeText(screen.getByTestId('create-task-title-input'), 'Test Task');
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.CREATE_BUTTON));
+      fireEvent.press(screen.getByTestId('create-button'));
 
       // Then
       await waitFor(() => {
@@ -174,21 +171,21 @@ describe('TaskFormScreen integration', () => {
       );
 
       fireEvent.changeText(
-        screen.getByTestId(TestTags.CREATE_TASK_TITLE_INPUT),
+        screen.getByTestId('create-task-title-input'),
         'a'.repeat(101),
       );
-      fireEvent.press(screen.getByTestId(TestTags.CREATE_BUTTON));
+      fireEvent.press(screen.getByTestId('create-button'));
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.TITLE_ERROR)).toBeVisible();
+        expect(screen.getByTestId('title-error')).toBeVisible();
       });
 
       // When
       fireEvent.changeText(
-        screen.getByTestId(TestTags.CREATE_TASK_TITLE_INPUT),
+        screen.getByTestId('create-task-title-input'),
         'Corrected title',
       );
       await selectPriority(screen, TaskPriority.HIGH);
-      fireEvent.press(screen.getByTestId(TestTags.CREATE_BUTTON));
+      fireEvent.press(screen.getByTestId('create-button'));
 
       // Then
       await waitFor(() => {
@@ -206,16 +203,16 @@ describe('TaskFormScreen integration', () => {
       );
 
       fireEvent.changeText(
-        screen.getByTestId(TestTags.CREATE_TASK_TITLE_INPUT),
+        screen.getByTestId('create-task-title-input'),
         'Temporary title',
       );
       fireEvent.changeText(
-        screen.getByTestId(TestTags.TASK_DESCRIPTION_INPUT),
+        screen.getByTestId('task-description-input'),
         'Temporary description',
       );
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.CLOSE_BUTTON));
+      fireEvent.press(screen.getByTestId('close-button'));
       screen.unmount();
       const reopened = renderWithProviders(
         <TaskFormScreen navigation={navigation as never} route={createRoute as never} />,
@@ -223,8 +220,8 @@ describe('TaskFormScreen integration', () => {
 
       // Then
       expect(navigation.goBack).toHaveBeenCalled();
-      expect(reopened.getByTestId(TestTags.CREATE_TASK_TITLE_INPUT).props.value).toBe('');
-      expect(reopened.getByTestId(TestTags.TASK_DESCRIPTION_INPUT).props.value).toBe('');
+      expect(reopened.getByTestId('create-task-title-input').props.value).toBe('');
+      expect(reopened.getByTestId('task-description-input').props.value).toBe('');
     });
 
     it('should allow retry and create task after initial POST failure', async () => {
@@ -248,19 +245,19 @@ describe('TaskFormScreen integration', () => {
         <TaskFormScreen navigation={navigation as never} route={createRoute as never} />,
       );
 
-      fireEvent.changeText(screen.getByTestId(TestTags.CREATE_TASK_TITLE_INPUT), 'Retry Task');
+      fireEvent.changeText(screen.getByTestId('create-task-title-input'), 'Retry Task');
       fireEvent.changeText(
-        screen.getByTestId(TestTags.TASK_DESCRIPTION_INPUT),
+        screen.getByTestId('task-description-input'),
         'Retry Description',
       );
       await selectPriority(screen, TaskPriority.HIGH);
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.CREATE_BUTTON));
+      fireEvent.press(screen.getByTestId('create-button'));
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.SAVE_ERROR)).toBeVisible();
+        expect(screen.getByTestId('save-error')).toBeVisible();
       });
-      fireEvent.press(screen.getByTestId(TestTags.CREATE_BUTTON));
+      fireEvent.press(screen.getByTestId('create-button'));
 
       // Then
       await waitFor(() => {
@@ -293,13 +290,13 @@ describe('TaskFormScreen integration', () => {
       );
 
       fireEvent.changeText(
-        screen.getByTestId(TestTags.CREATE_TASK_TITLE_INPUT),
+        screen.getByTestId('create-task-title-input'),
         'Task with refresh failure',
       );
       await selectPriority(screen, TaskPriority.HIGH);
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.CREATE_BUTTON));
+      fireEvent.press(screen.getByTestId('create-button'));
 
       // Then
       await waitFor(() => {
@@ -325,16 +322,16 @@ describe('TaskFormScreen integration', () => {
         <TaskFormScreen navigation={navigation as never} route={createRoute as never} />,
       );
 
-      fireEvent.changeText(screen.getByTestId(TestTags.CREATE_TASK_TITLE_INPUT), 'Invalid Task');
+      fireEvent.changeText(screen.getByTestId('create-task-title-input'), 'Invalid Task');
       await selectPriority(screen, TaskPriority.HIGH);
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.CREATE_BUTTON));
+      fireEvent.press(screen.getByTestId('create-button'));
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.SAVE_ERROR)).toBeVisible();
-        expect(screen.getByTestId(TestTags.CREATE_TASK_TITLE_INPUT)).toBeVisible();
+        expect(screen.getByTestId('save-error')).toBeVisible();
+        expect(screen.getByTestId('create-task-title-input')).toBeVisible();
       });
     });
   });
@@ -370,13 +367,13 @@ describe('TaskFormScreen integration', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT)).toBeVisible();
+        expect(screen.getByTestId('edit-task-title-input')).toBeVisible();
       });
 
-      fireEvent.changeText(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT), 'Updated title');
+      fireEvent.changeText(screen.getByTestId('edit-task-title-input'), 'Updated title');
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.SAVE_BUTTON));
+      fireEvent.press(screen.getByTestId('save-button'));
 
       // Then
       await waitFor(() => {
@@ -429,13 +426,13 @@ describe('TaskFormScreen integration', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.TASK_DESCRIPTION_INPUT)).toBeVisible();
+        expect(screen.getByTestId('task-description-input')).toBeVisible();
       });
 
-      fireEvent.changeText(screen.getByTestId(TestTags.TASK_DESCRIPTION_INPUT), '');
+      fireEvent.changeText(screen.getByTestId('task-description-input'), '');
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.SAVE_BUTTON));
+      fireEvent.press(screen.getByTestId('save-button'));
 
       // Then
       await waitFor(() => {
@@ -480,13 +477,13 @@ describe('TaskFormScreen integration', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT)).toBeVisible();
+        expect(screen.getByTestId('edit-task-title-input')).toBeVisible();
       });
 
-      fireEvent.changeText(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT), 'Unsaved title');
+      fireEvent.changeText(screen.getByTestId('edit-task-title-input'), 'Unsaved title');
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.CLOSE_BUTTON));
+      fireEvent.press(screen.getByTestId('close-button'));
 
       // Then
       expect(navigation.goBack).toHaveBeenCalled();
@@ -525,18 +522,18 @@ describe('TaskFormScreen integration', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT)).toBeVisible();
+        expect(screen.getByTestId('edit-task-title-input')).toBeVisible();
       });
 
-      fireEvent.changeText(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT), 'a'.repeat(101));
-      fireEvent.press(screen.getByTestId(TestTags.SAVE_BUTTON));
+      fireEvent.changeText(screen.getByTestId('edit-task-title-input'), 'a'.repeat(101));
+      fireEvent.press(screen.getByTestId('save-button'));
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.TITLE_ERROR)).toBeVisible();
+        expect(screen.getByTestId('title-error')).toBeVisible();
       });
 
       // When
-      fireEvent.changeText(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT), 'Corrected title');
-      fireEvent.press(screen.getByTestId(TestTags.SAVE_BUTTON));
+      fireEvent.changeText(screen.getByTestId('edit-task-title-input'), 'Corrected title');
+      fireEvent.press(screen.getByTestId('save-button'));
 
       // Then
       await waitFor(() => {
@@ -568,7 +565,7 @@ describe('TaskFormScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.LOAD_ERROR)).toBeVisible();
+        expect(screen.getByTestId('load-error')).toBeVisible();
       });
     });
 
@@ -605,16 +602,16 @@ describe('TaskFormScreen integration', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT)).toBeVisible();
+        expect(screen.getByTestId('edit-task-title-input')).toBeVisible();
       });
 
       fireEvent.changeText(
-        screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT),
+        screen.getByTestId('edit-task-title-input'),
         updatedTask.title,
       );
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.SAVE_BUTTON));
+      fireEvent.press(screen.getByTestId('save-button'));
 
       // Then
       await waitFor(() => {
@@ -656,17 +653,17 @@ describe('TaskFormScreen integration', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT)).toBeVisible();
+        expect(screen.getByTestId('edit-task-title-input')).toBeVisible();
       });
 
-      fireEvent.changeText(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT), 'Updated title');
+      fireEvent.changeText(screen.getByTestId('edit-task-title-input'), 'Updated title');
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.SAVE_BUTTON));
+      fireEvent.press(screen.getByTestId('save-button'));
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.SAVE_ERROR)).toBeVisible();
+        expect(screen.getByTestId('save-error')).toBeVisible();
       });
-      fireEvent.press(screen.getByTestId(TestTags.SAVE_BUTTON));
+      fireEvent.press(screen.getByTestId('save-button'));
 
       // Then
       await waitFor(() => {
@@ -704,18 +701,18 @@ describe('TaskFormScreen integration', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT)).toBeVisible();
+        expect(screen.getByTestId('edit-task-title-input')).toBeVisible();
       });
 
-      fireEvent.changeText(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT), 'Updated title');
+      fireEvent.changeText(screen.getByTestId('edit-task-title-input'), 'Updated title');
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.SAVE_BUTTON));
+      fireEvent.press(screen.getByTestId('save-button'));
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.SAVE_ERROR)).toBeVisible();
-        expect(screen.getByTestId(TestTags.EDIT_TASK_TITLE_INPUT)).toBeVisible();
+        expect(screen.getByTestId('save-error')).toBeVisible();
+        expect(screen.getByTestId('edit-task-title-input')).toBeVisible();
       });
     });
   });

@@ -6,7 +6,6 @@ import {TaskDetailScreen} from './TaskDetailScreen';
 import enMessages from '../locales/en/translation.json';
 import esMessages from '../locales/es/translation.json';
 import {mockFetchResponse} from '@/test-utils/mockFetch';
-import {TestTags} from '@/testTags';
 import {renderWithProviders} from '@/test-utils/renderWithProviders';
 import {trackTranslationCalls} from '@/test-utils/trackTranslationCalls';
 
@@ -51,7 +50,7 @@ describe('TaskDetailScreen translation', () => {
       <TaskDetailScreen navigation={navigation as never} route={detailRoute(task.id) as never} />,
     );
     await waitFor(() => {
-      expect(screen.getByTestId(TestTags.DESCRIPTION)).toBeTruthy();
+      expect(screen.getByTestId('description')).toBeTruthy();
     });
 
     // Then

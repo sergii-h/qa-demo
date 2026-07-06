@@ -1,0 +1,6 @@
+appId: ${MAESTRO_APP_ID}
+---
+- tapOn:
+    id: language-switcher
+- tapOn:
+    id: language-option-es

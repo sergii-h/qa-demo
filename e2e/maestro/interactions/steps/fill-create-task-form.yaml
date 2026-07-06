@@ -1,0 +1,24 @@
+appId: ${MAESTRO_APP_ID}
+---
+- tapOn:
+    id: create-task-title-input
+- inputText: ${TASK_TITLE}
+- tapOn:
+    id: task-description-input
+- inputText: ${TASK_DESCRIPTION}
+- tapOn:
+    id: status-dropdown-open
+- extendedWaitUntil:
+    visible:
+      id: status-dropdown-option-${TASK_STATUS}
+    timeout: 5000
+- tapOn:
+    id: status-dropdown-option-${TASK_STATUS}
+- tapOn:
+    id: priority-dropdown-open
+- extendedWaitUntil:
+    visible:
+      id: priority-dropdown-option-${TASK_PRIORITY}
+    timeout: 5000
+- tapOn:
+    id: priority-dropdown-option-${TASK_PRIORITY}

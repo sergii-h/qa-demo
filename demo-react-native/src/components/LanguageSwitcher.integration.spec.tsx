@@ -6,23 +6,22 @@ import {TaskListScreen} from '@/screens/TaskListScreen';
 import {TaskPriority, TaskStatus} from '@/data/models/task';
 import {ENGLISH, setLanguage} from '@/i18n';
 import {mockFetchResponse} from '@/test-utils/mockFetch';
-import {TestTags} from '@/testTags';
 import {renderWithProviders} from '@/test-utils/renderWithProviders';
 
 async function switchToSpanish(screen: RenderAPI) {
-  fireEvent.press(screen.getByTestId(TestTags.LANGUAGE_SWITCHER));
+  fireEvent.press(screen.getByTestId('language-switcher'));
   await waitFor(() => {
-    expect(screen.getByTestId(TestTags.LANGUAGE_OPTION_ES)).toBeOnTheScreen();
+    expect(screen.getByTestId('language-option-es')).toBeOnTheScreen();
   });
-  fireEvent.press(screen.getByTestId(TestTags.LANGUAGE_OPTION_ES));
+  fireEvent.press(screen.getByTestId('language-option-es'));
 }
 
 async function switchToEnglish(screen: RenderAPI) {
-  fireEvent.press(screen.getByTestId(TestTags.LANGUAGE_SWITCHER));
+  fireEvent.press(screen.getByTestId('language-switcher'));
   await waitFor(() => {
-    expect(screen.getByTestId(TestTags.LANGUAGE_OPTION_EN)).toBeOnTheScreen();
+    expect(screen.getByTestId('language-option-en')).toBeOnTheScreen();
   });
-  fireEvent.press(screen.getByTestId(TestTags.LANGUAGE_OPTION_EN));
+  fireEvent.press(screen.getByTestId('language-option-en'));
 }
 
 const navigation = {
@@ -56,16 +55,16 @@ describe('LanguageSwitcher integration', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId(TestTags.LANGUAGE_SWITCHER)).toBeVisible();
+      expect(screen.getByTestId('language-switcher')).toBeVisible();
     });
 
     // When
-    fireEvent.press(screen.getByTestId(TestTags.LANGUAGE_SWITCHER));
+    fireEvent.press(screen.getByTestId('language-switcher'));
 
     // Then
     await waitFor(() => {
-      expect(screen.getByTestId(TestTags.LANGUAGE_OPTION_EN)).toBeOnTheScreen();
-      expect(screen.getByTestId(TestTags.LANGUAGE_OPTION_ES)).toBeOnTheScreen();
+      expect(screen.getByTestId('language-option-en')).toBeOnTheScreen();
+      expect(screen.getByTestId('language-option-es')).toBeOnTheScreen();
     });
     });
 
@@ -81,16 +80,16 @@ describe('LanguageSwitcher integration', () => {
       <TaskListScreen navigation={navigation as never} route={route as never} />,
     );
     await waitFor(() => {
-      expect(screen.getByTestId(TestTags.taskTitle('1'))).toBeVisible();
+      expect(screen.getByTestId(`task-title-${'1'}`)).toBeVisible();
     });
-    expect(screen.getByTestId(TestTags.PAGE_TITLE)).toHaveTextContent('Tasks');
+    expect(screen.getByTestId('page-title')).toHaveTextContent('Tasks');
 
     // When
     await switchToSpanish(screen);
 
     // Then
     await waitFor(() => {
-      expect(screen.getByTestId(TestTags.PAGE_TITLE)).toHaveTextContent('Tareas');
+      expect(screen.getByTestId('page-title')).toHaveTextContent('Tareas');
     });
 
     // When
@@ -98,7 +97,7 @@ describe('LanguageSwitcher integration', () => {
 
     // Then
     await waitFor(() => {
-      expect(screen.getByTestId(TestTags.PAGE_TITLE)).toHaveTextContent('Tasks');
+      expect(screen.getByTestId('page-title')).toHaveTextContent('Tasks');
     });
   });
   });

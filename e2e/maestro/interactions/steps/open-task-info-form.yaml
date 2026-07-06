@@ -1,0 +1,15 @@
+appId: ${MAESTRO_APP_ID}
+---
+- runFlow:
+    label: Scroll to task info button
+    file: ../pages/scroll-until-visible-in-task-list.yaml
+    env:
+      SCROLL_TARGET_ID: info-button-.*
+      TASK_TITLE: ${TASK_TITLE}
+- tapOn:
+    id: info-button-.*
+    below:
+      text: ${TASK_TITLE}
+- runFlow:
+    label: Wait for task info screen
+    file: ../pages/wait-for-task-info.yaml

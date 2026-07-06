@@ -3,7 +3,6 @@ import {fireEvent, waitFor} from '@testing-library/react-native';
 import {TaskDetailScreen} from './TaskDetailScreen';
 import {TaskPriority, TaskStatus} from '@/data/models/task';
 import {mockFetchResponse} from '@/test-utils/mockFetch';
-import {TestTags} from '@/testTags';
 import {renderWithProviders} from '@/test-utils/renderWithProviders';
 
 const navigation = {
@@ -50,10 +49,10 @@ describe('TaskDetailScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.DESCRIPTION)).toHaveTextContent('Info description');
-        expect(screen.getByTestId(TestTags.statusTag(TaskStatus.IN_PROGRESS))).toBeVisible();
-        expect(screen.getByTestId(TestTags.priorityTag(TaskPriority.HIGH))).toBeVisible();
-        expect(screen.getByTestId(TestTags.VALID)).toBeVisible();
+        expect(screen.getByTestId('description')).toHaveTextContent('Info description');
+        expect(screen.getByTestId(`status-tag-${TaskStatus.IN_PROGRESS}`)).toBeVisible();
+        expect(screen.getByTestId(`priority-tag-${TaskPriority.HIGH}`)).toBeVisible();
+        expect(screen.getByTestId('valid')).toBeVisible();
       });
     });
 
@@ -82,10 +81,10 @@ describe('TaskDetailScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.DESCRIPTION)).toHaveTextContent('No description');
-        expect(screen.getByTestId(TestTags.statusTag(TaskStatus.TODO))).toBeVisible();
-        expect(screen.getByTestId(TestTags.priorityTag(TaskPriority.MEDIUM))).toBeVisible();
-        expect(screen.getByTestId(TestTags.VALID)).toBeVisible();
+        expect(screen.getByTestId('description')).toHaveTextContent('No description');
+        expect(screen.getByTestId(`status-tag-${TaskStatus.TODO}`)).toBeVisible();
+        expect(screen.getByTestId(`priority-tag-${TaskPriority.MEDIUM}`)).toBeVisible();
+        expect(screen.getByTestId('valid')).toBeVisible();
       });
     });
 
@@ -110,11 +109,11 @@ describe('TaskDetailScreen integration', () => {
         <TaskDetailScreen navigation={navigation as never} route={detailRoute(task.id) as never} />,
       );
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.DESCRIPTION)).toBeVisible();
+        expect(screen.getByTestId('description')).toBeVisible();
       });
 
       // When
-      fireEvent.press(screen.getByTestId(TestTags.CLOSE_BUTTON));
+      fireEvent.press(screen.getByTestId('close-button'));
 
       // Then
       expect(navigation.goBack).toHaveBeenCalled();
@@ -147,9 +146,9 @@ describe('TaskDetailScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.VALID)).toBeVisible();
+        expect(screen.getByTestId('valid')).toBeVisible();
       });
-      expect(screen.queryByTestId(TestTags.NOT_VALID)).toBeNull();
+      expect(screen.queryByTestId('notValid')).toBeNull();
     });
 
     it('should display not-validated state when external validation returns false', async () => {
@@ -177,10 +176,10 @@ describe('TaskDetailScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.DESCRIPTION)).toHaveTextContent(task.description);
-        expect(screen.getByTestId(TestTags.NOT_VALID)).toBeVisible();
+        expect(screen.getByTestId('description')).toHaveTextContent(task.description);
+        expect(screen.getByTestId('notValid')).toBeVisible();
       });
-      expect(screen.queryByTestId(TestTags.VALID)).toBeNull();
+      expect(screen.queryByTestId('valid')).toBeNull();
     });
 
     it.each([
@@ -204,9 +203,9 @@ describe('TaskDetailScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.LOAD_ERROR)).toBeVisible();
+        expect(screen.getByTestId('load-error')).toBeVisible();
       });
-      expect(screen.queryByTestId(TestTags.DESCRIPTION)).toBeNull();
+      expect(screen.queryByTestId('description')).toBeNull();
     });
 
     it.each([
@@ -237,10 +236,10 @@ describe('TaskDetailScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId(TestTags.DESCRIPTION)).toHaveTextContent(task.description);
-        expect(screen.getByTestId(TestTags.NOT_VALID)).toBeVisible();
+        expect(screen.getByTestId('description')).toHaveTextContent(task.description);
+        expect(screen.getByTestId('notValid')).toBeVisible();
       });
-      expect(screen.queryByTestId(TestTags.LOAD_ERROR)).toBeNull();
+      expect(screen.queryByTestId('load-error')).toBeNull();
     });
   });
 });
