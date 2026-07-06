@@ -12,6 +12,12 @@ env:
 # given
 - runFlow:
     file: ../../interactions/steps/open-main-page.yaml
+- runFlow:
+    file: ../../interactions/steps/refresh-main-page.yaml
+- extendedWaitUntil:
+    visible:
+      text: ${TASK_TITLE}
+    timeout: 15000
 
 # when
 - runFlow:

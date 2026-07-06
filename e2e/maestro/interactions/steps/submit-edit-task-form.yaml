@@ -2,11 +2,23 @@ appId: ${MAESTRO_APP_ID}
 env:
   UPDATED_TASK_TITLE: ${UPDATED_TASK_TITLE}
 ---
-- hideKeyboard
+- tapOn:
+    id: modal-title
+- scrollUntilVisible:
+    element:
+      id: save-button
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: save-button
-- runFlow:
-    file: ../pages/wait-for-main-page.yaml
+- extendedWaitUntil:
+    notVisible:
+      id: save-button
+    timeout: 15000
+- extendedWaitUntil:
+    notVisible:
+      id: refreshing
+    timeout: 15000
 - extendedWaitUntil:
     visible:
       text: ${UPDATED_TASK_TITLE}
