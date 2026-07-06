@@ -157,7 +157,6 @@ const TEST_RUNS = [
     suites: [
       { suite: 'E2E', meta: 'mocked backend', allure: './maestro-ios-e2e/index.html' },
       { suite: 'Accessibility', meta: 'mocked backend', allure: './maestro-ios-accessibility/index.html' },
-      { suite: 'UAT', meta: 'full stack', allure: './maestro-ios-uat/index.html' },
     ],
   },
 ];

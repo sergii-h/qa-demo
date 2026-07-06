@@ -94,11 +94,6 @@ jobs:
     uses: ./.github/workflows/maestro-react-native-ios-e2e.yml
     secrets: inherit
 
-  maestro-react-native-ios-uat:
-    needs: audit-react-native-e2e-dependencies
-    uses: ./.github/workflows/maestro-react-native-ios-uat.yml
-    secrets: inherit
-
   maestro-react-native-ios-accessibility:
     needs: audit-react-native-e2e-dependencies
     uses: ./.github/workflows/maestro-react-native-ios-accessibility.yml

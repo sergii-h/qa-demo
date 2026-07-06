@@ -20,6 +20,8 @@ jobs:
     if: github.event.workflow_run.conclusion != 'cancelled'
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Wait for all E2E workflows to complete
         id: gate

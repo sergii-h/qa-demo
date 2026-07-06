@@ -32,10 +32,12 @@ runs:
         distribution: temurin
         java-version: '17'
 
-    - name: Set up Docker on macOS
+    - name: Reject Docker on GitHub-hosted macOS
       if: runner.os == 'macOS' && inputs.wiremock-backend != 'standalone'
       shell: bash
-      run: bash docker/scripts/setup-docker-macos-ci.sh
+      run: |
+        echo "::error::Docker is unavailable on GitHub-hosted macOS ARM runners (Apple virtualization is disabled). Use wiremock-backend: standalone for mocked iOS jobs, ubuntu-22.04 for full-stack UAT on Android, or run iOS UAT locally."
+        exit 1
 
     - name: Log in to Docker Hub
       if: inputs.docker-hub-username != ''
