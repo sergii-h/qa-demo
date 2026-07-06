@@ -1,6 +1,13 @@
 appId: ${MAESTRO_APP_ID}
+env:
+  UPDATED_TASK_TITLE: ${UPDATED_TASK_TITLE}
 ---
+- hideKeyboard
 - tapOn:
     id: save-button
 - runFlow:
     file: ../pages/wait-for-main-page.yaml
+- extendedWaitUntil:
+    visible:
+      text: ${UPDATED_TASK_TITLE}
+    timeout: 15000

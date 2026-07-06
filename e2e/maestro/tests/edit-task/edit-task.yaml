@@ -12,8 +12,6 @@ env:
 # given
 - runFlow:
     file: ../../interactions/steps/open-main-page.yaml
-- runFlow:
-    file: ../../interactions/steps/refresh-main-page.yaml
 
 # when
 - runFlow:
@@ -29,6 +27,8 @@ env:
       UPDATED_TASK_PRIORITY: ${UPDATED_TASK_PRIORITY}
 - runFlow:
     file: ../../interactions/steps/submit-edit-task-form.yaml
+    env:
+      UPDATED_TASK_TITLE: ${UPDATED_TASK_TITLE}
 - runFlow:
     file: ../../interactions/steps/open-task-info-form.yaml
     env:

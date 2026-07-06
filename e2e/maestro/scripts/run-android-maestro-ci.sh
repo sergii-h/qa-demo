@@ -8,9 +8,7 @@ APK_PATH="$REPO_ROOT/demo-react-native/android/app/build/outputs/apk/release/app
 
 export REACT_NATIVE_ARCHITECTURES="${REACT_NATIVE_ARCHITECTURES:-x86_64}"
 
-if [[ "${SKIP_ANDROID_BUILD:-}" != "true" ]]; then
-  bash "$REPO_ROOT/e2e/maestro/scripts/build-android-app.sh" "$API_BASE_URL"
-fi
+bash "$REPO_ROOT/e2e/maestro/scripts/build-android-app.sh" "$API_BASE_URL"
 
 if [[ ! -f "$APK_PATH" ]]; then
   echo "APK not found after build: $APK_PATH" >&2

@@ -11,7 +11,8 @@ on:
       - '.github/workflows/android-compose-e2e.yml'
       - '.github/workflows/android-compose-accessibility.yml'
       - '.github/workflows/android-compose-uat.yml'
-      - '.github/actions/**'
+      - '.github/actions/audit-osv/**'
+      - '.github/actions/run-android-emulator-tests/**'
   push:
     branches: [master]
     paths:
@@ -22,7 +23,8 @@ on:
       - '.github/workflows/android-compose-e2e.yml'
       - '.github/workflows/android-compose-accessibility.yml'
       - '.github/workflows/android-compose-uat.yml'
-      - '.github/actions/**'
+      - '.github/actions/audit-osv/**'
+      - '.github/actions/run-android-emulator-tests/**'
 
 permissions:
   contents: read

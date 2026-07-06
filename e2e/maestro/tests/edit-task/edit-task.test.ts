@@ -23,10 +23,9 @@ export default maestroTestCase(import.meta.url, {
 
     await support.reset();
     await support.mock.api.getTasks(response);
-    await support.mock.api.getTasks(response);
     await support.mock.api.getTask(response);
-    await support.mock.api.getIsValid(true);
     await support.mock.api.updateTask(updatedResponse);
+    await support.mock.api.getTasks(updatedResponse);
     await support.mock.api.getTasks(updatedResponse);
     await support.mock.api.getTask(updatedResponse);
     await support.mock.api.getIsValid(true);
