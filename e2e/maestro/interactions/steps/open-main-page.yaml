@@ -1,7 +1,7 @@
 appId: ${MAESTRO_APP_ID}
 ---
-- launchApp:
-    clearState: true
+- stopApp
+- launchApp
 - runFlow:
     label: Wait for main page
     file: ../pages/wait-for-main-page.yaml

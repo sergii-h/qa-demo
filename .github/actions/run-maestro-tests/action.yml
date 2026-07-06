@@ -54,6 +54,12 @@ runs:
         curl -Ls "https://get.maestro.mobile.dev" | bash
         echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
+    - name: Build Android release APK
+      shell: bash
+      env:
+        REACT_NATIVE_ARCHITECTURES: x86_64
+      run: bash e2e/maestro/scripts/build-android-app.sh "${{ inputs.api-base-url }}"
+
     - name: Run Maestro tests on emulator
       uses: reactivecircus/android-emulator-runner@v2
       with:
@@ -62,7 +68,7 @@ runs:
         arch: x86_64
         disable-animations: true
         emulator-boot-timeout: 900
-        script: bash e2e/maestro/scripts/run-android-maestro-ci.sh "${{ inputs.api-base-url }}" "${{ inputs.npm-script }}"
+        script: SKIP_ANDROID_BUILD=true bash e2e/maestro/scripts/run-android-maestro-ci.sh "${{ inputs.api-base-url }}" "${{ inputs.npm-script }}"
 
     - name: Upload allure results
       if: ${{ !cancelled() }}
