@@ -1,2 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","2626","should create task","Desktop Chrome (chromium)","Mon Jul 06 08:24:10 UTC 2026","passed","Mon Jul 06 08:24:13 UTC 2026","Create task","tests/create-task/create-task.uat.spec.ts","",""
