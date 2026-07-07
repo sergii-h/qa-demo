@@ -150,13 +150,44 @@ function collectChildEntries(
   const windowStart = parent.metadata.timestamp;
   const windowEnd = windowStart + parent.metadata.duration;
 
-  return entries.filter((entry) => {
+  const candidates = entries.filter((entry) => {
     if (entry.metadata.sequenceNumber === parent.metadata.sequenceNumber) {
       return false;
     }
 
     const entryEnd = entry.metadata.timestamp + entry.metadata.duration;
     return entry.metadata.timestamp >= windowStart && entryEnd <= windowEnd;
+  });
+
+  const nestedRunFlows = candidates.filter(isRunFlowEntry);
+
+  return candidates.filter(
+    (entry) =>
+      isRunFlowEntry(entry) ||
+      !isWithinNestedRunFlow(entry, nestedRunFlows),
+  );
+}
+
+function isRunFlowEntry(entry: MaestroCommandEntry): boolean {
+  const evaluatedCommand = entry.metadata.evaluatedCommand ?? entry.command;
+  return Object.keys(evaluatedCommand)[0] === 'runFlowCommand';
+}
+
+function isWithinNestedRunFlow(
+  entry: MaestroCommandEntry,
+  nestedRunFlows: MaestroCommandEntry[],
+): boolean {
+  return nestedRunFlows.some((runFlow) => {
+    if (runFlow.metadata.sequenceNumber === entry.metadata.sequenceNumber) {
+      return false;
+    }
+
+    const runFlowEnd = runFlow.metadata.timestamp + runFlow.metadata.duration;
+    const entryEnd = entry.metadata.timestamp + entry.metadata.duration;
+    return (
+      entry.metadata.timestamp >= runFlow.metadata.timestamp &&
+      entryEnd <= runFlowEnd
+    );
   });
 }
 

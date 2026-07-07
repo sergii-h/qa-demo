@@ -166,6 +166,7 @@ export class AllureTestReporter {
     const stepUuid = this.runtime.startStep(testUuid, parentStepUuid, {
       name: step.name,
       parameters: step.parameters,
+      ...(step.timestamp !== undefined ? { start: step.timestamp } : {}),
     });
 
     if (!stepUuid) {
