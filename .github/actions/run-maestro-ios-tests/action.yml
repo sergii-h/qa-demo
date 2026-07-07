@@ -44,7 +44,7 @@ runs:
         MAESTRO_IOS_SIMULATOR: ${{ inputs.ios-simulator-name }}
         MAESTRO_CLI_NO_ANALYTICS: 'true'
         MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: 'true'
-        MAESTRO_DRIVER_STARTUP_TIMEOUT: '120000'
+        MAESTRO_DRIVER_STARTUP_TIMEOUT: '240000'
       run: bash e2e/maestro/scripts/run-ios-maestro-ci.sh "${{ inputs.api-base-url }}" "${{ inputs.npm-script }}"
 
     - name: Upload allure results
