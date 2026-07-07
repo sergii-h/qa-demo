@@ -28,4 +28,13 @@ bash "$REPO_ROOT/e2e/maestro/scripts/install-ios-app.sh" "$APP_PATH"
 cd "$REPO_ROOT/e2e/maestro"
 export MAESTRO_CLI_NO_ANALYTICS=true
 export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
+export MAESTRO_DRIVER_STARTUP_TIMEOUT="${MAESTRO_DRIVER_STARTUP_TIMEOUT:-240000}"
+
+MAESTRO_BIN="${MAESTRO_BIN:-$HOME/.maestro/bin/maestro}"
+WARMUP_FLOW="$REPO_ROOT/e2e/maestro/interactions/flows/warmup-ios-driver.yaml"
+echo "Warming up Maestro iOS driver (timeout: ${MAESTRO_DRIVER_STARTUP_TIMEOUT}ms)..."
+"$MAESTRO_BIN" --device "$MAESTRO_DEVICE" test \
+  -e "MAESTRO_APP_ID=com.example.demo" \
+  "$WARMUP_FLOW"
+
 ALLURE_RESULTS_DIR="$REPO_ROOT/e2e/maestro/allure-results" npm run "$NPM_SCRIPT"

@@ -157,6 +157,11 @@ const TEST_RUNS = [
     suites: [
       { suite: 'E2E', meta: 'mocked backend', allure: './maestro-ios-e2e/index.html' },
       { suite: 'Accessibility', meta: 'mocked backend', allure: './maestro-ios-accessibility/index.html' },
+      {
+        suite: 'UAT',
+        meta: 'full stack · not published in CI (Docker unavailable on GitHub macOS runners)',
+        allureDisabled: true,
+      },
     ],
   },
 ];
@@ -210,6 +215,14 @@ function renderAllureReportAction(href) {
   `;
 }
 
+function renderDisabledAllureReportAction() {
+  return `
+    <span class="report-action report-action--chip report-action--disabled" aria-disabled="true" title="Report not available">
+      ${renderBrandChip(ALLURE_REPORT_BRAND, true)}
+    </span>
+  `;
+}
+
 function renderSuiteRow(suite) {
   const playwrightHtmlAction = suite.playwrightHtml
     ? `
@@ -227,7 +240,7 @@ function renderSuiteRow(suite) {
           <span class="meta">${suite.meta}</span>
         </span>
         <div class="report-actions">
-          ${renderAllureReportAction(suite.allure)}
+          ${suite.allureDisabled ? renderDisabledAllureReportAction() : renderAllureReportAction(suite.allure)}
           ${playwrightHtmlAction}
         </div>
       </div>

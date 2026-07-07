@@ -2,17 +2,24 @@
 
 Black-box E2E tests for `demo-react-native` using [Maestro](https://maestro.mobile.dev/) on Android and iOS. Mirrors the page object → step → validator architecture used by Playwright and Android Compose E2E suites.
 
-## Prerequisites
+## Prerequisites & setup
 
-- Node.js 22+ ([asdf](https://asdf-vm.com/) — see `.tool-versions`)
-- [Maestro CLI](https://maestro.mobile.dev/docs/getting-started/installing-maestro)
-- **Android:** SDK (`platform-tools`, emulator or device). Auto-detects `$HOME/Library/Android/sdk` (macOS) or `$HOME/Android/Sdk` (Linux), or `ANDROID_HOME` / `ANDROID_SDK_ROOT`.
+- Node.js 22+ ([asdf](https://asdf-vm.com/) — `.tool-versions`)
+- [Maestro CLI](https://maestro.mobile.dev/docs/getting-started/installing-maestro) — `curl -Ls "https://get.maestro.mobile.dev" | bash`; auto-detected at `~/.maestro/bin/maestro` (override with `MAESTRO_BIN`)
+- **Android:** SDK (`platform-tools`, emulator or device). `$HOME/Library/Android/sdk` (macOS), `$HOME/Android/Sdk` (Linux), or `ANDROID_HOME` / `ANDROID_SDK_ROOT`
 - **iOS (macOS only):** Xcode + iOS Simulator
-- Application stack for UAT tests (see below)
+- Docker for WireMock / UAT stack
+
+From `e2e/maestro`:
+
+```bash
+asdf install   # first time only
+npm install
+```
 
 ## Configuration
 
-Test configuration is read from `.env.e2e`. Override values in `.env.e2e.local` (git-ignored).
+Read from `.env.e2e`; override in `.env.e2e.local` (git-ignored).
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -29,65 +36,34 @@ Build the app with the API URL that matches your suite and platform:
 | Mocked BE / Accessibility | `http://10.0.2.2:8085/v1/` | `http://localhost:8085/v1/` |
 | UAT | `http://10.0.2.2:8080/v1/` | `http://localhost:8080/v1/` |
 
-The build scripts produce a **standalone release build** with an embedded JS bundle (no Metro). That is a different runtime from **`npx expo start`**, which loads JavaScript from Metro (Expo Go or dev client). Always validate E2E against the Maestro-built app, not Expo Go.
+Build scripts produce a **standalone release build** with an embedded JS bundle (no Metro). That differs from **`npx expo start`** (Metro / Expo Go). Always validate E2E against the Maestro-built app.
 
-### Android
+### Build & install
 
-From `e2e/maestro` (start the emulator first):
+From `e2e/maestro` (scripts resolve paths from their own location — npm is recommended):
+
+**Android** — start the emulator first:
 
 ```bash
 npm run build:android:wiremock   # or build:android:uat
 npm run install:android
 ```
 
-The scripts resolve paths from their own location — they work from any directory, but running via npm keeps everything alongside `npm run test:e2e`.
-
-Each build runs `expo prebuild`, verifies cleartext HTTP in the Android manifest, and auto-detects CPU architecture from the connected emulator (`arm64-v8a` / `x86_64`).
-
-### iOS (macOS)
-
-From `e2e/maestro` (a simulator is booted automatically if none is running):
+**iOS** — boots a simulator automatically if none is running:
 
 ```bash
 npm run build:ios:wiremock   # or build:ios:uat
 npm run install:ios
 ```
 
-CocoaPods runs via `npx pod-install` (Expo). React Native may still print a deprecation notice about raw `pod install` — that is informational and safe to ignore.
+Each build runs `expo prebuild`, verifies cleartext HTTP (Android manifest) or local-network HTTP (`Info.plist`), and auto-detects Android ABI (`arm64-v8a` / `x86_64`). iOS builds a Release simulator `.app` via `npx pod-install` (Expo; RN deprecation notice about raw `pod install` is safe to ignore).
 
-Optional: pin a simulator by name in `.env.e2e.local`:
+Optional `.env.e2e.local` pins:
 
 ```bash
 MAESTRO_IOS_SIMULATOR=iPhone 17
+# or: MAESTRO_DEVICE=<udid>   # from: xcrun simctl list devices booted
 ```
-
-Each build runs `expo prebuild`, verifies local-network HTTP in `Info.plist`, and produces a Release simulator `.app`. Use `localhost` — not `10.0.2.2` — for iOS Simulator.
-
-To target a specific simulator when running tests:
-
-```bash
-xcrun simctl list devices booted
-export MAESTRO_DEVICE=<simulator-udid>
-cd e2e/maestro && npm run test:e2e
-```
-
-## Setup
-
-From `e2e/maestro`:
-
-```bash
-asdf install   # first time only
-npm install
-```
-
-Install Maestro (macOS):
-
-```bash
-curl -Ls "https://get.maestro.mobile.dev" | bash
-export PATH="$HOME/.maestro/bin:$PATH"
-```
-
-The test runner auto-detects Maestro at `~/.maestro/bin/maestro`. Override with `MAESTRO_BIN` if installed elsewhere.
 
 ## Test suites
 
@@ -98,31 +74,29 @@ The test runner auto-detects Maestro at `~/.maestro/bin/maestro`. Override with 
 | UAT smoke (create task) | `npm run test:uat` | Real running stack |
 | All suites | `npm test` | Mixed |
 
-Start WireMock for mocked-BE and accessibility runs:
+WireMock (mocked BE / accessibility):
 
 ```bash
 docker compose -f docker/docker-compose/run-application.yml up -d qa-demo-wiremock
 ```
 
-Start the full stack for UAT:
+Full stack (UAT):
 
 ```bash
 docker compose -f docker/docker-compose/run-application.yml up -d --build
 ```
 
-If you ran mocked tests before UAT, restart WireMock so static validation mappings reload from `docker/docker-compose/mappings/`:
+If mocked tests ran before UAT, restart WireMock so mappings reload from `docker/docker-compose/mappings/`:
 
 ```bash
 docker compose -f docker/docker-compose/run-application.yml restart qa-demo-wiremock
 ```
 
-Run tests (with the matching app installed on a running emulator/simulator):
+Run with the matching app installed on a running emulator/simulator:
 
 ```bash
 cd e2e/maestro
-npm run test:e2e
-npm run test:accessibility
-npm run test:uat
+npm run test:e2e            # or test:accessibility / test:uat
 ```
 
 ## Architecture
@@ -149,21 +123,15 @@ e2e/maestro/
 └── scripts/                 # build/install scripts for Android and iOS
 ```
 
-- **TypeScript runner** (`runSuite.ts` + `runner/`) sets up WireMock stubs, generates per-test env vars, and invokes Maestro.
-- **New tests** — add a co-located `feature/feature.test.ts` + `feature.yaml` under `tests/`; the runner picks them up automatically (no registry edit).
-- **Maestro YAML** sub-flows hold all `testID` selectors inline (page objects) — no compile-time link to the app.
+- **TypeScript runner** sets up WireMock stubs, generates per-test env vars, and invokes Maestro.
+- **New tests** — add co-located `feature/feature.test.ts` + `feature.yaml` under `tests/`; auto-discovered (no registry edit).
+- **Maestro YAML** sub-flows hold all `testID` selectors inline — no compile-time link to the app.
 
 ## Reports
 
-The TypeScript runner writes Allure results to `allure-results/`. Each test includes:
+Allure results → `allure-results/`; Maestro artifacts → `.maestro-output/` (git-ignored). `npm run allure:serve`.
 
-- **Setup WireMock stubs** — when the test uses mocked API responses
-- **Maestro steps** — imported from Maestro `commands-*.json` after each flow run
-  - Step names use `runFlow` **labels** when set, otherwise the sub-flow file name
-  - **Parameters** on top-level Maestro steps show resolved test data (`TASK_TITLE`, `SCROLL_TARGET_ID`, etc.); nested steps omit them but still resolve env in step names and show per-command durations from Maestro's command log
-  - Failed steps attach the closest Maestro screenshot when available; failed/broken tests also attach a screenshot at test level
-
-Use `label` on `runFlow` in YAML for readable step names in Allure:
+Each test includes WireMock setup (when stubbed) and Maestro steps from `commands-*.json` — step names use `runFlow` **labels** when set, otherwise the sub-flow file name; top-level steps show resolved env parameters (`TASK_TITLE`, etc.); failures attach Maestro screenshots. The **Environment** section shows framework, suite, backend URL, app id, and device info from Maestro's `Running on …` output.
 
 ```yaml
 - runFlow:
@@ -173,15 +141,7 @@ Use `label` on `runFlow` in YAML for readable step names in Allure:
       TASK_TITLE: ${TASK_TITLE}
 ```
 
-Maestro artifacts for the latest run are stored under `.maestro-output/` (git-ignored).
-
-The **Environment** section in Allure shows framework, suite, backend URL, app id, and device info (`platform`, `device`, `os_version`, `device_id`) parsed from Maestro's `Running on …` output during the test run.
-
-```bash
-npm run allure:serve
-```
-
-On **push to `master`** and **pull requests**, Maestro Allure reports (including failure screenshots) are published to [GitHub Pages](https://sergii-h.github.io/qa-demo/) alongside web and Android Compose suites — see `maestro-android-*` and `maestro-ios-*` on the landing page.
+On **push to `master`** and **pull requests**, reports publish to [GitHub Pages](https://sergii-h.github.io/qa-demo/) (`maestro-android-*`, `maestro-ios-*`). iOS UAT is listed but not published — see CI below.
 
 ## CI
 
@@ -189,13 +149,11 @@ Android and iOS Maestro jobs run from `.github/workflows/react-native-e2e.yml`.
 
 | Platform | Runner | Workflows |
 |----------|--------|-----------|
-| Android | `ubuntu-22.04` | `maestro-react-native-android-e2e.yml`, `maestro-react-native-android-uat.yml`, `maestro-react-native-android-accessibility.yml` |
+| Android | `ubuntu-22.04` | `maestro-react-native-android-e2e.yml`, `maestro-react-native-android-accessibility.yml`, `maestro-react-native-android-uat.yml` |
 | iOS | `macos-15` | `maestro-react-native-ios-e2e.yml`, `maestro-react-native-ios-accessibility.yml` |
 
-iOS jobs use `run-maestro-ios-tests` (`build-ios-app.sh` → `install-ios-app.sh` → npm test). API URLs use `http://localhost:…` on the simulator. CocoaPods runs inside `build-ios-app.sh` via `npx pod-install` — no separate pipeline step.
+**iOS** — `run-ios-maestro-ci.sh` (build → install → npm test). WireMock via standalone Java JAR (`wiremock-backend:standalone`) — no Docker. **UAT is not run in CI**: GitHub-hosted macOS ARM runners lack Apple virtualization, so Colima/Docker cannot start — run locally (`npm run build:ios:uat`, full stack on `localhost:8080`). Boots **iPhone 16 on iOS 18.x**, passes `platform=iOS Simulator,id=…` to `xcodebuild` (generic `arch=` fails with multiple runtimes); `MAESTRO_DEVICE` set from the same UDID.
 
-All iOS jobs run on **`macos-15` (Apple Silicon)**. Mocked / accessibility jobs start WireMock via a **standalone Java JAR** (`wiremock-backend: standalone`) — no Docker. **iOS UAT is not run in CI**: GitHub-hosted macOS ARM runners do not expose Apple virtualization, so Colima/Docker cannot start. Run iOS UAT locally (`npm run build:ios:uat`, full stack on `localhost:8080`). **Android UAT** uses the full Docker stack on `ubuntu-22.04`. React Native builds target the `arm64` simulator on these runners.
+**Android** — `run-android-maestro-ci.sh` inside `android-emulator-runner` (multiline `script:` runs each line in a separate shell — variables do not persist). **UAT** uses the full Docker stack on `ubuntu-22.04`.
 
-Android CI invokes `run-android-maestro-ci.sh` as a single command inside `android-emulator-runner` (that action runs each line of a multiline `script:` in a separate shell, so shell variables do not persist across lines).
-
-iOS CI uses `run-ios-maestro-ci.sh` (build → install → npm test). The build boots an **iPhone 16 on iOS 18.x** simulator and passes `platform=iOS Simulator,id=…` to `xcodebuild` (generic `arch=` destinations fail when multiple simulator runtimes are installed). `MAESTRO_DEVICE` is set from the same UDID for install and Maestro.
+All iOS jobs use **`macos-15` (Apple Silicon)** with `arm64` simulator builds. API URLs use `http://localhost:…` on the simulator.

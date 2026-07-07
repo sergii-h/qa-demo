@@ -291,9 +291,7 @@ See [Performance README](performance/README.md) for all scenarios, thresholds, a
 
 **[Sergii Holdys](https://github.com/sergii-h)** — QA Engineer  
 **Location:** Malaga, Spain  
-**LinkedIn:** [sergii-holdys](https://www.linkedin.com/in/sergii-holdys-501798158)  
-**Available for:** Remote • Hybrid • On-site  
-**Demo Project:** [View on GitHub](https://github.com/sergii-h/qa-demo)
+**LinkedIn:** [sergii-holdys](https://www.linkedin.com/in/sergii-holdys-501798158)
 
 ---
 

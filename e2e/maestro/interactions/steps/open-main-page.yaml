@@ -1,5 +1,6 @@
 appId: ${MAESTRO_APP_ID}
 ---
+- stopApp
 - launchApp:
     clearState: true
 - runFlow:

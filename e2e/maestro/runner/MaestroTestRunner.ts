@@ -103,30 +103,46 @@ export class MaestroTestRunner {
       absoluteFlow,
     ];
 
-    const result = spawnSync(this.maestroCli, args, {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-      env: {
-        ...process.env,
-        MAESTRO_CLI_NO_ANALYTICS: 'true',
-        MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: 'true',
-      },
-    });
+    const maxAttempts = process.env.MAESTRO_DEVICE ? 2 : 1;
 
-    if (result.stdout) {
-      process.stdout.write(result.stdout);
-    }
-    if (result.stderr) {
-      process.stderr.write(result.stderr);
-    }
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const result = spawnSync(this.maestroCli, args, {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+        env: {
+          ...process.env,
+          MAESTRO_CLI_NO_ANALYTICS: 'true',
+          MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: 'true',
+        },
+      });
 
-    const combinedOutput = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
-    const deviceInfo = parseMaestroDeviceOutput(combinedOutput);
-    if (deviceInfo) {
-      this.runtimeDeviceInfo = deviceInfo;
-    }
+      if (result.stdout) {
+        process.stdout.write(result.stdout);
+      }
+      if (result.stderr) {
+        process.stderr.write(result.stderr);
+      }
 
-    if (result.status !== 0) {
+      const combinedOutput = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
+      const deviceInfo = parseMaestroDeviceOutput(combinedOutput);
+      if (deviceInfo) {
+        this.runtimeDeviceInfo = deviceInfo;
+      }
+
+      if (result.status === 0) {
+        return;
+      }
+
+      const isDriverStartupTimeout = combinedOutput.includes(
+        'IOSDriverTimeoutException',
+      );
+      if (isDriverStartupTimeout && attempt < maxAttempts) {
+        process.stderr.write(
+          `\nMaestro iOS driver startup timed out (attempt ${attempt}/${maxAttempts}), retrying...\n`,
+        );
+        continue;
+      }
+
       throw new Error(result.stderr || result.stdout || 'Maestro test failed');
     }
   }
