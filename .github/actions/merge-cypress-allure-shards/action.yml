@@ -1,0 +1,52 @@
+name: Merge Cypress Allure shard artifacts
+description: Download sharded Cypress Allure artifacts, merge into one folder, and re-upload
+
+inputs:
+  artifact-prefix:
+    description: Artifact name prefix (e.g. allure-results-cypress-e2e)
+    required: true
+  shard-count:
+    description: Number of shard artifacts to merge
+    required: true
+  output-artifact:
+    description: Final merged artifact name
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Download Cypress Allure shards
+      uses: actions/download-artifact@v4
+      with:
+        pattern: ${{ inputs.artifact-prefix }}-shard-*
+        merge-multiple: true
+        path: cypress-allure-shards
+
+    - name: Merge Allure result files
+      shell: bash
+      run: |
+        set -euo pipefail
+        merged="cypress-allure-merged"
+        rm -rf "$merged"
+        mkdir -p "$merged"
+
+        find cypress-allure-shards -type f \( -name '*.json' -o -name '*.png' -o -name '*.txt' -o -name '*.xml' \) -print0 \
+          | while IFS= read -r -d '' file; do
+              cp -n "$file" "$merged/"
+            done
+
+        file_count="$(find "$merged" -type f | wc -l | tr -d ' ')"
+        echo "Merged $file_count Allure file(s) from ${{ inputs.shard-count }} shard(s)."
+
+        if [ "$file_count" -eq 0 ]; then
+          echo "::warning::No Allure files found to merge for ${{ inputs.artifact-prefix }}."
+        fi
+
+    - name: Upload merged Allure results
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.output-artifact }}
+        path: cypress-allure-merged
+        retention-days: 7
+        if-no-files-found: warn

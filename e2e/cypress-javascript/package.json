@@ -1,0 +1,27 @@
+{
+  "name": "cypress-javascript-e2e",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "npm run test:e2e && npm run test:accessibility && npm run test:uat",
+    "cy:run": "cypress run --browser chrome",
+    "test:e2e": "bash scripts/run-cypress-parallel.sh e2e",
+    "test:e2e:serial": "CYPRESS_SUITE=e2e npm run cy:run",
+    "test:mock": "npm run test:e2e",
+    "test:accessibility": "bash scripts/run-cypress-parallel.sh accessibility",
+    "test:accessibility:serial": "CYPRESS_SUITE=accessibility npm run cy:run",
+    "test:uat": "CYPRESS_SUITE=uat npm run cy:run",
+    "test:open": "CYPRESS_SUITE=all cypress open",
+    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:serve": "allure serve allure-results"
+  },
+  "devDependencies": {
+    "@cypress/grep": "^4.1.0",
+    "@cypress/webpack-preprocessor": "^6.0.2",
+    "@shelex/cypress-allure-plugin": "^2.40.2",
+    "axios": "^1.7.2",
+    "cypress": "^14.2.0",
+    "cypress-axe": "^1.6.0",
+    "cypress-split": "^1.24.25",
+    "dotenv": "^16.4.5"
+  }
+}

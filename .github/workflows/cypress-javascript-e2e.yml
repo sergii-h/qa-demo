@@ -1,0 +1,47 @@
+name: Run e2e tests (Cypress — mocked BE)
+
+on:
+  workflow_call:
+
+jobs:
+  run-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2]
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: frontend
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Run Cypress e2e tests (shard ${{ matrix.shard }})
+        uses: ./.github/actions/cypress-javascript-test
+        with:
+          npm-script: e2e
+          cypress-suite: e2e
+          split-count: '3'
+          split-index: ${{ matrix.shard }}
+          app-mode: frontend
+          test-label: Run Cypress e2e tests (mocked BE) — shard ${{ matrix.shard }}
+          artifact-name: allure-results-cypress-e2e-shard-${{ matrix.shard }}
+
+  merge-allure:
+    needs: run-tests
+    if: ${{ always() && !cancelled() }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Merge Cypress e2e Allure shards
+        uses: ./.github/actions/merge-cypress-allure-shards
+        with:
+          artifact-prefix: allure-results-cypress-e2e
+          shard-count: '3'
+          output-artifact: allure-results-cypress-e2e

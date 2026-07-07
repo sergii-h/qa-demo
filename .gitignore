@@ -38,3 +38,6 @@ __pycache__/
 /demo-android/.gradle-local/
 /e2e/maestro/allure-results/
 /e2e/maestro/.maestro-output/
+/e2e/cypress-javascript/allure-results/
+/e2e/cypress-javascript/cypress/videos/
+/e2e/cypress-javascript/cypress/screenshots/
