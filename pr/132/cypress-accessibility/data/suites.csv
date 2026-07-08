@@ -1,0 +1,7 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","1232","[mobile] should have no accessibility violations on task table","","Wed Jul 08 22:24:59 UTC 2026","passed","Wed Jul 08 22:25:00 UTC 2026","","Task table - accessibility","",""
+"","1331","[desktop] should have no accessibility violations on create task form","","Wed Jul 08 22:24:24 UTC 2026","passed","Wed Jul 08 22:24:26 UTC 2026","","Create task form - accessibility","",""
+"","1194","[desktop] should have no accessibility violations on task info modal","","Wed Jul 08 22:24:27 UTC 2026","passed","Wed Jul 08 22:24:29 UTC 2026","","View task info - accessibility","",""
+"","1115","[mobile] should have no accessibility violations on create task form","","Wed Jul 08 22:24:34 UTC 2026","passed","Wed Jul 08 22:24:35 UTC 2026","","Create task form - accessibility","",""
+"","1197","[mobile] should have no accessibility violations on task info modal","","Wed Jul 08 22:24:37 UTC 2026","passed","Wed Jul 08 22:24:38 UTC 2026","","View task info - accessibility","",""
+"","1391","[desktop] should have no accessibility violations on task table","","Wed Jul 08 22:24:51 UTC 2026","passed","Wed Jul 08 22:24:53 UTC 2026","","Task table - accessibility","",""
