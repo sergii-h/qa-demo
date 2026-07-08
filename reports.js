@@ -102,6 +102,20 @@ const TEST_RUNS = [
     ],
   },
   {
+    titleEmphasis: 'Cypress',
+    titleSuffix: 'test-run (JavaScript)',
+    subtitle: 'Web · Desktop Chrome',
+    headerLogos: [
+      'https://img.shields.io/badge/JavaScript-ES2022-yellow?logo=javascript',
+      greenBadge('Cypress', 'cypress', '17202C'),
+    ],
+    suites: [
+      { suite: 'E2E', meta: 'mocked backend', allure: './cypress-e2e/index.html' },
+      { suite: 'Accessibility', meta: 'mocked backend', allure: './cypress-accessibility/index.html' },
+      { suite: 'UAT', meta: 'full stack', allure: './cypress-uat/index.html' },
+    ],
+  },
+  {
     titleEmphasis: 'Playwright',
     titleSuffix: 'test-run (Python)',
     subtitle: 'Web · Desktop Chrome & Mobile Safari (webkit)',
