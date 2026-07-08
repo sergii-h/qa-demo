@@ -1,0 +1,7 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","2867","test_should_have_no_accessibility_violations_on_task_info_modal[webkit]","tests.task_info","Wed Jul 08 08:08:23 UTC 2026","passed","Wed Jul 08 08:08:26 UTC 2026","","test_task_info_accessibility","",""
+"","2666","test_should_have_no_accessibility_violations_on_task_info_modal[chromium]","tests.task_info","Wed Jul 08 08:08:19 UTC 2026","passed","Wed Jul 08 08:08:22 UTC 2026","","test_task_info_accessibility","",""
+"","2328","test_should_have_no_accessibility_violations_on_task_table[webkit]","tests.task_table","Wed Jul 08 08:08:23 UTC 2026","passed","Wed Jul 08 08:08:26 UTC 2026","","test_task_table_accessibility","",""
+"","2374","test_should_have_no_accessibility_violations_on_task_table[chromium]","tests.task_table","Wed Jul 08 08:08:19 UTC 2026","passed","Wed Jul 08 08:08:22 UTC 2026","","test_task_table_accessibility","",""
+"","3700","test_should_have_no_accessibility_violations_on_create_task_form[webkit]","tests.create_task","Wed Jul 08 08:08:22 UTC 2026","passed","Wed Jul 08 08:08:26 UTC 2026","","test_create_task_accessibility","",""
+"","2582","test_should_have_no_accessibility_violations_on_create_task_form[chromium]","tests.create_task","Wed Jul 08 08:08:19 UTC 2026","passed","Wed Jul 08 08:08:22 UTC 2026","","test_create_task_accessibility","",""
