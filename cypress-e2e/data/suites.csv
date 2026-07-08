@@ -1,0 +1,6 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","1041","should delete task","","Wed Jul 08 00:39:52 UTC 2026","passed","Wed Jul 08 00:39:53 UTC 2026","","Delete task","",""
+"","1048","should view task info","","Wed Jul 08 00:40:06 UTC 2026","passed","Wed Jul 08 00:40:07 UTC 2026","","View task info","",""
+"","2906","should create task","","Wed Jul 08 00:39:47 UTC 2026","passed","Wed Jul 08 00:39:50 UTC 2026","","Create task","",""
+"","3862","should edit task","","Wed Jul 08 00:40:00 UTC 2026","passed","Wed Jul 08 00:40:04 UTC 2026","","Edit task","",""
+"","1283","should switch UI to Spanish when ES is selected","","Wed Jul 08 00:39:50 UTC 2026","passed","Wed Jul 08 00:39:51 UTC 2026","","Language support","",""
