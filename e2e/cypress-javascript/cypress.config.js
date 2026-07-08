@@ -7,12 +7,17 @@ const allureWriter = require('@shelex/cypress-allure-plugin/writer');
 const webpackPreprocessor = require('@cypress/webpack-preprocessor');
 const cypressSplit = require('cypress-split');
 const testConfig = require('./test.config');
+const { resolveDevice } = require('./data/devices');
+const { writeAllureEnvironmentInfo } = require('./support/allure/environmentInfo');
 
 const envPath = fs.existsSync(path.resolve(__dirname, '.env.e2e.local'))
   ? path.resolve(__dirname, '.env.e2e.local')
   : path.resolve(__dirname, '.env.e2e');
 
 dotenv.config({ path: envPath });
+
+const deviceName = process.env.CYPRESS_DEVICE || 'desktop';
+const device = resolveDevice(deviceName);
 
 const SUITE_CONFIG = {
   e2e: {
@@ -49,14 +54,30 @@ module.exports = defineConfig({
     videoCompression: 32,
     screenshotOnRunFailure: true,
     trashAssetsBeforeRuns: Number(process.env.SPLIT || 1) <= 1,
-    viewportWidth: 1280,
-    viewportHeight: 720,
+    viewportWidth: device.viewportWidth,
+    viewportHeight: device.viewportHeight,
     defaultCommandTimeout: 10_000,
     requestTimeout: 10_000,
     pageLoadTimeout: 30_000,
     setupNodeEvents(on, config) {
       allureWriter(on, config);
       grep(config);
+
+      on('before:browser:launch', (browser, launchOptions) => {
+        if (device.userAgent) {
+          launchOptions.args.push(`--user-agent=${device.userAgent}`);
+        }
+
+        if (!config.env.allure) {
+          return;
+        }
+
+        const resultsDir = path.isAbsolute(config.env.allureResultsPath)
+          ? config.env.allureResultsPath
+          : path.join(config.projectRoot, config.env.allureResultsPath);
+
+        writeAllureEnvironmentInfo(resultsDir, browser, device);
+      });
 
       on('file:preprocessor', webpackPreprocessor({
         webpackOptions: {
@@ -90,6 +111,7 @@ module.exports = defineConfig({
   env: {
     allure: true,
     allureResultsPath,
+    device: deviceName,
     grepFilterSpecs: true,
     grepOmitFiltered: true,
     E2E_TEST_ENV_URL: process.env.E2E_TEST_ENV_URL || 'http://localhost:5173',

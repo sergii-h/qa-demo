@@ -1,133 +1,92 @@
 # Cypress + JavaScript E2E Tests
 
-## Prerequisites
+Mirrors the Playwright TypeScript layout: **pages** (locators) → **steps** (actions) → **validators** (assertions), wired via `providers/` and `fixtures/providers.js`. API stubs use `cy.intercept` in `support/mocks/ApiRouteMock.js`.
 
-- Node.js 22+ (managed with [asdf](https://asdf-vm.com/))
-- Application stack running for UAT tests: `docker compose -f docker/docker-compose/run-application.yml up -d` (from repo root)
+## Prerequisites & setup
 
-## Configuration
-
-Test configuration is read from `.env.e2e`. Override values by creating a `.env.e2e.local` file (git-ignored).
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `E2E_TEST_ENV_URL` | `http://localhost:5173` | Frontend base URL |
-| `E2E_API_URL` | `http://localhost:8080` | Backend API base URL |
-| `E2E_WIREMOCK_URL` | `http://localhost:8085` | WireMock base URL |
-
-## Setup
-
-From `e2e/cypress-javascript`:
-
-```bash
-# install Node.js (first time only)
-asdf plugin add nodejs
-asdf install
-
-# install dependencies
-npm install
-```
-
-`.tool-versions` pins Node.js 22.22.3 for asdf. After `asdf install`, `node` and `npm` resolve via asdf shims in this directory.
-
-## Test Suites
-
-| Suite | Command | Requires real backend |
-|-------|---------|----------------------|
-| Mocked BE (user flows) | `npm run test:e2e` | No |
-| Accessibility (axe-core) | `npm run test:accessibility` | No |
-| UAT smoke | `npm run test:uat` | Yes |
-| All suites | `npm test` | For UAT only |
+- Node.js 22+ via [asdf](https://asdf-vm.com/) (`.tool-versions` pins 22.22.3)
+- UAT only: full stack from repo root — `docker compose -f docker/docker-compose/run-application.yml up -d`
 
 ```bash
 cd e2e/cypress-javascript
-
-npm run test:e2e            # mocked BE — 3 parallel Chrome workers (local)
-npm run test:e2e:serial     # mocked BE — single worker (debugging)
-npm run test:accessibility  # axe-core — 2 parallel workers
-npm run test:accessibility:serial
-npm run test:uat            # smoke test against the real running app (single worker)
-npm test                    # all suites sequentially
+asdf plugin add nodejs && asdf install   # first time
+npm install
 ```
 
-Override local worker count: `CYPRESS_SPLIT=4 npm run test:e2e`
+Config: `.env.e2e` (override with git-ignored `.env.e2e.local`).
 
-### Parallel execution
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `E2E_TEST_ENV_URL` | `http://localhost:5173` | Frontend |
+| `E2E_API_URL` | `http://localhost:8080` | Backend |
+| `E2E_WIREMOCK_URL` | `http://localhost:8085` | WireMock |
 
-| Where | Mechanism | Workers |
-|-------|-----------|---------|
-| Local | `scripts/run-cypress-parallel.sh` via `[cypress-split](https://github.com/bahmutov/cypress-split)` | e2e: 3 · accessibility: 2 · uat: 1 |
-| CI | GitHub Actions matrix + `cypress-split` (`SPLIT` / `SPLIT_INDEX`) | same as local |
+## Running tests
 
-Shard Allure results are merged automatically (local script or `merge-cypress-allure-shards` CI action) before publishing.
-
-## Interactive mode
-
-```bash
-npm run test:open
-```
-
-## Single spec
+| Suite | Command | Real backend |
+|-------|---------|--------------|
+| Mocked BE | `npm run test:e2e` | No |
+| Accessibility | `npm run test:accessibility` | No |
+| UAT | `npm run test:uat` | Yes |
+| All | `npm test` | UAT only |
 
 ```bash
+npm run test:e2e                      # sequential (default)
+npm run test:e2e:parallel             # 3 workers — optional
+npm run test:accessibility:parallel   # 2 workers
+npm run test:open                     # Cypress UI (all suites)
 npx cypress run --spec tests/create-task/create-task.cy.js
 ```
 
-## Reports
+**Parallel / sharding** — local default is sequential; opt in with `:parallel` (`scripts/run-cypress-parallel.sh` + [cypress-split](https://github.com/bahmutov/cypress-split)). CI uses matrix shards (`SPLIT` / `SPLIT_INDEX`). Workers: e2e 3 · accessibility 2 · uat 1. Override locally: `CYPRESS_SPLIT=4 npm run test:e2e:parallel`. Shard Allure results merge via local script or `merge-cypress-allure-shards` CI action.
+
+**Spec discovery** — no files registered in `package.json`; `CYPRESS_SUITE` selects by pattern:
+
+| Suite | Pattern | `CYPRESS_SUITE` |
+|-------|---------|-----------------|
+| Mocked BE | `*.cy.js` (excl. `*.uat` / `*.axe`) | `e2e` |
+| UAT | `*.uat.cy.js` | `uat` |
+| Accessibility | `*.axe.cy.js` | `accessibility` |
+
+Tags `@uat` / `@accessibility` filter specs in interactive mode (`@cypress/grep`).
+
+## Viewports
+
+Like Playwright, each suite runs on **desktop and mobile** (Chrome with viewport + user-agent emulation — Cypress does not run WebKit on Linux CI):
+
+| `CYPRESS_DEVICE` | Viewport | Matches |
+|------------------|----------|---------|
+| `desktop` (default) | 1280×720 | Playwright Desktop Chrome |
+| `mobile` | 390×844 | Playwright iPhone 12 Pro |
 
 ```bash
-npm run allure:serve   # Allure report (after tests)
+npm run cy:run:desktop    # desktop only
+npm run cy:run:mobile     # mobile only
+npm run test:e2e          # both (default for all suite scripts via cy:run)
 ```
 
-### Videos
-
-**Disabled for now** (`video: false`) — specs are too fast for useful MP4s; use **screenshots on failure** and **Allure** instead.
-
-Video infrastructure is kept for when the suite grows: `videosFolder`, `videoCompression`, and the `after:spec` hook that deletes videos for passing specs (only failures would be retained once `video: true`).
-
-## Run application
-
-From repo root:
+## Reports & artifacts
 
 ```bash
-docker compose -f docker/docker-compose/run-application.yml up -d
+npm run allure:serve   # after a test run
 ```
 
-## Architecture
+Allure **Environment** includes OS, Node, `E2E_TEST_ENV_URL`, and browser type/version.
 
-Mirrors the Playwright TypeScript layout:
+Screenshots on failure + Allure are the primary debug output. **Video is off** (`video: false`); folders, compression, and the `after:spec` cleanup hook remain for re-enabling later.
 
-- **Page objects** — element lookups only (`interactions/pages/`)
-- **Steps** — workflow actions (`interactions/steps/`)
-- **Validators** — assertions only (`interactions/validators/`)
-- **Providers** — wire layers into tests (`providers/`, `fixtures/providers.js`)
-- **Mocks** — `cy.intercept` stubs (`support/mocks/ApiRouteMock.js`); fluent chaining in `beforeEach` (mirrors Selenide `ApiRouteMockClient`)
+## Fluent chaining
 
-**Fluent chaining** (Selenide-style) — form workflows return the next step object so tests read as a single flow:
+Selenide-style flows — steps return `this` or the next step object:
 
 ```javascript
-step.tasks
-  .openCreateTaskForm()
-  .fillForm(context.createTaskData())
-  .submitForm();
+step.tasks.openCreateTaskForm().fillForm(context.createTaskData()).submitForm();
 
 support.mock.api
-  .getTasks([response])
-  .createTask(response)
-  .getTask(response.id, response)
-  .getIsValid(response.id, true);
+  .getTasks([response]).createTask(response)
+  .getTask(response.id, response).getIsValid(response.id, true);
 ```
 
-Steps that resolve a task id asynchronously (`openEditTaskForm`, `openTaskInfoForm`) stay on a separate line before chaining form actions.
-
-When a mock must be registered **after** filling a form but **before** submit (edit task), keep `fillForm` and `submitForm` on separate lines with `support.mock.api` between them — Cypress executes queued commands as they are enqueued, so chaining `fillForm().submitForm()` would fire the API call before the intercept is set up.
-
-Suite file naming — specs are discovered automatically from `tests/**/`; no need to register files in `package.json`:
-
-| Suite | File pattern | npm script sets |
-|-------|--------------|-----------------|
-| Mocked BE | `*.cy.js` (not `*.uat` / `*.axe`) | `CYPRESS_SUITE=e2e` |
-| UAT | `*.uat.cy.js` | `CYPRESS_SUITE=uat` |
-| Accessibility | `*.axe.cy.js` | `CYPRESS_SUITE=accessibility` |
-
-Optional tags (`@uat`, `@accessibility`) remain on tests for filtering in interactive mode via `@cypress/grep`.
+**Cypress caveats:**
+- `openEditTaskForm` / `openTaskInfoForm` / `deleteTask` resolve task id asynchronously — call on their own line before chaining form actions.
+- Edit task: register `support.mock.api` **between** `fillForm` and `submitForm` — queued commands run as enqueued, so `fillForm().submitForm()` fires the PUT before the intercept exists.
