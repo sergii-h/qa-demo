@@ -1,0 +1,47 @@
+name: Run accessibility tests (Cypress — mocked BE)
+
+on:
+  workflow_call:
+
+jobs:
+  run-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1]
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: frontend
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Run Cypress accessibility tests (shard ${{ matrix.shard }})
+        uses: ./.github/actions/cypress-javascript-test
+        with:
+          npm-script: accessibility
+          cypress-suite: accessibility
+          split-count: '2'
+          split-index: ${{ matrix.shard }}
+          app-mode: frontend
+          test-label: Run Cypress accessibility tests (mocked BE) — shard ${{ matrix.shard }}
+          artifact-name: allure-results-cypress-accessibility-shard-${{ matrix.shard }}
+
+  merge-allure:
+    needs: run-tests
+    if: ${{ always() && !cancelled() }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Merge Cypress accessibility Allure shards
+        uses: ./.github/actions/merge-cypress-allure-shards
+        with:
+          artifact-prefix: allure-results-cypress-accessibility
+          shard-count: '2'
+          output-artifact: allure-results-cypress-accessibility

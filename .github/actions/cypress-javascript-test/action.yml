@@ -1,0 +1,80 @@
+name: Run Cypress JavaScript tests
+description: Run Cypress JavaScript npm script and upload Allure results
+
+inputs:
+  npm-script:
+    description: npm script label used for screenshot artifact naming (e2e, accessibility, uat)
+    required: true
+  app-mode:
+    description: frontend (mocked BE) or full (full stack)
+    required: true
+  test-label:
+    description: Label for the Cypress test step
+    required: true
+  artifact-name:
+    description: Artifact name for raw Allure results
+    required: true
+  cypress-suite:
+    description: CYPRESS_SUITE value (e2e, accessibility, uat)
+    required: true
+  split-count:
+    description: Total number of parallel shards (1 disables sharding)
+    required: false
+    default: '1'
+  split-index:
+    description: Zero-based shard index for cypress-split
+    required: false
+    default: '0'
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: npm
+        cache-dependency-path: e2e/cypress-javascript/package-lock.json
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: e2e/cypress-javascript
+      run: npm ci
+
+    - name: ${{ inputs.test-label }}
+      if: ${{ !cancelled() }}
+      continue-on-error: true
+      id: test
+      shell: bash
+      working-directory: e2e/cypress-javascript
+      run: npm run cy:run
+      env:
+        CYPRESS_SUITE: ${{ inputs.cypress-suite }}
+        SPLIT: ${{ inputs.split-count }}
+        SPLIT_INDEX: ${{ inputs.split-index }}
+        E2E_TEST_ENV_URL: http://localhost:5173
+        E2E_API_URL: ${{ inputs.app-mode == 'full' && 'http://localhost:8080' || '' }}
+        E2E_WIREMOCK_URL: ${{ inputs.app-mode == 'full' && 'http://localhost:8085' || '' }}
+
+    - name: Upload allure results
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: e2e/cypress-javascript/allure-results
+        retention-days: 7
+        if-no-files-found: warn
+
+    - name: Upload Cypress screenshots
+      if: failure() && !cancelled()
+      uses: actions/upload-artifact@v4
+      with:
+        name: cypress-screenshots-${{ inputs.npm-script }}
+        path: e2e/cypress-javascript/cypress/screenshots
+        retention-days: 7
+        if-no-files-found: ignore
+
+    - name: Fail job when tests failed
+      if: steps.test.outcome == 'failure'
+      shell: bash
+      run: exit 1

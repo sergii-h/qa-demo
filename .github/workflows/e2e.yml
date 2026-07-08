@@ -9,6 +9,7 @@ on:
       - 'e2e/playwright-typescript/**'
       - 'e2e/playwright-python/**'
       - 'e2e/selenide-junit5-selenium-grid/**'
+      - 'e2e/cypress-javascript/**'
       - 'docker/**'
       - '.github/workflows/e2e.yml'
       - '.github/workflows/playwright-typescript-e2e.yml'
@@ -20,6 +21,9 @@ on:
       - '.github/workflows/selenide-junit5-grid-e2e.yml'
       - '.github/workflows/selenide-junit5-grid-uat.yml'
       - '.github/workflows/selenide-junit5-grid-accessibility.yml'
+      - '.github/workflows/cypress-javascript-e2e.yml'
+      - '.github/workflows/cypress-javascript-uat.yml'
+      - '.github/workflows/cypress-javascript-accessibility.yml'
       - '.github/actions/audit-npm/**'
       - '.github/actions/audit-pip/**'
       - '.github/actions/audit-osv/**'
@@ -27,6 +31,8 @@ on:
       - '.github/actions/playwright-typescript-test/**'
       - '.github/actions/playwright-python-test/**'
       - '.github/actions/selenide-test/**'
+      - '.github/actions/cypress-javascript-test/**'
+      - '.github/actions/merge-cypress-allure-shards/**'
   push:
     branches: [ "master" ]
     paths:
@@ -35,6 +41,7 @@ on:
       - 'e2e/playwright-typescript/**'
       - 'e2e/playwright-python/**'
       - 'e2e/selenide-junit5-selenium-grid/**'
+      - 'e2e/cypress-javascript/**'
       - 'docker/**'
       - '.github/workflows/e2e.yml'
       - '.github/workflows/playwright-typescript-e2e.yml'
@@ -46,6 +53,9 @@ on:
       - '.github/workflows/selenide-junit5-grid-e2e.yml'
       - '.github/workflows/selenide-junit5-grid-uat.yml'
       - '.github/workflows/selenide-junit5-grid-accessibility.yml'
+      - '.github/workflows/cypress-javascript-e2e.yml'
+      - '.github/workflows/cypress-javascript-uat.yml'
+      - '.github/workflows/cypress-javascript-accessibility.yml'
       - '.github/actions/audit-npm/**'
       - '.github/actions/audit-pip/**'
       - '.github/actions/audit-osv/**'
@@ -53,6 +63,8 @@ on:
       - '.github/actions/playwright-typescript-test/**'
       - '.github/actions/playwright-python-test/**'
       - '.github/actions/selenide-test/**'
+      - '.github/actions/cypress-javascript-test/**'
+      - '.github/actions/merge-cypress-allure-shards/**'
 
 permissions:
   contents: read
@@ -99,6 +111,15 @@ jobs:
         with:
           path: e2e/selenide-junit5-selenium-grid
 
+      - name: Install Cypress JavaScript dependencies
+        working-directory: e2e/cypress-javascript
+        run: npm ci
+
+      - name: Audit Cypress JavaScript dependencies
+        uses: ./.github/actions/audit-npm
+        with:
+          working-directory: e2e/cypress-javascript
+
   playwright-typescript-e2e:
     needs: audit-e2e-dependencies
     uses: ./.github/workflows/playwright-typescript-e2e.yml
@@ -142,4 +163,19 @@ jobs:
   selenide-accessibility:
     needs: audit-e2e-dependencies
     uses: ./.github/workflows/selenide-junit5-grid-accessibility.yml
+    secrets: inherit
+
+  cypress-javascript-e2e:
+    needs: audit-e2e-dependencies
+    uses: ./.github/workflows/cypress-javascript-e2e.yml
+    secrets: inherit
+
+  cypress-javascript-uat:
+    needs: audit-e2e-dependencies
+    uses: ./.github/workflows/cypress-javascript-uat.yml
+    secrets: inherit
+
+  cypress-javascript-accessibility:
+    needs: audit-e2e-dependencies
+    uses: ./.github/workflows/cypress-javascript-accessibility.yml
     secrets: inherit
