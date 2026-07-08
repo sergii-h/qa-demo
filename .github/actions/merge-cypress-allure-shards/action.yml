@@ -30,7 +30,7 @@ runs:
         rm -rf "$merged"
         mkdir -p "$merged"
 
-        find cypress-allure-shards -type f \( -name '*.json' -o -name '*.png' -o -name '*.txt' -o -name '*.xml' \) -print0 \
+        find cypress-allure-shards -type f \( -name '*.json' -o -name '*.png' -o -name '*.txt' -o -name '*.xml' -o -name '*.properties' \) -print0 \
           | while IFS= read -r -d '' file; do
               cp -n "$file" "$merged/"
             done
