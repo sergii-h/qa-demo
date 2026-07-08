@@ -50,11 +50,28 @@ npx cypress run --spec tests/create-task/create-task.cy.js
 
 Tags `@uat` / `@accessibility` filter specs in interactive mode (`@cypress/grep`).
 
+## Viewports
+
+Like Playwright, each suite runs on **desktop and mobile** (Chrome with viewport + user-agent emulation — Cypress does not run WebKit on Linux CI):
+
+| `CYPRESS_DEVICE` | Viewport | Matches |
+|------------------|----------|---------|
+| `desktop` (default) | 1280×720 | Playwright Desktop Chrome |
+| `mobile` | 390×844 | Playwright iPhone 12 Pro |
+
+```bash
+npm run cy:run:desktop    # desktop only
+npm run cy:run:mobile     # mobile only
+npm run test:e2e          # both (default for all suite scripts via cy:run)
+```
+
 ## Reports & artifacts
 
 ```bash
 npm run allure:serve   # after a test run
 ```
+
+Allure **Environment** includes OS, Node, `E2E_TEST_ENV_URL`, and browser type/version.
 
 Screenshots on failure + Allure are the primary debug output. **Video is off** (`video: false`); folders, compression, and the `after:spec` cleanup hook remain for re-enabling later.
 

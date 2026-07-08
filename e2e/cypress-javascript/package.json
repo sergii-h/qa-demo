@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "test": "npm run test:e2e && npm run test:accessibility && npm run test:uat",
-    "cy:run": "cypress run --browser chrome",
+    "cy:run": "rm -rf allure-results && npm run cy:run:desktop && npm run cy:run:mobile && node scripts/merge-allure-results.js allure-results allure-results/.device-desktop allure-results/.device-mobile",
+    "cy:run:desktop": "bash -c 'CYPRESS_SUITE=${CYPRESS_SUITE:-e2e} CYPRESS_DEVICE=desktop ALLURE_RESULTS_DIR=allure-results/.device-desktop cypress run --browser chrome'",
+    "cy:run:mobile": "bash -c 'CYPRESS_SUITE=${CYPRESS_SUITE:-e2e} CYPRESS_DEVICE=mobile ALLURE_RESULTS_DIR=allure-results/.device-mobile cypress run --browser chrome'",
     "test:e2e": "CYPRESS_SUITE=e2e npm run cy:run",
     "test:e2e:parallel": "bash scripts/run-cypress-parallel.sh e2e",
     "test:e2e:serial": "npm run test:e2e",

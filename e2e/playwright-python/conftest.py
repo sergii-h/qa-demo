@@ -25,7 +25,10 @@ def pytest_configure(config: pytest.Config) -> None:
 
     allure_dir = config.getoption("--alluredir", default=None)
     if allure_dir:
-        write_allure_environment_info(Path(allure_dir))
+        browsers = config.getoption("--browser") or ["chromium"]
+        if isinstance(browsers, str):
+            browsers = [browsers]
+        write_allure_environment_info(Path(allure_dir), list(dict.fromkeys(browsers)))
 
 
 @pytest.fixture(scope="session")
