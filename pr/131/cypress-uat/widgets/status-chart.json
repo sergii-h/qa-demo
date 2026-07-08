@@ -1,1 +1,1 @@
-[{"uid":"ef78366c3f05d9ed","name":"should create task","time":{"start":1783498136858,"stop":1783498141076,"duration":4218},"status":"passed","severity":"normal"}]
+[{"uid":"83bd4618eded4e8e","name":"[mobile] should create task","time":{"start":1783518852843,"stop":1783518855659,"duration":2816},"status":"passed","severity":"normal"},{"uid":"8515ebe862f5a614","name":"[desktop] should create task","time":{"start":1783518842575,"stop":1783518846424,"duration":3849},"status":"passed","severity":"normal"}]
