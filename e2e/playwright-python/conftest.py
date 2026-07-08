@@ -11,11 +11,21 @@ import config
 from providers.step_provider import StepProvider
 from providers.validation_provider import ValidationProvider
 from providers.support_provider import SupportProvider
+from support.allure.environment_info import write_allure_environment_info
 
 DESKTOP_BROWSER = "chromium"
 MOBILE_BROWSER = "webkit"
 DESKTOP_DEVICE = "Desktop Chrome"
 MOBILE_DEVICE = "iPhone 12 Pro"
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    if getattr(config, "workerinput", None) is not None:
+        return
+
+    allure_dir = config.getoption("--alluredir", default=None)
+    if allure_dir:
+        write_allure_environment_info(Path(allure_dir))
 
 
 @pytest.fixture(scope="session")
