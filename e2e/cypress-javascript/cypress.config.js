@@ -7,6 +7,7 @@ const allureWriter = require('@shelex/cypress-allure-plugin/writer');
 const webpackPreprocessor = require('@cypress/webpack-preprocessor');
 const cypressSplit = require('cypress-split');
 const testConfig = require('./test.config');
+const { writeAllureEnvironmentInfo } = require('./support/allure/environmentInfo');
 
 const envPath = fs.existsSync(path.resolve(__dirname, '.env.e2e.local'))
   ? path.resolve(__dirname, '.env.e2e.local')
@@ -57,6 +58,18 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       allureWriter(on, config);
       grep(config);
+
+      on('before:run', () => {
+        if (!config.env.allure) {
+          return;
+        }
+
+        const resultsDir = path.isAbsolute(config.env.allureResultsPath)
+          ? config.env.allureResultsPath
+          : path.join(config.projectRoot, config.env.allureResultsPath);
+
+        writeAllureEnvironmentInfo(resultsDir);
+      });
 
       on('file:preprocessor', webpackPreprocessor({
         webpackOptions: {
