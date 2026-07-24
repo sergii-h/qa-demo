@@ -105,7 +105,7 @@ else
   done
 fi
 
-ruby scripts/merge_allure_results.rb allure-results \
+bundle exec ruby scripts/merge_allure_results.rb allure-results \
   allure-results/.device-desktop \
   allure-results/.device-mobile
 

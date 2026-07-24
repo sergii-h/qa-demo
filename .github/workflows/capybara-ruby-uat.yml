@@ -22,8 +22,6 @@ jobs:
         with:
           rake-task: uat
           capybara-suite: uat
-          split-count: '1'
-          split-index: '0'
           app-mode: full
           test-label: Run Capybara Ruby UAT tests (full app)
           artifact-name: allure-results-capybara-ruby-uat

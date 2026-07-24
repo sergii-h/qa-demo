@@ -35,12 +35,12 @@ Accessibility scans inject vendored `vendor/axe.min.js` (axe-core 4.10.2) into t
 
 ```bash
 bundle exec rake test:e2e                      # sequential (default)
-bundle exec rake test:e2e:parallel             # 3 workers — optional
-bundle exec rake test:accessibility:parallel   # 2 workers
+bundle exec rake test:e2e:parallel             # local workers — optional
+bundle exec rake test:accessibility:parallel   # local workers
 CAPYBARA_DEVICE=desktop bundle exec rspec spec/create_task/create_task_spec.rb
 ```
 
-**Parallel / sharding** — local default is sequential (`test:e2e`). Opt in with `:parallel` tasks (`scripts/run_rspec_parallel.sh`). CI uses matrix shards (`SPLIT` / `SPLIT_INDEX`). Workers: e2e 3 · accessibility 2 · uat 1. With only a handful of specs, parallel can be slower than serial because each worker pays Chrome + Billy startup cost.
+**Parallel / sharding** — local default is sequential (`test:e2e`). Opt in with `:parallel` tasks (`scripts/run_rspec_parallel.sh`). CI runs the parallel path on a single runner (e2e 3 workers · accessibility 2 · uat 1). With only a handful of specs, local serial can still be faster than parallel because each worker pays Chrome + Billy startup cost.
 
 **Spec discovery** — `CAPYBARA_SUITE` selects by filename pattern:
 
