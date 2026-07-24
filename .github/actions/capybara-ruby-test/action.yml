@@ -1,0 +1,80 @@
+name: Run Capybara Ruby tests
+description: Run Capybara Ruby RSpec suite and upload Allure results
+
+inputs:
+  rake-task:
+    description: Rake task label used for screenshot artifact naming (e2e, accessibility, uat)
+    required: true
+  app-mode:
+    description: frontend (mocked BE) or full (full stack)
+    required: true
+  test-label:
+    description: Label for the Capybara test step
+    required: true
+  artifact-name:
+    description: Artifact name for raw Allure results
+    required: true
+  capybara-suite:
+    description: CAPYBARA_SUITE value (e2e, accessibility, uat)
+    required: true
+  split-count:
+    description: Total number of parallel shards (1 disables sharding)
+    required: false
+    default: '1'
+  split-index:
+    description: Zero-based shard index
+    required: false
+    default: '0'
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+        working-directory: e2e/capybara-ruby
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: e2e/capybara-ruby
+      run: bundle install
+
+    - name: ${{ inputs.test-label }}
+      if: ${{ !cancelled() }}
+      continue-on-error: true
+      id: test
+      shell: bash
+      working-directory: e2e/capybara-ruby
+      run: bash scripts/run_rspec_parallel.sh ${{ inputs.capybara-suite }}
+      env:
+        CAPYBARA_SUITE: ${{ inputs.capybara-suite }}
+        SPLIT: ${{ inputs.split-count }}
+        SPLIT_INDEX: ${{ inputs.split-index }}
+        E2E_TEST_ENV_URL: http://localhost:5173
+        E2E_API_URL: ${{ inputs.app-mode == 'full' && 'http://localhost:8080' || '' }}
+        E2E_WIREMOCK_URL: ${{ inputs.app-mode == 'full' && 'http://localhost:8085' || '' }}
+
+    - name: Upload allure results
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: e2e/capybara-ruby/allure-results
+        retention-days: 7
+        if-no-files-found: warn
+
+    - name: Upload Capybara screenshots
+      if: failure() && !cancelled()
+      uses: actions/upload-artifact@v4
+      with:
+        name: capybara-ruby-screenshots-${{ inputs.rake-task }}
+        path: e2e/capybara-ruby/screenshots
+        retention-days: 7
+        if-no-files-found: ignore
+
+    - name: Fail job when tests failed
+      if: steps.test.outcome == 'failure'
+      shell: bash
+      run: exit 1

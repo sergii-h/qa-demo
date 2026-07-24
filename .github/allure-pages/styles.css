@@ -154,6 +154,18 @@ main {
   height: 15px;
 }
 
+.brand-chip--rspec {
+  background: #f7f4ef;
+  color: #9b111e;
+  font-size: 12px;
+  padding: 0 0.65rem 0 0.3rem;
+}
+
+.brand-chip--rspec .logo-static {
+  height: 18px;
+  border-radius: 4px;
+}
+
 .brand-chip--compact.brand-chip--allure,
 .brand-chip--compact.brand-chip--selenide {
   font-size: 11px;

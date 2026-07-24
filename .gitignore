@@ -41,3 +41,5 @@ __pycache__/
 /e2e/cypress-javascript/allure-results/
 /e2e/cypress-javascript/cypress/videos/
 /e2e/cypress-javascript/cypress/screenshots/
+/e2e/capybara-ruby/screenshots/
+/e2e/capybara-ruby/allure-results/

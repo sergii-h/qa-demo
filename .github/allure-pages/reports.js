@@ -16,22 +16,26 @@ const ALLURE_LOGO = './assets/allure-logo.png';
 const MAESTRO_LOGO = './assets/maestro-logo.png';
 const REACT_NATIVE_LOGO = './assets/react-native-logo.png';
 const IOS_LOGO = './assets/ios-logo.png';
+const RSPEC_LOGO = './assets/rspec-logo.png';
 
 const LOCAL_LOGO_ASSETS = {
   'maestro-logo': { className: 'logo-static--maestro', alt: 'Maestro' },
   'react-native-logo': { className: 'logo-static--react-native', alt: 'React Native' },
   'ios-logo': { className: 'logo-static--ios', alt: 'iOS' },
+  'rspec-logo': { className: 'logo-static--rspec', alt: 'RSpec' },
 };
 
 const BRAND_CONFIG = {
   playwright: { logo: PLAYWRIGHT_LOGO, className: 'brand-chip--playwright' },
   selenide: { logo: SELENIDE_LOGO, className: 'brand-chip--selenide' },
   allure: { logo: ALLURE_LOGO, className: 'brand-chip--allure' },
+  rspec: { logo: RSPEC_LOGO, className: 'brand-chip--rspec' },
 };
 
 const PLAYWRIGHT_BRAND = { kind: 'playwright', label: 'Playwright' };
 const SELENIDE_BRAND = { kind: 'selenide', label: 'Selenide' };
 const ALLURE_REPORT_BRAND = { kind: 'allure', label: 'Allure report' };
+const RSPEC_BRAND = { kind: 'rspec', label: 'RSpec' };
 
 const BADGES = {
   java21: 'https://img.shields.io/badge/Java-21-orange?logo=openjdk',
@@ -113,6 +117,21 @@ const TEST_RUNS = [
       { suite: 'E2E', meta: 'mocked backend', allure: './cypress-e2e/index.html' },
       { suite: 'Accessibility', meta: 'mocked backend', allure: './cypress-accessibility/index.html' },
       { suite: 'UAT', meta: 'full stack', allure: './cypress-uat/index.html' },
+    ],
+  },
+  {
+    titleEmphasis: 'Capybara',
+    titleSuffix: 'test-run (Ruby)',
+    subtitle: 'Web · Desktop & mobile Chrome',
+    headerLogos: [
+      'https://img.shields.io/badge/Ruby-3.3-red?logo=ruby',
+      RSPEC_BRAND,
+      greenBadge('Capybara', 'capybara', '435440'),
+    ],
+    suites: [
+      { suite: 'E2E', meta: 'mocked backend', allure: './capybara-ruby-e2e/index.html' },
+      { suite: 'Accessibility', meta: 'mocked backend', allure: './capybara-ruby-accessibility/index.html' },
+      { suite: 'UAT', meta: 'full stack', allure: './capybara-ruby-uat/index.html' },
     ],
   },
   {
