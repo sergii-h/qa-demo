@@ -1,3 +1,3 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"Location - spec/create_task/create_task_uat_spec.rb:12","4636","[desktop] should create task","Desktop Chrome","Fri Jul 24 10:23:32 UTC 2026","passed","Fri Jul 24 10:23:37 UTC 2026","","Create task","create_task_uat_spec",""
-"Location - spec/create_task/create_task_uat_spec.rb:12","2480","[mobile] should create task","Mobile (iPhone 12 Pro viewport)","Fri Jul 24 10:23:39 UTC 2026","passed","Fri Jul 24 10:23:41 UTC 2026","","Create task","create_task_uat_spec",""
+"Location - spec/create_task/create_task_uat_spec.rb:12","2844","[mobile] should create task","Mobile (iPhone 12 Pro viewport)","Sat Jul 25 07:55:27 UTC 2026","passed","Sat Jul 25 07:55:30 UTC 2026","","Create task","create_task_uat_spec",""
+"Location - spec/create_task/create_task_uat_spec.rb:12","5455","[desktop] should create task","Desktop Chrome","Sat Jul 25 07:55:19 UTC 2026","passed","Sat Jul 25 07:55:25 UTC 2026","","Create task","create_task_uat_spec",""
