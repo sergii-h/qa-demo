@@ -1,0 +1,27 @@
+name: Run e2e tests (Capybara Ruby — mocked BE)
+
+on:
+  workflow_call:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: frontend
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Run Capybara Ruby e2e tests
+        uses: ./.github/actions/capybara-ruby-test
+        with:
+          rake-task: e2e
+          capybara-suite: e2e
+          app-mode: frontend
+          test-label: Run Capybara Ruby e2e tests (mocked BE)
+          artifact-name: allure-results-capybara-ruby-e2e

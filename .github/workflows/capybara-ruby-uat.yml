@@ -1,0 +1,27 @@
+name: Run UAT tests (Capybara Ruby — full app)
+
+on:
+  workflow_call:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: full
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Run Capybara Ruby UAT tests
+        uses: ./.github/actions/capybara-ruby-test
+        with:
+          rake-task: uat
+          capybara-suite: uat
+          app-mode: full
+          test-label: Run Capybara Ruby UAT tests (full app)
+          artifact-name: allure-results-capybara-ruby-uat

@@ -1,0 +1,55 @@
+# frozen_string_literal: true
+
+require 'fileutils'
+
+namespace :test do
+  desc 'Run all suites (e2e + accessibility + uat)'
+  task all: %i[e2e accessibility uat]
+
+  desc 'Run mocked-BE e2e suite (desktop + mobile, sequential)'
+  task :e2e do
+    sh 'CAPYBARA_SUITE=e2e CAPYBARA_SPLIT=1 bash scripts/run_rspec_parallel.sh e2e'
+  end
+
+  desc 'Run mocked-BE e2e suite in parallel'
+  task 'e2e:parallel' do
+    sh 'CAPYBARA_SUITE=e2e bash scripts/run_rspec_parallel.sh e2e'
+  end
+
+  desc 'Run mocked-BE e2e suite sequentially'
+  task 'e2e:serial' => :e2e
+
+  desc 'Run accessibility suite (desktop + mobile, sequential)'
+  task :accessibility do
+    sh 'CAPYBARA_SUITE=accessibility CAPYBARA_SPLIT=1 bash scripts/run_rspec_parallel.sh accessibility'
+  end
+
+  desc 'Run accessibility suite in parallel'
+  task 'accessibility:parallel' do
+    sh 'CAPYBARA_SUITE=accessibility bash scripts/run_rspec_parallel.sh accessibility'
+  end
+
+  desc 'Run accessibility suite sequentially'
+  task 'accessibility:serial' => :accessibility
+  desc 'Run UAT suite (desktop + mobile)'
+  task :uat do
+    sh 'CAPYBARA_SUITE=uat bash scripts/run_rspec_parallel.sh uat'
+  end
+
+  desc 'Alias for mocked-BE e2e suite'
+  task mock: :e2e
+end
+
+namespace :allure do
+  desc 'Generate Allure HTML report'
+  task :generate do
+    sh 'allure generate allure-results --clean -o allure-report'
+  end
+
+  desc 'Serve Allure report'
+  task :serve do
+    sh 'allure serve allure-results'
+  end
+end
+
+task default: 'test:e2e'
