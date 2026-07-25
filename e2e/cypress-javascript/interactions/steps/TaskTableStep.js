@@ -30,7 +30,7 @@ class TaskTableStep {
   _openTaskInfoForm(title) {
     this._resolveTaskId(title).then((id) => {
       this.mainPage.taskInfoButtonById(id).click();
-      this.taskInfoModal.title.should('be.visible');
+      this.taskInfoModal.description.should('be.visible');
     });
   }
 
