@@ -43,3 +43,4 @@ __pycache__/
 /e2e/cypress-javascript/cypress/screenshots/
 /e2e/capybara-ruby/screenshots/
 /e2e/capybara-ruby/allure-results/
+/e2e/capybara-ruby/.rspec_status

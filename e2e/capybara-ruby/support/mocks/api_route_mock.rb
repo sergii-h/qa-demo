@@ -6,6 +6,12 @@ class ApiRouteMock
     'Access-Control-Allow-Origin' => '*'
   }.freeze
 
+  CORS_HEADERS = {
+    'Access-Control-Allow-Origin' => '*',
+    'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers' => 'Content-Type'
+  }.freeze
+
   def create_task(response)
     stub_request(:post, %r{/v1/tasks$}, json: response, code: 201)
     self
@@ -22,7 +28,12 @@ class ApiRouteMock
   end
 
   def delete_task(id)
-    stub_request(:delete, %r{/v1/tasks/#{Regexp.escape(id)}$}, json: {}, code: 204)
+    # Empty 204 body (JSON body can break Chromium fetch). Dup headers — Billy mutates them.
+    Billy.proxy.stub(%r{/v1/tasks/#{Regexp.escape(id)}$}, method: 'DELETE').and_return(
+      code: 204,
+      body: '',
+      headers: CORS_HEADERS.dup
+    )
     self
   end
 

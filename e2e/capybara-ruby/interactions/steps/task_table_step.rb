@@ -50,7 +50,7 @@ class TaskTableStep
   def delete_task(title)
     id = resolve_task_id(title)
     @main_page.task_delete_button_by_id(id).click
-    expect(page).not_to have_css("[data-testid=\"delete-button-#{id}\"]")
+    expect(page).to have_no_css("[data-testid=\"delete-button-#{id}\"]")
   end
 
   private
