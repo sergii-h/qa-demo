@@ -60,6 +60,7 @@ jobs:
         uses: ./.github/actions/audit-osv
         with:
           path: notification-service
+          prepare-maven-bom: 'true'
 
       - name: Run notification-service consumer pact tests
         working-directory: notification-service
