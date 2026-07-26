@@ -1,6 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","46502","should switch UI to Spanish when ES is selected","","Sun Jul 26 09:42:50 UTC 2026","passed","Sun Jul 26 09:43:36 UTC 2026","","","",""
-"","105220","should update task when edit form submitted","","Sun Jul 26 09:40:17 UTC 2026","passed","Sun Jul 26 09:42:02 UTC 2026","","","",""
-"","93917","should create task when form submitted with valid data","","Sun Jul 26 09:37:48 UTC 2026","passed","Sun Jul 26 09:39:22 UTC 2026","","","",""
-"","47610","should display task details when info opened","","Sun Jul 26 09:42:02 UTC 2026","passed","Sun Jul 26 09:42:50 UTC 2026","","","",""
-"","54084","should remove task from list when delete succeeds","","Sun Jul 26 09:39:22 UTC 2026","passed","Sun Jul 26 09:40:16 UTC 2026","","","",""
