@@ -106,6 +106,36 @@ const TEST_RUNS = [
     ],
   },
   {
+    titleEmphasis: 'Cucumber',
+    titleSuffix: 'test-run (Playwright TypeScript)',
+    subtitle: 'Web · Desktop Chrome & Mobile Safari (webkit)',
+    headerLogos: [
+      BADGES.typescript5,
+      greenBadge('Cucumber', 'cucumber', '23D96C'),
+      PLAYWRIGHT_BRAND,
+    ],
+    suites: [
+      {
+        suite: 'E2E',
+        meta: 'mocked backend',
+        allure: './cucumber-playwright-e2e/index.html',
+        playwrightHtml: './cucumber-playwright-html-e2e/index.html',
+      },
+      {
+        suite: 'Accessibility',
+        meta: 'mocked backend',
+        allure: './cucumber-playwright-accessibility/index.html',
+        playwrightHtml: './cucumber-playwright-html-accessibility/index.html',
+      },
+      {
+        suite: 'UAT',
+        meta: 'full stack',
+        allure: './cucumber-playwright-uat/index.html',
+        playwrightHtml: './cucumber-playwright-html-uat/index.html',
+      },
+    ],
+  },
+  {
     titleEmphasis: 'Cypress',
     titleSuffix: 'test-run (JavaScript)',
     subtitle: 'Web · Desktop Chrome',
