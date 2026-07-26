@@ -1,0 +1,73 @@
+name: Run Cucumber Playwright TypeScript tests
+description: Run Cucumber Playwright TypeScript npm script and upload Allure results
+
+inputs:
+  npm-script:
+    description: npm script to run (e2e, accessibility, uat)
+    required: true
+  app-mode:
+    description: frontend (mocked BE) or full (full stack)
+    required: true
+  browsers:
+    description: Playwright browsers to install
+    required: false
+    default: chromium webkit
+  test-label:
+    description: Label for the Cucumber Playwright test step
+    required: true
+  artifact-name:
+    description: Artifact name for raw Allure results
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: npm
+        cache-dependency-path: e2e/cucumber-playwright-typescript/package-lock.json
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: e2e/cucumber-playwright-typescript
+      run: npm ci
+
+    - name: Install Playwright browsers
+      shell: bash
+      working-directory: e2e/cucumber-playwright-typescript
+      run: npx playwright install --with-deps ${{ inputs.browsers }}
+
+    - name: ${{ inputs.test-label }}
+      if: ${{ !cancelled() }}
+      continue-on-error: true
+      id: test
+      shell: bash
+      working-directory: e2e/cucumber-playwright-typescript
+      run: npm run test:${{ inputs.npm-script }}
+      env:
+        E2E_TEST_ENV_URL: http://localhost:5173
+        E2E_API_URL: ${{ inputs.app-mode == 'full' && 'http://localhost:8080' || '' }}
+        E2E_WIREMOCK_URL: ${{ inputs.app-mode == 'full' && 'http://localhost:8085' || '' }}
+
+    - name: Upload allure results
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: e2e/cucumber-playwright-typescript/allure-results
+        retention-days: 7
+
+    - name: Upload Playwright report
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: cucumber-playwright-report-${{ inputs.npm-script }}
+        path: e2e/cucumber-playwright-typescript/playwright-report/
+        retention-days: 7
+
+    - name: Fail job when tests failed
+      if: steps.test.outcome == 'failure'
+      shell: bash
+      run: exit 1

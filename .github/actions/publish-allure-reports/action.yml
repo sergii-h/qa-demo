@@ -97,6 +97,9 @@ runs:
           "allure-results-capybara-ruby-e2e|capybara-ruby-e2e"
           "allure-results-capybara-ruby-uat|capybara-ruby-uat"
           "allure-results-capybara-ruby-accessibility|capybara-ruby-accessibility"
+          "allure-results-cucumber-playwright-e2e|cucumber-playwright-e2e"
+          "allure-results-cucumber-playwright-uat|cucumber-playwright-uat"
+          "allure-results-cucumber-playwright-accessibility|cucumber-playwright-accessibility"
           "allure-results-android-e2e|android-compose-e2e"
           "allure-results-android-uat|android-compose-uat"
           "allure-results-android-accessibility|android-compose-accessibility"
@@ -125,6 +128,9 @@ runs:
           "playwright-report-e2e|playwright-html-e2e"
           "playwright-report-uat|playwright-html-uat"
           "playwright-report-accessibility|playwright-html-accessibility"
+          "cucumber-playwright-report-e2e|cucumber-playwright-html-e2e"
+          "cucumber-playwright-report-uat|cucumber-playwright-html-uat"
+          "cucumber-playwright-report-accessibility|cucumber-playwright-html-accessibility"
         )
 
         for report in "${playwright_reports[@]}"; do

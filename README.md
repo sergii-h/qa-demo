@@ -221,7 +221,7 @@ See [doc/pact.md](doc/pact.md) for the step-by-step manual run and broker notes.
 
 Each stack has three suites: **Mocked BE** (user flows), **Accessibility**, **UAT** (smoke against the real app).
 
-**Web E2E** — [Playwright TypeScript](e2e/playwright-typescript/README.md) · [Playwright Python](e2e/playwright-python/README.md) · [Selenide](e2e/selenide-junit5-selenium-grid/README.md) · [Cypress JavaScript](e2e/cypress-javascript/README.md) · [Capybara Ruby](e2e/capybara-ruby/README.md)
+**Web E2E** — [Playwright TypeScript](e2e/playwright-typescript/README.md) · [Playwright Python](e2e/playwright-python/README.md) · [Selenide](e2e/selenide-junit5-selenium-grid/README.md) · [Cypress JavaScript](e2e/cypress-javascript/README.md) · [Capybara Ruby](e2e/capybara-ruby/README.md) · [Cucumber Playwright TypeScript](e2e/cucumber-playwright-typescript/README.md)
 
 **Mobile E2E** — [Compose UI (Android)](demo-android/README.md#e2e-tests-instrumented-compose-ui-test) · [Maestro React Native](e2e/maestro/README.md) (Android & iOS)
 
@@ -257,7 +257,7 @@ See [Performance README](performance/README.md) for all scenarios, thresholds, a
 | [`demo-android/`](demo-android/README.md) | Android app (Kotlin · Jetpack Compose) — includes **Compose UI E2E** in `app/src/androidTest/` |
 | [`demo-react-native/`](demo-react-native/README.md) | React Native app (Expo · TypeScript) |
 | `notification-service/` | Kafka consumer (Java 21) — Pact message consumer |
-| `e2e/` | **Web E2E** — [Playwright TypeScript](e2e/playwright-typescript/README.md) · [Playwright Python](e2e/playwright-python/README.md) · [Selenide](e2e/selenide-junit5-selenium-grid/README.md) · [Cypress JavaScript](e2e/cypress-javascript/README.md) · [Capybara Ruby](e2e/capybara-ruby/README.md) · **Mobile E2E** — [Maestro React Native](e2e/maestro/README.md) |
+| `e2e/` | **Web E2E** — [Playwright TypeScript](e2e/playwright-typescript/README.md) · [Playwright Python](e2e/playwright-python/README.md) · [Selenide](e2e/selenide-junit5-selenium-grid/README.md) · [Cypress JavaScript](e2e/cypress-javascript/README.md) · [Capybara Ruby](e2e/capybara-ruby/README.md) · [Cucumber Playwright TypeScript](e2e/cucumber-playwright-typescript/README.md) · **Mobile E2E** — [Maestro React Native](e2e/maestro/README.md) |
 | `performance/` | k6 load & spike scripts |
 | `docker/` | Docker Compose configs and Dockerfiles |
 | `.github/` | CI workflows · reusable actions · Pact scripts |
@@ -281,6 +281,7 @@ See [Performance README](performance/README.md) for all scenarios, thresholds, a
 | [Selenide E2E README](e2e/selenide-junit5-selenium-grid/README.md) | **Web E2E** — Selenide suites and Selenium Grid Docker setup |
 | [Cypress JavaScript E2E README](e2e/cypress-javascript/README.md) | **Web E2E** — Cypress + JavaScript suites, configuration, and run commands |
 | [Capybara Ruby E2E README](e2e/capybara-ruby/README.md) | **Web E2E** — Capybara + RSpec suites, configuration, and run commands |
+| [Cucumber Playwright TypeScript E2E README](e2e/cucumber-playwright-typescript/README.md) | **Web E2E** — Cucumber + Playwright + TypeScript Gherkin suites, configuration, and run commands |
 | [Maestro React Native E2E README](e2e/maestro/README.md) | **Mobile E2E** — Maestro suites, Android/iOS build & install, WireMock/UAT setup, Allure reports |
 | [Performance README](performance/README.md) | k6 scenarios and thresholds |
 | [ADR Index](doc/adr/README.md) | Architectural decisions with context and rationale |
