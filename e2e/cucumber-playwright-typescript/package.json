@@ -1,0 +1,27 @@
+{
+  "name": "cucumber-playwright-typescript-e2e",
+  "version": "1.0.0",
+  "scripts": {
+    "bddgen": "bddgen",
+    "test": "npm run bddgen && playwright test",
+    "test:e2e": "npm run bddgen && playwright test --grep-invert \"@uat|@accessibility\"",
+    "test:mock": "npm run test:e2e",
+    "test:accessibility": "npm run bddgen && playwright test --grep @accessibility",
+    "test:uat": "npm run bddgen && playwright test --grep @uat --project='Desktop Chrome (chromium)'",
+    "test:desktop": "npm run bddgen && playwright test --project='Desktop Chrome (chromium)'",
+    "test:mobile": "npm run bddgen && playwright test --project='Mobile Safari (webkit)'",
+    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:serve": "allure serve allure-results"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
+    "@playwright/test": "1.60.0",
+    "playwright": "1.60.0",
+    "@types/node": "^25.9.1",
+    "allure-playwright": "^3.0.0",
+    "axios": "^1.18.1",
+    "dotenv": "^16.4.5",
+    "playwright-bdd": "8.5.1",
+    "typescript": "^5.4.5"
+  }
+}

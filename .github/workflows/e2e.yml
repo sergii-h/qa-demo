@@ -11,6 +11,7 @@ on:
       - 'e2e/selenide-junit5-selenium-grid/**'
       - 'e2e/cypress-javascript/**'
       - 'e2e/capybara-ruby/**'
+      - 'e2e/cucumber-playwright-typescript/**'
       - 'docker/**'
       - '.github/workflows/e2e.yml'
       - '.github/workflows/playwright-typescript-e2e.yml'
@@ -28,6 +29,9 @@ on:
       - '.github/workflows/capybara-ruby-e2e.yml'
       - '.github/workflows/capybara-ruby-uat.yml'
       - '.github/workflows/capybara-ruby-accessibility.yml'
+      - '.github/workflows/cucumber-playwright-typescript-e2e.yml'
+      - '.github/workflows/cucumber-playwright-typescript-uat.yml'
+      - '.github/workflows/cucumber-playwright-typescript-accessibility.yml'
       - '.github/actions/audit-npm/**'
       - '.github/actions/audit-pip/**'
       - '.github/actions/audit-osv/**'
@@ -37,6 +41,7 @@ on:
       - '.github/actions/selenide-test/**'
       - '.github/actions/cypress-javascript-test/**'
       - '.github/actions/capybara-ruby-test/**'
+      - '.github/actions/cucumber-playwright-typescript-test/**'
       - '.github/actions/merge-cypress-allure-shards/**'
   push:
     branches: [ "master" ]
@@ -48,6 +53,7 @@ on:
       - 'e2e/selenide-junit5-selenium-grid/**'
       - 'e2e/cypress-javascript/**'
       - 'e2e/capybara-ruby/**'
+      - 'e2e/cucumber-playwright-typescript/**'
       - 'docker/**'
       - '.github/workflows/e2e.yml'
       - '.github/workflows/playwright-typescript-e2e.yml'
@@ -65,6 +71,9 @@ on:
       - '.github/workflows/capybara-ruby-e2e.yml'
       - '.github/workflows/capybara-ruby-uat.yml'
       - '.github/workflows/capybara-ruby-accessibility.yml'
+      - '.github/workflows/cucumber-playwright-typescript-e2e.yml'
+      - '.github/workflows/cucumber-playwright-typescript-uat.yml'
+      - '.github/workflows/cucumber-playwright-typescript-accessibility.yml'
       - '.github/actions/audit-npm/**'
       - '.github/actions/audit-pip/**'
       - '.github/actions/audit-osv/**'
@@ -74,6 +83,7 @@ on:
       - '.github/actions/selenide-test/**'
       - '.github/actions/cypress-javascript-test/**'
       - '.github/actions/capybara-ruby-test/**'
+      - '.github/actions/cucumber-playwright-typescript-test/**'
       - '.github/actions/merge-cypress-allure-shards/**'
 
 permissions:
@@ -151,6 +161,15 @@ jobs:
         working-directory: e2e/capybara-ruby
         run: bundle exec bundler-audit check --update
 
+      - name: Install Cucumber Playwright TypeScript dependencies
+        working-directory: e2e/cucumber-playwright-typescript
+        run: npm ci
+
+      - name: Audit Cucumber Playwright TypeScript dependencies
+        uses: ./.github/actions/audit-npm
+        with:
+          working-directory: e2e/cucumber-playwright-typescript
+
   playwright-typescript-e2e:
     needs: audit-e2e-dependencies
     uses: ./.github/workflows/playwright-typescript-e2e.yml
@@ -224,4 +243,19 @@ jobs:
   capybara-ruby-accessibility:
     needs: audit-e2e-dependencies
     uses: ./.github/workflows/capybara-ruby-accessibility.yml
+    secrets: inherit
+
+  cucumber-playwright-typescript-e2e:
+    needs: audit-e2e-dependencies
+    uses: ./.github/workflows/cucumber-playwright-typescript-e2e.yml
+    secrets: inherit
+
+  cucumber-playwright-typescript-uat:
+    needs: audit-e2e-dependencies
+    uses: ./.github/workflows/cucumber-playwright-typescript-uat.yml
+    secrets: inherit
+
+  cucumber-playwright-typescript-accessibility:
+    needs: audit-e2e-dependencies
+    uses: ./.github/workflows/cucumber-playwright-typescript-accessibility.yml
     secrets: inherit
