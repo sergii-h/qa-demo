@@ -1,2 +1,2 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","2937","test_should_create_task[chromium]","tests.create_task","Sun Jul 26 17:24:50 UTC 2026","passed","Sun Jul 26 17:24:53 UTC 2026","","test_create_task_uat","",""
+"","3563","test_should_create_task[chromium]","tests.create_task","Sun Jul 26 18:07:36 UTC 2026","passed","Sun Jul 26 18:07:39 UTC 2026","","test_create_task_uat","",""
