@@ -17,6 +17,7 @@
         <selenium.version>4.44.0</selenium.version>
         <selenide.version>7.16.1</selenide.version>
         <jackson.version>2.22.1</jackson.version>
+        <netty.version>4.1.136.Final</netty.version>
         <properties.file.name>test.properties</properties.file.name>
         <test.tags></test.tags>
         <test.ignore.tags>uat</test.ignore.tags>
@@ -28,6 +29,13 @@
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
                 <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${netty.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
