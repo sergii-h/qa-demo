@@ -9,6 +9,10 @@ inputs:
     description: Generate Gradle lockfiles with ./gradlew before scanning
     required: false
     default: 'false'
+  prepare-maven-bom:
+    description: Resolve Maven deps into a CycloneDX BOM, then scan that (avoids deps.dev pom.xml resolution)
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -32,6 +36,27 @@ runs:
           (cd "$SCAN_PATH" && ./gradlew :app:dependencies --write-locks)
         fi
 
+        scan_target="$SCAN_PATH"
+        if [ "${{ inputs.prepare-maven-bom }}" = "true" ]; then
+          if ! command -v mvn >/dev/null 2>&1; then
+            echo "mvn not found; setup Java/Maven before enabling prepare-maven-bom" >&2
+            exit 1
+          fi
+          if [ ! -f "$SCAN_PATH/pom.xml" ]; then
+            echo "pom.xml not found in $SCAN_PATH" >&2
+            exit 1
+          fi
+          (cd "$SCAN_PATH" && mvn -B -q org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeBom \
+            -DoutputFormat=json \
+            -DoutputName=bom \
+            -DincludeTestScope=true)
+          scan_target="$SCAN_PATH/target/bom.json"
+          if [ ! -f "$scan_target" ]; then
+            echo "CycloneDX BOM was not created at $scan_target" >&2
+            exit 1
+          fi
+        fi
+
         osv_scanner="$RUNNER_TEMP/osv-scanner"
         results="$RUNNER_TEMP/osv-results.json"
         curl -sSfL "https://github.com/google/osv-scanner/releases/download/v2.3.8/osv-scanner_linux_amd64" \
@@ -39,19 +64,29 @@ runs:
         chmod +x "$osv_scanner"
 
         set +e
-        scan_output=$("$osv_scanner" scan source \
-          -r \
-          --format=json \
-          --verbosity=error \
-          --output-file="$results" \
-          "$SCAN_PATH" 2>&1)
+        if [ -f "$scan_target" ]; then
+          scan_output=$("$osv_scanner" scan source \
+            -L \
+            "$scan_target" \
+            --format=json \
+            --verbosity=error \
+            --output-file="$results" \
+            2>&1)
+        else
+          scan_output=$("$osv_scanner" scan source \
+            -r \
+            --format=json \
+            --verbosity=error \
+            --output-file="$results" \
+            "$scan_target" 2>&1)
+        fi
         scan_exit=$?
         set -e
 
         if [ ! -f "$results" ]; then
           echo "$scan_output"
           echo "OSV-Scanner did not produce results for $SCAN_PATH." >&2
-          echo "Gradle projects need lockfiles (enable prepare-gradle-locks). Maven needs pom.xml." >&2
+          echo "Gradle: enable prepare-gradle-locks. Maven: enable prepare-maven-bom." >&2
           exit 1
         fi
 

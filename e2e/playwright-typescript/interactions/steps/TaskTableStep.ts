@@ -34,7 +34,7 @@ export class TaskTableStep {
   async openTaskInfoForm(title: string): Promise<void> {
     const id = await this.resolveTaskId(title);
     await this.mainPage.taskInfoButtonById(id).click();
-    await expect(this.taskInfoModal.title).toBeVisible();
+    await expect(this.taskInfoModal.description).toBeVisible();
   }
 
   @step("Open edit form for task '{title}'")

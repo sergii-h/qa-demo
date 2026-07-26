@@ -26,7 +26,7 @@ public class TaskTableStep {
     @Step("Open 'Task info' modal for task '{title}'")
     public void openTaskInfoForm(String title) {
         mainPage.infoButton(resolveTaskId(title)).shouldBe(visible).click();
-        infoTaskModal.title.shouldBe(visible);
+        infoTaskModal.descriptionField.shouldBe(visible);
     }
 
     @Step("Open 'Task edit' form for task '{title}'")

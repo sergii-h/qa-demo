@@ -190,7 +190,7 @@ configurations.configureEach {
             )
             eachDependency {
                 if (requested.group == "io.netty") {
-                    useVersion("4.1.135.Final")
+                    useVersion("4.1.136.Final")
                     because("Fix GHSA netty vulnerabilities")
                 }
             }

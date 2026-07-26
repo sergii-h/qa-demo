@@ -116,10 +116,17 @@ jobs:
         with:
           working-directory: e2e/playwright-python
 
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
       - name: Audit Selenide dependencies
         uses: ./.github/actions/audit-osv
         with:
           path: e2e/selenide-junit5-selenium-grid
+          prepare-maven-bom: 'true'
 
       - name: Install Cypress JavaScript dependencies
         working-directory: e2e/cypress-javascript
