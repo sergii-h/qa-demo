@@ -1,0 +1,53 @@
+[
+  {
+    "description": "Ensure every ARIA progressbar node has an accessible name",
+    "help": "ARIA progressbar nodes must have an accessible name",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.10/aria-progressbar-name?application=axeAPI",
+    "id": "aria-progressbar-name",
+    "impact": "serious",
+    "nodes": [
+      {
+        "all": [],
+        "any": [
+          {
+            "data": null,
+            "id": "aria-label",
+            "impact": "serious",
+            "message": "aria-label attribute does not exist or is empty",
+            "relatedNodes": []
+          },
+          {
+            "data": null,
+            "id": "aria-labelledby",
+            "impact": "serious",
+            "message": "aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty",
+            "relatedNodes": []
+          },
+          {
+            "data": {
+              "messageKey": "noAttr"
+            },
+            "id": "non-empty-title",
+            "impact": "serious",
+            "message": "Element has no title attribute",
+            "relatedNodes": []
+          }
+        ],
+        "failureSummary": "Fix any of the following:\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute",
+        "html": "<div class=\"p-progress-spinner\" role=\"progressbar\" aria-busy=\"true\" data-testid=\"loading-spinner\" data-pc-name=\"progressspinner\" data-pc-section=\"root\">",
+        "impact": "serious",
+        "none": [],
+        "target": [
+          ".p-progress-spinner"
+        ]
+      }
+    ],
+    "tags": [
+      "cat.aria",
+      "wcag2a",
+      "wcag111",
+      "EN-301-549",
+      "EN-9.1.1.1"
+    ]
+  }
+]
