@@ -35,7 +35,7 @@ class TaskTableStep
   def open_task_info_form(title)
     id = resolve_task_id(title)
     @main_page.task_info_button_by_id(id).click
-    expect(@task_info_modal.title).to be_visible
+    expect(@task_info_modal.description).to be_visible
   end
 
   step "Open edit form for task '{title}'"
