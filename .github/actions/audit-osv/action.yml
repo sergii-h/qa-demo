@@ -38,9 +38,12 @@ runs:
           -o "$osv_scanner"
         chmod +x "$osv_scanner"
 
+        # Prefer Maven Central over deps.dev for pom.xml transitive resolution —
+        # deps.dev intermittently returns Unavailable and fails the whole scan (exit 127).
         set +e
         scan_output=$("$osv_scanner" scan source \
           -r \
+          --data-source=native \
           --format=json \
           --verbosity=error \
           --output-file="$results" \
