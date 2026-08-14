@@ -1,0 +1,99 @@
+name: Run iOS pact tests
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+  changes:
+    runs-on: ubuntu-22.04
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - demo-ios/**
+              - demo-service/**
+              - docker/**
+              - .github/scripts/pact-*.sh
+              - .github/workflows/pact-ios.yml
+
+  pact-ios:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    runs-on: macos-15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Start Pact Broker
+        uses: ./.github/actions/start-pact-broker
+        with:
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Configure Pact Broker main branches
+        run: bash .github/scripts/pact-configure-broker.sh
+
+      - name: Bootstrap master branch iOS contracts in Pact Broker
+        if: github.ref_name != 'master'
+        env:
+          DOCKER_HOST: unix:///var/run/docker.sock
+        run: bash .github/scripts/pact-bootstrap-ios-master.sh
+
+      - name: Run demo-ios consumer pact tests
+        working-directory: demo-ios
+        env:
+          PACT_OUTPUT_DIR: ${{ github.workspace }}/demo-ios/pacts
+        run: |
+          xcodegen generate
+          mkdir -p pacts
+          chmod +x Scripts/run-pact-tests.sh
+          DESTINATION='platform=iOS Simulator,name=iPhone 17,OS=latest' Scripts/run-pact-tests.sh
+          bash Scripts/collect-pacts-from-simulator.sh pacts
+
+      - name: Publish demo-ios pacts to broker
+        working-directory: demo-ios
+        env:
+          PACT_BROKER_BASE_URL: http://localhost:9292
+          PACT_CONSUMER_VERSION: ${{ github.sha }}
+          PACT_BRANCH: ${{ github.ref_name }}
+        run: |
+          docker run --rm --network=host \
+            -v "$PWD/pacts:/pacts" \
+            -e PACT_BROKER_BASE_URL=${PACT_BROKER_BASE_URL} \
+            pactfoundation/pact-cli:latest \
+            pact-broker publish /pacts \
+            --consumer-app-version ${PACT_CONSUMER_VERSION} \
+            --branch ${PACT_BRANCH}
+
+      - name: Run task API provider pact verification
+        uses: ./.github/actions/verify-task-api-pact-provider
+        with:
+          pact-provider-version: ${{ github.sha }}
+          pact-provider-branch: ${{ github.ref_name }}
+
+      - name: Can I merge to master
+        if: github.ref_name != 'master'
+        env:
+          PACT_VERSION: ${{ github.sha }}
+          PACT_MERGE_PROFILE: ios
+        run: bash .github/scripts/pact-can-i-merge.sh

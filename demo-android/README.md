@@ -37,7 +37,7 @@ Native Android client for the QA Demo task management API. Same CRUD functionali
 
 ```bash
 docker compose -f docker/docker-compose/run-application.yml up -d qa-demo-mongo qa-demo-kafka qa-demo-wiremock
-cd demo-service && mvn spring-boot:run
+cd demo-service && mvn sp-boot:runring
 ```
 
 ## Open in Android Studio
