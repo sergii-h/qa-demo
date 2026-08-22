@@ -11,15 +11,20 @@ iphonesimulator_sdk_version() {
 pick_iphone_on_runtime() {
   local os_prefix="$1"
   local name="$2"
+  local needle="$name"
+
+  if [[ "$name" != "iPhone" ]]; then
+    needle="$name ("
+  fi
 
   xcrun simctl list devices available \
-    | awk -v os="$os_prefix" -v name="$name" '
+    | awk -v os="$os_prefix" -v needle="$needle" '
         /^-- iOS / {
           in_ios = (index($3, os) == 1)
           next
         }
         /^-- / { in_ios = 0; next }
-        in_ios && index($0, name) { print; exit }
+        in_ios && index($0, needle) { print; exit }
       '
 }
 
@@ -68,10 +73,10 @@ ensure_simulator_booted() {
 
   if ! xcrun simctl list devices booted | grep -q "$udid"; then
     echo "Booting simulator ${udid}..." >&2
-    xcrun simctl boot "$udid" 2>/dev/null || true
+    xcrun simctl boot "$udid" >/dev/null 2>&1 || true
   fi
 
-  xcrun simctl bootstatus "$udid" -b
+  xcrun simctl bootstatus "$udid" -b >&2
 }
 
 resolve_xcodebuild_destination() {
