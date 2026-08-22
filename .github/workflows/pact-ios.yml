@@ -24,11 +24,60 @@ jobs:
               - docker/**
               - .github/scripts/pact-*.sh
               - .github/workflows/pact-ios.yml
+              - .github/actions/start-pact-broker/**
+              - .github/actions/verify-task-api-pact-provider/**
 
-  pact-ios:
+  pact-ios-consumer:
     needs: changes
     if: needs.changes.outputs.relevant == 'true'
     runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Run demo-ios consumer pact tests
+        working-directory: demo-ios
+        env:
+          PACT_OUTPUT_DIR: ${{ github.workspace }}/demo-ios/pacts
+        run: |
+          xcodegen generate
+          mkdir -p pacts
+          chmod +x Scripts/run-pact-tests.sh
+          DESTINATION='platform=iOS Simulator,name=iPhone 17,OS=latest' Scripts/run-pact-tests.sh
+          bash Scripts/collect-pacts-from-simulator.sh pacts
+
+      - name: Upload this-branch iOS pacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-pacts
+          path: demo-ios/pacts
+          if-no-files-found: error
+
+      - name: Generate master branch iOS pacts
+        if: github.ref_name != 'master'
+        env:
+          PACT_IOS_GENERATE_ONLY: 'true'
+          PACT_IOS_OUTPUT_DIR: ${{ github.workspace }}/ios-pacts-master
+        run: bash .github/scripts/pact-bootstrap-ios-master.sh
+
+      - name: Upload master iOS pacts
+        if: github.ref_name != 'master'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-pacts-master
+          path: ios-pacts-master
+          if-no-files-found: error
+
+  pact-ios:
+    needs: pact-ios-consumer
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v4
@@ -47,28 +96,28 @@ jobs:
           distribution: temurin
           cache: maven
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
       - name: Configure Pact Broker main branches
         run: bash .github/scripts/pact-configure-broker.sh
+
+      - name: Download this-branch iOS pacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-pacts
+          path: demo-ios/pacts
+
+      - name: Download master iOS pacts
+        if: github.ref_name != 'master'
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-pacts-master
+          path: ios-pacts-master
 
       - name: Bootstrap master branch iOS contracts in Pact Broker
         if: github.ref_name != 'master'
         env:
           DOCKER_HOST: unix:///var/run/docker.sock
+          PACT_IOS_PACTS_DIR: ${{ github.workspace }}/ios-pacts-master
         run: bash .github/scripts/pact-bootstrap-ios-master.sh
-
-      - name: Run demo-ios consumer pact tests
-        working-directory: demo-ios
-        env:
-          PACT_OUTPUT_DIR: ${{ github.workspace }}/demo-ios/pacts
-        run: |
-          xcodegen generate
-          mkdir -p pacts
-          chmod +x Scripts/run-pact-tests.sh
-          DESTINATION='platform=iOS Simulator,name=iPhone 17,OS=latest' Scripts/run-pact-tests.sh
-          bash Scripts/collect-pacts-from-simulator.sh pacts
 
       - name: Publish demo-ios pacts to broker
         working-directory: demo-ios
