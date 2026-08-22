@@ -6,9 +6,7 @@ on:
   push:
     branches: [master]
 
-permissions:
-  contents: read
-  security-events: read
+permissions: read-all
 
 jobs:
   dependabot-check:
