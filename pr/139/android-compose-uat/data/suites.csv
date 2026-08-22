@@ -1,2 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","8152","shouldCreateTask","","Sat Aug 22 20:09:26 UTC 2026","passed","Sat Aug 22 20:09:34 UTC 2026","","com.example.demo.e2e.test.create.CreateTaskUatTest","com.example.demo.e2e.test.create.CreateTaskUatTest","shouldCreateTask"
