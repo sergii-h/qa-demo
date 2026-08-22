@@ -8,6 +8,7 @@ on:
       - 'demo-service/**'
       - 'docker/**'
       - '.github/workflows/ios-e2e.yml'
+      - '.github/actions/start-e2e-env/**'
   push:
     branches: [master]
     paths:
@@ -15,6 +16,7 @@ on:
       - 'demo-service/**'
       - 'docker/**'
       - '.github/workflows/ios-e2e.yml'
+      - '.github/actions/start-e2e-env/**'
 
 jobs:
   ios-xcuitest-mocked:
@@ -24,10 +26,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Start WireMock
-        run: |
-          docker network create qa-demo-e2e || true
-          docker compose -f docker/docker-compose/run-application.yml up -d qa-demo-wiremock
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: wiremock
+          wiremock-backend: standalone
 
       - name: Install XcodeGen
         run: brew install xcodegen
