@@ -41,8 +41,8 @@ jobs:
           API_BASE_URL: http://localhost:8085/v1/
         run: |
           xcodegen generate
-          chmod +x Scripts/run-ui-tests.sh
-          DESTINATION='platform=iOS Simulator,name=iPhone 17,OS=latest' Scripts/run-ui-tests.sh
+          chmod +x Scripts/run-ui-tests.sh Scripts/ios-destination.sh
+          Scripts/run-ui-tests.sh
 
       - name: Upload Allure report artifact
         if: always()

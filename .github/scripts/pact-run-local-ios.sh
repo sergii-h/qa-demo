@@ -42,10 +42,13 @@ echo "Running demo-ios consumer pact tests..."
   xcodegen generate
   mkdir -p pacts
   export PACT_OUTPUT_DIR="${ROOT}/demo-ios/pacts"
+  # shellcheck source=../../demo-ios/Scripts/ios-destination.sh
+  source "${ROOT}/demo-ios/Scripts/ios-destination.sh"
+  resolve_xcodebuild_destination
   xcodebuild test \
     -project Demo.xcodeproj \
     -scheme Demo \
-    -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
+    -destination "$DESTINATION" \
     -only-testing:DemoPactTests \
     -parallel-testing-enabled NO \
     CODE_SIGNING_ALLOWED=NO

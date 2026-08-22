@@ -2,10 +2,10 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=ios-destination.sh
+source "$ROOT/Scripts/ios-destination.sh"
 XCODEGEN="${XCODEGEN:-/tmp/xcodegen-dist/xcodegen/bin/xcodegen}"
 SCHEME="${SCHEME:-Demo}"
-SIMULATOR_NAME="${SIMULATOR_NAME:-iPhone 17}"
-DESTINATION="${DESTINATION:-platform=iOS Simulator,name=${SIMULATOR_NAME},OS=latest}"
 DERIVED_DATA="${DERIVED_DATA:-$ROOT/build/DerivedData}"
 COVERAGE_SUMMARY="${COVERAGE_SUMMARY:-$ROOT/build/coverage-summary.txt}"
 MIN_LINE_COVERAGE="${MIN_LINE_COVERAGE:-90}"
@@ -51,6 +51,8 @@ TEST_SUITES=(
 
 mkdir -p "$(dirname "$COVERAGE_SUMMARY")" "$DERIVED_DATA/Logs"
 
+resolve_xcodebuild_destination
+
 echo "Building once for testing..."
 xcodebuild build-for-testing \
   -project Demo.xcodeproj \
@@ -78,11 +80,7 @@ fi
 # reads. Passing the container's preferences plist as an explicit file path
 # routes the deletion through the same CFPreferences API the app uses, so it
 # takes effect for the next launch.
-DEVICE_UDID="$(xcrun simctl list devices available | grep -F "${SIMULATOR_NAME} (" | grep -oE '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}' | head -1)"
-if [[ -z "$DEVICE_UDID" ]]; then
-  echo "ERROR: could not resolve simulator UDID for '${SIMULATOR_NAME}'" >&2
-  exit 1
-fi
+DEVICE_UDID="${SIMULATOR_UDID:?ERROR: simulator UDID was not resolved}"
 
 clear_app_preferences() {
   local container

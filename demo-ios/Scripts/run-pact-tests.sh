@@ -2,8 +2,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=ios-destination.sh
+source "$ROOT/Scripts/ios-destination.sh"
 XCODEGEN="${XCODEGEN:-/tmp/xcodegen-dist/xcodegen/bin/xcodegen}"
-DESTINATION="${DESTINATION:-platform=iOS Simulator,name=iPhone 17,OS=latest}"
 DERIVED_DATA="${DERIVED_DATA:-$ROOT/build/DerivedData}"
 RESULT_BUNDLE="${RESULT_BUNDLE:-$ROOT/build/PactTestResults.xcresult}"
 
@@ -17,6 +18,8 @@ fi
 export PACT_OUTPUT_DIR="$ROOT/pacts"
 
 rm -rf "$RESULT_BUNDLE"
+
+resolve_xcodebuild_destination
 
 xcodebuild test \
   -project Demo.xcodeproj \

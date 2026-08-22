@@ -1,8 +1,21 @@
 import XCTest
 
 struct TaskTestContext {
+    let id = UUID().uuidString
     let title = "Task \(UUID().uuidString.prefix(8))"
     let description = "E2E description"
+
+    func stubTask() -> [String: Any] {
+        [
+            "id": id,
+            "title": title,
+            "description": description,
+            "status": "TODO",
+            "priority": "MEDIUM",
+            "createdDate": "2024-01-15T10:00:00.000Z",
+            "updatedDate": "2024-01-16T12:00:00.000Z",
+        ]
+    }
 }
 
 final class MainPage {
@@ -22,10 +35,12 @@ final class MainPage {
         app.buttons["add-task-button"].tap()
     }
 
-    func hasTask(titled title: String) -> Bool {
-        app.staticTexts.matching(
-            NSPredicate(format: "identifier BEGINSWITH 'task-title-' AND label == %@", title)
-        ).firstMatch.waitForExistence(timeout: 10)
+    func hasTask(id: String, titled title: String) -> Bool {
+        let element = app.descendants(matching: .any)["task-title-\(id)"]
+        guard element.waitForExistence(timeout: 10) else {
+            return false
+        }
+        return element.label == title
     }
 }
 

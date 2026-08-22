@@ -48,8 +48,8 @@ jobs:
         run: |
           xcodegen generate
           mkdir -p pacts
-          chmod +x Scripts/run-pact-tests.sh
-          DESTINATION='platform=iOS Simulator,name=iPhone 17,OS=latest' Scripts/run-pact-tests.sh
+          chmod +x Scripts/run-pact-tests.sh Scripts/ios-destination.sh
+          Scripts/run-pact-tests.sh
           bash Scripts/collect-pacts-from-simulator.sh pacts
 
       - name: Upload this-branch iOS pacts

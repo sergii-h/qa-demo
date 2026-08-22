@@ -219,18 +219,19 @@ resolve_ios_simulator_udid() {
 
 ensure_simulator_booted() {
   local udid="$1"
-  if xcrun simctl list devices booted | grep -q "$udid"; then
-    return 0
+
+  # GitHub macos-15 + Xcode 26: CoreSimulator caches can be cold; listing devices rebuilds them.
+  xcrun simctl list >/dev/null 2>&1 || true
+
+  if ! xcrun simctl list devices booted | grep -q "$udid"; then
+    echo "Booting simulator ${udid}..." >&2
+    xcrun simctl boot "$udid" 2>/dev/null || true
   fi
 
-  echo "Booting simulator ${udid}..." >&2
-  xcrun simctl boot "$udid" 2>/dev/null || true
+  # Maestro's XCTest driver fails to attach to a headless simctl boot; Simulator.app is required.
+  open -a Simulator --args -CurrentDeviceUDID "$udid" 2>/dev/null || open -a Simulator || true
 
-  if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
-    xcrun simctl bootstatus "$udid" -b
-  else
-    open -a Simulator
-  fi
+  xcrun simctl bootstatus "$udid" -b
 }
 
 resolve_ios_simulator_destination_for_build() {

@@ -4,6 +4,14 @@ final class CreateTaskTest: MockedBackendTestBase {
     func testShouldCreateTaskWhenFormSubmittedWithValidData() throws {
         // Given
         let context = TaskTestContext()
+        let task = context.stubTask()
+        try mock.api()
+            .createTask(task)
+            .getTasks([task])
+            .getTasks([task])
+            .getTask(task)
+            .getIsValid(true)
+
         let mainPage = MainPage(app: app)
         mainPage.waitUntilReady()
 
@@ -17,6 +25,6 @@ final class CreateTaskTest: MockedBackendTestBase {
 
         // Then
         mainPage.waitUntilReady()
-        XCTAssertTrue(mainPage.hasTask(titled: context.title))
+        XCTAssertTrue(mainPage.hasTask(id: context.id, titled: context.title))
     }
 }

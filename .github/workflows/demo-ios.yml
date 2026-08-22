@@ -15,7 +15,7 @@ on:
 jobs:
   unit:
     runs-on: macos-15
-    timeout-minutes: 45
+    timeout-minutes: 90
 
     steps:
       - uses: actions/checkout@v4
@@ -37,5 +37,5 @@ jobs:
       - name: Run unit and integration tests with coverage
         working-directory: demo-ios
         run: |
-          chmod +x Scripts/run-unit-tests.sh
-          DESTINATION='platform=iOS Simulator,name=iPhone 17,OS=latest' Scripts/run-unit-tests.sh
+          chmod +x Scripts/run-unit-tests.sh Scripts/ios-destination.sh
+          Scripts/run-unit-tests.sh

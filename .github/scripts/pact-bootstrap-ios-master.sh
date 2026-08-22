@@ -38,10 +38,14 @@ if [[ -z "${PACTS_TO_PUBLISH}" ]]; then
     xcodegen generate
     mkdir -p pacts
     export PACT_OUTPUT_DIR="${WORKTREE}/demo-ios/pacts"
+    # Resolve against this checkout so destination logic is available before it lands on master.
+    # shellcheck source=../../demo-ios/Scripts/ios-destination.sh
+    source "${ROOT}/demo-ios/Scripts/ios-destination.sh"
+    resolve_xcodebuild_destination
     xcodebuild test \
       -project Demo.xcodeproj \
       -scheme Demo \
-      -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
+      -destination "$DESTINATION" \
       -only-testing:DemoPactTests \
       -parallel-testing-enabled NO \
       CODE_SIGNING_ALLOWED=NO
