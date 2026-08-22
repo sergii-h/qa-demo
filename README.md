@@ -62,16 +62,17 @@ A full-stack Task Management app used as a testing pyramid demo. The domain is i
 | Backend | Java 21 · SpringBoot 3.5.12 · MongoDB 4.4 · Kafka 3.3.2 · WireMock 3.9.2 |
 | Frontend | TypeScript 5 · React 18 · PrimeReact 10 · Vite 8 · Node 22 |
 | Android | Kotlin · Jetpack Compose · Material 3 · Retrofit + Moshi · ViewModel + StateFlow · Min SDK 26 · Target SDK 35 |
+| iOS | Swift · SwiftUI · URLSession + Codable · `@Observable` + async/await · iOS 17+ |
 | React Native | Expo 53 · TypeScript · React Navigation · React Native Paper |
-| Unit | JUnit5 + Mockito (BE) · Vitest 4 (FE) · JUnit4 + MockK + Robolectric (Android) · Jest (React Native) |
-| Integration | JUnit5 + TestContainers (BE) · Vitest 4 (FE) |
-| Contract | Pact — HTTP (FE↔BE + Android↔BE + React Native↔BE) + Kafka message (notification-service↔BE) |
+| Unit | JUnit5 + Mockito (BE) · Vitest 4 (FE) · JUnit4 + MockK + Robolectric (Android) · Swift Testing (iOS) · Jest (React Native) |
+| Integration | JUnit5 + TestContainers (BE) · Vitest 4 (FE) · URLProtocol stubbing (iOS) |
+| Contract | Pact — HTTP (FE↔BE + Android↔BE + iOS↔BE + React Native↔BE) + Kafka message (notification-service↔BE) |
 | Web E2E | Playwright + TypeScript · Playwright + Python · Selenide + JUnit5 + Selenium Grid |
-| Mobile E2E | Compose UI Test (Android) · Maestro + TypeScript (React Native — Android & iOS) |
+| Mobile E2E | Compose UI Test (Android) · XCUITest (iOS) · Maestro + TypeScript (React Native — Android & iOS) |
 | Mutation | PiTest (BE) · Stryker (FE, on-demand) |
 | Performance | k6 |
 | Security | CodeQL (SAST) · Dependabot alerts (SCA) · GitHub secret scanning & push protection (platform) |
-| Coverage | JaCoCo ≥90% (BE) · Istanbul ≥90% (FE) · Kover ≥90% (Android) · Jest ≥90% (React Native) |
+| Coverage | JaCoCo ≥90% (BE) · Istanbul ≥90% (FE) · Kover ≥90% (Android) · xccov/Slather ≥90% (iOS) · Jest ≥90% (React Native) |
 
 ---
 
@@ -112,7 +113,7 @@ Each E2E stack follows the same three-suite split regardless of language or tool
 | UAT | `@uat` | Single smoke test against the real running app | Every CI run |
 
 **Web** (`e2e/`): Playwright TypeScript · Playwright Python · Selenide · Cypress JavaScript · Capybara Ruby  
-**Mobile**: Compose UI Test in [`demo-android/app/src/androidTest/`](demo-android/README.md#e2e-tests-instrumented-compose-ui-test) · Maestro in [`e2e/maestro/`](e2e/maestro/README.md)
+**Mobile**: Compose UI Test in [`demo-android/app/src/androidTest/`](demo-android/README.md#e2e-tests-instrumented-compose-ui-test) · XCUITest in [`demo-ios/DemoUITests/`](demo-ios/README.md#e2e-tests-xcuitest) · Maestro in [`e2e/maestro/`](e2e/maestro/README.md)
 
 The UAT suite is intentionally one test (the most critical happy path). Business logic is already covered by the layers below; UAT exists only to confirm all services are wired together correctly in a real environment.
 
@@ -129,13 +130,15 @@ GitHub Actions validates every change — see [Actions](https://github.com/sergi
 | `demo-service` | Backend unit, PiTest mutation, integration — push / PR to `master`, path-filtered |
 | `demo-interface` | Frontend unit + integration — push / PR to `master`, path-filtered |
 | `demo-android` | Android unit + integration tests — push / PR to `master`, path-filtered |
+| `demo-ios` | iOS unit + integration tests (Swift Testing, ViewInspector) — push / PR to `master`, path-filtered |
 | `demo-react-native` | React Native unit + integration tests — push / PR to `master`, path-filtered |
 | `pact-interface` | `demo-interface` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
 | `pact-notification` | `notification-service` consumer contracts, events provider verify, can-i-merge — push / PR to `master` |
 | `pact-android` | `demo-android` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
+| `pact-ios` | `demo-ios` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
 | `pact-react-native` | `demo-react-native` consumer contracts, task API provider verify, can-i-merge — push / PR to `master` |
 | `e2e` | **Web E2E** — Playwright (TypeScript), Playwright (Python), Selenide (JUnit5 + Selenium Grid), Cypress (JavaScript), Capybara (Ruby) — mocked BE, accessibility, and UAT suites — push / PR to `master`, path-filtered |
-| `android-e2e`, `react-native-e2e` | **Mobile E2E** — Compose UI (Android), Maestro (React Native — Android + iOS) — mocked BE, accessibility, and UAT suites — push / PR to `master`, path-filtered |
+| `android-e2e`, `ios-e2e`, `react-native-e2e` | **Mobile E2E** — Compose UI (Android), XCUITest (iOS), Maestro (React Native — Android + iOS) — mocked BE, accessibility, and UAT suites — push / PR to `master`, path-filtered |
 | `e2e-reports` | Publish Allure and Playwright reports to GitHub Pages after web (`e2e`), Android Compose (`android-e2e`), and Maestro React Native (`react-native-e2e`) workflows finish |
 | `allure-pages` | Allure reports landing page (`master`) |
 | `allure-pages-cleanup` | Remove PR report folder (Allure + Playwright HTML) from GitHub Pages when a PR closes |
@@ -207,11 +210,12 @@ VITE_BE_API=http://localhost:8080/v1 npm start
 
 ### Pact (Consumer-Driven Contract Tests)
 
-Ephemeral broker per CI run; four consumers (`demo-interface`, `notification-service`, `demo-android`, `demo-react-native`) verified against `demo-service`.
+Ephemeral broker per CI run; five consumers (`demo-interface`, `notification-service`, `demo-android`, `demo-ios`, `demo-react-native`) verified against `demo-service`.
 
 ```bash
 bash .github/scripts/pact-run-local.sh                  # full pipeline (all consumers)
 bash .github/scripts/pact-run-local-android.sh          # Android-only pipeline
+bash .github/scripts/pact-run-local-ios.sh              # iOS-only pipeline
 bash .github/scripts/pact-run-local-react-native.sh     # React Native-only pipeline
 ```
 
@@ -223,7 +227,7 @@ Each stack has three suites: **Mocked BE** (user flows), **Accessibility**, **UA
 
 **Web E2E** — [Playwright TypeScript](e2e/playwright-typescript/README.md) · [Playwright Python](e2e/playwright-python/README.md) · [Selenide](e2e/selenide-junit5-selenium-grid/README.md) · [Cypress JavaScript](e2e/cypress-javascript/README.md) · [Capybara Ruby](e2e/capybara-ruby/README.md) · [Cucumber Playwright TypeScript](e2e/cucumber-playwright-typescript/README.md)
 
-**Mobile E2E** — [Compose UI (Android)](demo-android/README.md#e2e-tests-instrumented-compose-ui-test) · [Maestro React Native](e2e/maestro/README.md) (Android & iOS)
+**Mobile E2E** — [Compose UI (Android)](demo-android/README.md#e2e-tests-instrumented-compose-ui-test) · [XCUITest (iOS)](demo-ios/README.md#e2e-tests-xcuitest) · [Maestro React Native](e2e/maestro/README.md) (Android & iOS)
 
 ### Performance Tests (k6)
 
@@ -255,6 +259,7 @@ See [Performance README](performance/README.md) for all scenarios, thresholds, a
 | [`demo-service/`](demo-service/README.md) | SpringBoot backend (Java 21 · MongoDB · Kafka) |
 | [`demo-interface/`](demo-interface/README.md) | React frontend (Vite · TypeScript) |
 | [`demo-android/`](demo-android/README.md) | Android app (Kotlin · Jetpack Compose) — includes **Compose UI E2E** in `app/src/androidTest/` |
+| [`demo-ios/`](demo-ios/README.md) | iOS app (Swift · SwiftUI) — includes **XCUITest E2E** in `DemoUITests/` |
 | [`demo-react-native/`](demo-react-native/README.md) | React Native app (Expo · TypeScript) |
 | `notification-service/` | Kafka consumer (Java 21) — Pact message consumer |
 | `e2e/` | **Web E2E** — [Playwright TypeScript](e2e/playwright-typescript/README.md) · [Playwright Python](e2e/playwright-python/README.md) · [Selenide](e2e/selenide-junit5-selenium-grid/README.md) · [Cypress JavaScript](e2e/cypress-javascript/README.md) · [Capybara Ruby](e2e/capybara-ruby/README.md) · [Cucumber Playwright TypeScript](e2e/cucumber-playwright-typescript/README.md) · **Mobile E2E** — [Maestro React Native](e2e/maestro/README.md) |
@@ -275,6 +280,7 @@ See [Performance README](performance/README.md) for all scenarios, thresholds, a
 | [Backend README](demo-service/README.md) | Running backend unit, integration, and mutation tests |
 | [Frontend README](demo-interface/README.md) | Running frontend unit, integration, and mutation tests |
 | [Android README](demo-android/README.md) | Android unit, integration, Kover coverage, and Compose UI E2E tests |
+| [iOS README](demo-ios/README.md) | iOS unit, integration, Xcode coverage, Pact, and XCUITest E2E tests |
 | [React Native README](demo-react-native/README.md) | Running React Native unit, integration, and Pact tests |
 | [Playwright TypeScript E2E README](e2e/playwright-typescript/README.md) | **Web E2E** — Playwright + TypeScript suites, configuration, and run commands |
 | [Playwright Python E2E README](e2e/playwright-python/README.md) | **Web E2E** — Playwright + Python suites, viewports, Allure and trace reports |

@@ -1,0 +1,41 @@
+name: Run iOS unit and integration tests
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'demo-ios/**'
+      - '.github/workflows/demo-ios.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'demo-ios/**'
+      - '.github/workflows/demo-ios.yml'
+
+jobs:
+  unit:
+    runs-on: macos-15
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: demo-ios
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: demo-ios
+        run: xcodegen generate
+
+      - name: Run unit and integration tests with coverage
+        working-directory: demo-ios
+        run: |
+          chmod +x Scripts/run-unit-tests.sh Scripts/ios-destination.sh
+          Scripts/run-unit-tests.sh

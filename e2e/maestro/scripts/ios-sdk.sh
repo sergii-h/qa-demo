@@ -137,35 +137,85 @@ extract_simulator_udid() {
   sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/'
 }
 
-resolve_simulator_udid_by_name() {
-  local name="$1"
-  local udid
+iphonesimulator_sdk_version() {
+  xcrun --sdk iphonesimulator --show-sdk-version
+}
 
-  udid="$(
-    xcrun simctl list devices available \
-      | awk -v name="$name" '
-          /^-- iOS 18\./ { in_ios_18 = 1; next }
-          /^-- iOS / { in_ios_18 = 0; next }
-          in_ios_18 && index($0, name) { print; exit }
-        ' \
-      | extract_simulator_udid
-  )"
-  if [[ -n "$udid" ]]; then
-    echo "$udid"
-    return 0
+pick_iphone_on_runtime() {
+  local os_prefix="$1"
+  local name="$2"
+  local needle="$name"
+
+  if [[ "$name" != "iPhone" ]]; then
+    needle="$name ("
   fi
 
   xcrun simctl list devices available \
-    | grep -F "$name" \
-    | head -1 \
-    | extract_simulator_udid
+    | awk -v os="$os_prefix" -v needle="$needle" '
+        /^-- iOS / {
+          in_ios = (index($3, os) == 1)
+          next
+        }
+        /^-- / { in_ios = 0; next }
+        in_ios && index($0, needle) { print; exit }
+      '
+}
+
+resolve_simulator_udid_by_name() {
+  local name="$1"
+  local sdk os_prefix line udid
+  sdk="$(iphonesimulator_sdk_version)"
+  local sdk_major="${sdk%%.*}"
+
+  for os_prefix in "$sdk" "${sdk_major}."; do
+    line="$(pick_iphone_on_runtime "$os_prefix" "$name")"
+    if [[ -z "$line" ]]; then
+      continue
+    fi
+    udid="$(printf '%s\n' "$line" | extract_simulator_udid)"
+    if [[ -n "$udid" ]]; then
+      echo "Using simulator ${line} (iOS SDK ${sdk})" >&2
+      echo "$udid"
+      return 0
+    fi
+  done
+
+  udid="$(
+    xcrun simctl list devices available \
+      | grep -F "$name (" \
+      | head -1 \
+      | extract_simulator_udid
+  )" || true
+  printf '%s\n' "$udid"
 }
 
 resolve_default_iphone_simulator_udid() {
-  xcrun simctl list devices available \
-    | grep -E '^\s+iPhone' \
-    | head -1 \
-    | extract_simulator_udid
+  local sdk os_prefix name line udid
+  sdk="$(iphonesimulator_sdk_version)"
+  local sdk_major="${sdk%%.*}"
+
+  for os_prefix in "$sdk" "${sdk_major}."; do
+    for name in "iPhone 16" "iPhone 16 Pro" "iPhone 17" "iPhone"; do
+      line="$(pick_iphone_on_runtime "$os_prefix" "$name")"
+      if [[ -z "$line" ]]; then
+        continue
+      fi
+      udid="$(printf '%s\n' "$line" | extract_simulator_udid)"
+      if [[ -n "$udid" ]]; then
+        echo "Using simulator ${line} (iOS SDK ${sdk})" >&2
+        echo "$udid"
+        return 0
+      fi
+    done
+  done
+
+  udid="$(
+    xcrun simctl list devices available \
+      | grep -E '^\s+iPhone' \
+      | head -1 \
+      | extract_simulator_udid
+  )" || true
+  printf '%s\n' "$udid"
 }
 
 resolve_ios_simulator_udid() {
@@ -174,12 +224,18 @@ resolve_ios_simulator_udid() {
     return 0
   fi
 
-  local booted_udid
-  booted_udid="$(resolve_booted_simulator_udid 2>/dev/null || true)"
-  if [[ -n "$booted_udid" ]]; then
-    echo "$booted_udid"
-    return 0
+  # GitHub runners often have a random iOS 26 simulator already booted.
+  # Prefer a device that matches the selected Xcode's iOS SDK instead.
+  if [[ -z "${GITHUB_ACTIONS:-}" ]]; then
+    local booted_udid
+    booted_udid="$(resolve_booted_simulator_udid 2>/dev/null || true)"
+    if [[ -n "$booted_udid" ]]; then
+      echo "$booted_udid"
+      return 0
+    fi
   fi
+
+  xcrun simctl list >/dev/null 2>&1 || true
 
   local simulator_name="${MAESTRO_IOS_SIMULATOR:-}"
   if [[ -z "$simulator_name" && -n "${GITHUB_ACTIONS:-}" ]]; then
@@ -219,34 +275,39 @@ resolve_ios_simulator_udid() {
 
 ensure_simulator_booted() {
   local udid="$1"
-  if xcrun simctl list devices booted | grep -q "$udid"; then
-    return 0
+  local booted
+
+  xcrun simctl list >/dev/null 2>&1 || true
+
+  booted="$(xcrun simctl list devices booted 2>/dev/null || true)"
+  if printf '%s\n' "$booted" | grep -q Booted && ! printf '%s\n' "$booted" | grep -q "$udid"; then
+    xcrun simctl shutdown all >/dev/null 2>&1 || true
   fi
 
-  echo "Booting simulator ${udid}..." >&2
-  xcrun simctl boot "$udid" 2>/dev/null || true
-
-  if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
-    xcrun simctl bootstatus "$udid" -b
-  else
-    open -a Simulator
+  if ! xcrun simctl list devices booted | grep -q "$udid"; then
+    echo "Booting simulator ${udid}..." >&2
+    xcrun simctl boot "$udid" >/dev/null 2>&1 || true
   fi
+
+  open -a Simulator --args -CurrentDeviceUDID "$udid" >/dev/null 2>&1 || true
+  xcrun simctl bootstatus "$udid" -b >&2
 }
 
 resolve_ios_simulator_destination_for_build() {
-  local udid
+  local udid dest
   udid="$(resolve_ios_simulator_udid)" || return 1
-  ensure_simulator_booted "$udid"
+  ensure_simulator_booted "$udid" >&2
   export MAESTRO_DEVICE="$udid"
+  dest="platform=iOS Simulator,id=${udid},arch=$(uname -m)"
   echo "Using simulator ${udid} for Xcode build." >&2
-  echo "platform=iOS Simulator,id=${udid}"
+  echo "$dest"
 }
 
 resolve_ios_simulator_destination() {
   local udid
   udid="$(resolve_ios_simulator_udid)" || return 1
-  ensure_simulator_booted "$udid"
-  echo "platform=iOS Simulator,id=${udid}"
+  ensure_simulator_booted "$udid" >&2
+  echo "platform=iOS Simulator,id=${udid},arch=$(uname -m)"
 }
 
 resolve_simulator_udid() {

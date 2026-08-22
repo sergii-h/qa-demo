@@ -1,0 +1,15 @@
+xcodeproj: Demo.xcodeproj
+scheme: Demo
+configuration: Debug
+sdk: iphonesimulator
+arch: arm64
+binary_basename: Demo
+build_directory: build/DerivedData
+output_directory: slather-report
+ignore:
+  - Demo/Resources/**
+  - DemoTests/**
+  - DemoPactTests/**
+  - DemoUITests/**
+  - "**/*Preview*"
+  - "**/Generated/**"

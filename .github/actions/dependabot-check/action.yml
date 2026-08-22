@@ -1,0 +1,12 @@
+name: Dependabot alerts check
+description: Fail when this checkout still contains packages from open moderate+ Dependabot alerts
+
+runs:
+  using: composite
+  steps:
+    - name: Check Dependabot alerts against this tree
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        DEPENDABOT_REPO: ${{ github.repository }}
+      run: ./scripts/check-dependabot-alerts.sh

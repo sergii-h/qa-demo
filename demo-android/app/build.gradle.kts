@@ -185,6 +185,8 @@ configurations.configureEach {
                 "com.google.protobuf:protobuf-javalite:3.25.5",
                 "com.google.protobuf:protobuf-kotlin:3.25.5",
                 "commons-beanutils:commons-beanutils:1.11.0",
+                "org.apache.httpcomponents.core5:httpcore5:5.4.3",
+                "org.apache.httpcomponents.core5:httpcore5-h2:5.4.3",
                 "org.apache.tika:tika-core:3.2.2",
                 "org.bouncycastle:bcprov-jdk18on:1.84",
             )

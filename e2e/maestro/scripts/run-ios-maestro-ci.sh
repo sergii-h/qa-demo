@@ -28,13 +28,30 @@ bash "$REPO_ROOT/e2e/maestro/scripts/install-ios-app.sh" "$APP_PATH"
 cd "$REPO_ROOT/e2e/maestro"
 export MAESTRO_CLI_NO_ANALYTICS=true
 export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
-export MAESTRO_DRIVER_STARTUP_TIMEOUT="${MAESTRO_DRIVER_STARTUP_TIMEOUT:-240000}"
+export MAESTRO_DRIVER_STARTUP_TIMEOUT="${MAESTRO_DRIVER_STARTUP_TIMEOUT:-300000}"
 
 MAESTRO_BIN="${MAESTRO_BIN:-$HOME/.maestro/bin/maestro}"
 WARMUP_FLOW="$REPO_ROOT/e2e/maestro/interactions/flows/warmup-ios-driver.yaml"
-echo "Warming up Maestro iOS driver (timeout: ${MAESTRO_DRIVER_STARTUP_TIMEOUT}ms)..."
-"$MAESTRO_BIN" --device "$MAESTRO_DEVICE" test \
-  -e "MAESTRO_APP_ID=com.example.demo" \
-  "$WARMUP_FLOW"
+
+warmup_ok=0
+for attempt in 1 2 3; do
+  echo "Warming up Maestro iOS driver (attempt ${attempt}/3, timeout: ${MAESTRO_DRIVER_STARTUP_TIMEOUT}ms)..."
+  if "$MAESTRO_BIN" --device "$MAESTRO_DEVICE" test \
+    -e "MAESTRO_APP_ID=com.example.demo" \
+    "$WARMUP_FLOW"; then
+    warmup_ok=1
+    break
+  fi
+  echo "Maestro iOS driver warmup failed (attempt ${attempt}/3)." >&2
+  if [[ "$attempt" -lt 3 ]]; then
+    xcrun simctl shutdown "$MAESTRO_DEVICE" 2>/dev/null || true
+    sleep 2
+    ensure_simulator_booted "$MAESTRO_DEVICE"
+  fi
+done
+if [[ "$warmup_ok" -ne 1 ]]; then
+  echo "Maestro iOS driver did not become ready after 3 attempts." >&2
+  exit 1
+fi
 
 ALLURE_RESULTS_DIR="$REPO_ROOT/e2e/maestro/allure-results" npm run "$NPM_SCRIPT"

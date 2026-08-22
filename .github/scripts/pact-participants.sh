@@ -33,6 +33,7 @@ PACT_TASK_API_PROVIDER_IT_TESTS="CreateTaskPactProviderTest,DeleteTaskPactProvid
 PACT_PARTICIPANTS=(
   "demo-interface"
   "demo-android"
+  "demo-ios"
   "demo-react-native"
   "notification-service"
   "${PACT_PROVIDER_PARTICIPANTS[@]}"
@@ -61,6 +62,11 @@ PACT_ANDROID_MERGE_PARTICIPANTS=(
 
 PACT_REACT_NATIVE_MERGE_PARTICIPANTS=(
   "demo-react-native"
+  "${PACT_TASK_API_PROVIDER_PARTICIPANTS[@]}"
+)
+
+PACT_IOS_MERGE_PARTICIPANTS=(
+  "demo-ios"
   "${PACT_TASK_API_PROVIDER_PARTICIPANTS[@]}"
 )
 

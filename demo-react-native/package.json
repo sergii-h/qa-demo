@@ -12,7 +12,8 @@
     "test:watch": "jest --watch",
     "test:stryker": "stryker run",
     "test:pact": "rm -rf pacts && vitest run --config vitest.pact.config.mts",
-    "pact:publish": "docker run --rm --network=host -v \"$PWD/pacts:/pacts\" -e PACT_BROKER_BASE_URL=${PACT_BROKER_BASE_URL:-http://localhost:9292} pactfoundation/pact-cli:latest pact-broker publish /pacts --consumer-app-version ${PACT_CONSUMER_VERSION:-local-dev} --branch ${PACT_BRANCH:-local}"
+    "pact:publish": "docker run --rm --network=host -v \"$PWD/pacts:/pacts\" -e PACT_BROKER_BASE_URL=${PACT_BROKER_BASE_URL:-http://localhost:9292} pactfoundation/pact-cli:latest pact-broker publish /pacts --consumer-app-version ${PACT_CONSUMER_VERSION:-local-dev} --branch ${PACT_BRANCH:-local}",
+    "postinstall": "node scripts/patch-metro-image-size.cjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
@@ -41,13 +42,15 @@
     "qs": "6.15.2",
     "uuid": "11.1.1",
     "postcss": "8.5.23",
-    "js-yaml": "4.3.0",
-    "brace-expansion": "5.0.8",
+    "js-yaml": "4.3.1",
+    "brace-expansion": "5.0.9",
     "minimatch": "10.2.5",
     "test-exclude": "8.0.0",
-    "fast-uri": "3.1.4",
+    "fast-uri": "3.1.5",
+    "nanoid": "3.3.18",
     "shell-quote": "1.9.0",
-    "tar": "7.5.21"
+    "tar": "7.5.21",
+    "image-size": "npm:image-size-next@2.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
