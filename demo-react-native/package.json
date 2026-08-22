@@ -12,7 +12,8 @@
     "test:watch": "jest --watch",
     "test:stryker": "stryker run",
     "test:pact": "rm -rf pacts && vitest run --config vitest.pact.config.mts",
-    "pact:publish": "docker run --rm --network=host -v \"$PWD/pacts:/pacts\" -e PACT_BROKER_BASE_URL=${PACT_BROKER_BASE_URL:-http://localhost:9292} pactfoundation/pact-cli:latest pact-broker publish /pacts --consumer-app-version ${PACT_CONSUMER_VERSION:-local-dev} --branch ${PACT_BRANCH:-local}"
+    "pact:publish": "docker run --rm --network=host -v \"$PWD/pacts:/pacts\" -e PACT_BROKER_BASE_URL=${PACT_BROKER_BASE_URL:-http://localhost:9292} pactfoundation/pact-cli:latest pact-broker publish /pacts --consumer-app-version ${PACT_CONSUMER_VERSION:-local-dev} --branch ${PACT_BRANCH:-local}",
+    "postinstall": "node scripts/patch-metro-image-size.cjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
