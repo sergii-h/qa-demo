@@ -1,0 +1,28 @@
+name: Dependabot alerts check
+description: Fail when open moderate, high, or critical Dependabot alerts exist on the repository
+
+runs:
+  using: composite
+  steps:
+    - name: Check open moderate+ Dependabot alerts
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+
+        alerts=$(gh api "repos/${GITHUB_REPOSITORY}/dependabot/alerts?state=open" --paginate \
+          --jq '[.[] | select(.security_advisory.severity == "moderate" or .security_advisory.severity == "high" or .security_advisory.severity == "critical")]')
+
+        count=$(echo "$alerts" | jq 'length')
+
+        if [ "$count" -eq 0 ]; then
+          echo "No open moderate/high/critical Dependabot alerts."
+          exit 0
+        fi
+
+        echo "Open moderate/high/critical Dependabot alerts ($count):"
+        echo "$alerts" | jq -r '.[] | "#\(.number) | \(.security_advisory.severity) | \(.dependency.package.name) \(.dependency.package.ecosystem) | \(.dependency.manifest_path // "n/a") | patched: \(.security_vulnerability.first_patched_version.identifier // "none") | \((.security_advisory.identifiers // []) | map(select(.type == "GHSA") | .value) | first // "n/a") | \(.security_advisory.summary)"'
+
+        echo "::error::Found $count open moderate+ Dependabot alert(s). See Security → Dependabot or run scripts/list-dependabot-alerts.sh locally."
+        exit 1

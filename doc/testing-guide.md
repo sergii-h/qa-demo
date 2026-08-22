@@ -178,7 +178,7 @@ All workflows trigger on **push or pull request to `master` only** — pushes to
 - [ ] **All required workflows green** before merging to `master`
 
 ### Security (GitHub-native)
-- [ ] **SCA (Dependabot alerts)** — No open high/critical dependency alerts under **Security → Dependabot** (platform setting; no `dependabot.yml` version-update PRs)
+- [ ] **SCA (Dependabot alerts)** — No open moderate/high/critical dependency alerts under **Security → Dependabot** (platform setting; no `dependabot.yml` version-update PRs)
 - [ ] **Secret scanning** — Push protection enabled on the repo; no leaked credentials in PRs (platform setting)
 - [ ] **SAST (CodeQL)** — `.github/workflows/codeql.yml` green on PR; review SARIF artifacts if needed
 

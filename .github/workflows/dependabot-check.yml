@@ -1,0 +1,20 @@
+name: Dependabot check
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+  security-events: read
+
+jobs:
+  dependabot-check:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Dependabot alerts
+        uses: ./.github/actions/dependabot-check

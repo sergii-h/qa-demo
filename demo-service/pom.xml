@@ -19,7 +19,7 @@
         <junit.parallel.enabled>true</junit.parallel.enabled>
         <spring-boot.version>3.5.15</spring-boot.version>
         <httpclient5.version>5.5.2</httpclient5.version>
-        <httpcore5.version>5.3.6</httpcore5.version>
+        <httpcore5.version>5.4.3</httpcore5.version>
         <jackson.version>2.22.1</jackson.version>
         <netty.version>4.1.136.Final</netty.version>
     </properties>
