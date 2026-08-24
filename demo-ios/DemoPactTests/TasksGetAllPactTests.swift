@@ -8,6 +8,7 @@ final class TasksGetAllPactTests: XCTestCase {
     func testShouldHaveGetAllTasksContractWhenListingTasks() async throws {
         TasksGetAllPactTests.mockService
             .uponReceiving("a request for all tasks")
+            .given("tasks exist")
             .withRequest(method: .GET, path: "/v1/tasks")
             .willRespondWith(
                 status: 200,

@@ -8,8 +8,8 @@ final class TasksDeletePactTests: XCTestCase {
     func testShouldHaveDeleteTaskContractWhenDeletingTask() async throws {
         TasksDeletePactTests.mockService
             .uponReceiving("a request to delete a task")
-            .given(ProviderState(description: "task exists", params: [:]))
-            .withRequest(method: .DELETE, path: "/v1/tasks/\(PactFixtures.taskID)")
+            .given("a task exists to delete")
+            .withRequest(method: .DELETE, path: PactFixtures.taskPathFromProviderState())
             .willRespondWith(status: 204)
 
         try await TasksDeletePactTests.mockService.run(timeout: 5) { baseURL in

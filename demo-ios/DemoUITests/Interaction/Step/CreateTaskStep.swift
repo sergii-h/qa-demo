@@ -14,14 +14,18 @@ final class CreateTaskStep {
         Allure.step("Set task data") {
             createTaskForm.typeText("create-task-title-input", taskData.title)
             createTaskForm.typeText("task-description-input", taskData.description)
-            createTaskForm.selectOption(
-                dropdown: createTaskForm.statusDropdown(),
-                option: createTaskForm.statusOption(taskData.status)
-            )
-            createTaskForm.selectOption(
-                dropdown: createTaskForm.priorityDropdown(),
-                option: createTaskForm.priorityOption(taskData.priority)
-            )
+            if taskData.status != .todo {
+                createTaskForm.selectOption(
+                    dropdown: createTaskForm.statusDropdown(),
+                    option: createTaskForm.statusOption(taskData.status)
+                )
+            }
+            if taskData.priority != .medium {
+                createTaskForm.selectOption(
+                    dropdown: createTaskForm.priorityDropdown(),
+                    option: createTaskForm.priorityOption(taskData.priority)
+                )
+            }
         }
         return self
     }

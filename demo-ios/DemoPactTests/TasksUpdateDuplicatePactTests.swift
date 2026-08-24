@@ -6,13 +6,13 @@ final class TasksUpdateDuplicatePactTests: XCTestCase {
     static let mockService = PactFixtures.mockService(provider: "demo-service-tasks-update")
 
     func testShouldHaveUpdateTaskDuplicateContractWhenUpdatingWithDuplicateTitle() async throws {
-        let exampleMessage = "Task with title 'Prepare release notes - updated' already exists"
+        let exampleMessage = "Task with title '\(PactFixtures.updateTaskRequest.title)' already exists"
         TasksUpdateDuplicatePactTests.mockService
             .uponReceiving("a task update request with duplicate title")
-            .given(ProviderState(description: "another task has the requested title", params: [:]))
+            .given("another task has the requested title")
             .withRequest(
                 method: .PUT,
-                path: "/v1/tasks/\(PactFixtures.taskID)",
+                path: PactFixtures.taskPathFromProviderState(),
                 headers: ["Content-Type": "application/json"],
                 body: PactFixtures.updateTaskRequestBody()
             )

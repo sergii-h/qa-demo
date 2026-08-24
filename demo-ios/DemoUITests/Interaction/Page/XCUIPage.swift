@@ -51,9 +51,6 @@ class XCUIPage {
             .matching(identifier: option.identifier)
             .firstMatch
             .tapWhenReady(timeout: 10)
-        if !dropdown.waitForExistence(timeout: 2) {
-            app.buttons["BackButton"].tapWhenReady()
-        }
         dropdown.waitUntilExists(timeout: 10)
     }
 

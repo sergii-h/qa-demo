@@ -8,8 +8,8 @@ final class TasksCreateDuplicatePactTests: XCTestCase {
     func testShouldHaveDuplicateTitleContractWhenPostingConflictingTask() async throws {
         let exampleMessage = "Task with title 'Prepare release notes' already exists"
         TasksCreateDuplicatePactTests.mockService
-            .uponReceiving("a duplicate task creation request")
-            .given(ProviderState(description: "task title already exists", params: [:]))
+            .uponReceiving("a task creation request with duplicate title")
+            .given("task title already exists")
             .withRequest(
                 method: .POST,
                 path: "/v1/tasks",
