@@ -2,6 +2,10 @@
 
 Native iOS client for the QA Demo task management API. Same CRUD functionality as the React web app and Android client, using the existing Spring Boot backend.
 
+<p style="text-align: center;">
+  <img src="../doc/assets/qa-demo-ios.gif" alt="QA Demo iOS App" width="540"/>
+</p>
+
 **Requirements:** [Frontend requirements](../doc/requirements/front-end/README.md)
 
 ## Stack
