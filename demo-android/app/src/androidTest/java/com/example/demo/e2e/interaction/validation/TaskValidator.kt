@@ -14,7 +14,7 @@ class TaskValidator(
     private val infoTaskModal = InfoTaskModal(rule)
 
     fun data(taskData: TaskData): TaskValidator {
-        Allure.step("Validate task info data") {
+        Allure.step("Validate task info data: $taskData") {
             infoTaskModal.title().assertTextEquals(taskData.title)
             infoTaskModal.descriptionField().assertTextEquals(taskData.description)
             infoTaskModal.statusTag(taskData.status).assertIsDisplayed()

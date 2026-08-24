@@ -11,7 +11,7 @@ final class CreateTaskStep {
 
     @discardableResult
     func setTaskData(_ taskData: TaskData) -> CreateTaskStep {
-        Allure.step("Set task data") {
+        Allure.step("Set task data: \(taskData.allureLabel)") {
             createTaskForm.typeText("create-task-title-input", taskData.title)
             createTaskForm.typeText("task-description-input", taskData.description)
             if taskData.status != .todo {

@@ -82,6 +82,43 @@ def collect_activities(xcresult: Path, test_id: str) -> list[dict[str, Any]]:
     return []
 
 
+def to_millis(value: Any) -> int:
+    if not isinstance(value, (int, float)) or value <= 0:
+        return 0
+    if value > 10_000_000_000:
+        return int(value)
+    return int(value * 1000)
+
+
+def step_times(node: dict[str, Any], child_steps: list[dict[str, Any]]) -> tuple[int, int]:
+    start = to_millis(node.get("startTime"))
+    stop = to_millis(node.get("finishTime") or node.get("endTime"))
+    duration_seconds = node.get("durationInSeconds")
+    if isinstance(duration_seconds, (int, float)) and duration_seconds > 0 and start:
+        stop = max(stop, start + int(duration_seconds * 1000))
+    if child_steps:
+        child_starts = [child.get("start") or 0 for child in child_steps]
+        child_stops = [child.get("stop") or 0 for child in child_steps]
+        if not start:
+            start = min((item for item in child_starts if item), default=0)
+        stop = max(stop, max(child_stops, default=0))
+    if stop < start:
+        stop = start
+    return start, stop
+
+
+def fill_sibling_durations(steps: list[dict[str, Any]], parent_stop: int = 0) -> None:
+    for index, step in enumerate(steps):
+        children = step.get("steps") or []
+        next_start = steps[index + 1].get("start") or 0 if index + 1 < len(steps) else parent_stop
+        fill_sibling_durations(children, step.get("stop") or next_start)
+        if (step.get("stop") or 0) <= (step.get("start") or 0):
+            if children:
+                step["stop"] = max((child.get("stop") or 0 for child in children), default=step.get("start") or 0)
+            elif next_start > (step.get("start") or 0):
+                step["stop"] = next_start
+
+
 def parse_allure_metadata(activities: list[dict[str, Any]]) -> tuple[str, str, list[str], list[dict[str, Any]]]:
     epic = ""
     feature = ""
@@ -92,7 +129,6 @@ def parse_allure_metadata(activities: list[dict[str, Any]]) -> tuple[str, str, l
         nonlocal epic, feature
         for node in nodes:
             title = node.get("title") or ""
-            start = int((node.get("startTime") or 0) * 1000)
             if title.startswith(ALLURE_PREFIX_EPIC):
                 epic = title[len(ALLURE_PREFIX_EPIC) :]
             elif title.startswith(ALLURE_PREFIX_FEATURE):
@@ -107,13 +143,14 @@ def parse_allure_metadata(activities: list[dict[str, Any]]) -> tuple[str, str, l
                     walk(nested)
                     child_steps = steps[before:]
                     del steps[before:]
+                start, stop = step_times(node, child_steps)
                 steps.append(
                     {
                         "name": title,
                         "status": "failed" if node.get("isAssociatedWithFailure") else "passed",
                         "stage": "finished",
                         "start": start,
-                        "stop": start,
+                        "stop": stop,
                         "steps": child_steps,
                     }
                 )
@@ -121,16 +158,38 @@ def parse_allure_metadata(activities: list[dict[str, Any]]) -> tuple[str, str, l
             walk(node.get("childActivities", []))
 
     walk(activities)
+    fill_sibling_durations(steps)
     return epic, feature, tms, steps
 
 
-def write_environment(results_dir: Path, summary: dict[str, Any], api_base_url: str) -> None:
+def first_device(summary: dict[str, Any]) -> dict[str, Any]:
+    configs = summary.get("devicesAndConfigurations") or []
+    if configs and isinstance(configs[0], dict) and isinstance(configs[0].get("device"), dict):
+        return configs[0]["device"]
+
     devices = summary.get("devices") or summary.get("environmentDevices") or []
-    device = devices[0] if devices else {}
+    if devices and isinstance(devices[0], dict):
+        first = devices[0]
+        nested = first.get("device")
+        return nested if isinstance(nested, dict) else first
+    return {}
+
+
+def write_environment(results_dir: Path, summary: dict[str, Any], api_base_url: str) -> None:
+    device = first_device(summary)
+    platform = str(device.get("platform") or "iOS").strip()
+    os_name = "iOS" if "ios" in platform.lower() else platform
+    os_version = str(device.get("osVersion") or "").strip()
+    os_label = f"{os_name} {os_version}".strip()
+    device_name = str(
+        device.get("deviceName") or device.get("modelName") or "iOS Simulator"
+    ).strip()
+    if "simulator" in platform.lower() and "simulator" not in device_name.lower():
+        device_name = f"{device_name} (Simulator)"
     lines = [
         "Framework=XCUITest",
-        f"OS={device.get('platform', 'iOS')} {device.get('osVersion', '')}".rstrip(),
-        f"Device={device.get('deviceName', device.get('modelName', 'iOS Simulator'))}",
+        f"OS={os_label}",
+        f"Device={device_name}",
         f"API.Base.URL={api_base_url}",
     ]
     (results_dir / "environment.properties").write_text("\n".join(lines) + "\n", encoding="utf-8")
