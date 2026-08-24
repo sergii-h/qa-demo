@@ -8,7 +8,7 @@ final class TasksCreatePactTests: XCTestCase {
     func testShouldHaveCreateTaskContractWhenPostingValidTask() async throws {
         TasksCreatePactTests.mockService
             .uponReceiving("a valid task creation request")
-            .given(ProviderState(description: "task title is unique", params: [:]))
+            .given("task title is unique")
             .withRequest(
                 method: .POST,
                 path: "/v1/tasks",

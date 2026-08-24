@@ -8,17 +8,17 @@ final class TasksUpdatePactTests: XCTestCase {
     func testShouldHaveUpdateTaskContractWhenPuttingValidTask() async throws {
         TasksUpdatePactTests.mockService
             .uponReceiving("a valid task update request")
-            .given(ProviderState(description: "task exists and title is unique", params: [:]))
+            .given("a task exists to update and title is unique")
             .withRequest(
                 method: .PUT,
-                path: "/v1/tasks/\(PactFixtures.taskID)",
+                path: PactFixtures.taskPathFromProviderState(),
                 headers: ["Content-Type": "application/json"],
                 body: PactFixtures.updateTaskRequestBody()
             )
             .willRespondWith(
                 status: 200,
                 headers: ["Content-Type": "application/json"],
-                body: PactFixtures.taskResponseBody(titleExample: "Prepare release notes - updated")
+                body: PactFixtures.taskResponseBody(titleExample: PactFixtures.updateTaskRequest.title)
             )
 
         try await TasksUpdatePactTests.mockService.run(timeout: 5) { baseURL in

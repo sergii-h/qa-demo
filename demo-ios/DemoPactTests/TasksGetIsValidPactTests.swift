@@ -7,8 +7,9 @@ final class TasksGetIsValidPactTests: XCTestCase {
 
     func testShouldHaveIsValidContractWhenCheckingTask() async throws {
         TasksGetIsValidPactTests.mockService
-            .uponReceiving("a request to validate a task")
-            .withRequest(method: .GET, path: "/v1/tasks/isValid/\(PactFixtures.taskID)")
+            .uponReceiving("a request for task validation status")
+            .given("validation result is true for the task")
+            .withRequest(method: .GET, path: PactFixtures.isValidPathFromProviderState())
             .willRespondWith(
                 status: 200,
                 headers: ["Content-Type": "application/json"],

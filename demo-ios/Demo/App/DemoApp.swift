@@ -11,17 +11,9 @@ struct DemoApp: App {
         AppLocale.shared.initialize()
     }
 
-    private var isRunningTests: Bool {
-        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
-    }
-
     var body: some Scene {
         WindowGroup {
-            if isRunningTests {
-                Color.clear
-            } else {
-                AppRoot(repository: repository)
-            }
+            AppRoot(repository: repository)
         }
     }
 }

@@ -8,7 +8,8 @@ final class TasksGetByIdPactTests: XCTestCase {
     func testShouldHaveGetTaskByIdContractWhenFetchingTask() async throws {
         TasksGetByIdPactTests.mockService
             .uponReceiving("a request for a task by id")
-            .withRequest(method: .GET, path: "/v1/tasks/\(PactFixtures.taskID)")
+            .given("a task exists")
+            .withRequest(method: .GET, path: PactFixtures.taskPathFromProviderState())
             .willRespondWith(
                 status: 200,
                 headers: ["Content-Type": "application/json"],

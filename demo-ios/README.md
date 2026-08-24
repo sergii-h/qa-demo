@@ -77,8 +77,6 @@ cd demo-ios
 xcodegen generate
 bundle install                       # Slather — required for the 90% coverage gate
 ./Scripts/run-unit-tests.sh          # Swift Testing unit + integration + ViewInspector screen tests
-./Scripts/run-pact-tests.sh          # PactSwift consumer contract tests
-./Scripts/run-ui-tests.sh            # XCUITest E2E (mocked backend — start WireMock first)
 ```
 
 Coverage is collected via `xcodebuild -enableCodeCoverage YES` and enforced at **90% line coverage on `Demo.app` only** (`MIN_LINE_COVERAGE` in `Scripts/run-unit-tests.sh`). Test bundles (`DemoTests.xctest`, `DemoPactTests.xctest`) are not part of the gate — Slather reports and `xccov` summaries filter to app source in `Demo/`.
@@ -100,7 +98,7 @@ xcodebuild test \
   CODE_SIGNING_ALLOWED=NO
 ```
 
-Use `-only-testing:DemoTests/<SuiteName>` with any suite from `Scripts/run-unit-tests.sh` (e.g. `EditTaskIntegrationTests`, `TaskListIntegrationTests`, `TaskFormScreenTests`). Integration suites should keep `-parallel-testing-enabled NO`.
+Use `-only-testing:DemoTests/<SuiteName>` with any `*Tests.swift` suite under `DemoTests/` (e.g. `EditTaskIntegrationTests`, `TaskListIntegrationTests`, `TaskFormScreenTests`). Integration suites should keep `-parallel-testing-enabled NO`.
 
 Per-test filters (`-only-testing:DemoTests/CreateTaskIntegrationTests/someTestName`) are unreliable with Swift Testing in this project — prefer suite-level filters or run individual tests from the Xcode Test navigator.
 
@@ -125,14 +123,15 @@ Consumer name: `demo-ios`. Provider names per endpoint: `demo-service-tasks-crea
 
 ## E2E tests (XCUITest)
 
-Mirrors the Android Compose UI E2E split: mocked-backend flows (WireMock), accessibility, and UAT smoke.
+Mirrors the Android Compose UI E2E split: mocked-backend flows, accessibility scans, and one full-stack UAT smoke test. Step and validation wiring follows [ADR 005](../doc/adr/005-domain-grouped-step-and-validation-providers-for-e2e.md) (`StepProvider`, `ValidationProvider`).
 
-| Suite | Backend | When to run |
-|-------|---------|-------------|
-| Mocked BE | WireMock at `localhost:8085` | Every CI run |
-| UAT | Real Spring Boot at `localhost:8080` | CI with full Docker stack |
+| Suite | Base class | Backend | When to run |
+|-------|------------|---------|-------------|
+| Mocked BE | `MockedBackendTestBase` | WireMock at `localhost:8085` | Every CI run |
+| Accessibility | `AccessibilityTestBase` | WireMock at `localhost:8085` | Every CI run |
+| UAT | `UatTestBase` | Real Spring Boot at `localhost:8080` | Locally with the full Docker stack |
 
-Start WireMock before mocked E2E:
+Start WireMock before mocked E2E and accessibility:
 
 ```bash
 docker network create qa-demo-e2e || true
@@ -140,17 +139,35 @@ docker compose -f docker/docker-compose/run-application.yml up -d qa-demo-wiremo
 ```
 
 ```bash
-API_BASE_URL=http://localhost:8085/v1/ ./Scripts/run-ui-tests.sh
+cd demo-ios
+xcodegen generate
+
+# Mocked E2E (create, edit, delete, task info, language)
+API_BASE_URL=http://localhost:8085/v1/ E2E_SUITE=e2e ./Scripts/run-ui-tests.sh
+
+# Accessibility (identifier and label checks on list, create form, and task info)
+API_BASE_URL=http://localhost:8085/v1/ E2E_SUITE=accessibility ./Scripts/run-ui-tests.sh
+
+# UAT smoke test — start the full stack first (see Prerequisites above)
+API_BASE_URL=http://localhost:8080/v1/ E2E_SUITE=uat ./Scripts/run-ui-tests.sh
 ```
 
 Location: `DemoUITests/`
 
+CI: `.github/workflows/ios-e2e.yml` (mocked BE and accessibility in parallel). UAT is not run on GitHub-hosted macOS runners — Docker/Colima cannot start there; run it locally. Allure results are published to [GitHub Pages](https://sergii-h.github.io/qa-demo/) with the other E2E suites.
+
 ### Allure report
 
-XCUITest results are converted with [Allure Report 3](https://github.com/allure-framework/allure3)'s native `.xcresult` reader:
+XCUITest activities (`Allure.step`, epic/feature/TMS labels) are converted from the `.xcresult` bundle into Allure 2 JSON after the run.
 
 ```bash
-allure generate build/UITestResults.xcresult -o build/allure-report --clean
+cd demo-ios
+
+API_BASE_URL=http://localhost:8085/v1/ E2E_SUITE=e2e ./Scripts/run-ui-tests.sh
+
+# Generate and open the HTML report locally (requires Allure CLI)
+allure generate build/allure-results --clean -o build/allure-report
+allure open build/allure-report
 ```
 
 ## Unit tests
@@ -173,6 +190,22 @@ demo-ios/
 ├── DemoTests/               # Swift Testing + ViewInspector
 ├── DemoPactTests/           # PactSwift consumer tests
 ├── DemoUITests/             # XCUITest E2E
+│   ├── Context/             # TaskTestContext
+│   ├── Data/                # TaskData, TaskResponse, AllureEpic
+│   ├── Interaction/
+│   │   ├── Page/            # Screen/modal element lookups
+│   │   ├── Step/
+│   │   └── Validation/
+│   ├── Provider/            # StepProvider, ValidationProvider, SupportProvider
+│   ├── Support/Mock/        # WireMockClient, ApiRouteMock
+│   └── Test/                # Scenarios + bases
+│       ├── Base/            # MockedBackend / UAT / Accessibility
+│       ├── Create/
+│       ├── Edit/
+│       ├── Delete/
+│       ├── TaskInfo/
+│       ├── TaskTable/
+│       └── Translation/
 ├── Scripts/                 # CI and local test runners
 ├── project.yml              # XcodeGen spec
 └── README.md
@@ -181,5 +214,5 @@ demo-ios/
 ## Notes
 
 - App Transport Security allows cleartext HTTP for local development
-- Regenerate `Demo.xcodeproj` after changing `project.yml`: `xcodegen generate`
+- `Demo.xcodeproj` is generated by XcodeGen — run `xcodegen generate` after cloning or after changing `project.yml`
 - Test tags match `demo-android` for cross-platform E2E parity (`page-title`, `add-task-button`, `task-title-{id}`, etc.)

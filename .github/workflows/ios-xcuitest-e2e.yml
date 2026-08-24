@@ -1,0 +1,40 @@
+name: Run e2e tests (iOS XCUITest — mocked BE)
+
+on:
+  workflow_call:
+
+jobs:
+  run-tests:
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: wiremock
+          wiremock-backend: standalone
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Run mocked-backend XCUITest suite
+        working-directory: demo-ios
+        env:
+          API_BASE_URL: http://localhost:8085/v1/
+          E2E_SUITE: e2e
+        run: |
+          xcodegen generate
+          chmod +x Scripts/run-ui-tests.sh Scripts/ios-destination.sh Scripts/xcresult-to-allure.py
+          Scripts/run-ui-tests.sh
+
+      - name: Upload Allure results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-ios-xcuitest-e2e
+          path: demo-ios/build/allure-results
+          retention-days: 7
+          if-no-files-found: warn

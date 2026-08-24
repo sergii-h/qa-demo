@@ -82,8 +82,10 @@ struct TaskFormView: View {
                     ForEach(TaskStatus.allCases, id: \.self) { status in
                         Text(TaskLabels.statusLabel(for: status, locale: locale))
                             .tag(status)
+                            .testTag("status-dropdown-option-\(status.rawValue)")
                     }
                 }
+                .pickerStyle(.navigationLink)
                 .testTag("status-dropdown")
 
                 Picker(locale.localizedString("field_priority"), selection: Binding(
@@ -93,8 +95,10 @@ struct TaskFormView: View {
                     ForEach(TaskPriority.allCases, id: \.self) { priority in
                         Text(TaskLabels.priorityLabel(for: priority, locale: locale))
                             .tag(priority)
+                            .testTag("priority-dropdown-option-\(priority.rawValue)")
                     }
                 }
+                .pickerStyle(.navigationLink)
                 .testTag("priority-dropdown")
             }
 

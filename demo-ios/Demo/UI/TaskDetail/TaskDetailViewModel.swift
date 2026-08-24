@@ -47,11 +47,11 @@ final class TaskDetailViewModel {
 
         let isValid = (try? await repository.isValid(id: taskId)) ?? false
 
-        uiState.isLoading = false
-        uiState.task = loadedTask
-        uiState.isValid = isValid
-        if let loadError {
-            uiState.errorMessage = ErrorMessages.mapTaskError(loadError, locale: locale)
-        }
+        uiState = TaskDetailUiState(
+            isLoading: false,
+            task: loadedTask,
+            isValid: isValid,
+            errorMessage: loadError.map { ErrorMessages.mapTaskError($0, locale: locale) }
+        )
     }
 }

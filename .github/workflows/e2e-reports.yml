@@ -2,7 +2,7 @@ name: Publish E2E test reports
 
 on:
   workflow_run:
-    workflows: ["E2E tests", "Android E2E tests", "React Native E2E tests"]
+    workflows: ["E2E tests", "Android E2E tests", "iOS E2E tests", "React Native E2E tests"]
     types: [completed]
 
 permissions:
@@ -35,7 +35,7 @@ jobs:
 
           incomplete=$(gh api \
             "repos/${repo}/actions/runs?head_sha=${sha}&event=${event}&per_page=100" \
-            --jq '[.workflow_runs[] | select(.name == "E2E tests" or .name == "Android E2E tests" or .name == "React Native E2E tests") | select(.status != "completed")] | length')
+            --jq '[.workflow_runs[] | select(.name == "E2E tests" or .name == "Android E2E tests" or .name == "iOS E2E tests" or .name == "React Native E2E tests") | select(.status != "completed")] | length')
 
           if [ "$incomplete" -gt 0 ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"

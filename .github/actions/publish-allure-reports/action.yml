@@ -66,9 +66,9 @@ runs:
           cp -R .github/allure-pages/assets "$staging/assets"
         fi
 
-        mapfile -t RUN_IDS < <(gh api \
-          "repos/${{ github.repository }}/actions/runs?head_sha=${HEAD_SHA}&event=${TRIGGER_EVENT}&per_page=100" \
-          --jq '.workflow_runs[] | select(.name == "E2E tests" or .name == "Android E2E tests" or .name == "React Native E2E tests") | .id')
+          mapfile -t RUN_IDS < <(gh api \
+            "repos/${{ github.repository }}/actions/runs?head_sha=${HEAD_SHA}&event=${TRIGGER_EVENT}&per_page=100" \
+            --jq '.workflow_runs[] | select(.name == "E2E tests" or .name == "Android E2E tests" or .name == "iOS E2E tests" or .name == "React Native E2E tests") | .id')
 
         download_artifact() {
           local artifact="$1"
@@ -103,6 +103,9 @@ runs:
           "allure-results-android-e2e|android-compose-e2e"
           "allure-results-android-uat|android-compose-uat"
           "allure-results-android-accessibility|android-compose-accessibility"
+          "allure-results-ios-xcuitest-e2e|ios-xcuitest-e2e"
+          "allure-results-ios-xcuitest-uat|ios-xcuitest-uat"
+          "allure-results-ios-xcuitest-accessibility|ios-xcuitest-accessibility"
           "allure-results-maestro-android-e2e|maestro-android-e2e"
           "allure-results-maestro-android-uat|maestro-android-uat"
           "allure-results-maestro-android-accessibility|maestro-android-accessibility"

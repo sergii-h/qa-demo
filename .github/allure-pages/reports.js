@@ -194,6 +194,25 @@ const TEST_RUNS = [
     ],
   },
   {
+    titleEmphasis: 'iOS XCUITest',
+    titleSuffix: 'test-run',
+    subtitle: 'Native iOS app · iOS Simulator',
+    headerLogos: [
+      'https://img.shields.io/badge/Swift-5.10-orange?logo=swift',
+      IOS_LOGO,
+      greenBadge('XCUITest'),
+    ],
+    suites: [
+      { suite: 'E2E', meta: 'mocked backend', allure: './ios-xcuitest-e2e/index.html' },
+      { suite: 'Accessibility', meta: 'mocked backend', allure: './ios-xcuitest-accessibility/index.html' },
+      {
+        suite: 'UAT',
+        meta: 'full stack · not published in CI (Docker unavailable on GitHub macOS runners)',
+        allureDisabled: true,
+      },
+    ],
+  },
+  {
     titleEmphasis: 'Maestro React Native',
     titleSuffix: 'test-run (Android)',
     subtitle: 'React Native app · release APK · Android emulator',
@@ -342,7 +361,7 @@ function renderPage() {
 
     ${TEST_RUNS.map(renderTestRun).join('')}
 
-    <footer>Reports are published together after web, Android Compose, and Maestro React Native E2E suites finish in CI.</footer>
+    <footer>Reports are published together after web, Android Compose, iOS XCUITest, and Maestro React Native E2E suites finish in CI.</footer>
   `;
 }
 

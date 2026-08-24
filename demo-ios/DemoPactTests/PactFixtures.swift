@@ -60,9 +60,26 @@ enum PactFixtures {
         ]
     }
 
+    static func taskPathFromProviderState() -> Matcher.FromProviderState {
+        Matcher.FromProviderState(
+            parameter: "/v1/tasks/${taskId}",
+            value: .string("/v1/tasks/\(taskID)")
+        )
+    }
+
+    static func isValidPathFromProviderState() -> Matcher.FromProviderState {
+        Matcher.FromProviderState(
+            parameter: "/v1/tasks/isValid/${taskId}",
+            value: .string("/v1/tasks/isValid/\(taskID)")
+        )
+    }
+
     static func createTaskRequestBody() -> [String: Any] {
         [
-            "title": Matcher.SomethingLike(createTaskRequest.title),
+            "title": Matcher.FromProviderState(
+                parameter: "taskTitle",
+                value: .string(createTaskRequest.title)
+            ),
             "description": Matcher.SomethingLike(createTaskRequest.description!),
             "status": Matcher.SomethingLike(createTaskRequest.status.rawValue),
             "priority": Matcher.SomethingLike(createTaskRequest.priority.rawValue),
@@ -71,7 +88,10 @@ enum PactFixtures {
 
     static func updateTaskRequestBody() -> [String: Any] {
         [
-            "title": Matcher.SomethingLike(updateTaskRequest.title),
+            "title": Matcher.FromProviderState(
+                parameter: "updatedTitle",
+                value: .string(updateTaskRequest.title)
+            ),
             "description": Matcher.SomethingLike(updateTaskRequest.description!),
             "status": Matcher.SomethingLike(updateTaskRequest.status.rawValue),
             "priority": Matcher.SomethingLike(updateTaskRequest.priority.rawValue),

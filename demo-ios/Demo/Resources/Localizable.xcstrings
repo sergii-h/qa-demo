@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "+" : {
+
+    },
     "action_delete" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -19,7 +19,9 @@ final class WireMockClient {
         request: [String: String],
         response: [String: Any]
     ) throws {
-        let requiredState = plannedScenarioStates[scenarioName] ?? "Started"
+        let actualState = try fetchScenarioState(scenarioName)
+        let plannedState = plannedScenarioStates[scenarioName] ?? "Started"
+        let requiredState = Self.laterScenarioState(actualState, plannedState)
         let newState = Self.nextScenarioState(requiredState)
         plannedScenarioStates[scenarioName] = newState
 
@@ -30,10 +32,44 @@ final class WireMockClient {
             "request": request,
             "response": response,
         ]
-        try requestAdmin(method: "POST", path: "/__admin/mappings", body: try JSONSerialization.data(withJSONObject: mapping))
+        try requestAdmin(
+            method: "POST",
+            path: "/__admin/mappings",
+            body: try JSONSerialization.data(withJSONObject: mapping)
+        )
     }
 
-    private func requestAdmin(method: String, path: String, body: Data? = nil) throws {
+    func addOverrideMapping(
+        request: [String: String],
+        response: [String: Any]
+    ) throws {
+        let mapping: [String: Any] = [
+            "priority": 1,
+            "request": request,
+            "response": response,
+        ]
+        try requestAdmin(
+            method: "POST",
+            path: "/__admin/mappings",
+            body: try JSONSerialization.data(withJSONObject: mapping)
+        )
+    }
+
+    private func fetchScenarioState(_ scenarioName: String) throws -> String {
+        let data = try requestAdmin(method: "GET", path: "/__admin/scenarios")
+        guard
+            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let scenarios = json["scenarios"] as? [[String: Any]]
+        else {
+            return "Started"
+        }
+        return scenarios.first { $0["name"] as? String == scenarioName }
+            .flatMap { $0["state"] as? String }
+            ?? "Started"
+    }
+
+    @discardableResult
+    private func requestAdmin(method: String, path: String, body: Data? = nil) throws -> Data {
         guard let url = URL(string: path, relativeTo: baseURL) else {
             throw WireMockClientError.invalidURL
         }
@@ -45,12 +81,12 @@ final class WireMockClient {
         }
 
         let semaphore = DispatchSemaphore(value: 0)
-        var completed: Result<Void, Error> = .failure(WireMockClientError.timeout)
-        URLSession.shared.dataTask(with: request) { _, response, error in
+        var completed: Result<Data, Error> = .failure(WireMockClientError.timeout)
+        URLSession.shared.dataTask(with: request) { data, response, error in
             if let error {
                 completed = .failure(error)
             } else if let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) {
-                completed = .success(())
+                completed = .success(data ?? Data())
             } else {
                 let status = (response as? HTTPURLResponse)?.statusCode ?? -1
                 completed = .failure(WireMockClientError.httpStatus(status))
@@ -61,7 +97,7 @@ final class WireMockClient {
         if semaphore.wait(timeout: .now() + 10) == .timedOut {
             throw WireMockClientError.timeout
         }
-        try completed.get()
+        return try completed.get()
     }
 
     static func resolveBaseURL() -> URL {
@@ -81,12 +117,22 @@ final class WireMockClient {
         return URL(string: "http://localhost:8085")!
     }
 
+    private static func laterScenarioState(_ left: String, _ right: String) -> String {
+        scenarioStep(left) >= scenarioStep(right) ? left : right
+    }
+
+    private static func scenarioStep(_ state: String) -> Int {
+        if state == "Started" {
+            return 0
+        }
+        return Int(state.replacingOccurrences(of: "step-", with: "")) ?? 0
+    }
+
     private static func nextScenarioState(_ current: String) -> String {
         if current == "Started" {
             return "step-1"
         }
-        let step = Int(current.replacingOccurrences(of: "step-", with: "")) ?? 0
-        return "step-\(step + 1)"
+        return "step-\(scenarioStep(current) + 1)"
     }
 }
 
@@ -95,91 +141,4 @@ enum WireMockClientError: Error {
     case invalidJSON
     case timeout
     case httpStatus(Int)
-}
-
-final class ApiRouteMock {
-    private let wireMock: WireMockClient
-
-    init(wireMock: WireMockClient) {
-        self.wireMock = wireMock
-    }
-
-    @discardableResult
-    func getTasks(_ tasks: [[String: Any]] = []) throws -> ApiRouteMock {
-        try wireMock.addScenarioMapping(
-            scenarioName: "get-tasks",
-            request: ["method": "GET", "urlPath": "/v1/tasks"],
-            response: jsonResponse(200, tasks)
-        )
-        return self
-    }
-
-    @discardableResult
-    func getTask(_ task: [String: Any]) throws -> ApiRouteMock {
-        try wireMock.addScenarioMapping(
-            scenarioName: "get-task",
-            request: ["method": "GET", "urlPathPattern": "/v1/tasks/(?!isValid)[^/]+"],
-            response: jsonResponse(200, task)
-        )
-        return self
-    }
-
-    @discardableResult
-    func getIsValid(_ isValid: Bool) throws -> ApiRouteMock {
-        try wireMock.addScenarioMapping(
-            scenarioName: "is-valid",
-            request: ["method": "GET", "urlPathPattern": "/v1/tasks/isValid/.+"],
-            response: jsonResponse(200, isValid)
-        )
-        return self
-    }
-
-    @discardableResult
-    func createTask(_ task: [String: Any]) throws -> ApiRouteMock {
-        try wireMock.addScenarioMapping(
-            scenarioName: "create-task",
-            request: ["method": "POST", "urlPath": "/v1/tasks"],
-            response: jsonResponse(200, task)
-        )
-        return self
-    }
-
-    private func jsonResponse(_ status: Int, _ body: Any) throws -> [String: Any] {
-        let json: String
-        if JSONSerialization.isValidJSONObject(body) {
-            let data = try JSONSerialization.data(withJSONObject: body)
-            json = String(data: data, encoding: .utf8) ?? "null"
-        } else if let flag = body as? Bool {
-            json = flag ? "true" : "false"
-        } else {
-            throw WireMockClientError.invalidJSON
-        }
-        return [
-            "status": status,
-            "body": json,
-            "headers": ["Content-Type": "application/json"],
-        ]
-    }
-}
-
-final class ApiRouteMockClient {
-    private let wireMock = WireMockClient()
-    private var apiMock: ApiRouteMock?
-
-    func api() -> ApiRouteMock {
-        if apiMock == nil {
-            apiMock = ApiRouteMock(wireMock: wireMock)
-        }
-        return apiMock!
-    }
-
-    func start() throws {
-        try reset()
-        try api().getTasks()
-    }
-
-    func reset() throws {
-        try wireMock.reset()
-        apiMock = nil
-    }
 }
