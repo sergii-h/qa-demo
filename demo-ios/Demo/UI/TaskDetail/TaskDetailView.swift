@@ -51,22 +51,24 @@ struct TaskDetailView: View {
                         }
                     }
 
-                    LabeledContent(locale.localizedString("detail_validated")) {
-                        HStack {
-                            Image(systemName: viewModel.uiState.isValid ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                .foregroundStyle(viewModel.uiState.isValid ? .green : .red)
-                                .testTag(viewModel.uiState.isValid ? "valid" : "notValid")
-                                .accessibilityLabel(
-                                    viewModel.uiState.isValid
-                                        ? locale.localizedString("valid")
-                                        : locale.localizedString("not_valid")
-                                )
-                            Text(viewModel.uiState.isValid
-                                ? locale.localizedString("valid")
-                                : locale.localizedString("not_valid"))
-                        }
+                    Text(locale.localizedString("detail_validated"))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .testTag("detail-validated-label")
+                    HStack {
+                        Image(systemName: viewModel.uiState.isValid ? "checkmark.circle.fill" : "xmark.circle.fill")
+                            .foregroundStyle(viewModel.uiState.isValid ? .green : .red)
+                        Text(viewModel.uiState.isValid
+                            ? locale.localizedString("valid")
+                            : locale.localizedString("not_valid"))
                     }
-                    .testTag("detail-validated-label")
+                    .testTag(viewModel.uiState.isValid ? "valid" : "notValid")
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(
+                        viewModel.uiState.isValid
+                            ? locale.localizedString("valid")
+                            : locale.localizedString("not_valid")
+                    )
 
                     HStack {
                         StatusChip(status: task.status)

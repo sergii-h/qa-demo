@@ -21,33 +21,26 @@ mkdir -p "$(dirname "$COVERAGE_SUMMARY")"
 
 # ViewHosting and StubURLProtocol are process-global; run each suite in its own
 # xcodebuild process so hosts and HTTP stubs do not leak between suites.
-TEST_SUITES=(
-  DemoTests/AppConfigurationTests
-  DemoTests/AppLocaleTests
-  DemoTests/ErrorBodyParserTests
-  DemoTests/TaskLabelsTests
-  DemoTests/TaskListViewModelTests
-  DemoTests/TaskFormViewModelTests
-  DemoTests/TaskDetailViewModelTests
-  DemoTests/TaskRepositoryTests
-  DemoTests/ErrorMessagesTests
-  DemoTests/URLSessionTaskAPITests
-  DemoTests/CreateTaskIntegrationTests
-  DemoTests/EditTaskIntegrationTests
-  DemoTests/LanguageIntegrationTests
-  DemoTests/PullToRefreshIntegrationTests
-  DemoTests/TaskDetailIntegrationTests
-  DemoTests/ExternalValidationIntegrationTests
-  DemoTests/TaskListIntegrationTests
-  DemoTests/DeleteTaskIntegrationTests
-  DemoTests/DemoAppThemeScreenTests
-  DemoTests/DemoNavigationScreenTests
-  DemoTests/LanguageSwitcherScreenTests
-  DemoTests/TaskChipsScreenTests
-  DemoTests/TaskDetailScreenTests
-  DemoTests/TaskFormScreenTests
-  DemoTests/TaskListScreenTests
-)
+unit_test_suites() {
+  local dir file
+  for dir in Unit Integration Screen; do
+    if [[ -d "$ROOT/DemoTests/${dir}" ]]; then
+      find "$ROOT/DemoTests/${dir}" -name '*Tests.swift' -print | sort
+    fi
+  done
+  find "$ROOT/DemoTests" -name '*Tests.swift' \
+    ! -path '*/Unit/*' ! -path '*/Integration/*' ! -path '*/Screen/*' -print | sort
+}
+
+TEST_SUITES=()
+while IFS= read -r file; do
+  TEST_SUITES+=("DemoTests/$(basename "$file" .swift)")
+done < <(unit_test_suites)
+
+if [[ ${#TEST_SUITES[@]} -eq 0 ]]; then
+  echo "No *Tests.swift suites found under DemoTests/" >&2
+  exit 1
+fi
 
 mkdir -p "$(dirname "$COVERAGE_SUMMARY")" "$DERIVED_DATA/Logs"
 

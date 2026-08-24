@@ -108,8 +108,8 @@ struct TaskListView: View {
                     .padding(16)
                 }
             }
-            .testTag("task-list")
         }
+        .testTag("task-list")
         .refreshable {
             await viewModel.refreshTasks()
         }

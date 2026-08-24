@@ -1,4 +1,5 @@
 # Xcode
+Demo.xcodeproj/
 DerivedData/
 build/
 *.xcuserstate

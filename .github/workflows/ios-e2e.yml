@@ -8,6 +8,9 @@ on:
       - 'demo-service/**'
       - 'docker/**'
       - '.github/workflows/ios-e2e.yml'
+      - '.github/workflows/ios-xcuitest-e2e.yml'
+      - '.github/workflows/ios-xcuitest-accessibility.yml'
+      - '.github/workflows/ios-xcuitest-uat.yml'
       - '.github/actions/start-e2e-env/**'
   push:
     branches: [master]
@@ -16,38 +19,20 @@ on:
       - 'demo-service/**'
       - 'docker/**'
       - '.github/workflows/ios-e2e.yml'
+      - '.github/workflows/ios-xcuitest-e2e.yml'
+      - '.github/workflows/ios-xcuitest-accessibility.yml'
+      - '.github/workflows/ios-xcuitest-uat.yml'
       - '.github/actions/start-e2e-env/**'
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
-  ios-xcuitest-mocked:
-    runs-on: macos-15
-    timeout-minutes: 45
+  ios-xcuitest-e2e:
+    uses: ./.github/workflows/ios-xcuitest-e2e.yml
+    secrets: inherit
 
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Start E2E environment
-        uses: ./.github/actions/start-e2e-env
-        with:
-          app-mode: wiremock
-          wiremock-backend: standalone
-
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Run mocked-backend XCUITest suite
-        working-directory: demo-ios
-        env:
-          API_BASE_URL: http://localhost:8085/v1/
-        run: |
-          xcodegen generate
-          chmod +x Scripts/run-ui-tests.sh Scripts/ios-destination.sh
-          Scripts/run-ui-tests.sh
-
-      - name: Upload Allure report artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-results-ios-xcuitest
-          path: demo-ios/build/allure-results
-          if-no-files-found: ignore
+  ios-xcuitest-accessibility:
+    uses: ./.github/workflows/ios-xcuitest-accessibility.yml
+    secrets: inherit
