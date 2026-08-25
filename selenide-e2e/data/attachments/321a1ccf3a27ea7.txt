@@ -1,0 +1,19 @@
+[2026-08-25T19:42:54.114Z] [SEVERE] http://qa-demo-interface:5173/ - Access to script at 'http://qa-demo-interface:5173/src/index.tsx' from origin 'http://qa-demo-interface:5173' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `local`.
+
+[2026-08-25T19:42:54.114Z] [SEVERE] http://qa-demo-interface:5173/src/index.tsx - Failed to load resource: net::ERR_FAILED
+
+[2026-08-25T19:42:54.118Z] [SEVERE] http://qa-demo-interface:5173/ - Access to script at 'http://qa-demo-interface:5173/@react-refresh' from origin 'http://qa-demo-interface:5173' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `local`.
+
+[2026-08-25T19:42:54.118Z] [SEVERE] http://qa-demo-interface:5173/@react-refresh - Failed to load resource: net::ERR_FAILED
+
+[2026-08-25T19:42:54.121Z] [SEVERE] http://qa-demo-interface:5173/ - Access to script at 'http://qa-demo-interface:5173/@vite/client' from origin 'http://qa-demo-interface:5173' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `local`.
+
+[2026-08-25T19:42:54.123Z] [SEVERE] http://qa-demo-interface:5173/@vite/client - Failed to load resource: net::ERR_FAILED
+
+[2026-08-25T19:42:54.195Z] [SEVERE] http://qa-demo-interface:5173/ - Access to manifest at 'http://qa-demo-interface:5173/manifest.json' from origin 'http://qa-demo-interface:5173' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `local`.
+
+[2026-08-25T19:42:54.195Z] [SEVERE] http://qa-demo-interface:5173/manifest.json - Failed to load resource: net::ERR_FAILED
+
+[2026-08-25T19:42:54.235Z] [SEVERE] http://qa-demo-interface:5173/ - Access to resource at 'http://qa-demo-interface:5173/favicon.ico' from origin 'http://qa-demo-interface:5173' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `local`.
+
+[2026-08-25T19:42:54.235Z] [SEVERE] http://qa-demo-interface:5173/favicon.ico - Failed to load resource: net::ERR_FAILED
