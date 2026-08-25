@@ -10,6 +10,21 @@ import { resolveMaestroCli } from '@/support/maestroCli';
 import { parseMaestroDeviceOutput } from '@/support/deviceInfo';
 import { testConfig } from '@/test.config';
 
+function isRecoverableIosMaestroFailure(output: string): boolean {
+  if (output.includes('IOSDriverTimeoutException')) {
+    return true;
+  }
+
+  if (!output.includes('Launch app')) {
+    return false;
+  }
+
+  const launchCompleted = /Launch app[^\n]*\.\.\. COMPLETED/m.test(output);
+  const reachedMainPage = output.includes('Wait for main page');
+
+  return !launchCompleted && !reachedMainPage;
+}
+
 export class MaestroTestRunner {
   private readonly maestroCli = resolveMaestroCli();
   private runtimeDeviceInfo?: Record<string, string>;
@@ -133,17 +148,36 @@ export class MaestroTestRunner {
         return;
       }
 
-      const isDriverStartupTimeout = combinedOutput.includes(
-        'IOSDriverTimeoutException',
-      );
-      if (isDriverStartupTimeout && attempt < maxAttempts) {
+      if (
+        process.env.MAESTRO_DEVICE &&
+        attempt < maxAttempts &&
+        isRecoverableIosMaestroFailure(combinedOutput)
+      ) {
         process.stderr.write(
-          `\nMaestro iOS driver startup timed out (attempt ${attempt}/${maxAttempts}), retrying...\n`,
+          `\nRecoverable Maestro iOS failure (attempt ${attempt}/${maxAttempts}), retrying after simulator recovery...\n`,
         );
+        this.recoverIosMaestroDriver();
         continue;
       }
 
       throw new Error(result.stderr || result.stdout || 'Maestro test failed');
     }
+  }
+
+  private recoverIosMaestroDriver(): void {
+    const device = process.env.MAESTRO_DEVICE;
+    if (!device) {
+      return;
+    }
+
+    spawnSync('xcrun', ['simctl', 'terminate', device, testConfig.maestro.appId], {
+      stdio: 'ignore',
+    });
+    spawnSync('xcrun', ['simctl', 'shutdown', device], { stdio: 'ignore' });
+    spawnSync('sleep', ['2']);
+    spawnSync('xcrun', ['simctl', 'boot', device], { stdio: 'ignore' });
+    spawnSync('xcrun', ['simctl', 'bootstatus', device, '-b'], {
+      stdio: 'inherit',
+    });
   }
 }
