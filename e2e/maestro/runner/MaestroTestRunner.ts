@@ -7,7 +7,7 @@ import { SupportProvider } from '@/providers/SupportProvider';
 import { testsForSuite } from '@/runner/testRegistry';
 import type { TestSuite } from '@/runner/types';
 import { resolveMaestroCli } from '@/support/maestroCli';
-import { captureConnectedAndroidDeviceInfo, parseMaestroDeviceOutput } from '@/support/deviceInfo';
+import { parseMaestroDeviceOutput } from '@/support/deviceInfo';
 import { testConfig } from '@/test.config';
 
 function isRecoverableIosMaestroFailure(output: string): boolean {
@@ -37,11 +37,6 @@ export class MaestroTestRunner {
 
   async run(suite: TestSuite): Promise<void> {
     fs.mkdirSync(this.maestroOutputRoot, { recursive: true });
-
-    const bootstrappedAndroidInfo = captureConnectedAndroidDeviceInfo();
-    if (bootstrappedAndroidInfo) {
-      this.runtimeDeviceInfo = bootstrappedAndroidInfo;
-    }
 
     const support = new SupportProvider(this.resultsDir, suite);
     const selectedTests = await testsForSuite(this.maestroRoot, suite);
