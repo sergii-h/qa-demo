@@ -19,7 +19,7 @@ class CreateTaskStep(
     private val mainPage = MainPage(rule)
 
     fun setTaskData(taskData: TaskData): CreateTaskStep {
-        Allure.step("Set task data") {
+        Allure.step("Set task data: $taskData") {
             createTaskForm.titleField().performTextInput(taskData.title)
             createTaskForm.descriptionField().performTextInput(taskData.description)
             createTaskForm.statusDropdown().performScrollTo().performClick()

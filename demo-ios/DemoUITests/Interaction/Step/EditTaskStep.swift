@@ -13,7 +13,7 @@ final class EditTaskStep {
 
     @discardableResult
     func setTaskData(_ taskData: TaskData) -> EditTaskStep {
-        Allure.step("Set task data") {
+        Allure.step("Set task data: \(taskData.allureLabel)") {
             editTaskForm.replaceText("edit-task-title-input", with: taskData.title)
             editTaskForm.replaceText("task-description-input", with: taskData.description)
             editTaskForm.selectOption(

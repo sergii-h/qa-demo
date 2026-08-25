@@ -32,41 +32,105 @@ export type MaestroAllureStep = {
 const INTERNAL_ENV_PREFIXES = ['MAESTRO_'];
 
 export function resolveMaestroCommandsPath(outputDir: string): string | undefined {
-  if (!fs.existsSync(outputDir)) {
+  const matches = findMaestroCommandsFiles(outputDir);
+  if (matches.length === 0) {
     return undefined;
   }
 
-  const directMatch = findCommandsFileName(outputDir);
-  if (directMatch) {
-    return path.join(outputDir, directMatch);
+  return matches.sort(
+    (left, right) => fs.statSync(right).mtimeMs - fs.statSync(left).mtimeMs,
+  )[0];
+}
+
+function findMaestroCommandsFiles(directory: string): string[] {
+  if (!fs.existsSync(directory)) {
+    return [];
   }
 
-  for (const entry of fs.readdirSync(outputDir, { withFileTypes: true })) {
-    if (!entry.isDirectory()) {
+  const files: string[] = [];
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...findMaestroCommandsFiles(entryPath));
       continue;
     }
 
-    const nestedDir = path.join(outputDir, entry.name);
-    const nestedMatch = findCommandsFileName(nestedDir);
-    if (nestedMatch) {
-      return path.join(nestedDir, nestedMatch);
+    if (isMaestroCommandsFileName(entry.name)) {
+      files.push(entryPath);
     }
   }
 
-  return undefined;
+  return files;
 }
 
-function findCommandsFileName(directory: string): string | undefined {
-  return fs
-    .readdirSync(directory)
-    .find((fileName) => fileName.startsWith('commands-') && fileName.endsWith('.json'));
+function isMaestroCommandsFileName(fileName: string): boolean {
+  if (!fileName.endsWith('.json')) {
+    return false;
+  }
+
+  return fileName === 'commands.json' || fileName.startsWith('commands-');
 }
 
 export function readMaestroCommands(commandsPath: string): MaestroCommandEntry[] {
-  const entries = JSON.parse(fs.readFileSync(commandsPath, 'utf8')) as MaestroCommandEntry[];
-  return [...entries].sort(
-    (left, right) => left.metadata.sequenceNumber - right.metadata.sequenceNumber,
-  );
+  const parsed = JSON.parse(fs.readFileSync(commandsPath, 'utf8')) as unknown;
+  const rawEntries = extractRawCommandEntries(parsed);
+
+  return rawEntries
+    .map((raw, index) => normalizeMaestroCommand(raw, index))
+    .sort((left, right) => left.metadata.sequenceNumber - right.metadata.sequenceNumber);
+}
+
+function extractRawCommandEntries(parsed: unknown): unknown[] {
+  if (Array.isArray(parsed)) {
+    return parsed;
+  }
+
+  if (parsed && typeof parsed === 'object') {
+    const wrapped = parsed as { commands?: unknown };
+    if (Array.isArray(wrapped.commands)) {
+      return wrapped.commands;
+    }
+  }
+
+  return [];
+}
+
+function normalizeMaestroCommand(raw: unknown, index: number): MaestroCommandEntry {
+  const record = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const nestedMetadata =
+    record.metadata && typeof record.metadata === 'object'
+      ? (record.metadata as Record<string, unknown>)
+      : {};
+  const command =
+    record.command && typeof record.command === 'object'
+      ? (record.command as Record<string, unknown>)
+      : {};
+  const error =
+    (nestedMetadata.error as { message?: string } | undefined) ??
+    (record.error as { message?: string } | undefined);
+
+  return {
+    command,
+    metadata: {
+      status: String(nestedMetadata.status ?? record.status ?? 'COMPLETED'),
+      timestamp: Number(
+        nestedMetadata.timestamp ?? record.timestamp ?? record.startedAt ?? 0,
+      ),
+      duration: Number(
+        nestedMetadata.duration ?? record.duration ?? record.durationMs ?? 0,
+      ),
+      sequenceNumber: Number(
+        nestedMetadata.sequenceNumber ??
+          record.sequenceNumber ??
+          record.sequence ??
+          index,
+      ),
+      evaluatedCommand:
+        (nestedMetadata.evaluatedCommand as Record<string, unknown> | undefined) ??
+        (record.evaluatedCommand as Record<string, unknown> | undefined),
+      error,
+    },
+  };
 }
 
 export function buildMaestroAllureSteps(
@@ -75,19 +139,47 @@ export function buildMaestroAllureSteps(
   outputDir: string,
 ): MaestroAllureStep[] {
   const env = filterTestDataEnv(runnerEnv);
+  const strictSteps = collectTopLevelSteps(entries, { ...env }, outputDir, {
+    allowFilenameOnly: false,
+  });
+
+  if (strictSteps.length > 0) {
+    return strictSteps;
+  }
+
+  const fileNameSteps = collectTopLevelSteps(entries, { ...env }, outputDir, {
+    allowFilenameOnly: true,
+  });
+
+  if (fileNameSteps.length > 0) {
+    return fileNameSteps;
+  }
+
+  return collectTopLevelSteps(entries, { ...env }, outputDir, { includeLeaves: true });
+}
+
+function collectTopLevelSteps(
+  entries: MaestroCommandEntry[],
+  env: Record<string, string>,
+  outputDir: string,
+  options: { allowFilenameOnly?: boolean; includeLeaves?: boolean },
+): MaestroAllureStep[] {
   const steps: MaestroAllureStep[] = [];
 
   for (const entry of entries) {
     const evaluatedCommand = entry.metadata.evaluatedCommand ?? entry.command;
-    const commandType = Object.keys(evaluatedCommand)[0];
+    const commandType = Object.keys(evaluatedCommand)[0] ?? '';
 
-    if (!shouldIncludeTopLevelCommand(commandType, evaluatedCommand)) {
+    if (
+      !shouldIncludeTopLevelCommand(commandType, evaluatedCommand, options) &&
+      !shouldIncludeLeafFallback(commandType, options)
+    ) {
       continue;
     }
 
     mergeEnvFromCommand(evaluatedCommand, env);
 
-    if (commandType === 'defineVariablesCommand') {
+    if (isDefineVariablesType(commandType)) {
       continue;
     }
 
@@ -118,11 +210,11 @@ function buildStepFromEntry(
   parentStatus?: Status,
 ): MaestroAllureStep | null {
   const evaluatedCommand = entry.metadata.evaluatedCommand ?? entry.command;
-  const commandType = Object.keys(evaluatedCommand)[0];
+  const commandType = Object.keys(evaluatedCommand)[0] ?? '';
 
   mergeEnvFromCommand(evaluatedCommand, env);
 
-  if (commandType === 'defineVariablesCommand' || commandType === 'applyConfigurationCommand') {
+  if (isDefineVariablesType(commandType) || isApplyConfigurationType(commandType)) {
     return null;
   }
 
@@ -170,7 +262,7 @@ function collectChildEntries(
 
 function isRunFlowEntry(entry: MaestroCommandEntry): boolean {
   const evaluatedCommand = entry.metadata.evaluatedCommand ?? entry.command;
-  return Object.keys(evaluatedCommand)[0] === 'runFlowCommand';
+  return isRunFlowType(Object.keys(evaluatedCommand)[0] ?? '');
 }
 
 function isWithinNestedRunFlow(
@@ -209,22 +301,22 @@ function buildStepFromEvaluatedCommand(
     return null;
   }
 
-  if (commandType === 'applyConfigurationCommand') {
+  if (isApplyConfigurationType(commandType)) {
     return null;
   }
 
-  if (commandType === 'defineVariablesCommand') {
+  if (isDefineVariablesType(commandType)) {
     mergeEnvFromCommand(evaluatedCommand, env);
     return null;
   }
 
-  if (commandType === 'runFlowCommand') {
+  if (isRunFlowType(commandType)) {
     const runFlow = payload as RunFlowCommand;
     mergeEnvFromCommand({ defineVariablesCommand: { env: runFlow.config?.env } }, env);
 
     const name =
       runFlow.label ??
-      formatSourceDescription(runFlow.sourceDescription) ??
+      formatSourceDescription(runFlowSource(runFlow)) ??
       formatRunFlowCondition(runFlow.condition, env);
     const flowEnv = filterTestDataEnv(runFlow.config?.env ?? {});
     const mergedEnv = { ...env, ...flowEnv };
@@ -447,7 +539,7 @@ function mergeEnvFromCommand(
   command: Record<string, unknown>,
   env: Record<string, string>,
 ): void {
-  const defineVariables = command.defineVariablesCommand as
+  const defineVariables = (command.defineVariablesCommand ?? command.defineVariables) as
     | { env?: Record<string, string> }
     | undefined;
 
@@ -465,29 +557,73 @@ function mergeEnvFromCommand(
 function shouldIncludeTopLevelCommand(
   commandType: string,
   evaluatedCommand: Record<string, unknown>,
+  options: { allowFilenameOnly?: boolean; includeLeaves?: boolean } = {},
 ): boolean {
-  if (commandType === 'defineVariablesCommand') {
+  if (isDefineVariablesType(commandType)) {
     return true;
   }
 
-  if (commandType !== 'runFlowCommand') {
+  if (!isRunFlowType(commandType)) {
     return false;
   }
 
   const runFlow = Object.values(evaluatedCommand)[0] as RunFlowCommand;
-  const source = runFlow.sourceDescription ?? '';
+  const source = runFlowSource(runFlow);
 
   if (!source && runFlow.condition) {
     return false;
   }
 
-  if (source.includes('/pages/') || source.startsWith('../pages/')) {
+  if (isPageSource(source)) {
     return false;
   }
 
+  if (isStepOrValidatorSource(source)) {
+    return true;
+  }
+
   return (
-    source.includes('/steps/') ||
-    source.includes('/validators/') ||
+    options.allowFilenameOnly === true &&
+    (Boolean(source) || Boolean(runFlow.label) || (runFlow.commands?.length ?? 0) > 0)
+  );
+}
+
+function shouldIncludeLeafFallback(
+  commandType: string,
+  options: { includeLeaves?: boolean },
+): boolean {
+  if (options.includeLeaves !== true) {
+    return false;
+  }
+
+  return !isDefineVariablesType(commandType) && !isApplyConfigurationType(commandType);
+}
+
+function isRunFlowType(commandType: string): boolean {
+  return commandType === 'runFlowCommand' || commandType === 'runFlow';
+}
+
+function isDefineVariablesType(commandType: string): boolean {
+  return commandType === 'defineVariablesCommand' || commandType === 'defineVariables';
+}
+
+function isApplyConfigurationType(commandType: string): boolean {
+  return commandType === 'applyConfigurationCommand' || commandType === 'applyConfiguration';
+}
+
+function runFlowSource(runFlow: RunFlowCommand): string {
+  return runFlow.sourceDescription ?? runFlow.file ?? runFlow.source ?? '';
+}
+
+function isPageSource(source: string): boolean {
+  return /(?:^|[/\\])pages[/\\]/.test(source) || source.startsWith('../pages/');
+}
+
+function isStepOrValidatorSource(source: string): boolean {
+  return (
+    /(?:^|[/\\])steps[/\\]/.test(source) ||
+    /(?:^|[/\\])validators[/\\]/.test(source) ||
+    source.includes('/interactions/') ||
     source.startsWith('../../interactions/')
   );
 }
@@ -524,6 +660,8 @@ function toParameters(env: Record<string, string>): Parameter[] {
 function mapMaestroStatus(status: string): Status {
   switch (status) {
     case 'COMPLETED':
+    case 'SUCCESS':
+    case 'PASSED':
       return Status.PASSED;
     case 'FAILED':
       return Status.FAILED;
@@ -634,6 +772,8 @@ type AssertionCondition = {
 type RunFlowCommand = {
   label?: string;
   sourceDescription?: string;
+  file?: string;
+  source?: string;
   condition?: AssertionCondition;
   config?: {
     env?: Record<string, string>;

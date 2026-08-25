@@ -25,7 +25,7 @@ if [[ -z "${GH_TOKEN:-${GITHUB_TOKEN:-}}" ]] && ! gh auth status >/dev/null 2>&1
 fi
 
 alerts=$(gh api "repos/${REPO}/dependabot/alerts?state=open" --paginate \
-  --jq '[.[] | select(.security_advisory.severity == "moderate" or .security_advisory.severity == "high" or .security_advisory.severity == "critical")]') \
+  --jq '[.[] | select(.security_advisory.severity == "medium" or .security_advisory.severity == "moderate" or .security_advisory.severity == "high" or .security_advisory.severity == "critical")]') \
   || {
     echo "Failed to list Dependabot alerts for ${REPO}." >&2
     echo "CI needs workflow permission read-all (or vulnerability-alerts: read). Locally use gh auth login with repo + security_events." >&2

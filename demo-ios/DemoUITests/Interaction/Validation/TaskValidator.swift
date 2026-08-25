@@ -9,7 +9,7 @@ final class TaskValidator {
 
     @discardableResult
     func data(_ taskData: TaskData) -> TaskValidator {
-        Allure.step("Validate task info data") {
+        Allure.step("Validate task info data: \(taskData.allureLabel)") {
             infoTaskModal.title().waitUntilExists()
             XCTAssertEqual(infoTaskModal.title().label, taskData.title)
             XCTAssertEqual(infoTaskModal.descriptionField().label, taskData.description)

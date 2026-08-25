@@ -8,4 +8,7 @@ data class TaskData(
     val description: String,
     val status: TaskStatus,
     val priority: TaskPriority,
-)
+) {
+    override fun toString(): String =
+        "{title: $title, description: $description, status: $status, priority: $priority}"
+}

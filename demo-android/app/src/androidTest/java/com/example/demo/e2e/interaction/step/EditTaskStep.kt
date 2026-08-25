@@ -20,7 +20,7 @@ class EditTaskStep(
     private val mainPage = MainPage(rule)
 
     fun setTaskData(taskData: TaskData): EditTaskStep {
-        Allure.step("Set task data") {
+        Allure.step("Set task data: $taskData") {
             editTaskForm.titleField().performTextClearance()
             editTaskForm.titleField().performTextInput(taskData.title)
             editTaskForm.descriptionField().performTextClearance()

@@ -47,10 +47,21 @@ class XCUIPage {
     func selectOption(dropdown: XCUIElement, option: XCUIElement) {
         dismissKeyboardIfPresent()
         dropdown.tapWhenReady()
-        app.descendants(matching: .any)
+        let optionElement = app.descendants(matching: .any)
             .matching(identifier: option.identifier)
             .firstMatch
-            .tapWhenReady(timeout: 10)
+        optionElement.tapWhenHittable(timeout: 10)
+        if dropdown.waitForExistence(timeout: 10) {
+            return
+        }
+        if optionElement.exists {
+            let pickerBack = app.navigationBars.buttons.matching(
+                NSPredicate(format: "identifier != %@", "close-button")
+            ).firstMatch
+            if pickerBack.waitForExistence(timeout: 2) {
+                pickerBack.tap()
+            }
+        }
         dropdown.waitUntilExists(timeout: 10)
     }
 
@@ -153,5 +164,22 @@ extension XCUIElement {
             line: line
         )
         coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+    }
+
+    func tapWhenHittable(
+        timeout: TimeInterval = 10,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) {
+        waitUntilExists(timeout: timeout, file: file, line: line)
+        let hittable = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "isHittable == true"),
+            object: self
+        )
+        if XCTWaiter().wait(for: [hittable], timeout: timeout) == .completed {
+            tap()
+            return
+        }
+        tapWhenReady(timeout: timeout, file: file, line: line)
     }
 }
