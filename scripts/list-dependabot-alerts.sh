@@ -15,7 +15,7 @@ if ! gh auth status >/dev/null 2>&1; then
 fi
 
 alerts=$(gh api "repos/${REPO}/dependabot/alerts?state=${STATE}" --paginate \
-  --jq '[.[] | select(.security_advisory.severity == "moderate" or .security_advisory.severity == "high" or .security_advisory.severity == "critical")]')
+  --jq '[.[] | select(.security_advisory.severity == "medium" or .security_advisory.severity == "moderate" or .security_advisory.severity == "high" or .security_advisory.severity == "critical")]')
 
 count=$(echo "$alerts" | jq 'length')
 
