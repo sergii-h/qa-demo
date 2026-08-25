@@ -1,4 +1,4 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","20942","should have no accessibility violations on task info form","","Tue Aug 25 09:40:54 UTC 2026","passed","Tue Aug 25 09:41:15 UTC 2026","","","",""
-"","17919","should have no accessibility violations on task table when tasks loaded","","Tue Aug 25 09:41:15 UTC 2026","passed","Tue Aug 25 09:41:32 UTC 2026","","","",""
-"","20240","should have no accessibility violations on create task form","","Tue Aug 25 09:40:33 UTC 2026","passed","Tue Aug 25 09:40:54 UTC 2026","","","",""
+"","19372","should have no accessibility violations on create task form","","Tue Aug 25 11:11:58 UTC 2026","passed","Tue Aug 25 11:12:17 UTC 2026","","","",""
+"","22182","should have no accessibility violations on task info form","","Tue Aug 25 11:12:17 UTC 2026","passed","Tue Aug 25 11:12:39 UTC 2026","","","",""
+"","17414","should have no accessibility violations on task table when tasks loaded","","Tue Aug 25 11:12:39 UTC 2026","passed","Tue Aug 25 11:12:57 UTC 2026","","","",""
