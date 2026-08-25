@@ -131,7 +131,7 @@ e2e/maestro/
 
 Allure results → `allure-results/`; Maestro artifacts → `.maestro-output/` (git-ignored). `npm run allure:serve`.
 
-Each test includes WireMock setup (when stubbed) and Maestro steps from `commands-*.json` — step names use `runFlow` **labels** when set, otherwise the sub-flow file name; top-level steps show resolved env parameters (`TASK_TITLE`, etc.); failures attach Maestro screenshots. The **Environment** section shows framework, suite, backend URL, app id, and device info from Maestro's `Running on …` output.
+Each test includes WireMock setup (when stubbed) and Maestro steps from `commands-*.json` — step names use `runFlow` **labels** when set, otherwise the sub-flow file name; top-level steps show resolved env parameters (`TASK_TITLE`, etc.); failures attach Maestro screenshots. The **Environment** section shows framework, suite, backend URL, app id, and device info. iOS details come from Maestro's `Running on …` line; Android resolves the connected emulator/device via `adb` (AVD name, model, OS/API level, serial) because Maestro often reports only `Running on test`.
 
 ```yaml
 - runFlow:

@@ -59,9 +59,10 @@ runs:
 
         osv_scanner="$RUNNER_TEMP/osv-scanner"
         results="$RUNNER_TEMP/osv-results.json"
-        curl -sSfL "https://github.com/google/osv-scanner/releases/download/v2.3.8/osv-scanner_linux_amd64" \
+        curl -sSfL --retry 5 --retry-all-errors --retry-delay 5 \
+          "https://github.com/google/osv-scanner/releases/download/v2.3.8/osv-scanner_linux_amd64" \
           -o "$osv_scanner"
-        chmod +x "$osv_scanner"
+        chmod +x "$osv_scanner"  
 
         set +e
         if [ -f "$scan_target" ]; then
