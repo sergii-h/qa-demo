@@ -1,0 +1,6 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","78016","should remove task from list when delete succeeds","","Sat Sep 05 09:47:30 UTC 2026","passed","Sat Sep 05 09:48:48 UTC 2026","","","",""
+"","115380","should update task when edit form submitted","","Sat Sep 05 09:48:48 UTC 2026","passed","Sat Sep 05 09:50:44 UTC 2026","","","",""
+"","54167","should switch UI to Spanish when ES is selected","","Sat Sep 05 09:52:07 UTC 2026","passed","Sat Sep 05 09:53:01 UTC 2026","","","",""
+"","82896","should display task details when info opened","","Sat Sep 05 09:50:44 UTC 2026","passed","Sat Sep 05 09:52:07 UTC 2026","","","",""
+"","112634","should create task when form submitted with valid data","","Sat Sep 05 09:45:37 UTC 2026","passed","Sat Sep 05 09:47:30 UTC 2026","","","",""
