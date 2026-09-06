@@ -1,39 +1,59 @@
 package config;
 
-import com.codeborne.selenide.WebDriverProvider;
-import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class ChromeRemoteProvider implements WebDriverProvider {
-    private final String[] platformArguments;
-
+public class ChromeRemoteProvider {
     private static final PropertyReader PROPERTIES_READER = PropertyReader.getInstance();
+    private static final String DISABLED_NETWORK_FEATURES = String.join(",",
+            "BlockInsecurePrivateNetworkRequests",
+            "PrivateNetworkAccessSendPreflights",
+            "PrivateNetworkAccessRespectPreflightResults",
+            "PrivateNetworkAccessPermissionPrompt",
+            "LocalNetworkAccessChecks",
+            "LocalNetworkAccessChecksForNavigations"
+    );
 
-    public ChromeRemoteProvider(String... platformArguments) {
-        this.platformArguments = platformArguments;
+    private final ChromeOptions options;
+
+    public ChromeRemoteProvider(ChromeOptions options) {
+        this.options = options;
     }
 
-    @Override
-    public RemoteWebDriver createDriver(Capabilities capabilities) {
+    public static ChromeOptions createOptions(String testUrl, boolean remote, String... extraArguments) {
         ChromeOptions options = new ChromeOptions();
+        List<String> arguments = new ArrayList<>();
+        arguments.add("--disable-search-engine-choice-screen");
+        arguments.add("--remote-allow-origins=*");
+        arguments.add("--disable-features=" + DISABLED_NETWORK_FEATURES);
+        arguments.add("--unsafely-treat-insecure-origin-as-secure=" + testUrl);
 
-        String chromeOptions = System.getProperty("chromeoptions.args", "");
-        if (!chromeOptions.isBlank()) {
-            options.addArguments(Arrays.stream(chromeOptions.split(", "))
-                    .map(String::trim)
-                    .filter(arg -> !arg.isEmpty())
-                    .toList());
+        if (remote) {
+            arguments.add("--no-sandbox");
+            arguments.add("--disable-dev-shm-usage");
+            arguments.add("--disable-notifications");
+            arguments.add("--allow-silent-push");
         }
 
-        options.addArguments(platformArguments);
-        options.merge(capabilities);
+        arguments.addAll(List.of(extraArguments));
+        options.addArguments(arguments);
 
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("profile.content_settings.exceptions.local_network_access.*.setting", 1);
+        options.setExperimentalOption("prefs", prefs);
+
+        return options;
+    }
+
+    public RemoteWebDriver createDriver() {
         String remoteWebdriverUrl = PROPERTIES_READER.getEnvProperty("test.remote.webdriver.url");
 
         try {
