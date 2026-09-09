@@ -17,10 +17,12 @@ public abstract class MobileTest extends TestBase {
         PropertyReader propertiesReader = PropertyReader.getInstance();
         Configuration.browserSize = format("%sx%s", propertiesReader.getProperty("test.mobile.browser-width"),
                 propertiesReader.getProperty("test.mobile.browser-height"));
+    }
 
-        System.setProperty(
-                "chromeoptions.args",
-                format("--user-agent=\"%s\"", propertiesReader.getProperty("test.mobile.user-agent"))
-        );
+    @Override
+    protected String[] extraChromeArgs() {
+        return new String[] {
+                format("--user-agent=%s", PropertyReader.getInstance().getProperty("test.mobile.user-agent"))
+        };
     }
 }

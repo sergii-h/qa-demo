@@ -18,8 +18,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.Augmenter;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import provider.SupportProvider;
@@ -76,37 +76,18 @@ public abstract class TestBase {
     protected void setUpBrowser() {
         setUpByPlatform();
 
-        String chromeOptions = System.getProperty("chromeoptions.args", "--disable-search-engine-choice-screen");
-        chromeOptions = ensureChromeArg(chromeOptions, "--disable-search-engine-choice-screen");
-        chromeOptions = ensureChromeArg(chromeOptions, "--remote-allow-origins=*");
-        chromeOptions = ensureChromeArg(
-                chromeOptions,
-                "--disable-features=BlockInsecurePrivateNetworkRequests,PrivateNetworkAccessSendPreflights,PrivateNetworkAccessRespectPreflightResults,LocalNetworkAccessChecks"
-        );
-        chromeOptions = ensureChromeArg(chromeOptions, "--unsafely-treat-insecure-origin-as-secure=" + TEST_URL);
-
-        if (!IS_LOCAL) {
-            chromeOptions = ensureChromeArg(chromeOptions, "--no-sandbox");
-            chromeOptions = ensureChromeArg(chromeOptions, "--disable-dev-shm-usage");
-            chromeOptions = ensureChromeArg(chromeOptions, "--disable-notifications");
-            chromeOptions = ensureChromeArg(chromeOptions, "--allow-silent-push");
-        }
-
-        System.setProperty("chromeoptions.args", chromeOptions);
+        ChromeOptions options = ChromeRemoteProvider.createOptions(TEST_URL, !IS_LOCAL, extraChromeArgs());
 
         if (IS_LOCAL) {
+            Configuration.browserCapabilities = options;
             WebDriverRunner.getAndCheckWebDriver();
         } else {
-            initRemoteDriver();
+            initRemoteDriver(options);
         }
     }
 
-    private String ensureChromeArg(String chromeOptions, String argument) {
-        if (chromeOptions.contains(argument)) {
-            return chromeOptions;
-        }
-
-        return chromeOptions + ", " + argument;
+    protected String[] extraChromeArgs() {
+        return new String[0];
     }
 
     @AfterEach
@@ -133,23 +114,24 @@ public abstract class TestBase {
 
     public abstract void setUpByPlatform();
 
-    private void initRemoteDriver() {
-        String desktopBrowserSize = PROPERTIES_READER.getProperty("test.desktop.browser-size");
-        String mobileBrowserWidth = PROPERTIES_READER.getProperty("test.mobile.browser-width");
-        String mobileBrowserHeight = PROPERTIES_READER.getProperty("test.mobile.browser-height");
+    private void initRemoteDriver(ChromeOptions options) {
+        if (platform.equals(DESKTOP)) {
+            options.addArguments(format("--window-size=%s", PROPERTIES_READER.getProperty("test.desktop.browser-size")));
+        } else {
+            options.addArguments(format(
+                    "--window-size=%s,%s",
+                    PROPERTIES_READER.getProperty("test.mobile.browser-width"),
+                    PROPERTIES_READER.getProperty("test.mobile.browser-height")
+            ));
+        }
 
-        RemoteWebDriver remoteWebDriver = platform.equals(DESKTOP)
-                    ? new ChromeRemoteProvider(format("window-size=%s", desktopBrowserSize))
-                    .createDriver(new DesiredCapabilities())
-                    : new ChromeRemoteProvider(
-                    format("window-size=%s,%s", mobileBrowserWidth, mobileBrowserHeight)
-            ).createDriver(new DesiredCapabilities());
+        RemoteWebDriver remoteWebDriver = new ChromeRemoteProvider(options).createDriver();
 
-            browserInfo = remoteWebDriver.getCapabilities().getBrowserName() + " " +
-                    remoteWebDriver.getCapabilities().getBrowserVersion();
+        browserInfo = remoteWebDriver.getCapabilities().getBrowserName() + " " +
+                remoteWebDriver.getCapabilities().getBrowserVersion();
 
-            remoteWebDriver.setFileDetector(new LocalFileDetector());
-            WebDriver driver = new Augmenter().augment(remoteWebDriver);
-            WebDriverRunner.setWebDriver(driver);
+        remoteWebDriver.setFileDetector(new LocalFileDetector());
+        WebDriver driver = new Augmenter().augment(remoteWebDriver);
+        WebDriverRunner.setWebDriver(driver);
     }
 }

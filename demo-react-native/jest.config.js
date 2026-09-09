@@ -4,7 +4,7 @@ module.exports = {
   setupFiles: ['<rootDir>/src/jest.setup.mocks.ts'],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|react-native-paper|react-native-safe-area-context|react-native-screens|react-native-gesture-handler)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|react-native-paper|react-native-safe-area-context|react-native-screens|react-native-gesture-handler|decode-uri-component)',
   ],
   testMatch: [
     '**/*.unit.spec.(ts|tsx)',

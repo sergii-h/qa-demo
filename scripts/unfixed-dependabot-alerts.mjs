@@ -34,9 +34,24 @@ function cmpVersion(a, b) {
   return 0;
 }
 
+function versionLine(value) {
+  const [major, minor] = String(value)
+    .replace(/^v/i, '')
+    .split(/[^0-9]+/)
+    .filter(Boolean)
+    .map(Number);
+  if (major === 0) {
+    return `0.${minor ?? 0}`;
+  }
+  return String(major ?? 0);
+}
+
 function isVulnerable(version, patched) {
   if (!patched || patched === 'none') {
     return true;
+  }
+  if (versionLine(version) !== versionLine(patched)) {
+    return false;
   }
   return cmpVersion(version, patched) < 0;
 }
