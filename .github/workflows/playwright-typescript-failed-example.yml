@@ -1,0 +1,27 @@
+name: Run failed example report (Playwright — mocked BE)
+
+on:
+  workflow_call:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start E2E environment
+        uses: ./.github/actions/start-e2e-env
+        with:
+          app-mode: frontend
+          docker-hub-username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Run Playwright failed example report
+        uses: ./.github/actions/playwright-typescript-test
+        with:
+          npm-script: failed-example
+          app-mode: frontend
+          test-label: Run Playwright failed example report (mocked BE)
+          artifact-name: allure-results-playwright-failed-example
+          continue-on-test-failure: 'true'

@@ -18,6 +18,10 @@ inputs:
   artifact-name:
     description: Artifact name for raw Allure results
     required: true
+  continue-on-test-failure:
+    description: Publish reports but keep the job green even if tests fail (e.g. intentional failure examples)
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -68,6 +72,6 @@ runs:
         retention-days: 7
 
     - name: Fail job when tests failed
-      if: steps.test.outcome == 'failure'
+      if: steps.test.outcome == 'failure' && inputs.continue-on-test-failure != 'true'
       shell: bash
       run: exit 1

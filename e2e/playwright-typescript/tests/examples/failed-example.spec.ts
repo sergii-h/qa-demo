@@ -30,7 +30,7 @@ test.describe('Example: failing report walkthrough', () => {
     await support.mock.api.getIsValid(response.id, true);
   });
 
-  test('should show a mismatched priority when the task API mock returns stale data', async ({ step, validate }) => {
+  test('should show a mismatched priority when the task API mock returns stale data', { tag: '@failed-example' }, async ({ step, validate }) => {
     // given
     await step.navigation.openMainPage();
 

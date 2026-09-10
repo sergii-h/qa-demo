@@ -103,6 +103,12 @@ const TEST_RUNS = [
         allure: './playwright-uat/index.html',
         playwrightHtml: './playwright-html-uat/index.html',
       },
+      {
+        suite: 'Failed example',
+        meta: 'fails on purpose — see debugging info',
+        allure: './playwright-failed-example/index.html',
+        playwrightHtml: './playwright-html-failed-example/index.html',
+      },
     ],
   },
   {

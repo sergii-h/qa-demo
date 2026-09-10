@@ -17,6 +17,7 @@ on:
       - '.github/workflows/playwright-typescript-e2e.yml'
       - '.github/workflows/playwright-typescript-uat.yml'
       - '.github/workflows/playwright-typescript-accessibility.yml'
+      - '.github/workflows/playwright-typescript-failed-example.yml'
       - '.github/workflows/playwright-python-e2e.yml'
       - '.github/workflows/playwright-python-uat.yml'
       - '.github/workflows/playwright-python-accessibility.yml'
@@ -59,6 +60,7 @@ on:
       - '.github/workflows/playwright-typescript-e2e.yml'
       - '.github/workflows/playwright-typescript-uat.yml'
       - '.github/workflows/playwright-typescript-accessibility.yml'
+      - '.github/workflows/playwright-typescript-failed-example.yml'
       - '.github/workflows/playwright-python-e2e.yml'
       - '.github/workflows/playwright-python-uat.yml'
       - '.github/workflows/playwright-python-accessibility.yml'
@@ -183,6 +185,11 @@ jobs:
   playwright-typescript-accessibility:
     needs: audit-e2e-dependencies
     uses: ./.github/workflows/playwright-typescript-accessibility.yml
+    secrets: inherit
+
+  playwright-typescript-failed-example:
+    needs: audit-e2e-dependencies
+    uses: ./.github/workflows/playwright-typescript-failed-example.yml
     secrets: inherit
 
   playwright-python-e2e:
