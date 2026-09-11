@@ -55,8 +55,14 @@ cd e2e/playwright-typescript
 npm run test:e2e            # browser-level user flows with mocked backend
 npm run test:accessibility  # axe-core WCAG scans
 npm run test:uat              # smoke test against the real running app
-npm test                      # all suites
+npm test                      # all suitesII
 ```
+
+### Intentional failure example
+
+`tests/examples/failed-example.spec.ts` (tag `@failed-example`) is kept failing on purpose (mocked API returns a stale priority) so the published report always has one failure on both the Desktop Chrome and Mobile Safari projects — a live example of what a failing report looks like and how to debug it (screenshot, trace with network log, Allure step timeline). It lives under its own `Examples` Allure epic and its own `npm run test:failed-example` script, excluded from `test:e2e`.
+
+It runs in a dedicated CI job (`playwright-typescript-failed-example.yml`) that publishes the Allure/Playwright reports as usual but never fails the pipeline — the test step uses `continue-on-test-failure: true` in the shared `playwright-typescript-test` action, so a red test doesn't turn the `E2E tests` workflow red.
 
 ## Run/Debug by viewport
 
