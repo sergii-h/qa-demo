@@ -1,4 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","20454","should have no accessibility violations on create task form","","Fri Sep 11 06:40:28 UTC 2026","passed","Fri Sep 11 06:40:48 UTC 2026","","","",""
-"","21749","should have no accessibility violations on task info form","","Fri Sep 11 06:40:48 UTC 2026","passed","Fri Sep 11 06:41:10 UTC 2026","","","",""
-"","17727","should have no accessibility violations on task table when tasks loaded","","Fri Sep 11 06:41:10 UTC 2026","passed","Fri Sep 11 06:41:28 UTC 2026","","","",""
