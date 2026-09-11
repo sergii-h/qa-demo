@@ -1,3 +1,3 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","2791","[mobile] should create task","","Thu Sep 10 13:50:46 UTC 2026","passed","Thu Sep 10 13:50:48 UTC 2026","","Create task","",""
-"","3746","[desktop] should create task","","Thu Sep 10 13:50:34 UTC 2026","passed","Thu Sep 10 13:50:38 UTC 2026","","Create task","",""
+"","3009","[desktop] should create task","","Fri Sep 11 06:24:42 UTC 2026","passed","Fri Sep 11 06:24:45 UTC 2026","","Create task","",""
+"","2414","[mobile] should create task","","Fri Sep 11 06:24:51 UTC 2026","passed","Fri Sep 11 06:24:53 UTC 2026","","Create task","",""
