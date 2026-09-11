@@ -1,0 +1,3 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","12206","should show a mismatched priority when the task API mock returns stale data","Desktop Chrome (chromium)","Fri Sep 11 07:33:55 UTC 2026","failed","Fri Sep 11 07:34:08 UTC 2026","Example: failing report walkthrough","tests/examples/failed-example.spec.ts","",""
+"","20549","should show a mismatched priority when the task API mock returns stale data","Mobile Safari (webkit)","Fri Sep 11 07:33:55 UTC 2026","failed","Fri Sep 11 07:34:16 UTC 2026","Example: failing report walkthrough","tests/examples/failed-example.spec.ts","",""
