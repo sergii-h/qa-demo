@@ -1,22 +1,31 @@
 // @vitest-environment node
 import { MatchersV3 } from "@pact-foundation/pact";
 import { updateTask } from "../../services";
-import ITask, { TaskPriority, TaskStatus } from "../../interfaces/ITask";
-import { createPact } from "./tasks.pact.fixtures";
+import ITask, { TaskPriority, TaskStatus, TaskWrite } from "../../interfaces/ITask";
+import { IMessageErrorResponse } from "../../interfaces/IApiError";
+import { createPact, likeTask, TASK_ID } from "./tasks.pact.fixtures";
 
-const { like, regex, fromProviderState, extractPayload } = MatchersV3;
+const { regex, fromProviderState } = MatchersV3;
 
 const pact = createPact("demo-service-tasks-update");
-const taskId = "507f1f77bcf86cd799439011";
-const timestampPattern = "^\\d{4}-\\d{2}-\\d{2}T.*$";
 
-const taskPath = fromProviderState(`/v1/tasks/\${taskId}`, `/v1/tasks/${taskId}`);
+const taskPath = fromProviderState(`/v1/tasks/\${taskId}`, `/v1/tasks/${TASK_ID}`);
 
-const requestContract = {
-  title: fromProviderState("${updatedTitle}", "Prepare release notes - updated"),
+const task: Required<ITask> = {
+  id: TASK_ID,
+  title: "Prepare release notes - updated",
   description: "Document release tasks in detail",
   status: TaskStatus.IN_PROGRESS,
   priority: TaskPriority.HIGH,
+  createdDate: "2026-04-26T09:00:00.000Z",
+  updatedDate: "2026-04-26T10:30:00.000Z",
+};
+
+const requestBody: { [K in keyof Required<TaskWrite>]: unknown } = {
+  title: fromProviderState("${updatedTitle}", task.title),
+  description: task.description,
+  status: task.status,
+  priority: task.priority,
 };
 
 describe("tasks PUT /v1/tasks/{id} pact", () => {
@@ -27,43 +36,40 @@ describe("tasks PUT /v1/tasks/{id} pact", () => {
       .uponReceiving("a valid task update request")
       .withRequest("PUT", taskPath, (req) => {
         req.headers({ "Content-Type": "application/json" });
-        req.jsonBody(requestContract);
+        req.jsonBody(requestBody);
       })
       .willRespondWith(200, (res) => {
         res.headers({ "Content-Type": "application/json" });
-        res.jsonBody({
-          id: regex("^[a-f0-9]{24}$", taskId),
-          title: like(extractPayload(requestContract.title)),
-          description: like(requestContract.description),
-          status: like(requestContract.status),
-          priority: like(requestContract.priority),
-          createdDate: regex(timestampPattern, "2026-04-26T09:00:00.000Z"),
-          updatedDate: regex(timestampPattern, "2026-04-26T10:30:00.000Z"),
-        });
+        res.jsonBody(likeTask(task));
       })
       .executeTest(async (mockServer) => {
-        await updateTask({ id: taskId, ...extractPayload(requestContract) as object } as ITask, `${mockServer.url}/v1`);
+        await updateTask(task.id, task, `${mockServer.url}/v1`);
       });
   });
 
   it("should have update task duplicate contract when updating with duplicate title", async () => {
+    const error: IMessageErrorResponse = {
+      message: `Task with title '${task.title}' already exists`,
+    };
+    const errorBody: { [K in keyof IMessageErrorResponse]: unknown } = {
+      message: regex("^Task with title '.*' already exists$", error.message),
+    };
+
     await pact
       .addInteraction()
       .given("another task has the requested title")
       .uponReceiving("a task update request with duplicate title")
       .withRequest("PUT", taskPath, (req) => {
         req.headers({ "Content-Type": "application/json" });
-        req.jsonBody(requestContract);
+        req.jsonBody(requestBody);
       })
       .willRespondWith(409, (res) => {
         res.headers({ "Content-Type": "application/json" });
-        res.jsonBody({
-          message: regex("^Task with title '.*' already exists$", `Task with title '${extractPayload(requestContract.title)}' already exists`),
-        });
+        res.jsonBody(errorBody);
       })
       .executeTest(async (mockServer) => {
         await expect(
-          updateTask({ id: taskId, ...extractPayload(requestContract) as object } as ITask, `${mockServer.url}/v1`)
+          updateTask(task.id, task, `${mockServer.url}/v1`)
         ).rejects.toThrow("already exists");
       });
   });

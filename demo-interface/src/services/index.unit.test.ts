@@ -124,7 +124,12 @@ describe('services', () => {
                 `${services.BE_API}/tasks`,
                 {
                     method: 'POST',
-                    body: JSON.stringify(mockTask),
+                    body: JSON.stringify({
+                        title: mockTask.title,
+                        description: mockTask.description,
+                        status: mockTask.status,
+                        priority: mockTask.priority,
+                    }),
                     headers: { 'Content-Type': 'application/json' },
                 }
             );
@@ -157,7 +162,7 @@ describe('services', () => {
                 json: () => Promise.resolve(mockTask),
             });
 
-            const result = await services.updateTask(mockTask);
+            const result = await services.updateTask(mockTask.id, mockTask);
 
             expect(mockFetch).toHaveBeenCalledWith(
                 `${services.BE_API}/tasks/${mockTask.id}`,
@@ -181,7 +186,7 @@ describe('services', () => {
                 json: () => Promise.resolve({ message: 'Task not found' }),
             });
 
-            await expect(services.updateTask(mockTask)).rejects.toThrow('Task not found');
+            await expect(services.updateTask(mockTask.id, mockTask)).rejects.toThrow('Task not found');
         });
 
         it('should throw default error message when response has no message', async () => {
@@ -190,7 +195,7 @@ describe('services', () => {
                 json: () => Promise.resolve({}),
             });
 
-            await expect(services.updateTask(mockTask)).rejects.toThrow('Failed to update task');
+            await expect(services.updateTask(mockTask.id, mockTask)).rejects.toThrow('Failed to update task');
         });
     });
 

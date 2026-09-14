@@ -1,4 +1,4 @@
-import ITask from "../interfaces/ITask";
+import ITask, { TaskWrite } from "../interfaces/ITask";
 
 const BE_API = import.meta.env.VITE_BE_API || "/v1";
 
@@ -29,10 +29,15 @@ const getIsValid = async (taskId: string, baseUrl: string = BE_API): Promise<boo
     return await response.json();
 }
 
-const createTask = async (task: ITask, baseUrl: string = BE_API): Promise<ITask> => {
+const createTask = async (task: TaskWrite, baseUrl: string = BE_API): Promise<ITask> => {
     const response = await fetch(baseUrl + `/tasks`, { 
         method: 'POST', 
-        body: JSON.stringify({ ...task }), 
+        body: JSON.stringify({ 
+            title: task.title, 
+            description: task.description, 
+            status: task.status,
+            priority: task.priority
+        }), 
         headers: { 'Content-Type': 'application/json'} 
     });
     
@@ -44,8 +49,8 @@ const createTask = async (task: ITask, baseUrl: string = BE_API): Promise<ITask>
     return await response.json();
 }
 
-const updateTask = async (task: ITask, baseUrl: string = BE_API): Promise<ITask> => {
-    const response = await fetch(baseUrl + `/tasks/${task.id}`, { 
+const updateTask = async (taskId: string, task: TaskWrite, baseUrl: string = BE_API): Promise<ITask> => {
+    const response = await fetch(baseUrl + `/tasks/${taskId}`, { 
         method: 'PUT', 
         body: JSON.stringify({ 
             title: task.title, 

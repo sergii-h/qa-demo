@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TaskStatus, TaskPriority } from '../../interfaces/ITask';
+import ITask, { TaskStatus, TaskPriority } from '../../interfaces/ITask';
+import { IMessageErrorResponse } from '../../interfaces/IApiError';
 import { TasksTable } from '../tasksTable/tasksTable';
 import { mockFetchResponse } from '../../test-utils/mockFetch';
 
@@ -16,7 +17,7 @@ describe('CreateTaskModal integration', () => {
   describe('Create task tests', () => {
     it('should create task with all values, send correct POST request and add new task to the list after successful response', async () => {
       // given
-      const createTaskData = {
+      const createTaskData: ITask = {
         id: 'task-123',
         title: 'Test Task',
         description: 'Test Description',
@@ -93,7 +94,7 @@ describe('CreateTaskModal integration', () => {
 
     it('should create task with required values, send correct POST request and add new task to the list after successful response', async () => {
       // given
-      const createTaskData = {
+      const createTaskData: ITask = {
         id: 'task-124',
         title: 'Test Task',
         description: '',
@@ -151,7 +152,7 @@ describe('CreateTaskModal integration', () => {
 
     it('should allow successful creation after invalid title is corrected', async () => {
       // given
-      const createTaskData = {
+      const createTaskData: ITask = {
         id: 'task-130',
         title: 'Corrected title',
         description: '',
@@ -235,7 +236,7 @@ describe('CreateTaskModal integration', () => {
 
     it('should allow retry and create task after initial POST failure', async () => {
       // given
-      const createTaskData = {
+      const createTaskData: ITask = {
         id: 'task-456',
         title: 'Retry Task',
         description: 'Retry Description',
@@ -294,7 +295,7 @@ describe('CreateTaskModal integration', () => {
     });
 
     it.each([
-      { testCase: 'HTTP 500', getResponse: { body: { message: 'Server error' }, status: 500 } },
+      { testCase: 'HTTP 500', getResponse: { body: { message: 'Server error' } satisfies IMessageErrorResponse, status: 500 } },
       { testCase: 'network error', getResponse: { body: null, reject: 'Initial load failed' } },
     ])('should allow opening create form when initial GET tasks fails with $testCase', async ({ getResponse }) => {
       // given
@@ -324,7 +325,7 @@ describe('CreateTaskModal integration', () => {
       { testCase: 'network error', refreshGetResponse: { body: null, reject: 'Refresh failed' } },
     ])('should close create form when refresh GET fails with $testCase after successful POST', async ({ refreshGetResponse }) => {
       // given
-      const createTaskData = {
+      const createTaskData: ITask = {
         title: 'Task with refresh failure',
         description: '',
         status: TaskStatus.TODO,
@@ -374,12 +375,12 @@ describe('CreateTaskModal integration', () => {
     });
 
     it.each([
-      { testCase: 'HTTP 400', postResponse: { body: { message: 'Request failed with 400' }, status: 400 } },
-      { testCase: 'HTTP 500', postResponse: { body: { message: 'Request failed with 500' }, status: 500 } },
+      { testCase: 'HTTP 400', postResponse: { body: { message: 'Request failed with 400' } satisfies IMessageErrorResponse, status: 400 } },
+      { testCase: 'HTTP 500', postResponse: { body: { message: 'Request failed with 500' } satisfies IMessageErrorResponse, status: 500 } },
       { testCase: 'network error', postResponse: { body: null, reject: true } },
     ])('should display generic error on create form when POST request is rejected with $testCase', async ({ postResponse }) => {
       // given
-      const createTaskData = {
+      const createTaskData: ITask = {
         title: 'Invalid Task',
         description: 'Some description',
         status: TaskStatus.TODO,
