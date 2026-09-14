@@ -1,7 +1,7 @@
 import {fireEvent, waitFor} from '@testing-library/react-native';
 
 import {TaskDetailScreen} from './TaskDetailScreen';
-import {TaskPriority, TaskStatus} from '@/data/models/task';
+import {Task, TaskPriority, TaskStatus} from '@/data/models/task';
 import {mockFetchResponse} from '@/test-utils/mockFetch';
 import {renderWithProviders} from '@/test-utils/renderWithProviders';
 
@@ -26,12 +26,14 @@ describe('TaskDetailScreen integration', () => {
   describe('Info task tests', () => {
     it('should open info form and display task details for all values dataset', async () => {
       // Given
-      const task = {
+      const task: Task = {
         id: 'task-301',
         title: 'Info task',
         description: 'Info description',
         status: TaskStatus.IN_PROGRESS,
         priority: TaskPriority.HIGH,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         [`/v1/tasks/${task.id}`]: {
@@ -58,12 +60,14 @@ describe('TaskDetailScreen integration', () => {
 
     it('should open info form and display task details for required only values dataset', async () => {
       // Given
-      const task = {
+      const task: Task = {
         id: 'task-305',
         title: 'Info required task',
         description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         [`/v1/tasks/${task.id}`]: {
@@ -90,12 +94,14 @@ describe('TaskDetailScreen integration', () => {
 
     it('should close info form on close action', async () => {
       // Given
-      const task = {
+      const task: Task = {
         id: 'task-1',
         title: 'Info Task',
         description: 'Info description',
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         [`/v1/tasks/${task.id}`]: {
@@ -123,12 +129,14 @@ describe('TaskDetailScreen integration', () => {
   describe('UI-006', () => {
     it('should display validated state when external validation returns true', async () => {
       // Given
-      const task = {
+      const task: Task = {
         id: 'task-306-valid',
         title: 'Valid info task',
         description: 'Valid description',
         status: TaskStatus.TODO,
         priority: TaskPriority.LOW,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         [`/v1/tasks/${task.id}`]: {
@@ -153,12 +161,14 @@ describe('TaskDetailScreen integration', () => {
 
     it('should display not-validated state when external validation returns false', async () => {
       // Given
-      const task = {
+      const task: Task = {
         id: 'task-306',
         title: 'Not valid info task',
         description: 'Not valid description',
         status: TaskStatus.TODO,
         priority: TaskPriority.LOW,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         [`/v1/tasks/${task.id}`]: {
@@ -176,7 +186,7 @@ describe('TaskDetailScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId('description')).toHaveTextContent(task.description);
+        expect(screen.getByTestId('description')).toHaveTextContent(task.description ?? '');
         expect(screen.getByTestId('notValid')).toBeVisible();
       });
       expect(screen.queryByTestId('valid')).toBeNull();
@@ -213,12 +223,14 @@ describe('TaskDetailScreen integration', () => {
       { testCase: 'network error', validationGetResponse: { reject: true } },
     ])('should show invalid validation sign when validation request fails with $testCase and display generic load task info error', async ({ validationGetResponse }) => {
       // Given
-      const task = {
+      const task: Task = {
         id: 'task-307',
         title: 'Validation 500 task',
         description: 'Validation 500 description',
         status: TaskStatus.DONE,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         [`/v1/tasks/${task.id}`]: {
@@ -236,7 +248,7 @@ describe('TaskDetailScreen integration', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByTestId('description')).toHaveTextContent(task.description);
+        expect(screen.getByTestId('description')).toHaveTextContent(task.description ?? '');
         expect(screen.getByTestId('notValid')).toBeVisible();
       });
       expect(screen.queryByTestId('load-error')).toBeNull();

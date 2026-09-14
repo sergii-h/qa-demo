@@ -1,7 +1,7 @@
 import {fireEvent, RenderAPI, waitFor} from '@testing-library/react-native';
 
 import {TaskFormScreen} from './TaskFormScreen';
-import {TaskPriority, TaskStatus} from '@/data/models/task';
+import {Task, TaskPriority, TaskStatus} from '@/data/models/task';
 import {mockFetchResponse} from '@/test-utils/mockFetch';
 import {renderWithProviders} from '@/test-utils/renderWithProviders';
 
@@ -58,12 +58,14 @@ describe('TaskFormScreen integration', () => {
   describe('Create task tests', () => {
     it('should create task with all values, send correct POST request and add new task to the list after successful response', async () => {
       // Given
-      const createdTask = {
+      const createdTask: Task = {
         id: 'task-123',
         title: 'Test Task',
         description: 'Test Description',
         status: TaskStatus.IN_PROGRESS,
         priority: TaskPriority.HIGH,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {
@@ -111,12 +113,14 @@ describe('TaskFormScreen integration', () => {
 
     it('should create task with required values, send correct POST request and add new task to the list after successful response', async () => {
       // Given
-      const createdTask = {
+      const createdTask: Task = {
         id: 'task-124',
         title: 'Test Task',
         description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {
@@ -155,11 +159,14 @@ describe('TaskFormScreen integration', () => {
 
     it('should allow successful creation after invalid title is corrected', async () => {
       // Given
-      const createdTask = {
+      const createdTask: Task = {
         id: 'task-130',
         title: 'Corrected title',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.HIGH,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {
@@ -226,12 +233,14 @@ describe('TaskFormScreen integration', () => {
 
     it('should allow retry and create task after initial POST failure', async () => {
       // Given
-      const createdTask = {
+      const createdTask: Task = {
         id: 'task-456',
         title: 'Retry Task',
         description: 'Retry Description',
         status: TaskStatus.TODO,
         priority: TaskPriority.HIGH,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {
@@ -273,11 +282,14 @@ describe('TaskFormScreen integration', () => {
       { testCase: 'network error', refreshGetResponse: { reject: true } },
     ])('should close create form when refresh GET fails with $testCase after successful POST', async ({ refreshGetResponse }) => {
       // Given
-      const createdTask = {
+      const createdTask: Task = {
         id: 'task-778',
         title: 'Task with refresh failure',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.HIGH,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {
@@ -339,19 +351,23 @@ describe('TaskFormScreen integration', () => {
   describe('Edit task tests', () => {
     it('should update task with modified values, send correct PUT request and show modified task title in the list after successful response', async () => {
       // Given
-      const originalTask = {
+      const originalTask: Task = {
         id: 'task-1',
         title: 'Original title',
         description: 'Notes',
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
-      const updatedTask = {
+      const updatedTask: Task = {
         id: 'task-1',
         title: 'Updated title',
         description: 'Notes',
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         [`/v1/tasks/${originalTask.id}`]: {
@@ -398,19 +414,23 @@ describe('TaskFormScreen integration', () => {
 
     it('should update task with removed description', async () => {
       // Given
-      const originalTask = {
+      const originalTask: Task = {
         id: 'task-210',
         title: 'Task with description',
         description: 'Description to remove',
         status: TaskStatus.IN_PROGRESS,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
-      const updatedTask = {
+      const updatedTask: Task = {
         id: 'task-210',
         title: 'Task with description',
         description: null,
         status: TaskStatus.IN_PROGRESS,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         [`/v1/tasks/${originalTask.id}`]: {
@@ -457,12 +477,14 @@ describe('TaskFormScreen integration', () => {
 
     it('should not modify task when edit form is closed without saving', async () => {
       // Given
-      const task = {
+      const task: Task = {
         id: 'task-1',
         title: 'Original title',
         description: 'Notes',
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         [`/v1/tasks/${task.id}`]: {
@@ -496,17 +518,23 @@ describe('TaskFormScreen integration', () => {
 
     it('should proceed with save after user corrects invalid title', async () => {
       // Given
-      const originalTask = {
+      const originalTask: Task = {
         id: 'task-1',
         title: 'Original title',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
-      const updatedTask = {
+      const updatedTask: Task = {
         id: 'task-1',
         title: 'Corrected title',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         [`/v1/tasks/${originalTask.id}`]: {
@@ -574,14 +602,16 @@ describe('TaskFormScreen integration', () => {
       { testCase: 'network error', refreshGetResponse: { reject: true } },
     ])('should close edit form when refresh GET fails with $testCase after successful PUT', async ({ refreshGetResponse }) => {
       // Given
-      const existingTask = {
+      const existingTask: Task = {
         id: 'task-211',
         title: 'Task with refresh failure',
         description: 'Refresh failure description',
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
-      const updatedTask = {
+      const updatedTask: Task = {
         ...existingTask,
         title: 'Updated after refresh failure',
       };
@@ -624,17 +654,23 @@ describe('TaskFormScreen integration', () => {
 
     it('should allow retry and save task after initial PUT failure', async () => {
       // Given
-      const originalTask = {
+      const originalTask: Task = {
         id: 'task-1',
         title: 'Original title',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
-      const updatedTask = {
+      const updatedTask: Task = {
         id: 'task-1',
         title: 'Updated title',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         [`/v1/tasks/${originalTask.id}`]: {
@@ -680,12 +716,14 @@ describe('TaskFormScreen integration', () => {
       { testCase: 'network error', putResponse: { reject: true } },
     ])('should display generic error on edit form when PUT request is rejected with $testCase', async ({ putResponse }) => {
       // Given
-      const task = {
+      const task: Task = {
         id: 'task-1',
         title: 'Original title',
         description: 'Notes',
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         [`/v1/tasks/${task.id}`]: {

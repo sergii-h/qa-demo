@@ -1,13 +1,22 @@
 import {MatchersV3} from '@pact-foundation/pact';
 
-import {TaskPriority, TaskStatus} from '@/data/models/task';
+import {Task, TaskPriority, TaskStatus} from '@/data/models/task';
 import {createTaskApi} from '@/data/remote/taskApi';
-import {createPact} from './tasks.pact.fixtures';
+import {createPact, likeTask, TASK_ID} from './tasks.pact.fixtures';
 
-const { like, regex, eachLike } = MatchersV3;
+const { eachLike } = MatchersV3;
 
 const pact = createPact('demo-service-tasks-get-all');
-const timestampPattern = '^\\d{4}-\\d{2}-\\d{2}T.*$';
+
+const task: Task = {
+  id: TASK_ID,
+  title: 'Prepare release notes',
+  description: 'Document release tasks',
+  status: TaskStatus.TODO,
+  priority: TaskPriority.MEDIUM,
+  createdDate: '2026-04-26T09:00:00.000Z',
+  updatedDate: '2026-04-26T09:00:00.000Z',
+};
 
 describe('tasks GET /v1/tasks pact', () => {
   it('should have get tasks contract when requesting all tasks', async () => {
@@ -20,20 +29,7 @@ describe('tasks GET /v1/tasks pact', () => {
       })
       .willRespondWith(200, (res) => {
         res.headers({ 'Content-Type': 'application/json' });
-        res.jsonBody(
-          eachLike(
-            {
-              id: regex('^[a-f0-9]{24}$', '507f1f77bcf86cd799439011'),
-              title: like('Prepare release notes'),
-              description: like('Document release tasks'),
-              status: like(TaskStatus.TODO),
-              priority: like(TaskPriority.MEDIUM),
-              createdDate: regex(timestampPattern, '2026-04-26T09:00:00.000Z'),
-              updatedDate: regex(timestampPattern, '2026-04-26T09:00:00.000Z'),
-            },
-            1,
-          ),
-        );
+        res.jsonBody(eachLike(likeTask(task), 1));
       })
       .executeTest(async (mockServer) => {
         const api = createTaskApi(`${mockServer.url}/v1/`);
