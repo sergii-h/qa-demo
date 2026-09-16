@@ -3,6 +3,8 @@ package com.example.demo.integration.test.pact.api;
 import au.com.dius.pact.provider.junit5.HttpTestTarget;
 import au.com.dius.pact.provider.junit5.PactVerificationContext;
 import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
+import au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors;
+import au.com.dius.pact.provider.junitsupport.loader.SelectorBuilder;
 import au.com.dius.pact.provider.spring.junit5.PactVerificationSpringProvider;
 import com.example.demo.TaskRepository;
 import com.example.demo.data.Task;
@@ -19,6 +21,11 @@ import java.time.temporal.ChronoUnit;
 
 @PactBroker(url = "${PACT_BROKER_BASE_URL:http://localhost:9292}")
 public abstract class PactProviderTestBase extends ApiIntegrationTestBase {
+
+    @PactBrokerConsumerVersionSelectors
+    public static SelectorBuilder consumerVersionSelectors() {
+        return new SelectorBuilder().matchingBranch().mainBranch();
+    }
 
     @Autowired
     protected TaskRepository taskRepository;

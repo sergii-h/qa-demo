@@ -5,6 +5,8 @@ import au.com.dius.pact.provider.junit5.PactVerificationContext;
 import au.com.dius.pact.provider.junit5.PactVerificationInvocationContextProvider;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
+import au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors;
+import au.com.dius.pact.provider.junitsupport.loader.SelectorBuilder;
 import au.com.dius.pact.provider.PactVerifyProvider;
 import com.example.demo.data.TaskEvent;
 import com.example.demo.data.TaskPriority;
@@ -22,6 +24,11 @@ import java.time.Instant;
 @Provider("demo-service-tasks-events")
 @PactBroker(url = "${PACT_BROKER_BASE_URL:http://localhost:9292}")
 public class TaskEventsPactProviderTest extends ApiIntegrationTestBase {
+
+    @PactBrokerConsumerVersionSelectors
+    public static SelectorBuilder consumerVersionSelectors() {
+        return new SelectorBuilder().matchingBranch().mainBranch();
+    }
 
     @Autowired
     private ObjectMapper objectMapper;
