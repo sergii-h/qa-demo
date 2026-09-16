@@ -22,7 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 
 @Provider("demo-service-tasks-events")
-@PactBroker(url = "${PACT_BROKER_BASE_URL:http://localhost:9292}")
+@PactBroker(
+        url = "${PACT_BROKER_BASE_URL:http://localhost:9292}",
+        providerBranch = "${pact.provider.branch:master}"
+)
 public class TaskEventsPactProviderTest extends ApiIntegrationTestBase {
 
     @PactBrokerConsumerVersionSelectors

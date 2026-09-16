@@ -19,7 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-@PactBroker(url = "${PACT_BROKER_BASE_URL:http://localhost:9292}")
+@PactBroker(
+        url = "${PACT_BROKER_BASE_URL:http://localhost:9292}",
+        providerBranch = "${pact.provider.branch:master}"
+)
 public abstract class PactProviderTestBase extends ApiIntegrationTestBase {
 
     @PactBrokerConsumerVersionSelectors
