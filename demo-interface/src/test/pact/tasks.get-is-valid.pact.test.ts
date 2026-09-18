@@ -1,17 +1,18 @@
 // @vitest-environment node
 import { MatchersV3 } from "@pact-foundation/pact";
 import { getIsValid } from "../../services";
-import { createPact } from "./tasks.pact.fixtures";
+import { createPact, TASK_ID } from "./tasks.pact.fixtures";
 
 const { boolean, fromProviderState } = MatchersV3;
 
 const pact = createPact("demo-service-tasks-get-is-valid");
-const taskId = "507f1f77bcf86cd799439011";
 
-const isValidPath = fromProviderState(`/v1/tasks/isValid/\${taskId}`, `/v1/tasks/isValid/${taskId}`);
+const isValidPath = fromProviderState(`/v1/tasks/isValid/\${taskId}`, `/v1/tasks/isValid/${TASK_ID}`);
 
 describe("tasks GET /v1/tasks/isValid/{id} pact", () => {
   it("should have get is valid contract", async () => {
+    const isValid: boolean = true;
+
     await pact
       .addInteraction()
       .given("validation result is true for the task")
@@ -21,10 +22,10 @@ describe("tasks GET /v1/tasks/isValid/{id} pact", () => {
       })
       .willRespondWith(200, (res) => {
         res.headers({ "Content-Type": "application/json" });
-        res.jsonBody(boolean(true));
+        res.jsonBody(boolean(isValid));
       })
       .executeTest(async (mockServer) => {
-        await getIsValid(taskId, `${mockServer.url}/v1`);
+        await getIsValid(TASK_ID, `${mockServer.url}/v1`);
       });
   });
 });

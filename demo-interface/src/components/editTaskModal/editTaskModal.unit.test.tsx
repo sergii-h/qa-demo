@@ -125,8 +125,7 @@ describe('EditTaskModal', () => {
             await user.click(screen.getByTestId('save-button'));
 
             await waitFor(() => {
-                expect(updateTaskSpy).toHaveBeenCalledWith({
-                    id: taskId,
+                expect(updateTaskSpy).toHaveBeenCalledWith(taskId, {
                     title: 'Updated Title',
                     description: mockTask.description,
                     status: mockTask.status,
@@ -174,7 +173,7 @@ describe('EditTaskModal', () => {
             await user.click(screen.getByTestId('save-button'));
 
             await waitFor(() => {
-                expect(updateTaskSpy).toHaveBeenCalledWith(expect.objectContaining({ status: TaskStatus.DONE }));
+                expect(updateTaskSpy).toHaveBeenCalledWith(taskId, expect.objectContaining({ status: TaskStatus.DONE }));
             });
         });
 
@@ -190,7 +189,7 @@ describe('EditTaskModal', () => {
             await user.click(screen.getByTestId('save-button'));
 
             await waitFor(() => {
-                expect(updateTaskSpy).toHaveBeenCalledWith(expect.objectContaining({ priority: TaskPriority.LOW }));
+                expect(updateTaskSpy).toHaveBeenCalledWith(taskId, expect.objectContaining({ priority: TaskPriority.LOW }));
             });
         });
 

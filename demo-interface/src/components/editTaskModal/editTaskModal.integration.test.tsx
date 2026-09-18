@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TaskPriority, TaskStatus } from '../../interfaces/ITask';
+import ITask, { TaskPriority, TaskStatus } from '../../interfaces/ITask';
+import { IMessageErrorResponse } from '../../interfaces/IApiError';
 import { TasksTable } from '../tasksTable/tasksTable';
 import { mockFetchResponse } from '../../test-utils/mockFetch';
 
@@ -16,14 +17,14 @@ describe('EditTaskModal integration', () => {
   describe('Edit task tests', () => {
     it('should update task with modified values, send correct PUT request and show modified task title in the list after successful response', async () => {
       // given
-      const existingTask = {
+      const existingTask: ITask = {
         id: 'task-201',
         title: 'Existing title',
         description: 'Existing description',
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
       };
-      const updatedTask = {
+      const updatedTask: ITask = {
         ...existingTask,
         title: 'Updated title',
         description: 'Updated description',
@@ -76,14 +77,14 @@ describe('EditTaskModal integration', () => {
 
     it('should update task with removed description', async () => {
       // given
-      const existingTask = {
+      const existingTask: ITask = {
         id: 'task-210',
         title: 'Task with description',
         description: 'Description to remove',
         status: TaskStatus.IN_PROGRESS,
         priority: TaskPriority.MEDIUM,
       };
-      const updatedTask = {
+      const updatedTask: ITask = {
         ...existingTask,
         description: '',
       };
@@ -139,7 +140,7 @@ describe('EditTaskModal integration', () => {
 
     it('should not modify task when edit form is closed without saving', async () => {
       // given
-      const task = {
+      const task: ITask = {
         id: 'task-202',
         title: 'Original title',
         description: 'Original description',
@@ -183,14 +184,14 @@ describe('EditTaskModal integration', () => {
 
     it('should proceed with save after user corrects invalid title', async () => {
       // given
-      const task = {
+      const task: ITask = {
         id: 'task-203',
         title: 'Recover task',
         description: 'Recover description',
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
       };
-      const correctedTask = {
+      const correctedTask: ITask = {
         ...task,
         title: 'Recovered title',
       };
@@ -244,11 +245,11 @@ describe('EditTaskModal integration', () => {
     });
 
     it.each([
-      { testCase: 'HTTP 500', getTaskResponse: { body: { message: 'Request failed with 500' }, status: 500 } },
+      { testCase: 'HTTP 500', getTaskResponse: { body: { message: 'Request failed with 500' } satisfies IMessageErrorResponse, status: 500 } },
       { testCase: 'network error', getTaskResponse: { body: null, reject: true } },
     ])('should allow opening edit form when initial GET tasks fails with $testCase', async ({ getTaskResponse }) => {
       // given
-      const task = {
+      const task: ITask = {
         id: 'task-207',
         title: 'Get error task',
         description: 'Get error description',
@@ -285,14 +286,14 @@ describe('EditTaskModal integration', () => {
       { testCase: 'network error', refreshGetResponse: { body: null, reject: 'Refresh failed' } },
     ])('should close edit form when refresh GET fails with $testCase after successful PUT', async ({ refreshGetResponse }) => {
       // given
-      const existingTask = {
+      const existingTask: ITask = {
         id: 'task-211',
         title: 'Task with refresh failure',
         description: 'Refresh failure description',
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
       };
-      const updatedTask = {
+      const updatedTask: ITask = {
         ...existingTask,
         title: 'Updated after refresh failure',
       };
@@ -342,14 +343,14 @@ describe('EditTaskModal integration', () => {
 
     it('should allow retry and save task after initial PUT failure', async () => {
       // given
-      const task = {
+      const task: ITask = {
         id: 'task-205',
         title: 'Retry edit',
         description: 'Retry description',
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
       };
-      const updatedTask = {
+      const updatedTask: ITask = {
         ...task,
         title: 'Retry edit updated',
       };
@@ -358,7 +359,7 @@ describe('EditTaskModal integration', () => {
         [`/v1/tasks/${task.id}`]: {
           GET: { body: task },
           PUT: [
-            { body: { message: 'Temporary failure' }, status: 500 },
+            { body: { message: 'Temporary failure' } satisfies IMessageErrorResponse, status: 500 },
             { body: updatedTask, status: 200 },
           ],
         },
@@ -400,12 +401,12 @@ describe('EditTaskModal integration', () => {
     });
 
     it.each([
-      { testCase: 'HTTP 400', putResponse: { body: { message: 'Request failed with 400' }, status: 400 } },
-      { testCase: 'HTTP 500', putResponse: { body: { message: 'Request failed with 500' }, status: 500 } },
+      { testCase: 'HTTP 400', putResponse: { body: { message: 'Request failed with 400' } satisfies IMessageErrorResponse, status: 400 } },
+      { testCase: 'HTTP 500', putResponse: { body: { message: 'Request failed with 500' } satisfies IMessageErrorResponse, status: 500 } },
       { testCase: 'network error', putResponse: { body: null, reject: true } },
     ])('should display generic error on edit form when PUT request is rejected with $testCase', async ({ putResponse }) => {
       // given
-      const task = {
+      const task: ITask = {
         id: 'task-204',
         title: 'Error task',
         description: 'Error description',

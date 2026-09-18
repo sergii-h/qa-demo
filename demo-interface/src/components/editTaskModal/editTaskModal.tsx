@@ -91,7 +91,7 @@ export const EditTaskModal = (props: IProps) => {
         isSubmittingRef.current = true;
         setIsLoading(true);
         try {
-            await updateTask({ id: props.taskId, title, description, status, priority });
+            await updateTask(props.taskId, { title, description, status, priority });
             setIsLoading(false);
             props.onSave();
             props.onClose();

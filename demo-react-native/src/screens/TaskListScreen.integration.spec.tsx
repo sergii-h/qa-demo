@@ -1,7 +1,7 @@
 import {act, fireEvent, RenderAPI, waitFor} from '@testing-library/react-native';
 
 import {ApiError} from '@/data/remote/apiClient';
-import {TaskPriority, TaskStatus} from '@/data/models/task';
+import {Task, TaskPriority, TaskStatus} from '@/data/models/task';
 import {taskRepository} from '@/repository/taskRepository';
 import {TaskListScreen} from './TaskListScreen';
 import {mockFetchResponse} from '@/test-utils/mockFetch';
@@ -60,10 +60,34 @@ const route = {
   params: undefined,
 };
 
-const tagVariantTasks = [
-  { id: '1', title: 'Task One', status: TaskStatus.TODO, priority: TaskPriority.LOW },
-  { id: '2', title: 'Task Two', status: TaskStatus.IN_PROGRESS, priority: TaskPriority.MEDIUM },
-  { id: '3', title: 'Task Three', status: TaskStatus.DONE, priority: TaskPriority.HIGH },
+const tagVariantTasks: Task[] = [
+  {
+    id: '1',
+    title: 'Task One',
+    description: null,
+    status: TaskStatus.TODO,
+    priority: TaskPriority.LOW,
+    createdDate: null,
+    updatedDate: null,
+  },
+  {
+    id: '2',
+    title: 'Task Two',
+    description: null,
+    status: TaskStatus.IN_PROGRESS,
+    priority: TaskPriority.MEDIUM,
+    createdDate: null,
+    updatedDate: null,
+  },
+  {
+    id: '3',
+    title: 'Task Three',
+    description: null,
+    status: TaskStatus.DONE,
+    priority: TaskPriority.HIGH,
+    createdDate: null,
+    updatedDate: null,
+  },
 ];
 
 describe('TaskListScreen integration', () => {
@@ -151,11 +175,14 @@ describe('TaskListScreen integration', () => {
 
     it('should open create task form from list actions', async () => {
       // Given
-      const task = {
+      const task: Task = {
         id: '10',
         title: 'Modal Task',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {
@@ -178,11 +205,14 @@ describe('TaskListScreen integration', () => {
 
     it('should open task info form from list actions', async () => {
       // Given
-      const task = {
+      const task: Task = {
         id: '10',
         title: 'Modal Task',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {
@@ -205,11 +235,14 @@ describe('TaskListScreen integration', () => {
 
     it('should open task edit form from list actions', async () => {
       // Given
-      const task = {
+      const task: Task = {
         id: '10',
         title: 'Modal Task',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {
@@ -255,17 +288,23 @@ describe('TaskListScreen integration', () => {
   describe('Delete task tests', () => {
     it('should send delete request with selected task ID when delete is triggered and remove task from list after successful delete response', async () => {
       // Given
-      const deleteTask = {
+      const deleteTask: Task = {
         id: '1',
         title: 'Delete Me',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.LOW,
+        createdDate: null,
+        updatedDate: null,
       };
-      const keepTask = {
+      const keepTask: Task = {
         id: '2',
         title: 'Keep Me',
+        description: null,
         status: TaskStatus.DONE,
         priority: TaskPriority.HIGH,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {
@@ -308,17 +347,23 @@ describe('TaskListScreen integration', () => {
       { testCase: 'network error', deleteResponse: { reject: true }, expectedError: 'Network error' },
     ])('should keep task in list when delete fails with $testCase', async ({ deleteResponse, expectedError }) => {
       // Given
-      const deleteTask = {
+      const deleteTask: Task = {
         id: '1',
         title: 'Delete Me',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.LOW,
+        createdDate: null,
+        updatedDate: null,
       };
-      const keepTask = {
+      const keepTask: Task = {
         id: '2',
         title: 'Keep Me',
+        description: null,
         status: TaskStatus.DONE,
         priority: TaskPriority.HIGH,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {
@@ -352,17 +397,23 @@ describe('TaskListScreen integration', () => {
 
     it('should allow delete retry after failure and remove task when retry succeeds', async () => {
       // Given
-      const deleteTask = {
+      const deleteTask: Task = {
         id: 'retry-delete-target',
         title: 'Delete Me',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.LOW,
+        createdDate: null,
+        updatedDate: null,
       };
-      const keepTask = {
+      const keepTask: Task = {
         id: 'retry-keep-target',
         title: 'Keep Me',
+        description: null,
         status: TaskStatus.DONE,
         priority: TaskPriority.HIGH,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {
@@ -402,17 +453,23 @@ describe('TaskListScreen integration', () => {
   describe('Pull-to-refresh tests', () => {
     it('should show new task when pull-to-refresh returns updated list', async () => {
       // Given
-      const firstTask = {
+      const firstTask: Task = {
         id: '1',
         title: 'First Task',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
-      const secondTask = {
+      const secondTask: Task = {
         id: '2',
         title: 'Second Task',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {
@@ -461,11 +518,14 @@ describe('TaskListScreen integration', () => {
 
     it('should keep existing tasks when pull-to-refresh returns same list', async () => {
       // Given
-      const task = {
+      const task: Task = {
         id: '1',
         title: 'Stable Task',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {
@@ -491,17 +551,23 @@ describe('TaskListScreen integration', () => {
 
     it('should keep existing tasks when pull-to-refresh fails with server error', async () => {
       // Given
-      const firstTask = {
+      const firstTask: Task = {
         id: '1',
         title: 'Keep Me',
+        description: null,
         status: TaskStatus.TODO,
         priority: TaskPriority.LOW,
+        createdDate: null,
+        updatedDate: null,
       };
-      const secondTask = {
+      const secondTask: Task = {
         id: '2',
         title: 'Also Keep',
+        description: null,
         status: TaskStatus.DONE,
         priority: TaskPriority.HIGH,
+        createdDate: null,
+        updatedDate: null,
       };
       mockFetchResponse({
         '/v1/tasks': {

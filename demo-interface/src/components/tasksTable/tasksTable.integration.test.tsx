@@ -1,6 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TaskPriority, TaskStatus } from '../../interfaces/ITask';
+import ITask, { TaskPriority, TaskStatus } from '../../interfaces/ITask';
+import { IMessageErrorResponse } from '../../interfaces/IApiError';
 import { mockFetchResponse } from '../../test-utils/mockFetch';
 import { TasksTable } from './tasksTable';
 
@@ -16,7 +17,7 @@ describe('TasksTable integration', () => {
   describe('Task table tests', () => {
     it('should render task list with fetched data when the list is first shown', async () => {
       // given
-      const tasks = [
+      const tasks: ITask[] = [
         { id: '1', title: 'Task One', status: TaskStatus.TODO, priority: TaskPriority.LOW },
         { id: '2', title: 'Task Two', status: TaskStatus.IN_PROGRESS, priority: TaskPriority.MEDIUM },
       ];
@@ -46,7 +47,7 @@ describe('TasksTable integration', () => {
 
     it('should display status/priority tags and action buttons for each task', async () => {
       // given
-      const tasks = [
+      const tasks: ITask[] = [
         { id: '1', title: 'Task One', status: TaskStatus.TODO, priority: TaskPriority.LOW },
         { id: '2', title: 'Task Two', status: TaskStatus.IN_PROGRESS, priority: TaskPriority.MEDIUM },
         { id: '3', title: 'Task Three', status: TaskStatus.DONE, priority: TaskPriority.HIGH },
@@ -117,7 +118,7 @@ describe('TasksTable integration', () => {
 
     it('should open create task form from list actions', async () => {
       // given
-      const task = {
+      const task: ITask = {
         id: '10',
         title: 'Modal Task',
         description: 'Modal description',
@@ -151,7 +152,7 @@ describe('TasksTable integration', () => {
 
     it('should open task info form from list actions', async () => {
       // given
-      const task = {
+      const task: ITask = {
         id: '10',
         title: 'Modal Task',
         description: 'Modal description',
@@ -187,7 +188,7 @@ describe('TasksTable integration', () => {
 
     it('should open task edit form from list actions', async () => {
       // given
-      const task = {
+      const task: ITask = {
         id: '10',
         title: 'Modal Task',
         description: 'Modal description',
@@ -225,7 +226,7 @@ describe('TasksTable integration', () => {
       // given
       mockFetchResponse({
         [`/v1/tasks`]: {
-          GET: { body: { message: 'Server error' }, status: 500 },
+          GET: { body: { message: 'Server error' } satisfies IMessageErrorResponse, status: 500 },
         },
       });
 
@@ -243,7 +244,7 @@ describe('TasksTable integration', () => {
   describe('Delete task tests', () => {
     it('should send delete request with selected task ID when delete is triggered and remove task from list after successful delete response', async () => {
       // given
-      const tasks = [
+      const tasks: ITask[] = [
         { id: '1', title: 'Delete Me', status: TaskStatus.TODO, priority: TaskPriority.LOW },
         { id: '2', title: 'Keep Me', status: TaskStatus.DONE, priority: TaskPriority.HIGH },
       ];
@@ -278,11 +279,11 @@ describe('TasksTable integration', () => {
     });
 
     it.each([
-      { testCase: 'HTTP 500', deleteResponse: { body: { message: 'Delete failed' }, status: 500 } },
+      { testCase: 'HTTP 500', deleteResponse: { body: { message: 'Delete failed' } satisfies IMessageErrorResponse, status: 500 } },
       { testCase: 'network error', deleteResponse: { body: null, reject: true } },
     ])('should keep task in list when delete fails with $testCase', async ({ deleteResponse }) => {
       // given
-      const tasks = [
+      const tasks: ITask[] = [
         { id: '1', title: 'Delete Me', status: TaskStatus.TODO, priority: TaskPriority.LOW },
         { id: '2', title: 'Keep Me', status: TaskStatus.DONE, priority: TaskPriority.HIGH },
       ];
@@ -318,7 +319,7 @@ describe('TasksTable integration', () => {
 
     it('should allow delete retry after failure and remove task when retry succeeds', async () => {
       // given
-      const tasks = [
+      const tasks: ITask[] = [
         { id: '1', title: 'Delete Me', status: TaskStatus.TODO, priority: TaskPriority.LOW },
         { id: '2', title: 'Keep Me', status: TaskStatus.DONE, priority: TaskPriority.HIGH },
       ];
@@ -326,7 +327,7 @@ describe('TasksTable integration', () => {
       mockFetchResponse({
         [`/v1/tasks/1`]: {
           DELETE: [
-            { body: { message: 'Delete failed' }, status: 500 },
+            { body: { message: 'Delete failed' } satisfies IMessageErrorResponse, status: 500 },
             { body: {}, status: 204 },
           ],
         },

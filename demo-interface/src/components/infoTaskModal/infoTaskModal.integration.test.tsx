@@ -1,8 +1,9 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TaskPriority, TaskStatus } from '../../interfaces/ITask';
 import { TasksTable } from '../tasksTable/tasksTable';
 import { mockFetchResponse } from '../../test-utils/mockFetch';
+import ITask, { TaskPriority, TaskStatus } from '../../interfaces/ITask';
+import { IMessageErrorResponse } from '../../interfaces/IApiError';
 
 vi.stubGlobal('fetch', vi.fn());
 
@@ -16,7 +17,7 @@ describe('InfoTaskModal integration', () => {
   describe('Info task tests', () => {
     it('should open info form and display task details for all values dataset', async () => {
       // given
-      const task = {
+      const task: ITask = {
         id: 'task-301',
         title: 'Info task',
         description: 'Info description',
@@ -58,7 +59,7 @@ describe('InfoTaskModal integration', () => {
 
     it('should open info form and display task details for required only values dataset', async () => {
       // given
-      const task = {
+      const task: ITask = {
         id: 'task-305',
         title: 'Info required task',
         description: '',
@@ -98,7 +99,7 @@ describe('InfoTaskModal integration', () => {
 
     it('should close info form on close action', async () => {
       // given
-      const task = {
+      const task: ITask = {
         id: 'task-302',
         title: 'Closable info task',
         description: 'Closable description',
@@ -139,7 +140,7 @@ describe('InfoTaskModal integration', () => {
   describe('UI-006', () => {
     it('should display validated state when external validation returns true', async () => {
       // given
-      const task = {
+      const task: ITask = {
         id: 'task-306-valid',
         title: 'Valid info task',
         description: 'Valid description',
@@ -176,7 +177,7 @@ describe('InfoTaskModal integration', () => {
 
     it('should display not-validated state when external validation returns false', async () => {
       // given
-      const task = {
+      const task: ITask = {
         id: 'task-306',
         title: 'Not valid info task',
         description: 'Not valid description',
@@ -214,11 +215,11 @@ describe('InfoTaskModal integration', () => {
     });
 
     it.each([
-      { testCase: 'HTTP 500', taskGetResponse: { body: { message: 'Request failed with 500' }, status: 500 } },
+      { testCase: 'HTTP 500', taskGetResponse: { body: { message: 'Request failed with 500' } satisfies IMessageErrorResponse, status: 500 } },
       { testCase: 'network error', taskGetResponse: { body: null, reject: true } },
     ])('should not open info form when task details request fails with $testCase and display generic load task info error', async ({ taskGetResponse }) => {
       // given
-      const task = {
+      const task: ITask = {
         id: 'task-303',
         title: 'Fallback info task',
         status: TaskStatus.TODO,
@@ -253,11 +254,11 @@ describe('InfoTaskModal integration', () => {
     });
 
     it.each([
-      { testCase: 'HTTP 500', validationGetResponse: { body: { message: 'Validation failed' }, status: 500 } },
+      { testCase: 'HTTP 500', validationGetResponse: { body: { message: 'Validation failed' } satisfies IMessageErrorResponse, status: 500 } },
       { testCase: 'network error', validationGetResponse: { body: null, reject: true } },
     ])('should show invalid validation sign when validation request fails with $testCase and display generic load task info error', async ({ validationGetResponse }) => {
       // given
-      const task = {
+      const task: ITask = {
         id: 'task-307',
         title: 'Validation 500 task',
         description: 'Validation 500 description',
