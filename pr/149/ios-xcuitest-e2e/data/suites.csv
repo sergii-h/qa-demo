@@ -1,6 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","18257","shouldDisplayTaskDetailsWhenInfoOpened()","","Thu Jan 01 00:00:00 UTC 1970","passed","Thu Jan 01 00:00:18 UTC 1970","","TaskInfoTest","",""
-"","16089","shouldSwitchUiToSpanishWhenEsSelected()","","Thu Jan 01 00:00:00 UTC 1970","passed","Thu Jan 01 00:00:16 UTC 1970","","LanguageSupportTest","",""
-"","15624","shouldRemoveTaskFromListWhenDeleteSucceeds()","","Thu Jan 01 00:00:00 UTC 1970","passed","Thu Jan 01 00:00:15 UTC 1970","","DeleteTaskTest","",""
-"","64144","shouldUpdateTaskWhenEditFormSubmitted()","","Thu Jan 01 00:00:00 UTC 1970","passed","Thu Jan 01 00:01:04 UTC 1970","","EditTaskTest","",""
-"","42491","shouldCreateTaskWhenFormSubmittedWithValidData()","","Thu Jan 01 00:00:00 UTC 1970","passed","Thu Jan 01 00:00:42 UTC 1970","","CreateTaskTest","",""

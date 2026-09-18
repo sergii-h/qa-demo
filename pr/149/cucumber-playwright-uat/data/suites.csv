@@ -1,2 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","2911","Should create task","Desktop Chrome (chromium)","Thu Sep 17 20:37:55 UTC 2026","passed","Thu Sep 17 20:37:58 UTC 2026","Create task UAT","bdd/features/create-task/create-task.uat.feature.spec.js","",""
