@@ -20,6 +20,8 @@
 | Asserts on produced state/output (Test Context Pattern, ADR-002) | Bare `verify(x).calledWith(...)` with nothing captured/asserted |
 | Mocks only true external/infra boundaries | Mocks a POJO, DTO, or value object |
 | Tests through the public API of the unit | Re-derives the expected value with the same algorithm as the code under test |
+| Stub writes echo the SUT's argument (`thenAnswer`) and the expected object is built from the request + clock | `thenReturn(canned)` then `assertThat(result, is(canned))` — the mock supplies the answer |
+| Captor / `verify` only at output edges (persisted entity, published event, outbound request) | `verify(repo).findByTitle(...)` as its own test when the outcome already proves the read |
 
 ## Rationale
 

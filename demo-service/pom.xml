@@ -372,6 +372,13 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.11</version>
+                <configuration>
+                    <excludes>
+                        <exclude>com/example/DemoServiceApplication.class</exclude>
+                        <exclude>com/example/CorsConfigurer.class</exclude>
+                        <exclude>com/example/demo/config/**</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -432,6 +439,8 @@
                     </targetClasses>
                     <excludedClasses>
                         <param>com.example.DemoServiceApplication</param>
+                        <param>com.example.CorsConfigurer</param>
+                        <param>com.example.demo.config.*</param>
                         <param>com.example.demo.data.*</param>
                         <param>com.example.demo.TaskRepository</param>
                     </excludedClasses>

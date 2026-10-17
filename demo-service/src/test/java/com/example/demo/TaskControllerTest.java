@@ -5,27 +5,37 @@ import com.example.demo.data.Task;
 import com.example.demo.data.TaskPriority;
 import com.example.demo.data.TaskRequest;
 import com.example.demo.data.TaskStatus;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TaskControllerTest {
+    private static final Instant NOW = Instant.parse("2024-06-15T12:30:45.123Z");
+    private static final Instant EARLIER = Instant.parse("2024-01-01T10:00:00Z");
+
     @Mock
     private TaskRepository repository;
 
@@ -35,50 +45,46 @@ class TaskControllerTest {
     @Mock
     private TaskExternalClient taskExternalClient;
 
-    @InjectMocks
     private TaskController taskController;
 
     TaskTestContext context;
 
-    @BeforeEach()
+    @BeforeEach
     void beforeEach() {
+        taskController = new TaskController(repository, taskEventProducer, taskExternalClient, Clock.fixed(NOW, ZoneOffset.UTC));
+
         context = TaskTestContext.builder()
                 .title("Test Task")
                 .description("Test Description")
                 .status(TaskStatus.TODO)
                 .priority(TaskPriority.HIGH)
+                .createdDate(NOW)
+                .updatedDate(NOW)
                 .build();
     }
 
     @Nested
     class CreateTaskTest {
         @Test
-        void shouldCreateTaskWhenValidRequestProvided() {
+        void shouldPersistTaskAndPublishCreatedEventWhenTitleIsUnique() {
             // given
-            Task savedTask = context.createTask();
-            when(repository.insert(any(Task.class))).thenReturn(savedTask);
+            when(repository.insert(any(Task.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            ArgumentCaptor<Task> taskCaptor = ArgumentCaptor.forClass(Task.class);
 
             // when
             Task result = taskController.createTask(context.createTaskRequest());
 
             // then
-            assertThat(result, is(savedTask));
+            verify(repository).insert(taskCaptor.capture());
+            context.setId(taskCaptor.getValue().getId());
+
+            assertThat(taskCaptor.getValue(), is(context.createTask()));
+            assertThat(result, is(context.createTask()));
+            verify(taskEventProducer).produceTaskCreated(context.createTask());
         }
 
         @Test
-        void shouldFindByTitleWithTitleProvided() {
-            // given
-            when(repository.findByTitle(context.getTitle())).thenReturn(null);
-
-            // when
-            taskController.createTask(context.createTaskRequest());
-
-            // then
-            verify(repository).findByTitle(context.getTitle());
-        }
-
-        @Test
-        void shouldThrowDuplicateTitleExceptionWhenTitleAlreadyExists() {
+        void shouldRejectCreationWhenTitleAlreadyExists() {
             // given
             when(repository.findByTitle(context.getTitle())).thenReturn(context.createTask());
 
@@ -89,60 +95,18 @@ class TaskControllerTest {
             );
 
             // then
-            assertEquals("Task with title '" + context.getTitle() + "' already exists", exception.getMessage());
+            assertThat(exception.getMessage(), is("Task with title '" + context.getTitle() + "' already exists"));
             verify(repository, never()).insert(any(Task.class));
             verify(taskEventProducer, never()).produceTaskCreated(any());
         }
 
         @Test
-        void shouldCallInsertWithTask() {
+        void shouldNotPublishEventWhenPersistenceFails() {
             // given
-            ArgumentCaptor<Task> taskCaptor = ArgumentCaptor.forClass(Task.class);
+            doThrow(new RuntimeException("DB error")).when(repository).insert(any(Task.class));
 
             // when
-            taskController.createTask(context.createTaskRequest());
-
-            // then
-            verify(repository).insert(taskCaptor.capture());
-
-            Task capturedTask = taskCaptor.getValue();
-            
-            // Update context with dynamic fields to validate complete object
-            context.setId(capturedTask.getId());
-            context.setUpdatedDate(capturedTask.getUpdatedDate());
-            context.setCreatedDate(capturedTask.getCreatedDate());
-
-            assertThat(capturedTask, is(context.createTask()));
-            assertThat(capturedTask.getCreatedDate(), is(capturedTask.getUpdatedDate()));
-        }
-
-        @Test
-        void shouldCallProducerWithSavedTask() {
-            // given
-            Task savedTask = context.createTask();
-            when(repository.insert(any(Task.class))).thenReturn(savedTask);
-
-            // when
-            taskController.createTask(context.createTaskRequest());
-
-            // then
-            verify(taskEventProducer, times(1)).produceTaskCreated(savedTask);
-            verify(taskEventProducer, never()).produceTaskUpdated(any());
-            verify(taskEventProducer, never()).produceTaskDeleted(any());
-        }
-
-        @Test
-        void shouldNotProduceEventWhenRepositoryThrows() {
-            // given
-            doThrow(new RuntimeException("DB error"))
-                    .when(repository)
-                    .insert(any(Task.class));
-
-            // when
-            assertThrows(
-                    RuntimeException.class,
-                    () -> taskController.createTask(context.createTaskRequest())
-            );
+            assertThrows(RuntimeException.class, () -> taskController.createTask(context.createTaskRequest()));
 
             // then
             verify(taskEventProducer, never()).produceTaskCreated(any());
@@ -151,197 +115,121 @@ class TaskControllerTest {
 
     @Nested
     class UpdateTaskTest {
-        @Test
-        void shouldUpdateTaskWhenValidRequestProvided() {
-            // given
-            Instant createdDate = Instant.parse("2024-01-01T10:00:00Z");
+        TaskTestContext existingContext;
 
-            TaskTestContext existingContext = TaskTestContext.builder()
+        @BeforeEach
+        void beforeEach() {
+            existingContext = TaskTestContext.builder()
+                    .id(context.getId())
                     .title("Old Title")
                     .description("Old Description")
                     .status(TaskStatus.TODO)
                     .priority(TaskPriority.LOW)
-                    .createdDate(createdDate)
-                    .updatedDate(createdDate)
+                    .createdDate(EARLIER)
+                    .updatedDate(EARLIER)
                     .build();
-
-            TaskTestContext updateContext = TaskTestContext.builder()
-                    .id(existingContext.getId())
-                    .title("Updated Title")
-                    .description("Updated Description")
-                    .status(TaskStatus.IN_PROGRESS)
-                    .priority(TaskPriority.HIGH)
-                    .build();
-
-            Task updatedTask = updateContext.createTask();
-
-            when(repository.findById(existingContext.getId())).thenReturn(Optional.of(existingContext.createTask()));
-            when(repository.save(any(Task.class))).thenReturn(updatedTask);
-
-            // when
-            Task result = taskController.updateTask(existingContext.getId(), updateContext.createTaskRequest());
-
-            // then
-            assertThat(result, is(updatedTask));
         }
 
         @Test
-        void shouldThrowTaskNotFoundExceptionWhenTaskDoesNotExist() {
+        void shouldPersistChangesPreservingCreatedDateAndPublishUpdatedEventWhenTaskExists() {
             // given
-            when(repository.findById(context.getId())).thenReturn(Optional.empty());
-
-            // then
-            TaskNotFoundException exception = assertThrows(
-                    TaskNotFoundException.class,
-                    () -> taskController.updateTask(context.getId(), context.createTaskRequest())
-            );
-
-            assertEquals("Task not found with id: " + context.getId(), exception.getMessage());
-            verify(repository, never()).findByTitle(any());
-            verify(repository, never()).save(any(Task.class));
-            verify(taskEventProducer, never()).produceTaskUpdated(any(Task.class));
-        }
-
-        @Test
-        void shouldThrowDuplicateTitleExceptionWhenUpdatingToExistingTitle() {
-            // given
-            TaskTestContext updateContext = TaskTestContext.builder()
-                    .title("Updated Title")
-                    .build();
-
-            when(repository.findById(context.getId())).thenReturn(Optional.of(context.createTask()));
-            when(repository.findByTitle(updateContext.getTitle())).thenReturn(context.createTask());
-
-            // then
-            DuplicateTitleException exception = assertThrows(
-                    DuplicateTitleException.class,
-                    () -> taskController.updateTask(context.getId(), updateContext.createTaskRequest())
-            );
-
-            assertEquals("Task with title '" + updateContext.getTitle() + "' already exists", exception.getMessage());
-            verify(repository, never()).save(any(Task.class));
-            verify(taskEventProducer, never()).produceTaskUpdated(any(Task.class));
-        }
-
-        @Test
-        void shouldCallSaveWithTask() {
-            // given
-            Instant createdDate = Instant.parse("2024-01-01T10:00:00Z");
-
-            TaskTestContext existingContext = TaskTestContext.builder()
-                    .title("Old Title")
-                    .description("Old Description")
-                    .status(TaskStatus.TODO)
-                    .priority(TaskPriority.LOW)
-                    .createdDate(createdDate)
-                    .updatedDate(createdDate)
-                    .build();
-
-            TaskTestContext updateContext = TaskTestContext.builder()
-                    .id(existingContext.getId())
-                    .title("Updated Title")
-                    .description("Updated Description")
-                    .status(TaskStatus.IN_PROGRESS)
-                    .priority(TaskPriority.HIGH)
-                    .createdDate(existingContext.getCreatedDate())
-                    .build();
-
-            when(repository.findById(existingContext.getId())).thenReturn(Optional.of(existingContext.createTask()));
-            when(repository.save(any(Task.class))).thenReturn(updateContext.createTask());
-
+            context.setCreatedDate(EARLIER);
+            when(repository.findById(context.getId())).thenReturn(Optional.of(existingContext.createTask()));
+            when(repository.save(any(Task.class))).thenAnswer(invocation -> invocation.getArgument(0));
             ArgumentCaptor<Task> taskCaptor = ArgumentCaptor.forClass(Task.class);
-
-            // when
-            taskController.updateTask(existingContext.getId(), updateContext.createTaskRequest());
-
-            // then
-            verify(repository).save(taskCaptor.capture());
-
-            Task capturedTask = taskCaptor.getValue();
-            
-            // Update context with dynamic field to validate complete object
-            updateContext.setUpdatedDate(capturedTask.getUpdatedDate());
-
-            assertThat(capturedTask, is(updateContext.createTask()));
-            assertTrue(capturedTask.getUpdatedDate().isAfter(capturedTask.getCreatedDate()));
-        }
-
-        @Test
-        void shouldCallProducerWithSavedTask() {
-            // given
-            Task updatedTask = context.createTask();
-
-            when(repository.findById(context.getId())).thenReturn(Optional.of(context.createTask()));
-            when(repository.save(any(Task.class))).thenReturn(updatedTask);
-
-            // when
-            taskController.updateTask(context.getId(), context.createTaskRequest());
-
-            // then
-            verify(taskEventProducer, times(1)).produceTaskUpdated(updatedTask);
-            verify(taskEventProducer, never()).produceTaskCreated(any());
-            verify(taskEventProducer, never()).produceTaskDeleted(any());
-        }
-
-        @Test
-        void shouldAllowUpdateWhenTitleRemainsTheSame() {
-            // given
-            Task existingTask = context.createTask();
-            Task updatedTask = context.createTask();
-
-            when(repository.findById(context.getId())).thenReturn(Optional.of(existingTask));
-            when(repository.save(any(Task.class))).thenReturn(updatedTask);
 
             // when
             Task result = taskController.updateTask(context.getId(), context.createTaskRequest());
 
             // then
-            verify(repository, never()).findByTitle(any());
-            verify(repository).save(any(Task.class));
-            assertThat(result, is(updatedTask));
+            verify(repository).save(taskCaptor.capture());
+            assertThat(taskCaptor.getValue(), is(context.createTask()));
+            assertThat(result, is(context.createTask()));
+            verify(taskEventProducer).produceTaskUpdated(context.createTask());
+        }
+
+        @Test
+        void shouldRejectUpdateWhenTaskDoesNotExist() {
+            // given
+            when(repository.findById(context.getId())).thenReturn(Optional.empty());
+
+            // when
+            TaskNotFoundException exception = assertThrows(
+                    TaskNotFoundException.class,
+                    () -> taskController.updateTask(context.getId(), context.createTaskRequest())
+            );
+
+            // then
+            assertThat(exception.getMessage(), is("Task not found with id: " + context.getId()));
+            verify(repository, never()).save(any(Task.class));
+            verify(taskEventProducer, never()).produceTaskUpdated(any(Task.class));
+        }
+
+        @Test
+        void shouldRejectUpdateWhenNewTitleBelongsToAnotherTask() {
+            // given
+            TaskTestContext otherTaskContext = TaskTestContext.builder().title(context.getTitle()).build();
+            when(repository.findById(context.getId())).thenReturn(Optional.of(existingContext.createTask()));
+            when(repository.findByTitle(context.getTitle())).thenReturn(otherTaskContext.createTask());
+
+            // when
+            DuplicateTitleException exception = assertThrows(
+                    DuplicateTitleException.class,
+                    () -> taskController.updateTask(context.getId(), context.createTaskRequest())
+            );
+
+            // then
+            assertThat(exception.getMessage(), is("Task with title '" + context.getTitle() + "' already exists"));
+            verify(repository, never()).save(any(Task.class));
+            verify(taskEventProducer, never()).produceTaskUpdated(any(Task.class));
+        }
+
+        @Test
+        void shouldAllowUpdateWhenTitleRemainsTheSame() {
+            // given
+            context.setCreatedDate(EARLIER);
+            existingContext.setTitle(context.getTitle());
+            when(repository.findById(context.getId())).thenReturn(Optional.of(existingContext.createTask()));
+            lenient().when(repository.findByTitle(context.getTitle())).thenReturn(existingContext.createTask());
+            when(repository.save(any(Task.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // when
+            Task result = taskController.updateTask(context.getId(), context.createTaskRequest());
+
+            // then
+            assertThat(result, is(context.createTask()));
         }
     }
 
     @Nested
     class DeleteTaskTest {
         @Test
-        void shouldDeleteTaskWhenTaskExists() {
+        void shouldRemoveTaskAndPublishDeletedEventWhenTaskExists() {
             // given
-            TaskTestContext deleteContext = TaskTestContext.builder()
-                    .title("Task to Delete")
-                    .description("Description")
-                    .status(TaskStatus.TODO)
-                    .priority(TaskPriority.LOW)
-                    .build();
-
-            Task existingTask = deleteContext.createTask();
-
-            when(repository.findById(deleteContext.getId())).thenReturn(Optional.of(existingTask));
+            Task existingTask = context.createTask();
+            when(repository.findById(context.getId())).thenReturn(Optional.of(existingTask));
 
             // when
-            taskController.deleteTask(deleteContext.getId());
+            taskController.deleteTask(context.getId());
 
             // then
-            verify(repository).findById(deleteContext.getId());
             verify(repository).delete(existingTask);
-            verify(taskEventProducer, times(1)).produceTaskDeleted(existingTask);
-            verify(taskEventProducer, never()).produceTaskCreated(any());
-            verify(taskEventProducer, never()).produceTaskUpdated(any());
+            verify(taskEventProducer).produceTaskDeleted(existingTask);
         }
 
         @Test
-        void shouldThrowTaskNotFoundExceptionWhenDeletingNonExistentTask() {
+        void shouldRejectDeletionWhenTaskDoesNotExist() {
             // given
             when(repository.findById(context.getId())).thenReturn(Optional.empty());
 
-            // when & then
+            // when
             TaskNotFoundException exception = assertThrows(
                     TaskNotFoundException.class,
                     () -> taskController.deleteTask(context.getId())
             );
 
-            assertEquals("Task not found with id: " + context.getId(), exception.getMessage());
-            verify(repository).findById(context.getId());
+            // then
+            assertThat(exception.getMessage(), is("Task not found with id: " + context.getId()));
             verify(repository, never()).delete(any(Task.class));
             verify(taskEventProducer, never()).produceTaskDeleted(any(Task.class));
         }
@@ -350,129 +238,41 @@ class TaskControllerTest {
     @Nested
     class GetTaskTest {
         @Test
-        void shouldGetTaskWhenTaskExists() {
-            // given
-            TaskTestContext getContext = TaskTestContext.builder()
-                    .title("Test Task")
-                    .description("Description")
-                    .status(TaskStatus.TODO)
-                    .priority(TaskPriority.LOW)
-                    .build();
-
-            Task existingTask = getContext.createTask();
-
-            when(repository.findById(getContext.getId())).thenReturn(Optional.of(existingTask));
-
-            // when
-            Task result = taskController.getTask(getContext.getId());
-
-            // then
-            verify(repository).findById(getContext.getId());
-            assertEquals(existingTask, result);
-            verify(taskEventProducer, never()).produceTaskCreated(any());
-            verify(taskEventProducer, never()).produceTaskUpdated(any());
-            verify(taskEventProducer, never()).produceTaskDeleted(any());
-        }
-
-        @Test
-        void shouldThrowTaskNotFoundExceptionWhenGettingNonExistentTask() {
+        void shouldRejectLookupWhenTaskDoesNotExist() {
             // given
             when(repository.findById(context.getId())).thenReturn(Optional.empty());
 
-            // when & then
+            // when
             TaskNotFoundException exception = assertThrows(
                     TaskNotFoundException.class,
                     () -> taskController.getTask(context.getId())
             );
 
-            assertEquals("Task not found with id: " + context.getId(), exception.getMessage());
-            verify(repository).findById(context.getId());
-        }
-
-        @Test
-        void shouldGetAllTasks() {
-            // given
-            TaskTestContext context1 = TaskTestContext.builder()
-                    .title("Task 1")
-                    .description("Description 1")
-                    .status(TaskStatus.TODO)
-                    .priority(TaskPriority.LOW)
-                    .build();
-
-            TaskTestContext context2 = TaskTestContext.builder()
-                    .title("Task 2")
-                    .description("Description 2")
-                    .status(TaskStatus.IN_PROGRESS)
-                    .priority(TaskPriority.HIGH)
-                    .build();
-
-            Task task1 = context1.createTask();
-            Task task2 = context2.createTask();
-
-            java.util.List<Task> expectedTasks = java.util.List.of(task1, task2);
-            when(repository.findAll()).thenReturn(expectedTasks);
-
-            // when
-            java.util.List<Task> results = taskController.getTasks();
-
             // then
-            verify(repository).findAll();
-            assertEquals(expectedTasks, results);
-            verify(taskEventProducer, never()).produceTaskCreated(any());
-            verify(taskEventProducer, never()).produceTaskUpdated(any());
-            verify(taskEventProducer, never()).produceTaskDeleted(any());
-        }
-
-        @Test
-        void shouldReturnEmptyListWhenNoTasksExist() {
-            // given
-            when(repository.findAll()).thenReturn(java.util.Collections.emptyList());
-
-            // when
-            java.util.List<Task> results = taskController.getTasks();
-
-            // then
-            verify(repository).findAll();
-            assertTrue(results.isEmpty());
+            assertThat(exception.getMessage(), is("Task not found with id: " + context.getId()));
         }
     }
 
     @Nested
     class ValidateTaskTest {
         @Test
-        void shouldReturnTrueWhenTaskIsValid() {
+        void shouldForwardTaskDataToExternalServiceAndReturnItsVerdictWhenTaskExists() {
             // given
-            TaskTestContext validContext = TaskTestContext.builder()
-                    .title("Valid Task")
-                    .description("Description")
-                    .status(TaskStatus.TODO)
-                    .priority(TaskPriority.HIGH)
-                    .build();
-
-            Task task = validContext.createTask();
-
-            when(repository.findById(validContext.getId())).thenReturn(Optional.of(task));
-            when(taskExternalClient.validateTask(any(TaskRequest.class)))
-                    .thenReturn(reactor.core.publisher.Mono.just(true));
-
+            when(repository.findById(context.getId())).thenReturn(Optional.of(context.createTask()));
+            when(taskExternalClient.validateTask(any(TaskRequest.class))).thenReturn(Mono.just(true));
             ArgumentCaptor<TaskRequest> requestCaptor = ArgumentCaptor.forClass(TaskRequest.class);
 
             // when
-            Boolean result = taskController.isValid(validContext.getId());
+            Boolean result = taskController.isValid(context.getId());
 
             // then
             assertTrue(result);
-            verify(repository).findById(validContext.getId());
             verify(taskExternalClient).validateTask(requestCaptor.capture());
-
-            TaskRequest capturedRequest = requestCaptor.getValue();
-            TaskRequest expectedRequest = validContext.createTaskRequest();
-
-            assertEquals(expectedRequest, capturedRequest);
+            assertThat(requestCaptor.getValue(), is(context.createTaskRequest()));
         }
 
         @Test
-        void shouldReturnFalseWhenTaskDoesNotExist() {
+        void shouldReturnFalseWithoutCallingExternalServiceWhenTaskDoesNotExist() {
             // given
             when(repository.findById(context.getId())).thenReturn(Optional.empty());
 
@@ -481,34 +281,20 @@ class TaskControllerTest {
 
             // then
             assertFalse(result);
-            verify(repository).findById(context.getId());
             verify(taskExternalClient, never()).validateTask(any(TaskRequest.class));
         }
 
         @Test
-        void shouldReturnFalseWhenExternalValidationFails() {
+        void shouldReturnFalseWhenExternalServiceRejectsTask() {
             // given
-            TaskTestContext invalidContext = TaskTestContext.builder()
-                    .title("Invalid Task")
-                    .description("Description")
-                    .status(TaskStatus.TODO)
-                    .priority(TaskPriority.HIGH)
-                    .build();
-
-            Task task = invalidContext.createTask();
-
-            when(repository.findById(invalidContext.getId())).thenReturn(Optional.of(task));
-            when(taskExternalClient.validateTask(any(TaskRequest.class)))
-                    .thenReturn(reactor.core.publisher.Mono.just(false));
+            when(repository.findById(context.getId())).thenReturn(Optional.of(context.createTask()));
+            when(taskExternalClient.validateTask(any(TaskRequest.class))).thenReturn(Mono.just(false));
 
             // when
-            Boolean result = taskController.isValid(invalidContext.getId());
+            Boolean result = taskController.isValid(context.getId());
 
             // then
             assertFalse(result);
-            verify(repository).findById(invalidContext.getId());
-            verify(taskExternalClient).validateTask(any(TaskRequest.class));
         }
     }
 }
-

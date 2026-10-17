@@ -15,7 +15,6 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -86,33 +85,10 @@ class DemoExceptionHandlerTest {
 
         // then
         assertThat(response.getStatusCode(), is(BAD_REQUEST));
-        assertThat(response.getBody().size(), is(2));
-        assertEquals("must not be blank", response.getBody().get("title"));
-        assertEquals("must not be null", response.getBody().get("priority"));
-    }
-
-    @Test
-    void shouldReturnAllValidationErrorsInMap() {
-        // given
-        MethodArgumentNotValidException exception = mock(MethodArgumentNotValidException.class);
-        BindingResult bindingResult = mock(BindingResult.class);
-
-        FieldError error1 = new FieldError("task", "title", "size must be between 1 and 100");
-        FieldError error2 = new FieldError("task", "status", "must not be null");
-        FieldError error3 = new FieldError("task", "priority", "must not be null");
-
-        when(exception.getBindingResult()).thenReturn(bindingResult);
-        when(bindingResult.getAllErrors()).thenReturn(List.of(error1, error2, error3));
-
-        // when
-        ResponseEntity<Map<String, String>> response = exceptionHandler.handleValidationExceptions(exception);
-
-        // then
-        Map<String, String> errors = response.getBody();
-        assertThat(errors.size(), is(3));
-        assertEquals("size must be between 1 and 100", errors.get("title"));
-        assertEquals("must not be null", errors.get("status"));
-        assertEquals("must not be null", errors.get("priority"));
+        assertThat(response.getBody(), is(Map.of(
+                "title", "must not be blank",
+                "priority", "must not be null"
+        )));
     }
 }
 
