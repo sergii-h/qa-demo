@@ -231,6 +231,29 @@ function swiftVersions(manifestPath, packageName) {
   return { found: true, versions };
 }
 
+function pipVersions(manifestPath, packageName) {
+  const raw = read(manifestPath);
+  if (raw == null) {
+    return { found: false, versions: [] };
+  }
+
+  if (!manifestPath.endsWith('uv.lock')) {
+    return { found: false, versions: [] };
+  }
+
+  const versions = [];
+  for (const block of raw.split(/^\[\[package]]\s*$/m)) {
+    const name = block.match(/^name\s*=\s*"([^"]+)"/m);
+    const version = block.match(/^version\s*=\s*"([^"]+)"/m);
+    if (!name || !version || name[1] !== packageName) {
+      continue;
+    }
+    versions.push(version[1]);
+  }
+
+  return { found: true, versions };
+}
+
 function versionsFor(alert) {
   const ecosystem = (alert.dependency?.package?.ecosystem || '').toLowerCase();
   const packageName = alert.dependency?.package?.name;
@@ -242,6 +265,10 @@ function versionsFor(alert) {
   if (ecosystem === 'npm') {
     const result = npmVersions(manifestPath, packageName);
     return { ...result, complete: result.found };
+  }
+  if (ecosystem === 'pip') {
+    const pip = pipVersions(manifestPath, packageName);
+    return { ...pip, complete: pip.found };
   }
   if (ecosystem === 'maven') {
     if (manifestPath.endsWith('.lockfile') || manifestPath.includes('gradle')) {

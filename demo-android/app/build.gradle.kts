@@ -188,7 +188,7 @@ configurations.configureEach {
                 "org.apache.httpcomponents.core5:httpcore5:5.4.3",
                 "org.apache.httpcomponents.core5:httpcore5-h2:5.4.3",
                 "org.apache.tika:tika-core:3.2.2",
-                "org.bouncycastle:bcprov-jdk18on:1.84",
+                "org.bouncycastle:bcprov-jdk18on:1.86",
             )
             eachDependency {
                 if (requested.group == "io.netty") {
