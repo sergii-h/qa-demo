@@ -46,9 +46,42 @@ function versionLine(value) {
   return String(major ?? 0);
 }
 
-function isVulnerable(version, patched) {
-  if (!patched || patched === 'none') {
+function inVulnerableRange(version, range) {
+  const parts = String(range)
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (parts.length === 0) {
     return true;
+  }
+  for (const part of parts) {
+    const match = part.match(/^(<=|>=|<|>|=)\s*(.+)$/);
+    if (!match) {
+      return true;
+    }
+    const cmp = cmpVersion(version, match[2]);
+    if (match[1] === '<=' && cmp > 0) {
+      return false;
+    }
+    if (match[1] === '<' && cmp >= 0) {
+      return false;
+    }
+    if (match[1] === '>=' && cmp < 0) {
+      return false;
+    }
+    if (match[1] === '>' && cmp <= 0) {
+      return false;
+    }
+    if (match[1] === '=' && cmp !== 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function isVulnerable(version, patched, range) {
+  if (!patched || patched === 'none') {
+    return !range || inVulnerableRange(version, range);
   }
   if (versionLine(version) !== versionLine(patched)) {
     return false;
@@ -290,6 +323,7 @@ function versionsFor(alert) {
 
 function stillUnfixed(alert) {
   const patched = alert.security_vulnerability?.first_patched_version?.identifier || null;
+  const range = alert.security_vulnerability?.vulnerable_version_range || null;
   const { found, versions, complete } = versionsFor(alert);
 
   if (!found || complete === false) {
@@ -299,7 +333,7 @@ function stillUnfixed(alert) {
     return { unfixed: false, detail: 'package not present in this checkout' };
   }
 
-  const vulnerable = versions.filter((version) => isVulnerable(version, patched));
+  const vulnerable = versions.filter((version) => isVulnerable(version, patched, range));
   if (vulnerable.length === 0) {
     return { unfixed: false, detail: `resolved ${[...new Set(versions)].join(', ')}` };
   }
