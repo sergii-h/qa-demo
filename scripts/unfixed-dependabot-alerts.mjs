@@ -46,9 +46,42 @@ function versionLine(value) {
   return String(major ?? 0);
 }
 
-function isVulnerable(version, patched) {
-  if (!patched || patched === 'none') {
+function inVulnerableRange(version, range) {
+  const parts = String(range)
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (parts.length === 0) {
     return true;
+  }
+  for (const part of parts) {
+    const match = part.match(/^(<=|>=|<|>|=)\s*(.+)$/);
+    if (!match) {
+      return true;
+    }
+    const cmp = cmpVersion(version, match[2]);
+    if (match[1] === '<=' && cmp > 0) {
+      return false;
+    }
+    if (match[1] === '<' && cmp >= 0) {
+      return false;
+    }
+    if (match[1] === '>=' && cmp < 0) {
+      return false;
+    }
+    if (match[1] === '>' && cmp <= 0) {
+      return false;
+    }
+    if (match[1] === '=' && cmp !== 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function isVulnerable(version, patched, range) {
+  if (!patched || patched === 'none') {
+    return !range || inVulnerableRange(version, range);
   }
   if (versionLine(version) !== versionLine(patched)) {
     return false;
@@ -231,6 +264,29 @@ function swiftVersions(manifestPath, packageName) {
   return { found: true, versions };
 }
 
+function pipVersions(manifestPath, packageName) {
+  const raw = read(manifestPath);
+  if (raw == null) {
+    return { found: false, versions: [] };
+  }
+
+  if (!manifestPath.endsWith('uv.lock')) {
+    return { found: false, versions: [] };
+  }
+
+  const versions = [];
+  for (const block of raw.split(/^\[\[package]]\s*$/m)) {
+    const name = block.match(/^name\s*=\s*"([^"]+)"/m);
+    const version = block.match(/^version\s*=\s*"([^"]+)"/m);
+    if (!name || !version || name[1] !== packageName) {
+      continue;
+    }
+    versions.push(version[1]);
+  }
+
+  return { found: true, versions };
+}
+
 function versionsFor(alert) {
   const ecosystem = (alert.dependency?.package?.ecosystem || '').toLowerCase();
   const packageName = alert.dependency?.package?.name;
@@ -242,6 +298,10 @@ function versionsFor(alert) {
   if (ecosystem === 'npm') {
     const result = npmVersions(manifestPath, packageName);
     return { ...result, complete: result.found };
+  }
+  if (ecosystem === 'pip') {
+    const pip = pipVersions(manifestPath, packageName);
+    return { ...pip, complete: pip.found };
   }
   if (ecosystem === 'maven') {
     if (manifestPath.endsWith('.lockfile') || manifestPath.includes('gradle')) {
@@ -263,6 +323,7 @@ function versionsFor(alert) {
 
 function stillUnfixed(alert) {
   const patched = alert.security_vulnerability?.first_patched_version?.identifier || null;
+  const range = alert.security_vulnerability?.vulnerable_version_range || null;
   const { found, versions, complete } = versionsFor(alert);
 
   if (!found || complete === false) {
@@ -272,7 +333,7 @@ function stillUnfixed(alert) {
     return { unfixed: false, detail: 'package not present in this checkout' };
   }
 
-  const vulnerable = versions.filter((version) => isVulnerable(version, patched));
+  const vulnerable = versions.filter((version) => isVulnerable(version, patched, range));
   if (vulnerable.length === 0) {
     return { unfixed: false, detail: `resolved ${[...new Set(versions)].join(', ')}` };
   }

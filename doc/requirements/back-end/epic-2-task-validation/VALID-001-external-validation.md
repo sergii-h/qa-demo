@@ -10,6 +10,7 @@ As a user, I want to validate a task against external rules so that I can check 
 2. Should return `false` (200) when task ID does not exist — not 404
 3. Should call external `POST /external/validate/task` with title, description, status, priority (no id/timestamps)
 4. Should return `true` / `false` per external service response
+5. Should return HTTP 500 when the external service responds with a server error
 
 ## Test Plan
 
@@ -19,6 +20,7 @@ As a user, I want to validate a task against external rules so that I can check 
    - Should return not valid validation result when not valid description
    - Should return HTTP 200 with `false` when task ID does not exist
    - Should call external validation service with task data
+   - Should return HTTP 500 when external validation service responds with a server error
 3. **Pact**
    - Should verify provider contract for GET `/v1/tasks/isValid/{id}` (HTTP 200 with validation result)
 4. **E2E**
