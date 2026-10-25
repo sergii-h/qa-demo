@@ -1,2 +1,2 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","9691","shouldCreateTask","","Thu Oct 22 10:28:36 UTC 2026","passed","Thu Oct 22 10:28:46 UTC 2026","","com.example.demo.e2e.test.create.CreateTaskUatTest","com.example.demo.e2e.test.create.CreateTaskUatTest","shouldCreateTask"
+"","16968","shouldCreateTask","","Sun Oct 25 22:01:26 UTC 2026","broken","Sun Oct 25 22:01:43 UTC 2026","","com.example.demo.e2e.test.create.CreateTaskUatTest","com.example.demo.e2e.test.create.CreateTaskUatTest","shouldCreateTask"

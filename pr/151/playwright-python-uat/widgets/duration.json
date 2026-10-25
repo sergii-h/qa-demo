@@ -1,1 +1,1 @@
-[{"uid":"4bf5ef65fd2361ae","name":"test_should_create_task[chromium]","time":{"start":1792664636532,"stop":1792664639825,"duration":3293},"status":"passed","severity":"normal"}]
+[{"uid":"c6432e3bc473c106","name":"test_should_create_task[chromium]","time":{"start":1792965349340,"stop":1792965356050,"duration":6710},"status":"failed","severity":"normal"}]

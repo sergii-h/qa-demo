@@ -1,0 +1,69 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: tests/create-task/create-task.uat.spec.ts >> Create task >> should create task
+- Location: tests/create-task/create-task.uat.spec.ts:13:7
+
+# Error details
+
+```
+Error: expect(locator).not.toBeVisible() failed
+
+Locator:  getByTestId('create-button')
+Expected: not visible
+Received: visible
+Timeout:  10000ms
+
+Call log:
+  - Expect "not toBeVisible" with timeout 10000ms
+  - waiting for getByTestId('create-button')
+    5 × locator resolved to <button disabled aria-label="Create" data-pc-name="button" data-pc-section="root" data-pc-autofocus="true" data-testid="create-button" class="create-button p-button p-component p-disabled">…</button>
+      - unexpected value "visible"
+    19 × locator resolved to <button aria-label="Create" data-pc-name="button" data-pc-section="root" data-pc-autofocus="true" data-testid="create-button" class="create-button p-button p-component">…</button>
+       - unexpected value "visible"
+
+```
+
+```yaml
+- button "Create":  Create
+```
+
+# Test source
+
+```ts
+  1  | import { expect, Page } from '@playwright/test';
+  2  | import { step } from '@/decorators/step-decorator';
+  3  | import { CreateTaskForm } from '@/interactions/pages/CreateTaskForm';
+  4  | import { TaskData } from '@/data/TaskData';
+  5  | 
+  6  | export class CreateTaskStep {
+  7  |   private readonly form: CreateTaskForm;
+  8  | 
+  9  |   constructor(page: Page) {
+  10 |     this.form = new CreateTaskForm(page);
+  11 |   }
+  12 | 
+  13 |   @step('Fill create task form with {taskData}')
+  14 |   async fillForm(taskData: TaskData): Promise<void> {
+  15 |     await this.form.titleInput.fill(taskData.title);
+  16 |     await this.form.descriptionInput.fill(taskData.description);
+  17 |     await this.form.statusDropdown.click();
+  18 |     await this.form.statusOption(taskData.status).click();
+  19 |     await this.form.priorityDropdown.click();
+  20 |     await this.form.priorityOption(taskData.priority).click();
+  21 |   }
+  22 | 
+  23 |   @step('Submit create task form')
+  24 |   async submitForm(): Promise<void> {
+  25 |     await this.form.submitButton.click();
+> 26 |     await expect(this.form.submitButton).not.toBeVisible();
+     |                                              ^ Error: expect(locator).not.toBeVisible() failed
+  27 |   }
+  28 | }
+  29 | 
+```
