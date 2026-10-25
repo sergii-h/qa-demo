@@ -42,7 +42,7 @@ public class ApiIntegrationTestBase {
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", () -> mongo.getConnectionString() + "/task_db");
+        registry.add("spring.mongodb.uri", () -> mongo.getConnectionString() + "/task_db");
         registry.add("kafka.bootstrap-servers", kafka::getBootstrapServers);
     }
 
