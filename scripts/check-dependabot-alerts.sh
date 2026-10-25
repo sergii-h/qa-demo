@@ -60,7 +60,7 @@ unfixed=$(echo "$alerts" | (cd "$node_cwd" && node "$ROOT/scripts/unfixed-depend
 unfixed_count=$(echo "$unfixed" | jq 'length')
 
 if [ "$unfixed_count" -eq 0 ]; then
-  echo "All ${count} GitHub alert(s) are patched in this checkout. Dependabot will close them after merge and a rescan."
+  echo "No unfixed moderate+ alerts in this checkout. Allowed entries in scripts/dependabot-allowlist.json stay open on GitHub until upstream publishes a fix."
   exit 0
 fi
 

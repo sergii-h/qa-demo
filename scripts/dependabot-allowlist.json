@@ -1,0 +1,10 @@
+{
+  "noUpstreamFix": [
+    {
+      "ghsa": "GHSA-86w9-cpqp-85rv",
+      "package": "node-forge",
+      "ecosystem": "npm",
+      "reason": "No release above 1.4.0. Expo CLI depends on node-forge ^1.4.0."
+    }
+  ]
+}
