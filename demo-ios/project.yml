@@ -17,7 +17,8 @@ configFiles:
 packages:
   ViewInspector:
     url: https://github.com/nalexn/ViewInspector
-    from: 0.10.2
+    # 0.10.4+ uses GlassEffectTransition, which the iOS 18.5 SDK in Xcode 16.4 does not provide.
+    exactVersion: 0.10.3
   PactSwift:
     url: https://github.com/surpher/PactSwift
     branch: main
