@@ -177,7 +177,7 @@ final class EditTaskIntegrationTests {
         try harness.assertTextEquals("field-title-label", "Título *")
         try harness.assertTextEquals("save-button", "Guardar")
     }
-    @Test(arguments: GetTaskFailure.allCases)
+    @Test(.serialized, arguments: GetTaskFailure.allCases)
     func shouldAllowOpeningEditFormWhenGetTaskFails(failure: GetTaskFailure) async throws {
         // Given
         let context = TaskTestContext()
@@ -191,7 +191,7 @@ final class EditTaskIntegrationTests {
         // Then
         #expect(try harness.isButtonDisabled("save-button"))
     }
-    @Test(arguments: GetTasksFailure.allCases)
+    @Test(.serialized, arguments: GetTasksFailure.allCases)
     func shouldCloseEditFormWhenRefreshGetFailsAfterSuccessfulPut(failure: GetTasksFailure) async throws {
         // Given
         let context = TaskTestContext()
@@ -218,7 +218,7 @@ final class EditTaskIntegrationTests {
         // Then
         try await harness.assertIsDisplayed("add-task-button")
     }
-    @Test(arguments: UpdatePutFailure.allCases)
+    @Test(.serialized, arguments: UpdatePutFailure.allCases)
     func shouldDisplayGenericErrorOnEditFormWhenPutRequestFails(failure: UpdatePutFailure) async throws {
         // Given
         let context = TaskTestContext()

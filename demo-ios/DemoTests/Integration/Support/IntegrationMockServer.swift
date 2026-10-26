@@ -20,7 +20,7 @@ final class IntegrationMockServer {
 
     func start() {
         isStarted = true
-        StubURLProtocol.requestHandler = { [self] request in
+        StubURLProtocol.install(owner: ObjectIdentifier(self)) { [self] request in
             inFlightStubRequests.withLock { $0 += 1 }
             defer { inFlightStubRequests.withLock { $0 -= 1 } }
             return try dispatch(request)
@@ -60,7 +60,7 @@ final class IntegrationMockServer {
 
     func shutdown() {
         if isStarted {
-            StubURLProtocol.requestHandler = nil
+            StubURLProtocol.uninstall(owner: ObjectIdentifier(self))
         }
         drainInFlightStubRequests()
         session = nil
@@ -167,7 +167,7 @@ final class IntegrationMockServer {
             try self.assertMethod(request, "GET")
             try self.assertTaskPath(request)
             self.getTaskRequestCount += 1
-            return (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, Data())
+            throw URLError(.notConnectedToInternet)
         }
         return self
     }
