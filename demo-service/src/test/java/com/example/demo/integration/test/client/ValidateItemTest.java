@@ -1,6 +1,8 @@
 package com.example.demo.integration.test.client;
 
 import com.example.demo.context.TaskTestContext;
+import com.example.demo.data.TaskPriority;
+import com.example.demo.data.TaskStatus;
 import com.example.demo.integration.ApiIntegrationTestBase;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.restassured.response.Response;
@@ -95,6 +97,8 @@ public class ValidateItemTest extends ApiIntegrationTestBase {
         TaskTestContext context = TaskTestContext.builder()
                 .title("Test Title")
                 .description("Test Description")
+                .status(TaskStatus.IN_PROGRESS)
+                .priority(TaskPriority.MEDIUM)
                 .build();
 
         context.updateFromResponse(
@@ -108,8 +112,41 @@ public class ValidateItemTest extends ApiIntegrationTestBase {
 
         // then
         WireMock.verify(postRequestedFor(urlEqualTo("/external/validate/task"))
-                .withRequestBody(matchingJsonPath("$.title", equalTo("Test Title")))
-                .withRequestBody(matchingJsonPath("$.description", equalTo("Test Description")))
+                .withHeader("Content-Type", equalTo("application/json"))
+                .withRequestBody(equalToJson("""
+                        {
+                          "title": "Test Title",
+                          "description": "Test Description",
+                          "status": "IN_PROGRESS",
+                          "priority": "MEDIUM"
+                        }
+                        """))
         );
+    }
+
+    @Test
+    void shouldReturnHttp500WhenExternalValidationServiceFails() {
+        // given
+        WireMock.stubFor(post("/external/validate/task")
+                .atPriority(1)
+                .withRequestBody(matchingJsonPath("$.description", equalTo("server error")))
+                .willReturn(aResponse().withStatus(500))
+        );
+
+        TaskTestContext context = TaskTestContext.builder()
+                .description("server error")
+                .build();
+
+        context.updateFromResponse(
+                requestSpec
+                        .body(context.createTaskRequest())
+                        .post("/tasks")
+        );
+
+        // when
+        Response response = requestSpec.get("/tasks/isValid/" + context.getId());
+
+        // then
+        assertThat(response.statusCode(), is(500));
     }
 }

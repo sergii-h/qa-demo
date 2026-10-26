@@ -24,7 +24,7 @@ public class ListTasksEmptyTest extends ApiIntegrationTestBase {
 
     @DynamicPropertySource
     static void overrideDatabase(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.database", () -> "task_db_empty");
+        registry.add("spring.mongodb.database", () -> "task_db_empty");
     }
 
     @BeforeEach

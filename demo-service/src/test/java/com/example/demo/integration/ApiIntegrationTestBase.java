@@ -6,6 +6,7 @@ import io.restassured.config.ObjectMapperConfig;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
+import io.restassured.mapper.ObjectMapperType;
 import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class ApiIntegrationTestBase {
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", () -> mongo.getConnectionString() + "/task_db");
+        registry.add("spring.mongodb.uri", () -> mongo.getConnectionString() + "/task_db");
         registry.add("kafka.bootstrap-servers", kafka::getBootstrapServers);
     }
 
@@ -51,6 +52,7 @@ public class ApiIntegrationTestBase {
         requestSpec = given()
                 .config(RestAssured.config()
                         .objectMapperConfig(ObjectMapperConfig.objectMapperConfig()
+                                .defaultObjectMapperType(ObjectMapperType.JACKSON_2)
                                 .jackson2ObjectMapperFactory((type, charset) -> objectMapper)))
                 .baseUri("http://localhost:" + port + "/v1")
                 .contentType(ContentType.JSON)

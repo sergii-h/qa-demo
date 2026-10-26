@@ -142,6 +142,7 @@ final class IntegrationHarness {
     private var repository: TaskRepository?
     private var hostedRoot: IntegrationHostRoot!
     private var hostedLanguageTag: String!
+    private var hostingToken = 0
     private let navigation = IntegrationNavigationState()
 
     init() {
@@ -158,7 +159,7 @@ final class IntegrationHarness {
         repository = nil
         hostedRoot = nil
         hostedLanguageTag = nil
-        ViewHostingTestSupport.expel()
+        ViewHostingTestSupport.expel(token: hostingToken)
         AppLocaleTestSupport.resetToEnglish()
     }
 
@@ -218,7 +219,7 @@ final class IntegrationHarness {
             .environment(\.locale, Locale(identifier: hostedLanguageTag))
             .environment(\.appLocale, AppLocale.shared)
             .id(hostedLanguageTag)
-        ViewHostingTestSupport.host(hosted)
+        hostingToken = ViewHostingTestSupport.host(hosted)
     }
 
     private func appInspect() throws -> InspectableView<ViewType.ClassifiedView> {
@@ -319,6 +320,7 @@ final class IntegrationHarness {
                 && !mockServer.hasInFlightStubRequests()
                 && !listViewModel.uiState.isLoading
         }
+        rehost()
     }
 
     func waitForElement(_ testTag: String) async throws {
@@ -449,20 +451,19 @@ final class IntegrationHarness {
             try await tapDeleteButton(taskId: taskId)
             return
         }
+        if testTag.hasPrefix("info-button-") {
+            let taskId = String(testTag.dropFirst("info-button-".count))
+            try await waitUntilCondition(message: "Info button for task '\(taskId)' was not displayed") {
+                listTasks().contains(where: { $0.id == taskId })
+            }
+            navigation.showDetail(repository: repository!, taskId: taskId)
+            rehost()
+            return
+        }
         let element = try findElement(testTag)
         if testTag == "close-button" {
             try element.button().tap()
             navigation.closeTopScreen()
-            rehost()
-            return
-        }
-        if testTag.hasPrefix("info-button-") {
-            let taskId = String(testTag.dropFirst("info-button-".count))
-            if case .detail(let currentId) = navigation.path.last, currentId == taskId {
-                rehost()
-                return
-            }
-            navigation.showDetail(repository: repository!, taskId: taskId)
             rehost()
             return
         }
@@ -633,6 +634,7 @@ final class IntegrationHarness {
         try await waitUntilCondition(message: "Task detail load error was not displayed") {
             navigation.detailViewModel?.uiState.errorMessage != nil || elementExists("load-error")
         }
+        rehost()
         try await waitForElement("load-error")
     }
 

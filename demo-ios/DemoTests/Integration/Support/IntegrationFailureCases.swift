@@ -78,16 +78,8 @@ enum GetTaskFailure: CaseIterable {
     var expectedLoadError: String {
         switch self {
         case .http500: "Request failed (500)"
-        case .network: Self.emptyTaskDecodingErrorMessage()
-        }
-    }
-
-    private static func emptyTaskDecodingErrorMessage() -> String {
-        do {
-            try JSONDecoder().decode(Task.self, from: Data())
-            return ""
-        } catch {
-            return error.localizedDescription
+        case .network:
+            ErrorMessages.mapTaskError(URLError(.notConnectedToInternet), locale: AppLocale.shared)
         }
     }
 
