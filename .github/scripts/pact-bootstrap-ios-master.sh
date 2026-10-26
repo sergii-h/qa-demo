@@ -35,6 +35,18 @@ if [[ -z "${PACTS_TO_PUBLISH}" ]]; then
   (
     cd "${WORKTREE}/demo-ios"
     brew install xcodegen
+    # master still allows ViewInspector 0.10.2+, which resolves to 0.10.5.
+    # 0.10.4+ uses GlassEffectTransition, missing from the Xcode 16.4 iOS 18.5 SDK.
+    awk '
+      /ViewInspector:/ { in_view_inspector = 1 }
+      in_view_inspector && /^  [A-Za-z]/ && !/ViewInspector:/ { in_view_inspector = 0 }
+      in_view_inspector && /^    (from|exactVersion|minVersion|minorVersion|majorVersion):/ {
+        print "    exactVersion: 0.10.3"
+        next
+      }
+      { print }
+    ' project.yml > project.yml.pinned
+    mv project.yml.pinned project.yml
     xcodegen generate
     mkdir -p pacts
     export PACT_OUTPUT_DIR="${WORKTREE}/demo-ios/pacts"
