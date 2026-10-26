@@ -1,5 +1,7 @@
 FROM maven:3.9-eclipse-temurin-21
 COPY demo-service/src /src
 COPY demo-service/pom.xml /
-RUN mvn -Djdk.lang.Process.launchMechanism=vfork -Dtests.skip=true package
+# Retry once: a dropped Maven Central transfer is cached as a failed descriptor.
+RUN mvn -B -Djdk.lang.Process.launchMechanism=vfork -DskipUnitTests=true -Djacoco.skip=true package \
+    || mvn -B -U -Djdk.lang.Process.launchMechanism=vfork -DskipUnitTests=true -Djacoco.skip=true package
 CMD java -jar /target/demo-service-exec.jar --spring.mongodb.uri=$MONGODB_URL --kafka.bootstrap-servers=$KAFKA_SERVER --external.service.url=$EXTERNAL_SERVICE
