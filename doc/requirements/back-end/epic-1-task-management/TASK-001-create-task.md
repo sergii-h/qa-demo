@@ -17,12 +17,13 @@ As a user, I want to create a task with title, description, status, and priority
 
 ## Test Plan
 
-1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
+1. **UT**
+   - Should publish nothing when inserting the task fails
 2. **IT**
-   - Should successfully create task with valid data via POST `/v1/tasks` → HTTP 201
-   - Should return HTTP 409 when duplicate title exists
-   - Should return HTTP 400 for all validation errors (title blank, too long, missing required fields)
-   - **Note:** Kafka event publishing is tested in EVENT-001 integration tests
+   - Should return HTTP 201 with a generated `id` and `createdDate` equal to `updatedDate` when valid data is posted to POST `/v1/tasks`
+   - Should return HTTP 409 with `"Task with title '{title}' already exists"` when the title already exists, and leave the existing task unchanged
+   - Should return HTTP 400 with the field-error map for a blank title (`"Title is required"`), a title over 100 characters (`"Title must not exceed 100 characters"`), a description over 500 characters (`"Description must not exceed 500 characters"`), a missing status (`"Status is required"`), and a missing priority (`"Priority is required"`)
+   - **Note:** The created event is [EVENT-001](../epic-3-event-streaming/EVENT-001-task-created-event.md). Publishing nothing on 409 is that story's unit test. Several invalid fields in one response are [CONFIG-002](../epic-4-system-configuration/CONFIG-002-error-handling.md).
 3. **Pact**
    - Should verify provider contract for POST `/v1/tasks` (HTTP 201 with created task)
    - Should verify provider contract for POST `/v1/tasks` (HTTP 409 duplicate title)

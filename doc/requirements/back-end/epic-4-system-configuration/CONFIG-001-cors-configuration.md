@@ -11,12 +11,8 @@ As a frontend app, I want CORS enabled so I can call the API from another origin
 
 ## Test Plan
 
-1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
-2. **IT**
-   - Should return CORS headers for preflight requests
-   - Should allow all HTTP methods
-   - Should allow all origins
-   - Should allow credentials
+1. **UT** - N/A. CORS configuration has no branching logic, and the class is excluded from coverage rather than padded with a test
+2. **IT** - N/A. Same exclusion: the mapping is framework configuration, not a behaviour the suite re-proves
 3. **Pact** - N/A
 4. **E2E** - Implicitly tested (frontend can make requests)
 5. **Accessibility** - N/A

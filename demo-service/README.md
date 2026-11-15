@@ -27,8 +27,10 @@ mvn verify -Pintegration-tests -Dfailsafe.excludes='**/*PactProviderTest.java' -
 
 ### Mutation tests (PiTest ≥80%)
 
+PIT runs the unit tests and the integration tests. Pact provider tests are excluded. Docker is required. `-Pmutation-tests` skips the Failsafe goal so the suite is not also run once outside PIT.
+
 ```bash
-mvn verify -Pmutation-tests -DskipITs
+mvn verify -Pmutation-tests
 open target/pit-reports/index.html
 ```
 

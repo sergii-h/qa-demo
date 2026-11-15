@@ -1,6 +1,6 @@
 # QA Testing Guide
 
-A guide with actionable checklists to ensure complete test coverage following the **Testing Pyramid** approach. Use this when implementing new features or fixing bugs.
+A guide with actionable checklists to ensure complete test coverage following **risk-based test layering** ([ADR 007](adr/007-unit-vs-integration-test-boundary-checklist.md)): each scenario lives in exactly one layer, the public-boundary integration test by default, a unit test only for pure-logic permutations and failure injection. Use this when implementing new features or fixing bugs.
 
 ---
 
@@ -9,62 +9,70 @@ A guide with actionable checklists to ensure complete test coverage following th
 Before starting any testing work:
 - [ ] Requirements are clear and acceptance criteria are defined
 - [ ] Test data scenarios are identified (happy path, edge cases, error cases)
-- [ ] Testing approach follows Testing Pyramid (90% unit → 7-8% integration → <2% E2E)
+- [ ] Each scenario is assigned to exactly one layer by where its risk lives (see `.cursor/rules/common-testing.mdc` → "Choosing the Layer"); the resulting unit/integration/E2E ratio is an outcome, not a target
 - [ ] User story **Test Plan** levels understood — see [ADR 003](adr/003-test-plan-integration-in-user-stories.md#automation-in-this-repo) (automation vs manual, CI scope)
 
 ---
 
-## 🧩 Unit Testing (90%+ Coverage)
+## 🔗 Integration Testing (Primary Layer)
 
-### Frontend (Vitest)
-- [ ] **Component Logic** - Test all conditional rendering, state changes, event handlers
-- [ ] **Business Logic** - Test pure functions, utilities, data transformations
-- [ ] **Edge Cases** - Test empty states, loading states, error states
-- [ ] **Validation Rules** - Test form validation, input constraints (mandatory fields, max length, unique constraints)
-- [ ] **Props & Callbacks** - Use spies to verify prop passing and function calls
-- [ ] **Coverage Check** - Run `npm test -- --coverage` and verify >90% coverage
-
-**Detailed Rules:** [Private `.cursor/rules` submodule](../README.md#-documentation)
-
-### Backend (JUnit5)
-- [ ] **Service Logic** - Test all business logic methods in isolation
-- [ ] **Validation** - Test `@Valid` annotations, constraints, custom validators
-- [ ] **Repository Queries** - Test custom query methods (e.g., `findByTitle`)
-- [ ] **Exception Handling** - Test custom exceptions (e.g., `TaskNotFoundException`, `DuplicateTitleException`)
-- [ ] **Edge Cases** - Test null handling, empty collections, boundary values
-- [ ] **Mock External Dependencies** - Mock repositories, external clients, Kafka producers
-- [ ] **Mutation Testing** - Run `mvn verify -Pmutation-tests -DskipITs` and review surviving mutants in `target/pit-reports/index.html`
-
-**Standards:** Mock external dependencies; test business logic in isolation  
-**Detailed Rules:** [Private `.cursor/rules` submodule](../README.md#-documentation)
-
----
-
-## 🔗 Integration Testing (7-8% Coverage)
+Every AC's happy path and every error path reachable through the public interface is proven here first. Before writing a unit test, name the integration test that would already catch the regression.
 
 ### Frontend Integration (Vitest)
-- [ ] **Component Interactions** - Test parent-child component communication
-- [ ] **API Integration** - Test service layer calls with real/mocked fetch
+- [ ] **Component Behaviour** - Conditional rendering, state changes, event handlers, prop/callback wiring — on the real component tree
 - [ ] **Workflows** - Test complete user flows (create → list → edit → delete)
-- [ ] **Form Submissions** - Test entire form lifecycle including API calls
+- [ ] **Form Submissions** - Test entire form lifecycle including API calls and validation feedback
+- [ ] **Edge States** - Empty, loading, and error states as the user sees them
 - [ ] **Error Handling** - Test API error responses and user feedback
+- [ ] **Render Permutations** - Enum-driven labels/chips as `it.each` on the real component
 
-**Standards:** Keep project dependencies real; mock only 3rd party libs  
-**Detailed Rules:** [Private `.cursor/rules` submodule](../README.md#-documentation)
+**Standards:** Keep project dependencies real; mock only `fetch` and 3rd-party libs with browser-only behaviour  
+**Detailed Rules:** `.cursor/rules/frontend-testing.mdc`
 
 ### Backend Integration (@SpringBootTest)
-- [ ] **REST Endpoints** - Test all CRUD operations end-to-end
-- [ ] **Database Integration** - Test with real MongoDB (TestContainers or local)
-- [ ] **Request Validation** - Test `@Valid` with invalid payloads
+- [ ] **REST Endpoints** - Test all CRUD operations through HTTP
+- [ ] **Database Integration** - Test with real MongoDB (TestContainers)
+- [ ] **Request Validation** - Test `@Valid` with invalid payloads (400)
 - [ ] **HTTP Status Codes** - Test 200, 201, 400, 404, 409 responses
 - [ ] **Kafka Events** - Verify TaskEvent messages are produced correctly
+- [ ] **Third-party Failures** - WireMock-stubbed validator errors → API error mapping
 
-**Standards:** Use `@SpringBootTest` for full application context; test containers for DB/Kafka  
-**Detailed Rules:** [Private `.cursor/rules` submodule](../README.md#-documentation)
+**Standards:** `@SpringBootTest` with full context; Testcontainers for infrastructure you own; WireMock for third parties  
+**Detailed Rules:** `.cursor/rules/backend-testing.mdc`
 
 ---
 
-## 🧱 Component Testing (1-2% Coverage)
+## 🧩 Unit Testing (Pure Logic and Failure Injection)
+
+A unit test exists only for what the integration layer cannot reach cheaply. Reuse from several callers is not a reason for one.
+
+### Frontend (Vitest)
+- [ ] **Services** - Request/response mapping and error translation with `fetch` mocked
+- [ ] **Validation Rules** - Every branch of form validation and input constraints as pure functions
+- [ ] **Hooks** - State logic via `renderHook`
+- [ ] **Pure Utilities** - Data transformations, formatters
+- [ ] **No component unit tests** - component behaviour belongs to the integration layer above
+
+**Detailed Rules:** `.cursor/rules/frontend-testing.mdc`
+
+### Backend (JUnit5)
+- [ ] **Failure Injection** - Repository throws → no event published; external client errors → fallback/exception mapping
+- [ ] **Logic Permutations** - Branches the HTTP suite cannot provoke cheaply (a handler branch such as the duplicate-key race). A branch the API already reaches (unchanged title vs. a title owned by another task) stays in the integration test
+- [ ] **Adapters** - Outbound uri, content type, and JSON body are asserted in the API integration test (WireMock `equalToJson`). No Mockito test of the client fluent chain
+- [ ] **Repository Queries** - Custom `@Query` / specifications only; standard CRUD is covered by ITs
+- [ ] **No happy-path duplicates** - persist + publish, 404, 409 are proven by ITs; do not re-prove them with Mockito
+
+**Standards:** Mock only I/O edges (repository, Kafka producer, external client); state-based assertions via the Test Context Pattern  
+**Detailed Rules:** `.cursor/rules/backend-testing.mdc`
+
+### Mutation testing as the safety net
+- [ ] **Backend** - `mvn verify -Pmutation-tests` (CI gate; PIT runs unit and integration tests, Pact providers excluded); review `target/pit-reports/index.html`
+- [ ] **Frontend** - `npm run test:stryker` (on-demand)
+- [ ] **When moving or deleting tests** - run mutation testing with the integration suite included; a newly surviving mutant means the scenario was not covered at the other layer (see `common-testing.mdc` → "Moving or Deleting Tests")
+
+---
+
+## 🧱 Component Testing (Playwright CT)
 
 ### Playwright Component Tests
 - [ ] **Complex UI Interactions** - Drag & drop, animations, transitions
@@ -100,7 +108,7 @@ Before starting any testing work:
 
 ---
 
-## 🌐 E2E Testing (<2% Coverage)
+## 🌐 E2E Testing (Critical Paths Only)
 
 - [ ] **Critical Happy Path** - End-to-end user journey (create task → verify → edit → delete)
 - [ ] **Authentication Flow** - Login/logout (if applicable)
@@ -136,7 +144,7 @@ Code-based stubs only — `POST /external/validate/task` → `true` / `false` (i
 
 ### Kafka (`task-event` topic)
 
-- [ ] **Producer** - `CREATED` / `UPDATED` / `DELETED` events after API calls (unit + integration tests)
+- [ ] **Producer** - `CREATED` / `UPDATED` / `DELETED` events after API calls (integration tests). Unit tests cover send failure, once, and "publish nothing" on the error paths the controller handles
 - [ ] **Payload** - `taskId`, `title`, `status`, `priority`, `timestamp`, `eventType`
 - [ ] **Contract** - Pact message contract with `notification-service` (consumer not tested against live Kafka)
 
@@ -145,8 +153,8 @@ Code-based stubs only — `POST /external/validate/task` → `true` / `false` (i
 ## 📊 Test Coverage & Reporting
 
 ### Coverage Checks
-- [ ] **Unit coverage** - ≥90% line coverage (JaCoCo / Istanbul)
-- [ ] **Integration coverage** - Key workflows covered
+- [ ] **Line coverage** - ≥90% measured across unit + integration together (JaCoCo / Istanbul / Kover)
+- [ ] **Integration coverage** - Every AC happy path and error path reachable through the public interface
 - [ ] **E2E coverage** - Critical paths only
 - [ ] **Mutation testing** - PiTest ≥80% (BE, in CI); Stryker on-demand (FE, manual only)
 - [ ] **Reports** - Review coverage and mutation reports when changing test suites
@@ -189,7 +197,7 @@ All workflows trigger on **push or pull request to `master` only** — pushes to
 A ticket is **DONE** when:
 - [ ] Applicable checklist items above are implemented (unit → integration → contract/E2E as needed)
 - [ ] All tests pass locally
-- [ ] Unit coverage ≥90%; backend PiTest ≥80% when Java logic changed
+- [ ] Line coverage ≥90% (unit + integration); backend PiTest ≥80% when Java logic changed
 - [ ] CI green — required workflows on the PR to `master` (path-filtered where applicable)
 - [ ] Code reviewed and approved
 - [ ] README or this guide updated if test commands or CI changed
@@ -198,6 +206,6 @@ A ticket is **DONE** when:
 
 ## 📖 Additional Resources
 
-- **[Quick Checklist](check-list.md)** - Simple testing pyramid reminder for daily work
+- **[Quick Checklist](check-list.md)** - Simple test-layer reminder for daily work
 - **[ADR Index](adr/README.md)** - Architecture decisions (Vitest, test context pattern, integration strategy, and more)
 - **[Private testing rules](../README.md#-documentation)** - Detailed FE/BE unit & integration rules (private submodule; available on request)

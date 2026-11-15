@@ -16,14 +16,15 @@ As a user, I want to update a task's fields so that I can keep task information 
 
 ## Test Plan
 
-1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
+1. **UT**
+   - Should publish nothing when saving the task fails
 2. **IT**
-   - Should successfully update task with valid data via PUT `/v1/tasks/{id}` → HTTP 200
-   - Should return HTTP 404 when task ID does not exist
-   - Should return HTTP 409 when new title conflicts with existing task
-   - Should allow update when title remains the same
-   - Should return HTTP 400 for validation errors
-   - **Note:** Kafka event publishing is tested in EVENT-002 integration tests
+   - Should return HTTP 200 with the updated fields, `createdDate` preserved, and `updatedDate` set to the request time, when valid data is put to PUT `/v1/tasks/{id}`
+   - Should return HTTP 404 with `"Task not found with id: {taskId}"` when the id does not exist
+   - Should return HTTP 409 with `"Task with title '{title}' already exists"` when the new title belongs to another task, and leave both tasks unchanged
+   - Should return HTTP 200 with the updated task when the title is unchanged
+   - Should return HTTP 400 and leave the stored task unchanged when the body violates the [TASK-001](TASK-001-create-task.md) validation rules
+   - **Note:** The updated event is [EVENT-002](../epic-3-event-streaming/EVENT-002-task-updated-event.md). Publishing nothing on 404 or 409 is that story's unit test.
 3. **Pact**
    - Should verify provider contract for PUT `/v1/tasks/{id}` (HTTP 200 with updated task)
    - Should verify provider contract for PUT `/v1/tasks/{id}` (HTTP 409 duplicate title)
