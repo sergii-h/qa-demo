@@ -264,6 +264,30 @@ function swiftVersions(manifestPath, packageName) {
   return { found: true, versions };
 }
 
+function gemVersion(specVersion) {
+  const match = String(specVersion).match(/^(\d+(?:\.\d+)+(?:\.[0-9A-Za-z-]+)?)/);
+  return match ? match[1] : specVersion;
+}
+
+function gemVersions(lockfilePath, packageName) {
+  const raw = read(lockfilePath);
+  if (raw == null) {
+    return { found: false, versions: [] };
+  }
+
+  const versions = [];
+  const specRe = /^ {4}(\S+) \(([^)]+)\)\s*$/gm;
+  let match;
+  while ((match = specRe.exec(raw)) !== null) {
+    if (match[1] !== packageName) {
+      continue;
+    }
+    versions.push(gemVersion(match[2]));
+  }
+
+  return { found: true, versions };
+}
+
 function pipVersions(manifestPath, packageName) {
   const raw = read(manifestPath);
   if (raw == null) {
@@ -302,6 +326,10 @@ function versionsFor(alert) {
   if (ecosystem === 'pip') {
     const pip = pipVersions(manifestPath, packageName);
     return { ...pip, complete: pip.found };
+  }
+  if (ecosystem === 'rubygems') {
+    const gems = gemVersions(manifestPath, packageName);
+    return { ...gems, complete: gems.found };
   }
   if (ecosystem === 'maven') {
     if (manifestPath.endsWith('.lockfile') || manifestPath.includes('gradle')) {
