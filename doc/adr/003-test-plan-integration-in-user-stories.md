@@ -3,6 +3,8 @@
 ## Status
 **Accepted** — February 17, 2026
 
+**Updated** — November 15, 2026 (test plan changed following risk-based test layering strategy)
+
 ## Context
 
 User stories define acceptance criteria, but without an explicit test plan it is unclear which scenarios belong at which pyramid level. That leads to duplicated E2E coverage, gaps at lower levels, and test strategy drifting away from requirements.
@@ -30,7 +32,7 @@ Separate test documents also go stale quickly.
 
 **Every story lists all seven levels.** When a level does not apply, write **`N/A`**.
 
-**When writing the plan:** UT covers ACs at the lowest feasible level; IT covers public-facing integration (see ADR 004); E2E only for critical paths; unused levels get explicit `N/A`.
+**When writing the plan:** each AC is listed at exactly one level — IT (public-facing integration, see ADR 004) by default; UT only for pure-logic permutations and failure-injection paths the IT harness cannot provoke (see ADR 007); E2E only for critical paths; unused levels get explicit `N/A`.
 
 ### Automation in this repo
 
@@ -46,7 +48,7 @@ Separate test documents also go stale quickly.
 
 - **Shift-left** — plan forces most coverage into UT/IT before E2E
 - **Single source of truth** — test strategy lives with the story, not a separate doc
-- **No duplication** — validation at UT; API contracts at Pact; full UI journeys at E2E once
+- **No duplication** — behaviour at the public boundary; a unit test only for a path the API cannot provoke; API contracts at Pact; full UI journeys at E2E once
 - **Clear ownership** — developers and QA read the same checklist per story
 - **Explicit manual scope** — visual and assistive-tech checks are named
 
@@ -58,7 +60,7 @@ Separate test documents also go stale quickly.
 
 ```markdown
 ## Test Plan
-1. **UT** - All ACs covered at unit level (or IT where unit isolation is not feasible)
+1. **UT** - Should publish nothing when inserting the task fails
 2. **IT** - POST `/v1/tasks` → 201; 409 duplicate title; 400 validation errors
    - **Note:** Kafka publishing tested in EVENT-001 IT
 3. **Pact** - Provider: POST `/v1/tasks` → 201 and 409
