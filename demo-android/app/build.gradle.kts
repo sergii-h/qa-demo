@@ -196,6 +196,15 @@ configurations.configureEach {
                     useVersion("4.1.137.Final")
                     because("Fix GHSA netty vulnerabilities")
                 }
+                if (requested.group == "com.google.guava" && requested.name == "guava") {
+                    val patched = if (requested.version?.endsWith("-android") == true) {
+                        "33.8.0-android"
+                    } else {
+                        "33.8.0-jre"
+                    }
+                    useVersion(patched)
+                    because("Fix GHSA-xxph-c9ww-hj94")
+                }
             }
         }
     }
