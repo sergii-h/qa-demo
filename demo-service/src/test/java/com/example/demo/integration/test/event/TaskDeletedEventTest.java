@@ -13,11 +13,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.time.Instant;
 import java.util.Map;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class TaskDeletedEventTest extends ApiIntegrationTestBase {
@@ -60,6 +63,7 @@ public class TaskDeletedEventTest extends ApiIntegrationTestBase {
         context.updateFromResponse(createResponse);
 
         // when
+        Instant deletedAt = Instant.now();
         requestSpec.delete("/tasks/" + context.getId());
 
         // and
@@ -74,8 +78,12 @@ public class TaskDeletedEventTest extends ApiIntegrationTestBase {
                     .orElse(null);
 
             assertThat(event, notNullValue());
+            assertThat(event.getTimestamp(), greaterThanOrEqualTo(deletedAt.minusSeconds(1)));
+            assertThat(event.getTimestamp(), lessThan(deletedAt.plusSeconds(5)));
             context.setEventTimestamp(event.getTimestamp());
             assertThat(event, is(context.createExpectedEvent()));
+            int index = taskEventConsumer.getRecords().indexOf(event);
+            assertThat(taskEventConsumer.getKeys().get(index), is(context.getId()));
         });
     }
 }

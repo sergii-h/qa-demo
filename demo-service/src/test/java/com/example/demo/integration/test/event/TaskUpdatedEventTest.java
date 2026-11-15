@@ -13,11 +13,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.time.Instant;
 import java.util.Map;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class TaskUpdatedEventTest extends ApiIntegrationTestBase {
@@ -68,9 +71,11 @@ public class TaskUpdatedEventTest extends ApiIntegrationTestBase {
                 .build();
 
         // when
-        requestSpec
+        Response updateResponse = requestSpec
                 .body(updateContext.createTaskRequest())
                 .put("/tasks/" + createContext.getId());
+
+        updateContext.updateFromResponse(updateResponse);
 
         // and
         taskEventConsumer.setFilter(createContext.getId());
@@ -84,8 +89,13 @@ public class TaskUpdatedEventTest extends ApiIntegrationTestBase {
                     .orElse(null);
 
             assertThat(event, notNullValue());
+            Instant updatedDate = updateContext.getUpdatedDate();
+            assertThat(event.getTimestamp(), greaterThanOrEqualTo(updatedDate));
+            assertThat(event.getTimestamp(), lessThan(updatedDate.plusSeconds(5)));
             updateContext.setEventTimestamp(event.getTimestamp());
             assertThat(event, is(updateContext.createExpectedEvent()));
+            int index = taskEventConsumer.getRecords().indexOf(event);
+            assertThat(taskEventConsumer.getKeys().get(index), is(createContext.getId()));
         });
     }
 }

@@ -11,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -40,6 +41,7 @@ public class CreateTaskTest extends ApiIntegrationTestBase {
         assertAll(
                 () -> assertThat(postResponse.statusCode(), is(201)),
                 () -> assertThat(postResponse.getBody().as(Task.class), is(context.createTask())),
+                () -> assertThat(context.getCreatedDate(), is(context.getUpdatedDate())),
                 () -> {
                         Response getResponse = requestSpec.get("/tasks/" + context.getId());
                         assertThat(getResponse.getBody().as(Task.class), is(context.createTask()));
@@ -81,24 +83,57 @@ public class CreateTaskTest extends ApiIntegrationTestBase {
         );
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{1}")
     @MethodSource("validationErrorScenarios")
-    void shouldReturnHttp400ForValidationErrors(String requestBody) {
+    void shouldReturnHttp400ForValidationErrors(String field, String message, String requestBody) {
         // when
         Response response = requestSpec
                 .body(requestBody)
                 .post("/tasks");
 
         // then
-        assertThat(response.statusCode(), is(400));
+        assertAll(
+                () -> assertThat(response.statusCode(), is(400)),
+                () -> assertThat(response.jsonPath().<String, String>getMap("$"), is(Map.of(field, message)))
+        );
     }
 
     private static Stream<Arguments> validationErrorScenarios() {
         String longTitle = "a".repeat(101);
+        String longDescription = "a".repeat(501);
         return Stream.of(
-                Arguments.of("{\"title\": \"\", \"description\": \"desc\", \"status\": \"TODO\", \"priority\": \"HIGH\"}"),
-                Arguments.of("{\"title\": \"" + longTitle + "\", \"description\": \"desc\", \"status\": \"TODO\", \"priority\": \"HIGH\"}"),
-                Arguments.of("{\"title\": \"Test\", \"description\": \"desc\", \"priority\": \"HIGH\"}")
+                Arguments.of("title", "Title is required",
+                        "{\"title\": \"\", \"description\": \"desc\", \"status\": \"TODO\", \"priority\": \"HIGH\"}"),
+                Arguments.of("title", "Title must not exceed 100 characters",
+                        "{\"title\": \"" + longTitle + "\", \"description\": \"desc\", \"status\": \"TODO\", \"priority\": \"HIGH\"}"),
+                Arguments.of("description", "Description must not exceed 500 characters",
+                        "{\"title\": \"Test\", \"description\": \"" + longDescription + "\", \"status\": \"TODO\", \"priority\": \"HIGH\"}"),
+                Arguments.of("status", "Status is required",
+                        "{\"title\": \"Test\", \"description\": \"desc\", \"priority\": \"HIGH\"}"),
+                Arguments.of("priority", "Priority is required",
+                        "{\"title\": \"Test\", \"description\": \"desc\", \"status\": \"TODO\"}")
+        );
+    }
+
+    @Test
+    void shouldReturnHttp400WithEveryInvalidFieldWhenBodyViolatesAllRules() {
+        // given
+        String longDescription = "a".repeat(501);
+
+        // when
+        Response response = requestSpec
+                .body("{\"title\": \"\", \"description\": \"" + longDescription + "\"}")
+                .post("/tasks");
+
+        // then
+        assertAll(
+                () -> assertThat(response.statusCode(), is(400)),
+                () -> assertThat(response.jsonPath().<String, String>getMap("$"), is(Map.of(
+                        "title", "Title is required",
+                        "description", "Description must not exceed 500 characters",
+                        "status", "Status is required",
+                        "priority", "Priority is required"
+                )))
         );
     }
 }

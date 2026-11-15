@@ -17,10 +17,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@EnableWireMock(
-        @ConfigureWireMock(port = 8085)
-)
-@ResourceLock("wiremock-8085")
+@EnableWireMock(@ConfigureWireMock(
+        port = 0,
+        baseUrlProperties = "external.service.url"
+))
+@ResourceLock("wiremock")
 public class ValidateItemTest extends ApiIntegrationTestBase {
     @BeforeEach
     void setupWiremock() {
@@ -73,13 +74,17 @@ public class ValidateItemTest extends ApiIntegrationTestBase {
         Response invalidResponse = requestSpec.get("/tasks/isValid/" + invalidContext.getId());
 
         // then
-        assertThat(invalidResponse.getBody().as(String.class), is("false"));
+        assertAll(
+                () -> assertThat(invalidResponse.statusCode(), is(200)),
+                () -> assertThat(invalidResponse.getBody().as(String.class), is("false"))
+        );
     }
 
     @Test
     void shouldReturnHttp200WithFalseWhenTaskIdDoesNotExist() {
         // given
         TaskTestContext context = TaskTestContext.builder().build();
+        WireMock.resetAllRequests();
 
         // when
         Response response = requestSpec.get("/tasks/isValid/" + context.getId());
@@ -87,7 +92,8 @@ public class ValidateItemTest extends ApiIntegrationTestBase {
         // then
         assertAll(
                 () -> assertThat(response.statusCode(), is(200)),
-                () -> assertThat(response.getBody().as(String.class), is("false"))
+                () -> assertThat(response.getBody().as(String.class), is("false")),
+                () -> WireMock.verify(0, postRequestedFor(urlEqualTo("/external/validate/task")))
         );
     }
 

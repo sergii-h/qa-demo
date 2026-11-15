@@ -1,25 +1,15 @@
 package com.example;
 
-import com.example.demo.DuplicateTitleException;
-import com.example.demo.TaskNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 class DemoExceptionHandlerTest {
     private DemoExceptionHandler exceptionHandler;
@@ -27,32 +17,6 @@ class DemoExceptionHandlerTest {
     @BeforeEach
     void beforeEach() {
         exceptionHandler = new DemoExceptionHandler();
-    }
-
-    @Test
-    void shouldHandleTaskNotFoundExceptionWithNotFoundStatus() {
-        // given
-        TaskNotFoundException exception = new TaskNotFoundException("Task not found with id: abc123");
-
-        // when
-        ResponseEntity<Map<String, String>> response = exceptionHandler.handleNotFoundException(exception);
-
-        // then
-        assertThat(response.getStatusCode(), is(NOT_FOUND));
-        assertThat(response.getBody().get("message"), is("Task not found with id: abc123"));
-    }
-
-    @Test
-    void shouldHandleDuplicateTitleExceptionWithConflictStatus() {
-        // given
-        DuplicateTitleException exception = new DuplicateTitleException("Task with title 'My Task' already exists");
-
-        // when
-        ResponseEntity<Map<String, String>> response = exceptionHandler.handleDuplicateTitleException(exception);
-
-        // then
-        assertThat(response.getStatusCode(), is(CONFLICT));
-        assertThat(response.getBody().get("message"), is("Task with title 'My Task' already exists"));
     }
 
     @Test
@@ -66,29 +30,6 @@ class DemoExceptionHandlerTest {
         // then
         assertThat(response.getStatusCode(), is(CONFLICT));
         assertThat(response.getBody().get("message"), is("Task with this title already exists"));
-    }
-
-    @Test
-    void shouldHandleValidationExceptionsWithBadRequestStatus() {
-        // given
-        MethodArgumentNotValidException exception = mock(MethodArgumentNotValidException.class);
-        BindingResult bindingResult = mock(BindingResult.class);
-
-        FieldError fieldError1 = new FieldError("task", "title", "must not be blank");
-        FieldError fieldError2 = new FieldError("task", "priority", "must not be null");
-
-        when(exception.getBindingResult()).thenReturn(bindingResult);
-        when(bindingResult.getAllErrors()).thenReturn(List.of(fieldError1, fieldError2));
-
-        // when
-        ResponseEntity<Map<String, String>> response = exceptionHandler.handleValidationExceptions(exception);
-
-        // then
-        assertThat(response.getStatusCode(), is(BAD_REQUEST));
-        assertThat(response.getBody(), is(Map.of(
-                "title", "must not be blank",
-                "priority", "must not be null"
-        )));
     }
 }
 

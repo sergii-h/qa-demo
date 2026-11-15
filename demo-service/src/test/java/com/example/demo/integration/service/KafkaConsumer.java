@@ -43,6 +43,8 @@ public class KafkaConsumer<T> extends Thread {
     private final List<String> messages = new ArrayList<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final List<T> records = new ArrayList<>();
+    private final List<String> keys = new ArrayList<>();
+    private final List<String> rawMessages = new ArrayList<>();
 
     @Override
     public void run() {
@@ -62,6 +64,8 @@ public class KafkaConsumer<T> extends Thread {
 
                 if (message.toLowerCase().contains(filter.toLowerCase())) {
                     try {
+                        keys.add(consumerRecord.key());
+                        rawMessages.add(message);
                         records.add(objectMapper.readValue(message, messageClass));
                     } catch (IOException e) {
                         throw new InternalError("message cannot be decoded: " + message, e);

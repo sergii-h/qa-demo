@@ -49,7 +49,8 @@ public class UpdateTaskTest extends ApiIntegrationTestBase {
         assertAll(
                 () -> assertThat(updateResponse.statusCode(), is(200)),
                 () -> assertThat(updateResponse.getBody().as(Task.class), is(updateContext.createTask())),
-                () -> assertThat(updateContext.getUpdatedDate(), is(greaterThan(updateContext.getCreatedDate()))),
+                () -> assertThat(updateContext.getCreatedDate(), is(createContext.getCreatedDate())),
+                () -> assertThat(updateContext.getUpdatedDate(), is(greaterThan(createContext.getCreatedDate()))),
                 () -> {
                         Response getResponse = requestSpec.get("/tasks/" + updateContext.getId());
                         assertThat(getResponse.getBody().as(Task.class), is(updateContext.createTask()));
