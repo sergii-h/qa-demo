@@ -79,7 +79,7 @@ final class TaskDetailIntegrationTests {
         try harness.assertTextEquals("status-tag-\(context.status.rawValue)", "Por hacer")
         try harness.assertTextEquals("priority-tag-\(context.priority.rawValue)", "Baja")
     }
-    @Test(arguments: GetTaskFailure.allCases)
+    @Test(.serialized, arguments: GetTaskFailure.allCases)
     func shouldNotOpenInfoFormWhenTaskDetailsRequestFails(failure: GetTaskFailure) async throws {
         // Given
         let context = TaskTestContext()
@@ -135,7 +135,7 @@ final class ExternalValidationIntegrationTests {
         try await harness.assertIsDisplayed("notValid")
         try harness.assertIsNotDisplayed("valid")
     }
-    @Test(arguments: IsValidFailure.allCases)
+    @Test(.serialized, arguments: IsValidFailure.allCases)
     func shouldShowInvalidValidationSignWhenValidationRequestFails(failure: IsValidFailure) async throws {
         // Given
         let context = TaskTestContext()

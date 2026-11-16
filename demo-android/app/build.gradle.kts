@@ -188,12 +188,22 @@ configurations.configureEach {
                 "org.apache.httpcomponents.core5:httpcore5:5.4.3",
                 "org.apache.httpcomponents.core5:httpcore5-h2:5.4.3",
                 "org.apache.tika:tika-core:3.2.2",
-                "org.bouncycastle:bcprov-jdk18on:1.84",
+                "org.bouncycastle:bcprov-jdk18on:1.86",
+                "org.jsoup:jsoup:1.23.2",
             )
             eachDependency {
                 if (requested.group == "io.netty") {
                     useVersion("4.1.137.Final")
                     because("Fix GHSA netty vulnerabilities")
+                }
+                if (requested.group == "com.google.guava" && requested.name == "guava") {
+                    val patched = if (requested.version?.endsWith("-android") == true) {
+                        "33.8.0-android"
+                    } else {
+                        "33.8.0-jre"
+                    }
+                    useVersion(patched)
+                    because("Fix GHSA-xxph-c9ww-hj94")
                 }
             }
         }

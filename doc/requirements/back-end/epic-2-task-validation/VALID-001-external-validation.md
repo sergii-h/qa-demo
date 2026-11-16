@@ -10,15 +10,17 @@ As a user, I want to validate a task against external rules so that I can check 
 2. Should return `false` (200) when task ID does not exist — not 404
 3. Should call external `POST /external/validate/task` with title, description, status, priority (no id/timestamps)
 4. Should return `true` / `false` per external service response
+5. Should return HTTP 500 when the external service responds with a server error
 
 ## Test Plan
 
-1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
+1. **UT** - N/A. The outbound POST is reachable through GET `/v1/tasks/isValid/{id}`; the integration scenario asserts the uri, content type, and body
 2. **IT**
-   - Should return HTTP 200 with `true` when task exists and is valid via GET `/v1/tasks/isValid/{id}`
-   - Should return not valid validation result when not valid description
-   - Should return HTTP 200 with `false` when task ID does not exist
-   - Should call external validation service with task data
+   - Should return HTTP 200 with `true` when the task exists and the external service accepts it, via GET `/v1/tasks/isValid/{id}`
+   - Should return HTTP 200 with `false` when the external service rejects the task
+   - Should return HTTP 200 with `false` when the task id does not exist, and not call the external service
+   - Should POST `/external/validate/task` with `Content-Type: application/json` and a body of title, description, status, and priority only
+   - Should return HTTP 500 when the external service responds with a server error
 3. **Pact**
    - Should verify provider contract for GET `/v1/tasks/isValid/{id}` (HTTP 200 with validation result)
 4. **E2E**

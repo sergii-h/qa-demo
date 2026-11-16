@@ -105,7 +105,9 @@ CI runs unit/integration tests via `.github/workflows/demo-react-native.yml` and
 
 | Layer | Suffix | Mock boundary |
 |-------|--------|---------------|
-| Unit | `.unit.spec.ts(x)` | Repository or child components |
-| Integration | `.integration.spec.tsx` | `globalThis.fetch` only |
+| Integration (primary — every screen flow) | `.integration.spec.tsx` | `globalThis.fetch` only |
+| Unit (hooks, API client, repository, i18n mappers; render tables for leaf components) | `.unit.spec.ts(x)` | Repository for hooks; `fetch` for the API client; nothing for pure mappers |
 | Translation | `.translation.spec.tsx` | `i18n.t` spy (real locale JSON files) |
 | Pact | `src/test/pact/*.pact.test.ts` | Pact mock server (real `taskApi`) |
+
+Layer selection follows `.cursor/rules/react-native-testing.mdc` and `common-testing.mdc` → "Choosing the Layer".

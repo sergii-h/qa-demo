@@ -18,12 +18,12 @@
 <!-- When adding a new E2E framework: add a badge, list it under Web E2E or Mobile E2E in Tech Stack and CI/CD,
      link it from Running Tests > E2E Tests, and add it to Project Structure -->
 
-[![Testing Pyramid](https://img.shields.io/badge/Strategy-Testing%20Pyramid-blue)](doc/testing-guide.md)
+[![Risk-Based Test Layers](https://img.shields.io/badge/Strategy-Risk--Based%20Test%20Layers-blue)](doc/adr/007-unit-vs-integration-test-boundary-checklist.md)
 [![Shift-Left](https://img.shields.io/badge/Methodology-Shift--Left-blue)](doc/testing-guide.md)
 [![Live Reports](https://img.shields.io/badge/Live%20Reports-GitHub%20Pages-blue?logo=github)](https://sergii-h.github.io/qa-demo/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A full-stack QA engineering demo project applying the **Testing Pyramid** and **shift-left** methodology.
+A full-stack QA engineering demo project applying **risk-based test layering** (each scenario lives in exactly one layer, public-boundary integration tests first) and **shift-left** methodology.
 
 <p style="text-align: center;">
   <img src="doc/assets/qa-demo-app.gif" alt="QA Demo App" width="960"/>
@@ -47,7 +47,7 @@ A full-stack QA engineering demo project applying the **Testing Pyramid** and **
 
 ## 📋 Project Overview
 
-A full-stack Task Management app used as a testing pyramid demo. The domain is intentionally simple so all complexity lives in the test strategy.
+A full-stack Task Management app used as a test-strategy demo. The domain is intentionally simple so all complexity lives in the test strategy.
 
 **Task model:** `id` · `title` (unique) · `description` · `status` (TODO/IN_PROGRESS/DONE) · `priority` (LOW/MEDIUM/HIGH) · `createdDate` · `updatedDate`
 
@@ -65,42 +65,30 @@ A full-stack Task Management app used as a testing pyramid demo. The domain is i
 | iOS | Swift · SwiftUI · URLSession + Codable · `@Observable` + async/await · iOS 17+ |
 | React Native | Expo 53 · TypeScript · React Navigation · React Native Paper |
 | Unit | JUnit5 + Mockito (BE) · Vitest 4 (FE) · JUnit4 + MockK + Robolectric (Android) · Swift Testing (iOS) · Jest (React Native) |
-| Integration | JUnit5 + TestContainers (BE) · Vitest 4 (FE) · URLProtocol stubbing (iOS) |
+| Integration | JUnit5 + TestContainers (BE) · Vitest 4 + RTL (FE) · MockWebServer + Robolectric (Android) · URLProtocol stubbing (iOS) · Jest + RNTL (React Native) |
 | Contract | Pact — HTTP (FE↔BE + Android↔BE + iOS↔BE + React Native↔BE) + Kafka message (notification-service↔BE) |
 | Web E2E | Playwright + TypeScript · Playwright + Python · Selenide + JUnit5 + Selenium Grid |
 | Mobile E2E | Compose UI Test (Android) · XCUITest (iOS) · Maestro + TypeScript (React Native — Android & iOS) |
-| Mutation | PiTest (BE) · Stryker (FE, on-demand) |
+| Mutation | PiTest (BE, in CI) · Stryker (FE and React Native, on-demand) |
 | Performance | k6 |
 | Security | CodeQL (SAST) · Dependabot alerts (SCA) · GitHub secret scanning & push protection (platform) |
-| Coverage | JaCoCo ≥90% (BE) · Istanbul ≥90% (FE) · Kover ≥90% (Android) · xccov/Slather ≥90% (iOS) · Jest ≥90% (React Native) |
+| Coverage | ≥90% lines, unit + integration together — JaCoCo (BE) · Istanbul (FE) · Kover (Android) · xccov/Slather (iOS) · Jest (React Native) |
 
 ---
 
 ## 🧪 Testing Strategy
 
-```
-           /\
-          /  \    E2E — Full Stack
-         /____\   Smoke tests on real env (P1 happy paths only)
-        /      \
-       /________\ E2E — FE + Mocked BE (Playwright)
-      /          \ User flows — no real BE needed
-     /____________\
-    /              \ Integration + Contract (Pact)
-   /________________\ API integration, consumer-driven contracts
-  /                  \
- /____________________\
-                        Unit (Vitest, JUnit5)
-                        Business logic & component behavior
-                        Target: >90% coverage
-```
+Each scenario lives in exactly one layer ([ADR 007](doc/adr/007-unit-vs-integration-test-boundary-checklist.md)). The public-boundary integration test is the default; a unit test covers pure-logic permutations and failure injection. The resulting unit / integration / E2E ratio is an outcome, not a target. Line coverage ≥90% is a build gate across unit and integration together ([ADR 006](doc/adr/006-90-percent-coverage-as-code-smell-detector.md)) — a hard-to-reach line is a prompt to refactor the production code.
 
-| Layer | Share | Notes |
-|---|---|---|
-| Unit | ~90% | Business logic, component behavior |
-| Integration + Pact | ~7-8% | API integration; Pact decouples FE↔BE verification |
-| E2E — Mocked BE | ~1-2% | Fast, no real BE required |
-| E2E — Full Stack | <1% | Smoke only — confirms deployment wiring, not business logic |
+The backend tests were migrated from a testing pyramid to this approach. The old state is kept as the git tag `pyramid-baseline-be`, and [the migration doc](doc/pyramid-to-risk-based-migration.md) compares the two with metrics and before/after examples.
+
+| Layer | What it owns |
+|---|---|
+| Integration | Default layer. Happy path and every error path reachable through the public boundary — HTTP API (backend), rendered component tree (frontend), screen with HTTP mocked (Android, iOS, React Native) |
+| Unit | Combinatorial logic with no I/O, and branches that are cheap in isolation and expensive or impossible through the public boundary |
+| Pact | HTTP contract shape for each consumer against `demo-service`, and the Kafka message contract with `notification-service` |
+| E2E — Mocked BE | Critical user flows with WireMock in place of the backend |
+| E2E — Full stack | One smoke test per stack against the real running app; confirms deployment wiring |
 
 ### E2E Test Suites
 
@@ -115,7 +103,7 @@ Each E2E stack follows the same three-suite split regardless of language or tool
 **Web** (`e2e/`): Playwright TypeScript · Playwright Python · Selenide · Cypress JavaScript · Capybara Ruby  
 **Mobile**: Compose UI Test in [`demo-android/app/src/androidTest/`](demo-android/README.md#e2e-tests-instrumented-compose-ui-test) · XCUITest in [`demo-ios/DemoUITests/`](demo-ios/README.md#e2e-tests-xcuitest) · Maestro in [`e2e/maestro/`](e2e/maestro/README.md)
 
-The UAT suite is intentionally one test (the most critical happy path). Business logic is already covered by the layers below; UAT exists only to confirm all services are wired together correctly in a real environment.
+The UAT suite is intentionally one test (the most critical happy path). Unit and integration tests cover business logic; UAT confirms that all services are wired together in a real environment.
 
 📚 **Detailed Testing Standards:** See [doc/testing-guide.md](doc/testing-guide.md)
 
@@ -274,8 +262,9 @@ See [Performance README](performance/README.md) for all scenarios, thresholds, a
 
 | Doc | Contents |
 |---|---|
-| [Testing Guide](doc/testing-guide.md) | Public checklists, pyramid workflow, definition of done |
-| Private testing rules | Detailed FE/BE unit & integration rules — private [`.cursor/rules`](.cursor/rules) submodule; available on request |
+| [Testing Guide](doc/testing-guide.md) | Public checklists, layer selection workflow, definition of done |
+| Private testing rules | Layer selection, unit, integration, Pact, and E2E rules for backend, frontend, Android, iOS, and React Native — private [`.cursor/rules`](.cursor/rules) submodule; available on request |
+| [Pyramid to Risk-Based Migration](doc/pyramid-to-risk-based-migration.md) | Before/after comparison of the backend test suite, with metrics, examples and the baseline tag |
 | [Pact Guide](doc/pact.md) | Full Pact pipeline, step-by-step manual run, broker notes |
 | [Backend README](demo-service/README.md) | Running backend unit, integration, and mutation tests |
 | [Frontend README](demo-interface/README.md) | Running frontend unit, integration, and mutation tests |

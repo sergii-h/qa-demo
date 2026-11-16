@@ -144,7 +144,7 @@ final class CreateTaskIntegrationTests {
         try harness.assertTextEquals("field-title-label", "Título *")
         try harness.assertTextEquals("create-button", "Crear")
     }
-    @Test(arguments: GetTasksFailure.allCases)
+    @Test(.serialized, arguments: GetTasksFailure.allCases)
     func shouldAllowOpeningCreateFormWhenInitialGetTasksFails(failure: GetTasksFailure) async throws {
         // Given
         let context = TaskTestContext()
@@ -163,7 +163,7 @@ final class CreateTaskIntegrationTests {
         // Then
         try await harness.assertIsDisplayed("task-title-\(context.id)")
     }
-    @Test(arguments: GetTasksFailure.allCases)
+    @Test(.serialized, arguments: GetTasksFailure.allCases)
     func shouldCloseCreateFormWhenRefreshGetFailsAfterSuccessfulPost(failure: GetTasksFailure) async throws {
         // Given
         let context = TaskTestContext()
@@ -180,7 +180,7 @@ final class CreateTaskIntegrationTests {
         // Then
         try await harness.assertIsDisplayed("add-task-button")
     }
-    @Test(arguments: CreatePostFailure.allCases)
+    @Test(.serialized, arguments: CreatePostFailure.allCases)
     func shouldDisplayGenericErrorOnCreateFormWhenPostRequestFails(failure: CreatePostFailure) async throws {
         // Given
         let context = TaskTestContext(description: nil)

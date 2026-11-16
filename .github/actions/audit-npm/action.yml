@@ -13,6 +13,7 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       # npm 10 uses the retired audits/quick API (5xx / 400 Invalid package tree).
+      # scripts/dependabot-allowlist.json skips a high advisory only while that package has no non-breaking fix.
       run: |
         set -euo pipefail
-        npx --yes npm@11.6.2 audit --audit-level=high
+        node "${GITHUB_WORKSPACE}/scripts/npm-audit-with-allowlist.mjs"

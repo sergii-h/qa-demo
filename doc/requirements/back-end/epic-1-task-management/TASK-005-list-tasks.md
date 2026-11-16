@@ -11,7 +11,7 @@ As a user, I want to list all tasks so that I can view tracked work items.
 
 ## Test Plan
 
-1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
+1. **UT** - N/A. Listing is a pass-through read; both acceptance criteria are covered by the integration scenarios
 2. **IT**
    - Should return HTTP 200 with array of tasks when tasks exist via GET `/v1/tasks`
    - Should return HTTP 200 with empty array when no tasks exist

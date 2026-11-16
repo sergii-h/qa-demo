@@ -3,6 +3,8 @@
 ## Status
 **Accepted** — September 8, 2026
 
+**Amended** — October 24, 2026: the checklist is now enforced through the rule files (`common-testing.mdc` → "Choosing the Layer" / "Moving or Deleting Tests", plus the per-platform `*-testing.mdc` scope sections). The rules add two clarifications: the public-boundary integration test is the default layer and a unit test is the exception, and "called from several places" is explicitly not a reason to unit test.
+
 ## Context
 
 "Testing Pyramid" and "Testing Trophy" are often debated as if one must be chosen wholesale. In practice, most drift toward a fake pyramid: tests labelled "unit" that actually mock every collaborator (including POJOs/DTOs) and assert on call sequences rather than output — expensive to maintain, break on harmless refactors, and erode trust in red CI until failures get ignored. The project needs an explicit boundary rule so this is decided by pattern, not by label or team preference.
@@ -20,6 +22,8 @@
 | Asserts on produced state/output (Test Context Pattern, ADR-002) | Bare `verify(x).calledWith(...)` with nothing captured/asserted |
 | Mocks only true external/infra boundaries | Mocks a POJO, DTO, or value object |
 | Tests through the public API of the unit | Re-derives the expected value with the same algorithm as the code under test |
+| Stub writes echo the SUT's argument (`thenAnswer`) and the expected object is built from the request + clock | `thenReturn(canned)` then `assertThat(result, is(canned))` — the mock supplies the answer |
+| Captor / `verify` only at output edges (persisted entity, published event, outbound request) | `verify(repo).findByTitle(...)` as its own test when the outcome already proves the read |
 
 ## Rationale
 

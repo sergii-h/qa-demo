@@ -11,11 +11,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.time.Instant;
 import java.util.Map;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class TaskCreatedEventTest extends ApiIntegrationTestBase {
@@ -65,8 +70,14 @@ public class TaskCreatedEventTest extends ApiIntegrationTestBase {
                     .orElse(null);
 
             assertThat(event, notNullValue());
+            Instant createdDate = context.getCreatedDate();
+            assertThat(event.getTimestamp(), greaterThanOrEqualTo(createdDate));
+            assertThat(event.getTimestamp(), lessThan(createdDate.plusSeconds(5)));
             context.setEventTimestamp(event.getTimestamp());
             assertThat(event, is(context.createExpectedEvent()));
+            int index = taskEventConsumer.getRecords().indexOf(event);
+            assertThat(taskEventConsumer.getKeys().get(index), is(context.getId()));
+            assertThat(taskEventConsumer.getRawMessages().get(index), not(containsString("\"description\"")));
         });
     }
 

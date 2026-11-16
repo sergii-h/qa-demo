@@ -12,23 +12,33 @@ REST API for the Task Management app. See [API Endpoints](../README.md#-api-endp
 
 ## Running Tests
 
-### Unit tests + coverage (JaCoCo)
+### Unit tests
 
 ```bash
 mvn verify -DskipITs
+```
+
+### Unit + integration coverage (JaCoCo ≥90%)
+
+Surefire and Failsafe append to the same `jacoco.exec`. The gate runs only when both suites run. Pact provider tests are excluded.
+
+```bash
+mvn verify -Dfailsafe.excludes='**/*PactProviderTest.java'
 open target/site/jacoco/index.html
 ```
 
-### Integration tests
+### Integration tests only
 
 ```bash
-mvn verify -Pintegration-tests -Dfailsafe.excludes='**/*PactProviderTest.java' -Djacoco.skip=true
+mvn verify -Pintegration-tests -Dfailsafe.excludes='**/*PactProviderTest.java'
 ```
 
 ### Mutation tests (PiTest ≥80%)
 
+PIT runs the unit tests and the integration tests. Pact provider tests are excluded. Docker is required. `-Pmutation-tests` skips the Failsafe goal so the suite is not also run once outside PIT.
+
 ```bash
-mvn verify -Pmutation-tests -DskipITs
+mvn verify -Pmutation-tests
 open target/pit-reports/index.html
 ```
 

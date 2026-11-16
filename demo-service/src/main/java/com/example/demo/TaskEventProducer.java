@@ -2,23 +2,29 @@ package com.example.demo;
 
 import com.example.demo.data.Task;
 import com.example.demo.data.TaskEvent;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.Instant;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class TaskEventProducer {
 
     private final KafkaTemplate<String, TaskEvent> kafkaTemplate;
+    private final String topic;
+    private final Clock clock;
 
-    @Value("${kafka.topic.task-event}")
-    private String topic;
+    public TaskEventProducer(KafkaTemplate<String, TaskEvent> kafkaTemplate,
+                             @Value("${kafka.topic.task-event}") String topic,
+                             Clock clock) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.topic = topic;
+        this.clock = clock;
+    }
 
     public void produceTaskCreated(Task task) {
         produceEvent(task, "CREATED");
@@ -38,7 +44,7 @@ public class TaskEventProducer {
                 .title(task.getTitle())
                 .status(task.getStatus())
                 .priority(task.getPriority())
-                .timestamp(Instant.now())
+                .timestamp(Instant.now(clock))
                 .eventType(eventType)
                 .build();
 
@@ -53,4 +59,3 @@ public class TaskEventProducer {
                 });
     }
 }
-

@@ -11,10 +11,10 @@ As a user, I want to retrieve a task by ID so that I can view its details.
 
 ## Test Plan
 
-1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
+1. **UT** - N/A. Retrieval is a pass-through read; both acceptance criteria are covered by the integration scenarios
 2. **IT**
-   - Should return HTTP 200 with task details when valid ID provided via GET `/v1/tasks/{id}`
-   - Should return HTTP 404 when task ID does not exist
+   - Should return HTTP 200 with the task when a valid id is provided via GET `/v1/tasks/{id}`
+   - Should return HTTP 404 with `"Task not found with id: {taskId}"` when the id does not exist
 3. **Pact**
    - Provider: Should verify provider contract for GET `/v1/tasks/{id}` against consumer pacts
 4. **E2E** - Covered by other workflows (view task info, edit task)

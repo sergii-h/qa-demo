@@ -12,11 +12,12 @@ As a user, I want to delete a task so that I can remove work items I no longer n
 
 ## Test Plan
 
-1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
+1. **UT**
+   - Should publish nothing when deleting the task fails
 2. **IT**
-   - Should successfully delete task via DELETE `/v1/tasks/{id}` → HTTP 204
-   - Should return HTTP 404 when task ID does not exist
-   - **Note:** Kafka event publishing is tested in EVENT-003 integration tests
+   - Should return HTTP 204 and remove the task when DELETE `/v1/tasks/{id}` finds it
+   - Should return HTTP 404 with `"Task not found with id: {taskId}"` when the id does not exist
+   - **Note:** The deleted event is [EVENT-003](../epic-3-event-streaming/EVENT-003-task-deleted-event.md). Publishing nothing on 404 is that story's unit test.
 3. **Pact**
    - Should verify provider contract for DELETE `/v1/tasks/{id}` (HTTP 204 success)
 4. **E2E**

@@ -8,6 +8,7 @@ import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -19,6 +20,7 @@ public class TaskController {
     private final TaskRepository repository;
     private final TaskEventProducer taskEventProducer;
     private final TaskExternalClient taskExternalClient;
+    private final Clock clock;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -28,7 +30,7 @@ public class TaskController {
             throw new DuplicateTitleException("Task with title '" + taskRequest.getTitle() + "' already exists");
         }
 
-        Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        Instant now = Instant.now(clock).truncatedTo(ChronoUnit.MILLIS);
         Task task = Task.builder()
                 .id(String.valueOf(new ObjectId()))
                 .title(taskRequest.getTitle())
@@ -64,7 +66,7 @@ public class TaskController {
                 .status(taskRequest.getStatus())
                 .priority(taskRequest.getPriority())
                 .createdDate(existingTask.getCreatedDate())
-                .updatedDate(Instant.now().truncatedTo(ChronoUnit.MILLIS))
+                .updatedDate(Instant.now(clock).truncatedTo(ChronoUnit.MILLIS))
                 .build();
 
         Task savedTask = repository.save(updatedTask);

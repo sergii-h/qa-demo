@@ -3,6 +3,13 @@ import Foundation
 final class WireMockClient {
     private let baseURL: URL
     private var plannedScenarioStates: [String: String] = [:]
+    private let session: URLSession = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 10
+        configuration.timeoutIntervalForResource = 10
+        configuration.waitsForConnectivity = false
+        return URLSession(configuration: configuration)
+    }()
 
     init(baseURL: URL = WireMockClient.resolveBaseURL()) {
         self.baseURL = baseURL
@@ -80,41 +87,55 @@ final class WireMockClient {
             request.httpBody = body
         }
 
-        let semaphore = DispatchSemaphore(value: 0)
-        var completed: Result<Data, Error> = .failure(WireMockClientError.timeout)
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        let outcome = RequestOutcome()
+        let task = session.dataTask(with: request) { data, response, error in
             if let error {
-                completed = .failure(error)
+                outcome.finish(.failure(error))
             } else if let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) {
-                completed = .success(data ?? Data())
+                outcome.finish(.success(data ?? Data()))
             } else {
                 let status = (response as? HTTPURLResponse)?.statusCode ?? -1
-                completed = .failure(WireMockClientError.httpStatus(status))
+                outcome.finish(.failure(WireMockClientError.httpStatus(status)))
             }
-            semaphore.signal()
-        }.resume()
+        }
+        task.resume()
 
-        if semaphore.wait(timeout: .now() + 10) == .timedOut {
+        let deadline = Date().addingTimeInterval(10)
+        while outcome.result == nil, Date() < deadline {
+            RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.05))
+        }
+        guard let result = outcome.result else {
+            task.cancel()
             throw WireMockClientError.timeout
         }
-        return try completed.get()
+        return try result.get()
     }
 
     static func resolveBaseURL() -> URL {
         if let override = ProcessInfo.processInfo.environment["WIREMOCK_URL"],
            let url = URL(string: override.trimmingCharacters(in: CharacterSet(charactersIn: "/"))) {
-            return url
+            return preferringIPv4Loopback(url)
         }
         if let api = ProcessInfo.processInfo.environment["API_BASE_URL"],
            let url = URL(string: api),
            var components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
             components.path = ""
             components.query = nil
-            if let host = components.string {
-                return URL(string: host.trimmingCharacters(in: CharacterSet(charactersIn: "/")))!
+            if let host = components.string,
+               let resolved = URL(string: host.trimmingCharacters(in: CharacterSet(charactersIn: "/"))) {
+                return preferringIPv4Loopback(resolved)
             }
         }
-        return URL(string: "http://localhost:8085")!
+        return URL(string: "http://127.0.0.1:8085")!
+    }
+
+    private static func preferringIPv4Loopback(_ url: URL) -> URL {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              components.host == "localhost" else {
+            return url
+        }
+        components.host = "127.0.0.1"
+        return components.url ?? url
     }
 
     private static func laterScenarioState(_ left: String, _ right: String) -> String {
@@ -133,6 +154,23 @@ final class WireMockClient {
             return "step-1"
         }
         return "step-\(scenarioStep(current) + 1)"
+    }
+}
+
+private final class RequestOutcome: @unchecked Sendable {
+    private let lock = NSLock()
+    private var stored: Result<Data, Error>?
+
+    var result: Result<Data, Error>? {
+        lock.lock()
+        defer { lock.unlock() }
+        return stored
+    }
+
+    func finish(_ result: Result<Data, Error>) {
+        lock.lock()
+        stored = result
+        lock.unlock()
     }
 }
 

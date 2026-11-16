@@ -25,7 +25,7 @@ struct TaskDetailView: View {
                     .frame(maxWidth: .infinity)
                     .testTag("loading-spinner")
             } else if let errorMessage = viewModel.uiState.errorMessage {
-                Text(errorMessage)
+                Text(verbatim: errorMessage)
                     .foregroundStyle(.red)
                     .testTag("load-error")
             } else if let task = viewModel.uiState.task {

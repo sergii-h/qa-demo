@@ -12,9 +12,12 @@ As a system, I want to publish task-created events to Kafka so downstream system
 
 ## Test Plan
 
-1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
+1. **UT**
+   - Should publish nothing when the title already exists
+   - Should log the send failure when the Kafka send fails
+   - **Note:** An invalid body never reaches the controller, so HTTP 400 has no publisher call to assert and no Kafka absence wait. [TASK-001](../epic-1-task-management/TASK-001-create-task.md) proves the request is rejected. Publishing nothing when the insert fails is that story's unit test. Send failure is covered here once; `produceEvent` is shared with update and delete.
 2. **IT**
-   - Should publish event to Kafka topic `task-event` when task created
+   - Should publish to `task-event` after a successful create, keyed by task id, with `eventType` `CREATED` and payload `taskId`, `title`, `status`, `priority`, and `timestamp` from the request time, and no description
 3. **Pact** - N/A
 4. **E2E** - N/A (event streaming not visible in UI)
 5. **Accessibility** - N/A

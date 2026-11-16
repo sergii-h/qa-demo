@@ -12,13 +12,11 @@ As a system, I want MongoDB, Kafka, and the external validation API configured s
 
 ## Test Plan
 
-1. **UT** - Ticket's functional ACs are covered with unit tests (or integration tests, if it is not possible to cover on unit level)
-2. **IT**
-   - Should connect to MongoDB at configured URI
-   - Should persist data to "tasks" collection
-   - Should initialize Kafka producer with configured bootstrap servers
-   - Should send events with JSON serialization to configured topic
-   - Should create WebClient with configured base URL for external service
+1. **UT** - N/A. MongoDB, Kafka, and WebClient startup wiring has no branching logic
+2. **IT** - Covered by the public-boundary tests that use this wiring; do not add a configuration suite
+   - MongoDB connection and the `tasks` collection: create then read in [TASK-001](../epic-1-task-management/TASK-001-create-task.md)
+   - Kafka producer, JSON values, and the configured topic: [EVENT-001](../epic-3-event-streaming/EVENT-001-task-created-event.md), [EVENT-002](../epic-3-event-streaming/EVENT-002-task-updated-event.md), [EVENT-003](../epic-3-event-streaming/EVENT-003-task-deleted-event.md)
+   - WebClient base URL used for validation: [VALID-001](../epic-2-task-validation/VALID-001-external-validation.md)
 3. **Pact** - N/A
 4. **E2E** - Implicitly tested (application functions correctly)
 5. **Accessibility** - N/A

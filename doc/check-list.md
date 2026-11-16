@@ -1,6 +1,6 @@
 # Quick Testing Checklist
 
-Simple check-list to keep focus on main testing areas according to testing pyramid.
+Simple check-list to keep focus on main testing areas; each scenario lives in exactly one layer (see [ADR 007](adr/007-unit-vs-integration-test-boundary-checklist.md)).
 
 > 💡 **Need more details?** See [testing-guide.md](testing-guide.md) for comprehensive, actionable checklists.
 

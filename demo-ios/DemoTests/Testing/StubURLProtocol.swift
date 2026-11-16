@@ -3,6 +3,21 @@ import Foundation
 
 final class StubURLProtocol: URLProtocol, @unchecked Sendable {
     nonisolated(unsafe) static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+    nonisolated(unsafe) private static var installedOwner: ObjectIdentifier?
+
+    static func install(
+        owner: ObjectIdentifier,
+        handler: @escaping (URLRequest) throws -> (HTTPURLResponse, Data)
+    ) {
+        installedOwner = owner
+        requestHandler = handler
+    }
+
+    static func uninstall(owner: ObjectIdentifier) {
+        guard installedOwner == owner else { return }
+        requestHandler = nil
+        installedOwner = nil
+    }
 
     override class func canInit(with request: URLRequest) -> Bool {
         request.url?.host == "stub.test"

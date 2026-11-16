@@ -122,7 +122,7 @@ final class TaskListIntegrationTests {
         try harness.assertTextEquals("status-tag-\(context.status.rawValue)", "Por hacer")
         try harness.assertTextEquals("priority-tag-\(context.priority.rawValue)", "Baja")
     }
-    @Test(arguments: GetTasksFailure.allCases)
+    @Test(.serialized, arguments: GetTasksFailure.allCases)
     func shouldKeepCreateFlowAvailableWhenInitialGetTasksRequestFails(failure: GetTasksFailure) async throws {
         // Given
         let context = TaskTestContext()
@@ -196,7 +196,7 @@ final class DeleteTaskIntegrationTests {
         try await harness.assertIsDisplayed("task-title-\(keepContext.id)")
         try harness.assertIsNotDisplayed("task-title-\(deleteContext.id)")
     }
-    @Test(arguments: DeleteFailure.allCases)
+    @Test(.serialized, arguments: DeleteFailure.allCases)
     func shouldKeepTaskInListWhenDeleteFails(failure: DeleteFailure) async throws {
         // Given
         let deleteContext = TaskTestContext()

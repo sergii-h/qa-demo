@@ -13,7 +13,7 @@ enum ScreenTestSupport {
         let hosted = view
             .environment(\.locale, Locale(identifier: appLocale.languageTag))
             .environment(\.appLocale, appLocale)
-        ViewHostingTestSupport.host(hosted)
+        _ = ViewHostingTestSupport.host(hosted)
         return view
     }
 
