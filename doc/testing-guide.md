@@ -174,7 +174,7 @@ All workflows trigger on **push or pull request to `master` only** — pushes to
 
 | Trigger | What runs |
 |---|---|
-| Push / PR to `master`, `demo-service/**` (or `docker/**`) | `demo-service` — unit, PiTest mutation, integration (excl. Pact provider) |
+| Push / PR to `master`, `demo-service/**` (or `docker/**`) | `demo-service` — unit, PiTest mutation, unit + integration with JaCoCo ≥90% (excl. Pact provider) |
 | Push / PR to `master`, `demo-interface/**` | `demo-interface` — Vitest unit + integration |
 | Push / PR to `master`, `demo-android/**` | `demo-android` — JVM unit + integration tests (Robolectric; pact excluded) |
 | Push / PR to `master`, relevant consumer / provider paths | `pact-interface` — `demo-interface` consumer, task API provider verify, can-i-merge |

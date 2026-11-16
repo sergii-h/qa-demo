@@ -80,8 +80,8 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Run integration tests
+      - name: Run unit and integration tests with coverage
         working-directory: demo-service
         env:
           DOCKER_HOST: unix:///var/run/docker.sock
-        run: mvn verify -Pintegration-tests -Dfailsafe.excludes='**/*PactProviderTest.java' -Djacoco.skip=true
+        run: mvn verify -Dfailsafe.excludes='**/*PactProviderTest.java'

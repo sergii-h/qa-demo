@@ -11,6 +11,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <skipUnitTests>false</skipUnitTests>
         <jacoco.skip>false</jacoco.skip>
+        <jacoco.check.phase>verify</jacoco.check.phase>
         <pitest.version>1.19.1</pitest.version>
         <pitest-junit5-plugin.version>1.2.2</pitest-junit5-plugin.version>
         <pact.verifier.publishResults>false</pact.verifier.publishResults>
@@ -371,12 +372,14 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                         <configuration>
                             <skip>${jacoco.skip}</skip>
                             <propertyName>jacocoArgLine</propertyName>
+                            <append>true</append>
                         </configuration>
                     </execution>
                     <execution>
@@ -389,8 +392,10 @@
                             <skip>${jacoco.skip}</skip>
                         </configuration>
                     </execution>
+                    <!-- 90% gate reads the shared jacoco.exec. Partial runs bind this to phase none. -->
                     <execution>
                         <id>jacoco-check</id>
+                        <phase>${jacoco.check.phase}</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
@@ -455,12 +460,38 @@
             <id>integration-tests</id>
             <properties>
                 <skipUnitTests>true</skipUnitTests>
+                <jacoco.check.phase>none</jacoco.check.phase>
+            </properties>
+        </profile>
+        <profile>
+            <id>skip-jacoco-check-without-unit-tests</id>
+            <activation>
+                <property>
+                    <name>skipUnitTests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <jacoco.check.phase>none</jacoco.check.phase>
+            </properties>
+        </profile>
+        <profile>
+            <id>skip-jacoco-check-without-integration-tests</id>
+            <activation>
+                <property>
+                    <name>skipITs</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <jacoco.check.phase>none</jacoco.check.phase>
             </properties>
         </profile>
         <profile>
             <id>mutation-tests</id>
             <properties>
                 <jacoco.skip>true</jacoco.skip>
+                <jacoco.check.phase>none</jacoco.check.phase>
                 <skipITs>true</skipITs>
             </properties>
             <build>
