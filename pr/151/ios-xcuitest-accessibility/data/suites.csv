@@ -1,4 +1,4 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","14670","shouldHaveNoAccessibilityViolationsOnTaskTableWhenTasksLoaded()","","Thu Jan 01 00:00:00 UTC 1970","passed","Thu Jan 01 00:00:14 UTC 1970","","TaskTableAccessibilityTest","",""
-"","22356","shouldHaveNoAccessibilityViolationsOnTaskInfoForm()","","Thu Jan 01 00:00:00 UTC 1970","passed","Thu Jan 01 00:00:22 UTC 1970","","TaskInfoAccessibilityTest","",""
-"","27167","shouldHaveNoAccessibilityViolationsOnCreateTaskForm()","","Thu Jan 01 00:00:00 UTC 1970","passed","Thu Jan 01 00:00:27 UTC 1970","","CreateTaskAccessibilityTest","",""
+"","23308","shouldHaveNoAccessibilityViolationsOnCreateTaskForm()","","Thu Jan 01 00:00:00 UTC 1970","passed","Thu Jan 01 00:00:23 UTC 1970","","CreateTaskAccessibilityTest","",""
+"","13153","shouldHaveNoAccessibilityViolationsOnTaskTableWhenTasksLoaded()","","Thu Jan 01 00:00:00 UTC 1970","passed","Thu Jan 01 00:00:13 UTC 1970","","TaskTableAccessibilityTest","",""
+"","20451","shouldHaveNoAccessibilityViolationsOnTaskInfoForm()","","Thu Jan 01 00:00:00 UTC 1970","passed","Thu Jan 01 00:00:20 UTC 1970","","TaskInfoAccessibilityTest","",""
